@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Moeen.Api.Core.Entities
+﻿namespace Moeen.Api.Core.Entities
 {
      public class Mosque
     {
@@ -19,7 +13,7 @@ namespace Moeen.Api.Core.Entities
         public ICollection <Fouj> foujs { get; set; }
         public ICollection<Teacher> Teachers { get; set; }
         public ICollection<PdfFile> pdfFiles { get; set; }
-        public ICollection<SaturdayCourse> SaturdayCourses { get; set; }
+        public ICollection<SaturdayLesson> SaturdayLessons { get; set; }
         public ICollection<Post> posts { get; set; }
         public ICollection<Supervisor> supervisors { get; set; }
         public ICollection<Student> Students { get; set; }
