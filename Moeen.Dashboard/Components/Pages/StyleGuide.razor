@@ -1,0 +1,129 @@
+﻿@page "/style-guide"
+
+<h1>دليل الستايل – Style Guide</h1>
+
+<hr />
+
+<!-- ================= Buttons ================= -->
+<section>
+    <h2>الأزرار</h2>
+
+    <button class="btn btn-primary">زر أساسي</button>
+    <button class="btn btn-accent">زر ثانوي</button>
+    <button class="btn btn-danger">زر تحذير</button>
+
+    <br /><br />
+
+    <button class="btn-moeen">زر معين (Thuluth)</button>
+</section>
+
+<hr />
+
+<!-- ================= Forms ================= -->
+<section>
+    <h2>النماذج</h2>
+
+    <label class="label">حقل نصي</label>
+    <input class="input" placeholder="اكتب هنا..." />
+
+    <br /><br />
+
+    <label class="label">قائمة اختيار</label>
+    <select class="select">
+        <option>الخيار الأول</option>
+        <option>الخيار الثاني</option>
+    </select>
+
+    <br /><br />
+
+    <label class="label">نص متعدد الأسطر</label>
+    <textarea class="textarea" placeholder="محتوى النص..."></textarea>
+</section>
+
+<hr />
+
+<!-- ================= Search ================= -->
+<section>
+    <h2>البحث</h2>
+
+    <div class="search-container">
+        <input class="search-input" placeholder="ابحث هنا..." />
+        <button class="btn btn-primary">بحث</button>
+    </div>
+</section>
+
+<hr />
+
+<!-- ================= Table ================= -->
+<section>
+    <h2>الجدول</h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>الاسم</th>
+                <th>الحالة</th>
+                <th>إجراء</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>أحمد</td>
+                <td>نشط</td>
+                <td><button class="btn btn-primary">عرض</button></td>
+            </tr>
+            <tr>
+                <td>محمد</td>
+                <td>موقوف</td>
+                <td><button class="btn btn-danger">حذف</button></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<hr />
+
+<!-- ================= Cards ================= -->
+<section>
+    <h2>البطاقات</h2>
+
+    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+        <div class="card" style="width:250px;">
+            <h3>بطاقة 1</h3>
+            <p>هذا مثال على بطاقة باستخدام الستايل الموحد.</p>
+            <button class="btn btn-primary">تفاصيل</button>
+        </div>
+
+        <div class="card" style="width:250px;">
+            <h3>بطاقة 2</h3>
+            <p>يمكن استخدامها في لوحات التحكم.</p>
+            <button class="btn btn-accent">إجراء</button>
+        </div>
+    </div>
+</section>
+
+<hr />
+
+<!-- ================= Complaint ================= -->
+<section>
+    <h2>صندوق الشكاوى</h2>
+
+    <div class="complaint-box">
+        <textarea placeholder="اكتب الشكوى هنا..."></textarea>
+        <button>إرسال الشكوى</button>
+    </div>
+</section>
+
+<hr />
+
+<!-- ================= Validation ================= -->
+<section>
+    <h2>التحقق (Blazor Validation)</h2>
+
+    <input class="input invalid" placeholder="حقل غير صالح" />
+    <div class="validation-message">هذا الحقل مطلوب</div>
+
+    <br />
+
+    <input class="input valid modified" placeholder="حقل صالح" />
+</section>
