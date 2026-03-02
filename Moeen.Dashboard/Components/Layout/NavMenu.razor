@@ -1,35 +1,41 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Moeen.Dashboard</a>
-    </div>
-</div>
+﻿<!-- Bottom Navigation -->
+<div class="sidebar">
+    <nav>
+        <ul>
+            <li>
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill"></span>
+                    <div>Home</div>
+                </NavLink>
+            </li>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+            <li>
+                <NavLink class="nav-link" href="counter">
+                    <span class="bi bi-plus-square-fill"></span>
+                    <div>Counter</div>
+                </NavLink>
+            </li>
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+            <li>
+                <NavLink class="nav-link" href="weather">
+                    <span class="bi bi-list-nested"></span>
+                    <div>Weather</div>
+                </NavLink>
+            </li>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
+            <li>
+                <NavLink class="nav-link" href="style-guide">
+                    <span class="bi bi-filetype-css"></span>
+                    <div>نموذج</div>
+                </NavLink>
+            </li>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="style-guide">
-                <span class="bi bi-filetype-css" aria-hidden="true"></span> نموذج التصميم
-            </NavLink>
-        </div>
+            <li>
+                <NavLink class="nav-link" href="statices">
+                    <span class="bi bi-filetype-css"></span>
+                    <div>الاحصائيات</div>
+                </NavLink>
+            </li>
+        </ul>
     </nav>
 </div>
-
