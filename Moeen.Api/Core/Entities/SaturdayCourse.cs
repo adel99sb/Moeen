@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Moeen.Api.Core.Enities
+{
+    public class SaturdayCourse
+    {
+        public Guid Id {  get; set; }
+        public Guid mosqueId { get; set; }
+        public string title { get; set; }
+        public string description { get; set; }
+        public Mosque mosque { get; set; } 
+        public ICollection<PdfFile> pdfFiles { get; set; }
+        public ICollection<SaturdayHalqe> saturdayHalqes { get; set; }
+
+
+    }
+}
