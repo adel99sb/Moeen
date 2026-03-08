@@ -1,0 +1,50 @@
+﻿@page "/settings"
+<h3>Settings</h3>
+<div class="main">
+    <!-- كارد الشكاوي -->
+    <div class="card" style="width:250px;">
+        <h3>الشكاوي </h3>
+        
+         <ul>
+            <li>بطء في التحميل</li>
+            <li>وجود كشاكل في تسجيل الدخول</li>
+        </ul> 
+    </div>
+<hr>
+    <!-- كارد النسخ الاحتياطي -->
+    
+    <div class="card" style="width:250px;">
+        <h3>لنسخ الاحتياطي </h3>
+        <p>آخر نسخ احتياطي :أبدا</p>
+        <p>قم بعمل نسخة احتياطية لبياناتك هنا.</p>
+        
+        <button class="btn btn-primary">نسخ احتياطي</button>
+    </div>
+<hr>
+    <!-- كارد المظهر -->
+    <div>
+        <h2>المظهر</h2>
+
+        <!-- تغيير السمة -->
+         <div class="card" style="width:250px;">
+        <label class="label">تغيير السمة:</label>
+         <select class="select">
+            <option value="light">فاتح</option>
+            <option value="dark">داكن</option>
+        </select>
+        </div>
+        
+        <!-- حجم الخط -->
+        <div class="card" style="width:250px;">
+        <label class="label">حجم الخط:</label>
+        <select class="select">
+            <option value="large">كبير</option>
+            <option value="medium">وسط</option>
+            <option value="small">صغير</option>
+        </select>
+         </div>
+    </div>
+</div>
+@code {
+
+}

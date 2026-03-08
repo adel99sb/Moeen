@@ -194,6 +194,7 @@ h1, h2, h3 {
     border-spacing: 0;
     border-radius: var(--radius-md);
     overflow: hidden;
+    background-color: var(--color-accent);
     box-shadow: var(--shadow-sm);
 }
 
@@ -253,7 +254,7 @@ h1, h2, h3 {
    🔟 Complaint Box
 ========================================================= */
 .complaint-box {
-    background-color: var(--color-beige);
+    background-color: #91855a;
     padding: 20px;
     border-radius: var(--radius-md);
     max-width: 500px;
@@ -285,4 +286,13 @@ h1, h2, h3 {
 
 .validation-message {
     color: var(--color-danger);
+}
+
+p.pgraph {
+    margin: 0;
+    font-family: 'Cairo', sans-serif;
+    font-size: 40px;
+    color: var(--color-secondary);
+    direction: rtl;
+    background-color: var(--color-bg);
 }
