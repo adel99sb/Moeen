@@ -1,0 +1,119 @@
+﻿@page "/supervisor/teacher"	
+<h3>Teacher</h3>
+<div class="search-container">
+	<input class="search-input" placeholder="ابحث هنا..." />
+	<button class="btn btn-primary"> <span class="bi bi-search"> </span> </button>
+</div>
+<table class="table">
+	<thead>
+		<tr>
+			<th>اسم المعلم</th>
+			<th>حضور </th>
+			<th>حذف  المعلم</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td> آلاء قاسم </td>
+			<td>
+				<details> <summary>
+				<button class="btn btn-accent">الحضور </button>
+					</summary>
+					<br />
+				<br>
+				<select class="select" name="halaqa">
+					<option> حاضر</option>
+					<option> غائب</option>
+
+				</select>
+				</details>
+			</td>
+			<td><button class="btn btn-danger">حذف </button></td>
+		</tr>
+		<tr>
+			<td>ماريا العبد السلام </td>
+			<td>
+				<details>
+					<summary>
+						<button class="btn btn-accent">الحضور </button>
+					</summary>
+					<br />
+					<br>
+					<select class="select" name="halaqa">
+						<option> حاضر</option>
+						<option> غائب</option>
+
+					</select>
+				</details>
+			</td>
+			<td><button class="btn btn-danger">حذف </button></td>
+		</tr>
+		<tr>
+			<td>آية دعبول </td>
+			<td>
+				<details>
+					<summary>
+						<button class="btn btn-accent">الحضور </button>
+					</summary>
+					<br />
+					<br>
+					<select class="select" name="halaqa">
+						<option> حاضر</option>
+						<option> غائب</option>
+
+					</select>
+				</details>
+			</td>
+			<td><button class="btn btn-danger">حذف </button></td>
+		</tr>
+		</tbody>
+		</table>
+		<details>
+		<summary>إضافة معلم جديد</summary>
+
+		<br>
+
+		<form>
+		<label class="label">اسم والكنية:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
+
+		<label class="label">تاريخ الميلاد:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="number" name="age"><br><br>
+		<label class="label">تاريخ التسجيل:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="number" name="status"><br><br>
+		<label class="label">البريد الالكتروني:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="email" name="status"><br><br>
+		<label class="label">رقم الهاتف:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="number" name="status"><br><br>
+		<label class="label">الجنس:</label><br>
+		<select class="select" name="halaqa">
+			<option> ذكر</option>
+			<option> انثى</option>
+		</select>
+		<label class="label">لمحة عن الخبرات:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="text" name="status"><br><br>
+        <label class="label">كلمة السر:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="password" name="status"><br><br>
+		<label class="label">الفوج:</label><br>
+		<select class="select" name="halaqa">
+			<option> فوج اول</option>
+			<option> فوج ثاني</option>
+
+		</select><br><br>
+		<label class="label">رقم الحلقة:</label><br>
+		<select class="select" name="halaqa">
+			<option>الحلقة 1</option>
+			<option>الحلقة 2</option>
+			<option>الحلقة 3</option>
+			<option>الحلقة 4</option>
+		</select><br><br>
+		<button class="btn btn-accent" type="submit">حفظ</button>
+		<button class="btn btn-accent" type="submit">إضافة</button>
+
+	</form>
+
+</details>
+
+@code {
+
+}

@@ -1,0 +1,153 @@
+﻿@page "/supervisor/fouj-and-halqa"
+<h3>FoujAndHalqa</h3>
+<section>
+    <h2>إدارة الأفواج والحلقات</h2>
+
+    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+        <div class="card">
+            <h3> إدارة الأفواج</h3>
+            <details>
+					<summary>
+            <button class="btn btn-primary">تفاصيل</button>
+                </summary>
+                <h4>قائمة الأفواج</h4>
+                <table class="table">
+	<thead>
+		<tr>
+			<th>اسم الفوج</th>
+			<th>الحلقات التابعة له </th>
+			<th>حذف الفوج</th>
+		</tr>
+	</thead>
+    <tbody>
+						<tr>
+                            <td>فوج 1</td>
+                            <td>حلقة 1، حلقة 2</td>
+							<td><button class="btn btn-danger">حذف </button></td> 
+						</tr>
+                        <tr>
+                            <td>فوج 2</td>
+                            <td>حلقة 3، حلقة 4</td>
+							<td><button class="btn btn-danger">حذف </button></td>
+						</tr>
+
+    </tbody>
+				</table>
+                <details>
+		<summary>إضافة فوج جديد...</summary>
+
+		<br>
+
+		<form>
+                        <label class="label">اسم الفوج:</label><br>
+                        <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
+
+                        <label class="label">وقت بداية الفوج :</label><br>
+                        <input class="input" placeholder="اكتب هنا..." type="number" name="age"><br><br>
+                        <label class="label">وقت نهاية الفوج :</label><br>
+                        <input class="input" placeholder="اكتب هنا..." type="number" name="status"><br><br>
+						<label class="label"> الحلقات التابعة له:</label><br>
+                        <input class="input" placeholder="اكتب هنا..." type="number" name="status"><br><br>
+						<button class="btn btn-primary">إضافة</button>
+                        </form>
+                        </details>
+
+            </details>
+
+        </div>
+
+        <div class="card" >
+            <h3> إدارة الحلقات</h3>
+            <details>
+					<summary>
+            <button class="btn btn-primary">تفاصيل</button>
+            </summary>
+                <h4>قائمة الحلقات</h4>
+				<table class="table">
+					<thead>
+						<tr>
+							<th>اسم الحلقة</th>
+							<th>الفوج التابع له </th>
+                            <th>اسم معلم الحلقة</th>
+                            <th>الطلاب التابعة للحلقة</th>
+							<th>حذف الحلقة</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>حلقة أولى</td>
+                                    <td>فوج أول</td>
+							        <td>آية دعبول</td>
+							       <td>
+                                       <details>
+					                    <summary>
+                                         <button class="btn btn-primary">طلاب الحلقة الأولى</button>
+                                         </summary>
+                                         <h4>قائمة طلاب الحلقة الأولى:</h4>
+				                        <table class="table">
+					                       <thead>
+						                     <tr>
+						                  	<th>اسماء الطلاب:</th>
+                                          </tr>
+                                         </thead>
+                                       <tbody>
+                                             <tr>
+                                                 <td>بيان</td>
+                                             </tr>
+                                             <tr>
+                                                 <td>آية</td>
+											</tr>
+                                            </tbody>
+                                            </table></details>
+                                          
+                                          
+                                          
+                                          </td>
+							        <td><button class="btn btn-danger">حذف </button></td>
+
+                                </tr>
+
+
+                            </tbody>
+                            </table>
+                            <details>
+		<summary>إضافة حلقة جديدة...</summary>
+
+		<br>
+
+		<form>
+		<label class="label">اسم الحلقة:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
+                        <label class="label">نوع الحلقة:</label><br>
+                        <select class="select" name="halaqa">
+                            <option> غيبي</option>
+                            <option> حاضر</option>
+                        </select>
+                        <label class="label">الفوج التابعة له الحلقة:</label><br>
+                        <select class="select" name="halaqa">
+                            <option> فوج أول</option>
+                            <option> فوج ثاني</option>
+                        </select>
+                        <label class="label">المعلم/ة التابع للحلقة:</label><br>
+                        <select class="select" name="halaqa">
+                            <option> ماريا العبدالسلام</option>
+                            <option> آية دعبول</option>
+                        </select>
+						<button class="btn btn-primary">إضافة</button>
+					</form>
+                    </details>
+
+
+
+
+
+
+
+
+                            </details>
+        </div>
+    </div>
+</section>
+@code {
+
+}
