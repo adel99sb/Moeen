@@ -1,17 +1,6 @@
 ﻿@page "/settings"
 <h3>Settings</h3>
-<div class="main">
-    <!-- كارد الشكاوي -->
-    <div class="card" style="width:250px;">
-        <h3>الشكاوي </h3>
-        
-         <ul>
-            <li>بطء في التحميل</li>
-            <li>وجود كشاكل في تسجيل الدخول</li>
-        </ul> 
-    </div>
-<hr>
-    <!-- كارد النسخ الاحتياطي -->
+ <!-- كارد النسخ الاحتياطي -->
     
     <div class="card" style="width:250px;">
         <h3>لنسخ الاحتياطي </h3>
@@ -43,6 +32,39 @@
             <option value="small">صغير</option>
         </select>
          </div>
+    </div>
+<hr>
+
+<div class="main">
+    <!-- كارد الشكاوي -->
+    <div>
+        <h3>الشكاوي </h3>
+           <table class="table">
+            <thead>
+                <tr>
+                    <th>الشكوى</th>
+                    <th>حالة الشكوى</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>بطء في التحميل</td>
+                    <td>
+                        <button class="btn btn-accent">تم الحل</button>
+                        <button class="btn btn-accent">قيد الحل</button>
+                        <button class="btn btn-danger">حذف</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>وجود مشاكل في تسجيل الدخول</td>
+                    <td>
+                        <button class="btn btn-accent">تم الحل</button>
+                        <button class="btn btn-accent">قيد الحل</button>
+                        <button class="btn btn-danger">حذف</button>
+                    </td>
+                </tr>
+			</tbody>
+            </table>
     </div>
 </div>
 @code {
