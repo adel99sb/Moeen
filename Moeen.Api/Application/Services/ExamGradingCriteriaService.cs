@@ -1,0 +1,24 @@
+﻿using Moeen.Api.Core.Contracts.Application;
+using Moeen.Api.Shared.Requests.ExamGrading;
+using Moeen.Api.Shared.Responses.ExamGrading;
+
+namespace Moeen.Api.Application.Services
+{
+    public class ExamGradingCriteriaService : IExamGradingCriteriaService
+    {
+        public Task<DeleteGradingCriteriaResponse> DeleteGradingCriteriaAsync(DeleteGradingCriteriaRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<GetGradingCriteriaResponse> GetGradingCriteriaAsync(GetGradingCriteriaRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<GradingCriteriaDto> SetGradingCriteriaAsync(SetGradingCriteriaRequest request)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

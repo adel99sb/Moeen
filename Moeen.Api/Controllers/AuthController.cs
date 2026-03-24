@@ -6,10 +6,9 @@ using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Configurations;
 using Moeen.Api.Shared.Requests.auth;
-
-
-//using Moeen.Api.Shared.Requests;
+using Moeen.Api.Shared.Requests;
 using Moeen.Api.Shared.Responses;
+using Moeen.Api.Shared.Responses.Identity;
 
 namespace Moeen.Api.Controllers
 {

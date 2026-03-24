@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Moeen.Api.Application.Services;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.Core.Entities;
@@ -64,7 +65,32 @@ builder.Services.AddAuthentication(options =>
 // («Œ Ì«—Ì)  ”ÃÌ· JwtService ≈–« ﬂ‰  ” ” Œœ„Â ›Ì AuthController
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IMosquService, MosquService>();
-
+//builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
+builder.Services.AddScoped<IIdentityService, IdentityService>();
+builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+builder.Services.AddScoped<ICircleCommandService, CircleCommandService>();
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+builder.Services.AddScoped<ICircleQueryService, CircleQueryService>();
+builder.Services.AddScoped<ICircleTeacherAssignmentService, CircleTeacherAssignmentService>();
+builder.Services.AddScoped<IQuranCurriculumService, QuranCurriculumService>();
+builder.Services.AddScoped<IMemorizationService, MemorizationService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IPointsService, PointsService>();
+builder.Services.AddScoped<IExamGradingCriteriaService, ExamGradingCriteriaService>();
+builder.Services.AddScoped<IExamPhaseService, ExamPhaseService>();
+builder.Services.AddScoped<IExamCommandService, ExamCommandService>();
+builder.Services.AddScoped<IExamQueryService, ExamQueryService>();
+builder.Services.AddScoped<IGoalService, GoalService>();
+builder.Services.AddScoped<IImportExportService, ImportExportService>();
+builder.Services.AddScoped<ILessonManagementService, LessonManagementService>();
+builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+builder.Services.AddScoped<IContentSharingService, ContentSharingService>();
+builder.Services.AddScoped<IFeedbackService, FeedbackService>();
+builder.Services.AddScoped<ILibraryService, LibraryService>();
+builder.Services.AddScoped<IReportingService, ReportingService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+builder.Services.AddScoped<ISystemConfigurationService, SystemConfigurationService>();
+builder.Services.AddScoped<ISchedulingService, SchedulingService>();
 ////////////////////////////////////
 
 

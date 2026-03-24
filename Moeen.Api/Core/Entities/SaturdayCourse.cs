@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Moeen.Api.Core.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace Moeen.Api.Core.Enities
         public string description { get; set; }
         public Mosque mosque { get; set; } 
         public ICollection<PdfFile> pdfFiles { get; set; }
-        public ICollection<SaturdayHalqe> saturdayHalqes { get; set; }
+        public ICollection<SaturdayHalqa> saturdayHalqes { get; set; }
 
 
     }
