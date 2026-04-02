@@ -1,0 +1,148 @@
+﻿@page "/supervisor/posts"
+<h3>Posts</h3>
+
+
+    <h2>قائمة التحكم بالمنشورات</h2>
+
+    <table class="table">
+    
+        <tr>
+            <th class="table th">المنشور</th>
+            <th class="table th">معلومات المنشور </th>
+            <th class="table th">التفاعلات</th>
+            <th class="table th">حذف</th>
+
+        </tr>
+
+        <tr>
+            <td class="table td">إعلان بدء التسجيل  </td>
+
+            <td class="table td">
+                <details class="details">
+                    <summary class="summary">  تعديل معلومات المعلومات</summary>>
+
+                <label class="label">تعديل عنوان المنشور:</label><br>
+                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
+                <label class="label">تعديل محتوى المنشور:</label><br>
+                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
+                <label class="label">تاريخ ووقت النشر:</label><br>
+                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
+
+                <label class="label">نوع المنشور :</label><br>
+                <select class="select">
+                        <option>عام</option>
+                        <option>خاص</option>
+                    </select><br><br>
+
+                <button class="btn btn-accent" type="submit">حفظ</button>
+                <button class="btn btn-accent" type="submit">نشر</button>
+             
+
+                </details>
+            </td>
+
+            <td>
+                25 إعجاب
+            </td>
+        <td class="table td"><button class="btn btn-danger">حذف </button></td>
+        </tr>
+    <tr>
+        <td class="table td">حملات للتشجيع على حفظ القرآن الكريم  </td>
+
+        <td class="table td">
+            <details class="details">
+                <summary class="summary">  عرض/تعديل المعلومات</summary>
+
+                <label class="label">تعديل عنوان المنشور:</label><br>
+                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
+                <label class="label">تعديل محتوى المنشور:</label><br>
+                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
+                <label class="label">تاريخ ووقت النشر:</label><br>
+                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
+
+                <label class="label">نوع المنشور :</label><br>
+                <select class="select">
+                    <option>عام</option>
+                    <option>خاص</option>
+                </select><br><br>
+
+                <button class="btn btn-accent" type="submit">حفظ</button>
+                <button class="btn btn-accent" type="submit">نشر</button>
+             
+
+            </details>
+        </td>
+
+        <td class="table td">
+            15 إعجاب
+        </td>
+        <td class="table td"><button class="btn btn-danger">حذف </button></td>
+    </tr>
+    <tr>
+        <td class="table td">مبادرة تحفيزية للطلاب  </td>
+
+        <td class="table td">
+            <details class="details">
+                <summary class="summary">عرض/تعديل المعلومات</summary>
+
+                <label class="label">تعديل عنوان المنشور:</label><br>
+                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
+                <label class="label">تعديل محتوى المنشور:</label><br>
+                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
+                <label class="label">تاريخ ووقت النشر:</label><br>
+                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
+
+                <label class="label">نوع المنشور :</label><br>
+                <select class="select">
+                    <option>عام</option>
+                    <option>خاص</option>
+                </select><br><br>
+
+                <button class="btn btn-accent" type="submit">حفظ</button>
+                <button class="btn btn-accent" type="submit">نشر</button>
+             
+
+            </details>
+        </td>
+
+        <td class="table td">
+            30 إعجاب
+        </td>
+        <td class="table td"><button class="btn btn-danger">حذف </button></td>
+    </tr>
+
+    </table>
+    <details class="details">
+		<summary class="summary">إضافة منشور جديد</summary>
+
+		<br>
+
+		<form class="form-box">
+            <div class="form-group">
+        <label class="label">تعديل عنوان المنشور:</label><br>
+        <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
+             </div>
+              <div class="form-group">
+        <label class="label">تعديل محتوى المنشور:</label><br>
+        <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
+              </div>
+               <div class="form-group">
+        <label class="label">تاريخ ووقت النشر:</label><br>
+        <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
+               </div>
+                <div class="form-group">
+        <label class="label">نوع المنشور :</label><br>
+        <select class="select">
+            <option>عام</option>
+            <option>خاص</option>
+        </select>
+        </div>
+        <br><br>
+
+<button class="btn btn-accent" type="submit">حفظ</button>
+<button class="btn btn-accent" type="submit">نشر</button>
+             </form>
+             </details>
+@code {
+
+}
