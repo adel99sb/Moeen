@@ -48,9 +48,3 @@ namespace Moeen.Api.Controllers
         }
     }
 }
-namespace Moeen.Api.Controllers
-{
-    public class MemorizationController
-    {
-    }
-}

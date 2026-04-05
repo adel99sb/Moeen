@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Moeen.Api.Core.Enums;
+using Moeen.Api.Core.Constants;
 
 namespace Moeen.Api.Shared.Requests.ImportExport
 {

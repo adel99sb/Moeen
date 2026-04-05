@@ -18,7 +18,7 @@ namespace Moeen.Api.Core.Contracts.Application
         /// </summary>
         /// <param name="request">بيانات الدور (إذا كان RoleId موجوداً فهذا تحديث، وإلا إنشاء)</param>
         /// <returns>الدور بعد الإنشاء/التحديث</returns>
-        Task<Shared.Requests.Authorization.RoleDto> ManageRoleAsync(ManageRoleRequest request);
+        Task<Shared.Requests.Authorization.RequsteRoleDto> ManageRoleAsync(ManageRoleRequest request);
 
         /// <summary>
         /// تعيين دور لمستخدم

@@ -1,6 +1,6 @@
-﻿using Moeen.Api.Shared.Requests.ContentSharing;
+﻿
+using Moeen.Api.Shared.Requests.ContentSharing;
 using Moeen.Api.Shared.Responses.ContentSharing;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application
 {

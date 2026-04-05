@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.Authorization;
 using Moeen.Api.Shared.Responses.Authorization;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.Controllers
 {

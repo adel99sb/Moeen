@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Api.Shared.Requests.Authorization
 {
-    public class RoleDto
+    public class RequsteRoleDto
     {
         // Id موجود فقط عند التحديث (اختياري)
         public string Id { get; set; }

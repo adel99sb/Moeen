@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Api.Shared.Requests.Reporting
 {
-    public class ScheduleDto
+    public class ReportingScheduleDto
     {
         [Required(ErrorMessage = "Report type is required")]
         public string ReportType { get; set; } // "Attendance" or "Performance"

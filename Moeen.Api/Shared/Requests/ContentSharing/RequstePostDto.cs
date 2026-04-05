@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Api.Shared.Requests.ContentSharing
 {
-    public class PostDto
+    public class RequstePostDto
     {
         public Guid? Id { get; set; } // إذا كان موجوداً فهذا تحديث
 

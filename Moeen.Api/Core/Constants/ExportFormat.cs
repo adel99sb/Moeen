@@ -1,4 +1,4 @@
-﻿namespace Moeen.Api.Core.Enums
+﻿namespace Moeen.Api.Core.Constants
 {
     public enum ExportFormat
     {

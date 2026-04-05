@@ -14,7 +14,7 @@ namespace Moeen.Api.Shared.Responses.ExamCommand
         public int Score { get; set; }
         public DateTime Date { get; set; }
         public string Notes { get; set; }
-        public int Mark { get; set; }          // العلامة أو النقاط
-        public string Grade { get; set; }       // التقدير النصي (ممتاز، جيد، ...)
+        public int Mark { get; set; }         
+        public string Grade { get; set; }   
     }
 }
