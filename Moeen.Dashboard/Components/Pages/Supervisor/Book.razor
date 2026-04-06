@@ -1,0 +1,61 @@
+﻿@page "/supervisor/book"
+<h3>Book</h3>
+<div class="search-container">
+	<input class="search-input" placeholder="ابحث عن كتاب..." />
+	<button class="btn btn-primary"> <span class="bi bi-search"> </span> </button>
+</div>
+<table class="table">
+	<thead>
+		<tr>
+			<th class="table th">اسم الكتاب</th>
+			<th class="table th">وصف</th>
+			<th class="table th">رابط التحميل </th>
+		</tr>
+	</thead>
+	<tbody>
+		
+		<tr>
+			<td class="table td">كتاب التجويد </td>
+			<td class="table td">كتاب لتعلم قواعد التجويد </td>
+			<td class="table td">
+				<a href="https://example.com/taqweed.pdf" target="_blank" class="btn btn-accent">تحميل</a>
+			</td>
+		</tr>
+		
+		<tr>
+			<td class="table td">كتاب التفسير </td>
+			<td class="table td">كتاب لتعلم تفسير القرآن الكريم </td>
+			<td class="table td">
+				<a href="https://example.com/tafsir.pdf" target="_blank" class="btn btn-accent">تحميل</a>
+			</td>
+		</tr>
+		</tbody>
+		</table>
+		<details class="details">
+		<summary class="summary">إضافة كتاب جديد</summary>
+
+		<br>
+
+		<form class="form-box">
+			<div class="form-group">
+<label class="label">اسم الكتاب:</label><br>
+<input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
+	    	</div>
+			<div class="form-group">
+<label class="label">وصف الكتاب :</label><br>
+<input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
+             </div>
+			 <div class="form-group">
+<label class="label">رابط لتحميل الكتاب :</label><br>
+<input class="input" placeholder="اكتب هنا..." type="text" name="name">
+              </div>
+		<br><br>
+<button class="btn btn-accent" type="submit">حفظ</button>
+<button class="btn btn-accent" type="submit">تحميل</button>
+</form>
+</details>
+
+
+@code {
+
+}

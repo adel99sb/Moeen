@@ -1,0 +1,151 @@
+﻿@page "/supervisor/teacher"	
+<h3>Teacher</h3>
+<div class="search-container">
+	<input class="search-input" placeholder="ابحث هنا..." />
+	<button class="btn btn-primary"> <span class="bi bi-search"> </span> </button>
+</div>
+<table class="table">
+	<thead>
+		<tr>
+			<th class="table th">اسم المعلم</th>
+			<th class="table th">حضور </th>
+			<th class="table th ">حذف  المعلم</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td class="table td"> آلاء قاسم </td>
+			<td class="table td">
+				<details> <summary>
+				<button class="btn btn-accent">الحضور </button>
+					</summary>
+				
+				<select class="select" name="halaqa">
+					<option> حاضر</option>
+					<option> غائب</option>
+				    <option> غياب مبرر</option>
+
+
+				</select>
+				</details>
+			</td>
+			<td class="table td"><button class="btn btn-danger">حذف </button></td>
+		</tr>
+		<tr>
+			<td class="table td">ماريا العبد السلام </td>
+			<td class="table td">
+				<details>
+					<summary>
+						<button class="btn btn-accent">الحضور </button>
+					</summary>
+					
+					<select class="select" name="halaqa">
+						<option> حاضر</option>
+						<option> غائب</option>
+						<option> غياب مبرر</option>
+
+
+					</select>
+				</details>
+			</td>
+			<td class="table td"><button class="btn btn-danger">حذف </button></td>
+		</tr>
+		<tr>
+			<td class="table td">آية دعبول </td>
+			<td class="table td">
+				<details>
+					<summary>
+						<button class="btn btn-accent">الحضور </button>
+					</summary>
+					
+					<select class="select" name="halaqa">
+						<option> حاضر</option>
+						<option> غائب</option>
+						<option> غياب مبرر</option>
+
+
+					</select>
+				</details>
+			</td>
+			<td class="table td"><button class="btn btn-danger">حذف </button></td>
+		</tr>
+		</tbody>
+		</table>
+		<details class="details">
+		<summary class="summary">إضافة معلم جديد</summary>
+
+		<br>
+
+		<form class="form-box">
+			 <div class="form-group">
+		<label class="label">اسم والكنية:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
+		      </div>
+			   <div class="form-group">
+		<label class="label">تاريخ الميلاد:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="number" name="age"><br><br>
+		       </div>
+			   <div class="form-group">
+
+        <label class="label">تاريخ التسجيل:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="number" name="status"><br><br>
+		</div>
+		        <div class="form-group">
+		<label class="label">البريد الالكتروني:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="email" name="status"><br><br>
+		        </div>
+		        <div class="form-group">
+
+		<label class="label">رقم الهاتف:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="number" name="status"><br><br>
+		        </div>
+		        <div class="form-group">
+
+		<label class="label">الجنس:</label><br>
+		<select class="select" name="halaqa">
+			<option> ذكر</option>
+			<option> انثى</option>
+		</select>
+		</div>
+		        <div class="form-group">
+
+		<label class="label">لمحة عن الخبرات:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="text" name="status"><br><br>
+                </div>
+		        <div class="form-group">
+
+		<label class="label">كلمة السر:</label><br>
+		<input class="input" placeholder="اكتب هنا..." type="password" name="status"><br><br>
+		        </div>
+		        <div class="form-group">
+
+		<label class="label">الفوج:</label><br>
+		<select class="select" name="halaqa">
+			<option> فوج اول</option>
+			<option> فوج ثاني</option>
+
+		</select><br><br>
+		</div>
+		        <div class="form-group">
+
+		<label class="label">رقم الحلقة:</label><br>
+		<select class="select" name="halaqa">
+			<option>الحلقة 1</option>
+			<option>الحلقة 2</option>
+			<option>الحلقة 3</option>
+			<option>الحلقة 4</option>
+		</select>
+		</div>
+		<br />
+		<br />
+
+		<button class="btn btn-accent" type="submit">حفظ</button>
+		<button class="btn btn-accent" type="submit">إضافة</button>
+
+	</form>
+
+</details>
+
+@code {
+
+}
