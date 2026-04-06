@@ -1,5 +1,22 @@
 ﻿@page "/supervisor/teacher"	
+@rendermode InteractiveServer
+
+@inject NavigationManager NavManager
+
 <h3>Teacher</h3>
+<style>
+	/* تنسيق خيارات الحضور */
+	.attendance {
+		display: flex;
+		justify-content: center;
+		gap: 10px;
+	}
+
+		.attendance label {
+			cursor: pointer;
+			font-size: 14px;
+		}
+</style>
 <div class="search-container">
 	<input class="search-input" placeholder="ابحث هنا..." />
 	<button class="btn btn-primary"> <span class="bi bi-search"> </span> </button>
@@ -8,6 +25,8 @@
 	<thead>
 		<tr>
 			<th class="table th">اسم المعلم</th>
+			<th class="table th">معلومات المعلم</th>
+
 			<th class="table th">حضور </th>
 			<th class="table th ">حذف  المعلم</th>
 		</tr>
@@ -15,19 +34,20 @@
 	<tbody>
 		<tr>
 			<td class="table td"> آلاء قاسم </td>
+			<td>
+				<button type="button" class="btn btn-accent" @onclick="viewTeacher1"> عرض</button>
+				<button type="button" class="btn btn-accent" @onclick="editTeacher"> تعديل</button>
+	               
+			</td>
 			<td class="table td">
-				<details> <summary>
-				<button class="btn btn-accent">الحضور </button>
-					</summary>
+			
+					<div class="attendance">
+						<label><input type="radio" name="attend1"> حاضر</label>
+						<label><input type="radio" name="attend1"> غائب</label>
+						<label><input type="radio" name="attend1"> مبرر</label>
+					</div>
 				
-				<select class="select" name="halaqa">
-					<option> حاضر</option>
-					<option> غائب</option>
-				    <option> غياب مبرر</option>
-
-
-				</select>
-				</details>
+				
 			</td>
 			<td class="table td"><button class="btn btn-danger">حذف </button></td>
 		</tr>
@@ -147,5 +167,13 @@
 </details>
 
 @code {
-
+	private void viewTeacher1()
+	{
+		NavManager.NavigateTo("/supervisor/teacher1");
+	}
+	private void editTeacher()
+	{
+		NavManager.NavigateTo("/supervisor/editinfo_teacher");
+		// Logic to edit student information
+	}
 }
