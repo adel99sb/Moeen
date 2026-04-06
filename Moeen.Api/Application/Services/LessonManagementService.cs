@@ -16,7 +16,7 @@ namespace Moeen.Api.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<Shared.Requests.LessonManagement.LessonDto> CreateLessonAsync(CreateLessonRequest request)
+        public Task<LessonDto> CreateLessonAsync(CreateLessonRequest request)
         {
             throw new NotImplementedException();
         }
@@ -36,7 +36,7 @@ namespace Moeen.Api.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<Shared.Requests.LessonManagement.LessonDto> UpdateLessonAsync(UpdateLessonRequest request)
+        public Task<LessonDto> UpdateLessonAsync(UpdateLessonRequest request)
         {
             throw new NotImplementedException();
         }

@@ -1,13 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Moeen.Api.Core.Constants;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.Core.Entities;
-using Moeen.Api.infrastructure.Configurations;
-using Moeen.Api.Shared.Requests.auth;
-using Moeen.Api.Shared.Requests;
-using Moeen.Api.Shared.Responses;
+using Moeen.Api.Shared.Requests.Identity;
 using Moeen.Api.Shared.Responses.Identity;
 
 namespace Moeen.Api.Controllers
@@ -47,7 +43,7 @@ public class AuthController : ControllerBase
         {
             UserName = request.Email,
             Email = request.Email,
-            name = request.FullName,
+            name = request.Name,
             created_at = DateTime.UtcNow
         };
 

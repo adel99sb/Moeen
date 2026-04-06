@@ -1,6 +1,5 @@
-﻿using System;
+﻿using Moeen.Api.Core.Constants;
 using System.ComponentModel.DataAnnotations;
-using Moeen.Api.Core.Enums;
 
 namespace Moeen.Api.Shared.Requests.Attendance
 {

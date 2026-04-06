@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Moeen.Api.Shared.Responses.ExamCommand;
+using System.Collections.Generic;
 
 namespace Moeen.Api.Shared.Responses.ExamQuery
 {

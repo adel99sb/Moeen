@@ -26,7 +26,7 @@ namespace Moeen.Api.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<Shared.Requests.ContentSharing.PostDto> PublishPostAsync(PublishPostRequest request)
+        public Task<PostDto> PublishPostAsync(PublishPostRequest request)
         {
             throw new NotImplementedException();
         }
