@@ -1,4 +1,4 @@
-﻿namespace Moeen.Api.Shared.Responses.Circle
+﻿namespace Moeen.Api.Shared.Responses.CircleQuery
 {
     public class CircleStudentsCountResponse
     {

@@ -1,5 +1,107 @@
 ﻿@page "/supervisor/student"
+@rendermode InteractiveServer
+
+@inject NavigationManager NavManager
 <h3>Student</h3>
+<style>
+	.table {
+    width: 100%;
+    table-layout:fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background-color:#fcfbf9;
+    box-shadow: var(--shadow-sm);
+}
+		.table th {
+		background-color: var(--color-primary);
+		color: var(--color-beige);
+		padding: 12px;
+		text-align: center;
+		font-size: 30px;
+	}
+
+	.table td {
+		padding: 10px;
+		text-align: center;
+		border-bottom: 1px solid #eee;
+		font-family: 'Cairo', sans-serif;
+		font-size: 25px;
+	}
+
+	.table tbody tr:hover {
+		background-color:   #f4f1ee;
+	}
+	.form-container {
+    max-width: 900px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+    overflow: hidden;
+}	
+.form-header {
+    background: #195042;
+    color: #fff;
+    padding: 20px 30px;
+}
+
+form { padding: 30px; }
+
+/* دمج الصفوف والمجموعات */
+.grid-row, .actions, .form-header h2, .save, .cancel, .input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-radius:5px;
+    padding:5px;
+}
+
+.grid-row { margin-bottom: 20px; flex-wrap: wrap; gap: 20px; }
+.input-group { flex: 1; min-width: 250px; }
+
+.input-group {
+    flex:1 1 45%;
+    display: flex;
+    flex-direction:column;
+    margin-bottom: 8px;
+    color: #1d3937;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* تنسيق المدخلات الموحد */
+.input-wrapper { position: relative; }
+
+.input-wrapper i {
+    position: absolute;
+    right: 12px;
+    color: #195042;
+    font-size: 18px;
+}
+
+.input-wrapper input, .input-wrapper select {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    border: 2px solid #f0f0f0;
+    border-radius: 10px;
+    outline: none;
+    transition: 0.3s;
+    background: #fdfdfd;
+    font: inherit;
+    margin-right:5px;
+    flex:1;
+}
+
+.input-wrapper input:focus, .input-wrapper select:focus {
+    border-color: #d6cabc;
+    background: #fff;
+    box-shadow: 0 0 8px rgba(214, 202, 188, 0.3);
+}
+
+</style>
 <div class="search-container">
 	<input class="search-input" placeholder="ابحث هنا..." />
 	<button class="btn btn-primary"> <span class="bi bi-search"> </span> </button>
@@ -17,108 +119,38 @@
 		<tr>
 			<td class="table td">آلاء قاسم </td>
 			<td >
-				<details>
-					<summary>
-						<button class="btn btn-accent">عرض </button>
-					</summary>
-					<br />
-				<table>
-					<tr>
-						<th>الاسم</th>
-						<th>تسميع اليوم</th>
-						<th> مراجعة الأجزاء</th>
-						<th>الواجب</th>
-							<th>الاختبارات</th>
-
-						<th>الحضور</th>
-						<th>النقاط</th>
-					</tr>
-					<tr>
-	                    <td>آلاء </td>
-						<td> الصفحات 22و23 </td>
-						<td> تم مراجعة الجزء الأول   </td>
-					    <td>   مطلوب الصفحات 24و25   </td>
-							<td> مجازة بجزأين</td>
-
-						<td>   حاضر   </td>
-
-						<td> 6</td>
-                    </tr>
-				</table>
-				</details>
+				<a class="btn btn-accent" href="/supervisor/alaa_info" @onclick="editStudent"> عرض</a>
+				<a class="btn btn-accent" href="/supervisor/edit" @onclick="viewStudent1"> تعديل</a>
+	               
 				</td>
 			<td class="table td">
 				<button class="btn btn-danger">حذف </button>
 			</td>
 		</tr>
 		<tr>
-			<td class="table td">هبة عجم </td>
-			<td class="table td">
-				<details>
-					<summary>
-						<button class="btn btn-accent">عرض </button>
-					</summary>
-					<br />
-					<table>
-						<tr>
-							<th>الاسم</th>
-							<th>تسميع اليوم</th>
-							<th> مراجعة الأجزاء</th>
-							<th>الواجب</th>
-							<th>الاختبارات</th>
-
-							<th>الحضور</th>
-							<th>النقاط</th>
-						</tr>
-						<tr>
-							<td>فاطمة </td>
-							<td> الصفحات 5و6و7 </td>
-							<td> تم مراجعة الجزء الثاني   </td>
-							<td>   مطلوب الصفحات 8و9   </td>
-							<td>   مجازة بثلاثة أجزاء   </td>
-
-							<td> حاضر</td>
-							<td> 8</td>
-						</tr>
-					</table>
-				</details>
+			<td class="table td">ماريا العبد السلام </td>
+			<td>
+				<a class="btn btn-accent" href="/supervisor/alaa_info" @onclick="editStudent"> عرض</a>
+				<a class="btn btn-accent" href="/supervisor/edit" @onclick="viewStudent2"> تعديل</a>
+	               
 			</td>
 			<td class="table td">
 				<button class="btn btn-danger">حذف </button>
 			</td>
 		</tr>
 		<tr>
-			<td class="table td">ماريا العبدالسلام </td>
-			<td class="table td">
-				<details>
-					<summary>
-						<button class="btn btn-accent">عرض </button>
-					</summary>
-					<br />
-					<table>
-						<tr>
-							<th>الاسم</th>
-							<th>تسميع اليوم</th>
-							<th> مراجعة الأجزاء</th>
-							<th>الواجب</th>
-							<th>الحضور</th>
-							<th>النقاط</th>
-						</tr>
-						<tr>
-							<td>بيان </td>
-							<td> الصفحات 45ز46 </td>
-							<td> تم مراجعة الجزء الثاني   </td>
-							<td>   مطلوب الصفحات 47و48   </td>
-							<td> حاضر</td>
-							<td> 9</td>
-						</tr>
-					</table>
-				</details>
+			<td class="table td">آية دعبول </td>
+			<td>
+				<a class="btn btn-accent" href="/supervisor/alaa_info" @onclick="editStudent"> عرض</a>
+				<a class="btn btn-accent" href="/supervisor/edit" @onclick="viewStudent3"> تعديل</a>
+	               
 			</td>
 			<td class="table td">
 				<button class="btn btn-danger">حذف </button>
 			</td>
 		</tr>
+		
+			
 		
 	</tbody>
 	</table>
@@ -129,33 +161,37 @@
 
 		<br>
 
-		<form class="form-box">
+		<form class="form-box" >
 		
-			<div class="form-group"><label class="label">اسم والكنية:</label><br>
+		<div>
+			<label class="label">اسم والكنية:</label><br>
 		<input class="input" placeholder="اكتب هنا..." type ="text" name="name"><br><br>
 		     </div>
-			 <div class="form-group">
+			<div>
 		<label class="label">تاريخ الميلاد:</label><br>
 			<input class="input" placeholder="اكتب هنا..."  type="number" name="age"><br><br>
 			 </div>
-			 <div class="form-group">
+			 <div>
 		<label class="label">العنوان:</label><br>
 
 		<input class="input" placeholder="اكتب هنا..."  type="text" name="status"><br><br>
 		       </div>
-			   <div class="form-group">
+			  
+			      <div>
+           
 		<label class="label">حالة الطالب:</label><br>
 		<input class="input" placeholder="اكتب هنا..."  type="text" name="status"><br><br>
-		       </div>
-			   <div class="form-group">
+		   </div>
+		   <div>
 		<label class="label">تاريخ التسجيل:</label><br>
 		<input class="input" placeholder="اكتب هنا..." type ="number" name="status"><br><br>
-		       </div>
-			   <div class="form-group">
+		      </div> 
+			   <div>
 		<label class="label">البريد الالكتروني:</label><br>
 		<input class="input" placeholder="اكتب هنا..."  type="email" name="status"><br><br>
 		       </div>
-			   <div class="form-group">
+			  
+			   <div>
 		<label class="label">اسم المسجد:</label><br>
 		<input class="input" placeholder="اكتب هنا..."  type="text" name="status"><br><br>
 		       </div>
@@ -207,11 +243,31 @@
 		<button class="btn btn-accent" type="submit">ربط بولي الامر</button>
 		<button class="btn btn-accent" type="submit">حفظ</button>
 		</form>
-
+	
 	</details>
 
-
+	
 
 @code {
+	private void editStudent()
+	{
+		NavManager.NavigateTo("/supervisor/edit");
+		Console.WriteLine("////====///");
+		// Logic to edit student information
+	}
+	private void viewStudent1()
+	{
+		NavManager.NavigateTo("/supervisor/alaa_info");
+		// Logic to edit student information
+	}
+	private void viewStudent2()
+	{
+		NavManager.NavigateTo("/supervisor/maria-info");
+	}
+	private void viewStudent3()
+	{
+		NavManager.NavigateTo("/supervisor/aya-info");
+	}
 
+	
 }

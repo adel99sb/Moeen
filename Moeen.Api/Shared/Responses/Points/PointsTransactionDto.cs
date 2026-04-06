@@ -1,7 +1,4 @@
-﻿using System;
-using Moeen.Api.Core.Enums;
-
-namespace Moeen.Api.Shared.Responses.Points
+﻿namespace Moeen.Api.Shared.Responses.Points
 {
     public class PointsTransactionDto
     {

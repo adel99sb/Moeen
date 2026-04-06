@@ -5,6 +5,6 @@
         // إذا كان null فهذا يعني إنشاء دور جديد، وإذا موجود فهذا تحديث
         public string RoleId { get; set; }
 
-        public RoleDto RoleData { get; set; }
+        public RequsteRoleDto RoleData { get; set; }
     }
 }

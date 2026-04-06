@@ -1,6 +1,5 @@
 ﻿using Moeen.Api.Shared.Requests.Registration;
-using Moeen.Api.Shared.Responses.Registration;
-using System.Threading.Tasks;
+using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
 
 namespace Moeen.Api.Core.Contracts.Application
 {

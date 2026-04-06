@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Moeen.Api.Shared.Responses.Enrollment; // لاستخدام StudentDto
 
-namespace Moeen.Api.Shared.Responses.Circle
+namespace Moeen.Api.Shared.Responses.CircleQuery
 {
     public class CircleStudentsResponse
     {

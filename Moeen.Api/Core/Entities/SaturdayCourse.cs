@@ -1,11 +1,10 @@
-﻿using Moeen.Api.Core.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Moeen.Api.Core.Enities
+namespace Moeen.Api.Core.Entities
 {
     public class SaturdayCourse
     {

@@ -1,4 +1,4 @@
-﻿using Moeen.Api.Core.Enums;
+﻿using Moeen.Api.Core.Constants;
 
 namespace Moeen.Api.Shared.Requests.ExamGrading
 {
