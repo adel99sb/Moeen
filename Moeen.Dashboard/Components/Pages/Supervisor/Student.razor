@@ -119,8 +119,8 @@ form { padding: 30px; }
 		<tr>
 			<td class="table td">آلاء قاسم </td>
 			<td >
-				<a class="btn btn-accent" href="/supervisor/alaa_info" @onclick="editStudent"> عرض</a>
-				<a class="btn btn-accent" href="/supervisor/edit" @onclick="viewStudent1"> تعديل</a>
+				<a class="btn btn-accent"  @onclick="viewStudent1"> عرض</a>
+				<a class="btn btn-accent" @onclick="editStudent"> تعديل</a>
 	               
 				</td>
 			<td class="table td">
@@ -130,8 +130,8 @@ form { padding: 30px; }
 		<tr>
 			<td class="table td">ماريا العبد السلام </td>
 			<td>
-				<a class="btn btn-accent" href="/supervisor/alaa_info" @onclick="editStudent"> عرض</a>
-				<a class="btn btn-accent" href="/supervisor/edit" @onclick="viewStudent2"> تعديل</a>
+				<a class="btn btn-accent" @onclick="viewStudent2"> عرض</a>
+				<a class="btn btn-accent" @onclick="editStudent"> تعديل</a>
 	               
 			</td>
 			<td class="table td">
@@ -141,8 +141,8 @@ form { padding: 30px; }
 		<tr>
 			<td class="table td">آية دعبول </td>
 			<td>
-				<a class="btn btn-accent" href="/supervisor/alaa_info" @onclick="editStudent"> عرض</a>
-				<a class="btn btn-accent" href="/supervisor/edit" @onclick="viewStudent3"> تعديل</a>
+				<a class="btn btn-accent" @onclick="viewStudent3"> عرض</a>
+				<a class="btn btn-accent" @onclick="editStudent"> تعديل</a>
 	               
 			</td>
 			<td class="table td">
@@ -169,7 +169,7 @@ form { padding: 30px; }
 		     </div>
 			<div>
 		<label class="label">تاريخ الميلاد:</label><br>
-			<input class="input" placeholder="اكتب هنا..."  type="number" name="age"><br><br>
+			<input class="input" placeholder="اكتب هنا..."  type="date" name="age"><br><br>
 			 </div>
 			 <div>
 		<label class="label">العنوان:</label><br>
@@ -180,36 +180,36 @@ form { padding: 30px; }
 			      <div>
            
 		<label class="label">حالة الطالب:</label><br>
-		<input class="input" placeholder="اكتب هنا..."  type="text" name="status"><br><br>
+		<input class="input" placeholder="اكتب هنا..."  type="text" name="s"><br><br>
 		   </div>
 		   <div>
 		<label class="label">تاريخ التسجيل:</label><br>
-		<input class="input" placeholder="اكتب هنا..." type ="number" name="status"><br><br>
+		<input class="input" placeholder="اكتب هنا..." type ="number" name="date"><br><br>
 		      </div> 
 			   <div>
 		<label class="label">البريد الالكتروني:</label><br>
-		<input class="input" placeholder="اكتب هنا..."  type="email" name="status"><br><br>
+		<input class="input" placeholder="اكتب هنا..."  type="email" name="email"><br><br>
 		       </div>
 			  
 			   <div>
 		<label class="label">اسم المسجد:</label><br>
-		<input class="input" placeholder="اكتب هنا..."  type="text" name="status"><br><br>
+		<input class="input" placeholder="اكتب هنا..."  type="text" name="namemesqwe"><br><br>
 		       </div>
 			   <div class="form-group">
 		<label class="label">رقم الهاتف:</label><br>
-		<input class="input" placeholder="اكتب هنا..." type ="number" name="status"><br><br>
+		<input class="input" placeholder="اكتب هنا..." type ="number" name="phone"><br><br>
 		        </div>
 				<div class="form-group">
 		<label class="label">اسم ولي الامر:</label><br>
-		<input class="input" placeholder="اكتب هنا..."  type="text" name="status"><br><br>
+		<input class="input" placeholder="اكتب هنا..."  type="text" name="name parent"><br><br>
 		        </div>
 				<div class="form-group">
 		<label class="label">رقم ولي الامر:</label><br>
-		<input class="input" placeholder="اكتب هنا..." type ="number" name="status"><br><br>
+		<input class="input" placeholder="اكتب هنا..." type ="number" name="phone parent"><br><br>
 		        </div>
 				<div class="form-group">
 		<label class="label">الجنس:</label><br>
-		<select class="select" name="halaqa">
+		<select class="select" name="gender">
 			<option> ذكر</option>
 			<option> انثى</option>
 			
@@ -217,11 +217,11 @@ form { padding: 30px; }
 		        </div>
 				<div class="form-group">
 		<label class="label">كلمة السر:</label><br>
-		<input class="input" placeholder="اكتب هنا..." type ="password" name="status"><br><br>
+		<input class="input" placeholder="اكتب هنا..." type ="password" name="password"><br><br>
 		         </div>
 				 <div class="form-group">
 		<label class="label">الفوج:</label><br>
-		<select class="select" name="halaqa">
+		<select class="select" name="fouj">
 			<option> فوج اول</option>
 			<option> فوج ثاني</option>
 
@@ -240,8 +240,8 @@ form { padding: 30px; }
 		<br />
 		<br />
 
-		<button class="btn btn-accent" type="submit">ربط بولي الامر</button>
-		<button class="btn btn-accent" type="submit">حفظ</button>
+		<button class="btn btn-accent" type="button">ربط بولي الامر</button>
+		<button class="btn btn-accent" type="button">حفظ</button>
 		</form>
 	
 	</details>
