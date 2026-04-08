@@ -1,70 +1,146 @@
-﻿@page "/management/details"
+﻿@page "/details"
 @inject NavigationManager mgr
-<h3>details</h3>
+<style>
+    /* زر تعيين مشرف  */
+    .custom-outline-btn {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background-color: var(--color-beige);
+        color: var(--color-primary);
+        transition: var(--transition);
+    }
 
-<section>
+        .custom-outline-btn:focus,
+        .custom-outline-btn:active {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .custom-outline-btn:hover {
+            background-color: var(--color-beige);
+            color: var(--color-secondary);
+            box-shadow: 0 4px 10px rgba(29, 57, 55, 0.25);
+        }
+    
+    .btn-m {
+        background: #d6cabc;
+        color: var(--color-primary);
+    }
+
+        .btn-m:hover {
+            background-color: var(--color-beige);
+            color: var(--color-secondary);
+            box-shadow: 0 4px 10px rgba(29, 57, 55, 0.25);
+        }
+    /* رأس الجدول */
+    .table th {
+        background-color: var(--color-beige); /* بيج غامق */
+        color: #195042; /* أخضر داكن */
+        text-align: center;
+    }
+
+    /* الصفوف (تلوين بالتناوب) */
+    .table tr:nth-child(odd) td {
+        background-color: #efebe9; /* بيج فاتح */
+    }
+
+    .table tr:nth-child(even) td {
+        background-color: var(--color-bg); /* أفتح شوي */
+    }
+
+    /* تحسين الشكل العام */
+    .table td {
+        text-align: center;
+        vertical-align: middle;
+    }
+    /* زر الحذف */
+    .delete-button {
+        color: #195042;
+        background-color: #C0392B;
+    }
+
+</style>
+<!-- زر تعيين مشرف -->
+<button type="button" class="btn custom-outline-btn" @onclick="moveTopage"> تعيين مشرف</button>
+
     <h2>الفوج الأول</h2>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th> اسم الأستاذ</th>
-                <th>الحالة</th>
-                <th> المشرف</th>
-                <th>إجراء</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>عبدالله</td>
-                <td>نشط</td>
-                <td>أحمد </td>
-                <td><button class="btn btn-primary">عرض</button></td>
-            </tr>
-            <tr>
-                <td>مصطفى</td>
-                <td>موقوف</td>
-                <td> أحمد </td>
-                <td><button class="btn btn-danger">حذف</button></td>
-            </tr>
-        </tbody>
-    </table>
-</section>
-<br>
-<button class="btn btn-primary"> تعيين مشرف</button>
+<div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>الاسم الاستاذ</th>
+                    <th>الحالة</th>
+                    <th>المشرف</th>
+                    <th class="text-center">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td>محمود </td>
+                    <td>نشط </td>
+                    <td>مصطفى </td>
+                    <td class="actions-cell">
+                        <a href="/owner/Form"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td> أحمد</td>
+                    <td>متوقف</td>
+                    <td> مصطفى </td>
+                    <td class="actions-cell">
+                        <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button>
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
 <hr />
 <section>
     <h2>الفوج الثاني</h2>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th> اسم الأستاذ</th>
-                <th>الحالة</th>
-                <th> المشرف</th>
-                <th>إجراء</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>محمود</td>
-                <td>نشط</td>
-                <td>عمر </td>
-                <td><button class="btn btn-primary">عرض</button></td>
-            </tr>
-            <tr>
-                <td>محمد</td>
-                <td>موقوف</td>
-                <td> عمر </td>
-                <td><button class="btn btn-danger" @onclick="moveTopage">حذف</button></td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>الاسم الاستاذ</th>
+                    <th>الحالة</th>
+                    <th>المشرف</th>
+                    <th class="text-center">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td>محمود </td>
+                    <td>نشط </td>
+                    <td>مصطفى </td>
+                    <td class="actions-cell">
+                        <a href="/owner/Form"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td> أحمد</td>
+                    <td>متوقف</td>
+                    <td> مصطفى </td>
+                    <td class="actions-cell">
+                        <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button>
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </section>
 <br>
-<button class="btn btn-primary"> تعيين مشرف</button>
 <hr />
-
 @code {
     private void moveTopage()
     {
