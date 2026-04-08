@@ -20,7 +20,7 @@ namespace Moeen.Api.Controllers
         [HttpPost("publish")]
         public async Task<ActionResult<PostDto>> PublishPost(PublishPostRequest request)
         {
-            var result = await _contentService.PublishPostAsync(request);
+            var result = await _contentService.PublishPostAsync(request);           
             return Ok(result);
         }
 

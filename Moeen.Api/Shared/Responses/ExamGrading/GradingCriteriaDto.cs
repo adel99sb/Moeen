@@ -1,5 +1,4 @@
 ﻿using Moeen.Api.Core.Constants;
-using Moeen.Api.Core.Enums;
 using System;
 
 namespace Moeen.Api.Shared.Responses.ExamGrading

@@ -1,0 +1,273 @@
+﻿@page "/supervisor/edit"
+@inject NavigationManager NavManager
+
+@rendermode InteractiveServer
+
+<h3>Edit</h3>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+/* دمج الإعدادات العامة والحاويات */
+.form-container {
+    max-width: 900px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+    overflow: hidden;
+}
+
+.form-header {
+    background: #195042;
+    color: #fff;
+    padding: 20px 30px;
+}
+
+form { padding: 30px; }
+
+/* دمج الصفوف والمجموعات */
+.grid-row, .actions, .form-header h2, .save, .cancel, .input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-radius:5px;
+    padding:5px;
+}
+
+.grid-row { margin-bottom: 20px; flex-wrap: wrap; gap: 20px; }
+.input-group { flex: 1; min-width: 250px; }
+
+.input-group {
+    flex:1 1 45%;
+    display: flex;
+    flex-direction:column;
+    margin-bottom: 8px;
+    color: #1d3937;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* تنسيق المدخلات الموحد */
+.input-wrapper { position: relative; }
+
+.input-wrapper i {
+    position: absolute;
+    right: 12px;
+    color: #195042;
+    font-size: 18px;
+}
+
+.input-wrapper input, .input-wrapper select {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    border: 2px solid #f0f0f0;
+    border-radius: 10px;
+    outline: none;
+    transition: 0.3s;
+    background: #fdfdfd;
+    font: inherit;
+    margin-right:5px;
+    flex:1;
+}
+
+.input-wrapper input:focus, .input-wrapper select:focus {
+    border-color: #d6cabc;
+    background: #fff;
+    box-shadow: 0 0 8px rgba(214, 202, 188, 0.3);
+}
+
+/* الأزرار */
+.actions { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+
+.save, .cancel {
+    padding: 12px 35px;
+    border-radius: 10px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.save {
+    background: linear-gradient(45deg, #195042, #1d3937);
+    color: white;
+    border: none;
+}
+
+.save:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(25, 80, 66, 0.3); }
+
+.cancel { background: #f5f5f5; color: #666; }
+.cancel:hover { background: #eee; color: #333; }
+    </style>
+
+   
+   
+<div class="form-container">
+    <div class="form-header">
+        <h2><i class="bi bi-person-plus-fill"></i>  تعديل بيانات الطالب</h2>
+    </div>
+
+    <form>
+        <div class="grid-row">
+            <div class="input-group">
+                <label>الاسم الكامل</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-person"></i>
+                    <input type="text" placeholder="أدخل الاسم">
+                </div>
+            </div>
+        
+   
+            <div class="input-group">
+                <label>تاريخ الميلاد</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-calendar-event"></i>
+                    <input type="date">
+                </div>
+            </div>
+          </div>
+        <div class="grid-row">
+            <div class="input-group">
+                <label>العنوان</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-person"></i>
+                    <input type="text" placeholder="أدخل العنوان">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>حالة الطالب</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-person"></i>
+                    <input type="text" placeholder="حالة الطالب">
+                </div>
+            </div>
+
+        </div>
+        <div class="grid-row">
+            <div class="input-group">
+                <label>تاريخ التسجيل</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-calendar-event"></i>
+                    <input type="date">
+                </div>
+            </div>
+             <div class="input-group">
+                <label>البريد الإلكتروني</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-envelope"></i>
+                    <input type="email">
+                </div>
+            </div>
+         </div>
+        <div class="grid-row">
+         
+           <div class="input-group">
+                <label>اسم المسجد</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-person"></i>
+                    <input type="text" placeholder="أدخل اسم المسجد">
+                </div>
+            </div>
+
+             <div class="input-group">
+                <label>رقم الهاتف</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-telephone"></i>
+                    <input type="tel" >
+                </div>
+            </div>
+             
+        
+            </div>
+             <div class="grid-row">
+         
+           <div class="input-group">
+                <label>اسم ولي الأمر</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-person"></i>
+                    <input type="text" placeholder="أدخل الاسم">
+                </div>
+            </div>
+             <div class="input-group">
+                <label>رقم ولي الأمر</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-telephone"></i>
+                    <input type="tel" >
+                </div>
+            </div>
+            </div>
+
+           
+<div class="grid-row">
+            <div class="input-group">
+                <label>الجنس</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-gender-ambiguous"></i>
+                    <select>
+                        <option value="" disabled selected>اختر الجنس</option>
+                        <option value="male">ذكر</option>
+                        <option value="female">أنثى</option>
+                    </select>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>كلمة المرور</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-lock"></i>
+                    <input type="password">
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-row">
+            <div class="input-group">
+                <label>الفوج</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-layers"></i>
+                    <select>
+                        <option>الفوج الأول</option>
+                        <option>الفوج الثاني</option>
+                    </select>
+                </div>
+            </div>
+              <div class="input-group">
+                <label>رقم الحلقة</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-layers"></i>
+                    <select>
+                        <option>الحلقة الأولى</option>
+                        <option>الحلقة الثانية</option>
+                        <option>الحلقة الثالثة</option>
+
+                    </select>
+                </div>
+            </div>
+           
+            <div class="input-group">
+                <label>حالة الحساب</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-check-circle"></i>
+                    <select>
+                        <option value="active">نشط</option>
+                        <option value="inactive">متوقف</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ البيانات</button>
+            <a href="supervisor/student" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+        </div>
+    </form>
+</div>
+
+
+@code {
+
+}

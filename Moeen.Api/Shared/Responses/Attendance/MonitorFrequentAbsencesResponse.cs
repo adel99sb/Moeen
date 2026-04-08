@@ -4,6 +4,6 @@ namespace Moeen.Api.Shared.Responses.Attendance
 {
     public class MonitorFrequentAbsencesResponse
     {
-        public List<StudentDto> Students { get; set; }
+        public List<AttendanceStudentDto> Students { get; set; }
     }
 }

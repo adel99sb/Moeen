@@ -2,7 +2,7 @@
 
 namespace Moeen.Api.Shared.Responses.Attendance
 {
-    public class StudentDto
+    public class AttendanceStudentDto
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

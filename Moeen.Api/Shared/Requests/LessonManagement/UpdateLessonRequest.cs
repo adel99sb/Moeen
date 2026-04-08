@@ -9,6 +9,6 @@ namespace Moeen.Api.Shared.Requests.LessonManagement
         public Guid Id { get; set; }
 
         [Required(ErrorMessage = "Lesson data is required")]
-        public LessonDto LessonData { get; set; }
+        public RequsteLessonDto LessonData { get; set; }
     }
 }

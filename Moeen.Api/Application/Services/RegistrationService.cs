@@ -1,6 +1,6 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.Registration;
-using Moeen.Api.Shared.Responses.Registration;
+using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
 
 namespace Moeen.Api.Application.Services
 {

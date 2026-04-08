@@ -65,7 +65,7 @@ builder.Services.AddAuthentication(options =>
 // («Œ Ì«—Ì)  ”ÃÌ· JwtService ≈–« ﬂ‰  ” ” Œœ„Â ›Ì AuthController
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IMosquService, MosquService>();
-//builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
+builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 builder.Services.AddScoped<ICircleCommandService, CircleCommandService>();

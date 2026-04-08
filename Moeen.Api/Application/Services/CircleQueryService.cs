@@ -1,6 +1,7 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.Circle;
+using Moeen.Api.Shared.Requests.CircleQuery;
 using Moeen.Api.Shared.Responses.Circle;
+using Moeen.Api.Shared.Responses.CircleQuery;
 
 namespace Moeen.Api.Application.Services
 {

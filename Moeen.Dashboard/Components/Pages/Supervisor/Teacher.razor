@@ -1,5 +1,41 @@
 ﻿@page "/supervisor/teacher"	
+@rendermode InteractiveServer
+
+@inject NavigationManager NavManager
+
 <h3>Teacher</h3>
+<style>
+	/* تنسيق خيارات الحضور */
+
+
+		
+		.attendance-options label {
+    margin: 0 10px;
+    cursor: pointer;
+    font-size: 25px;/* خط أكبر */
+    font-weight: 500;   /* شوي ثخانة */
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+	/* تغيير لون الخلفية عند اختيار الحالة */
+.attendance-options input[type="radio"]:checked + span {
+    color: white;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+	
+.attendance-options input[type="radio"] {
+    width: 20px; /* تكبير الدائرة */
+    height: 20px;/*تكبير الدائرة */
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+
+</style>
 <div class="search-container">
 	<input class="search-input" placeholder="ابحث هنا..." />
 	<button class="btn btn-primary"> <span class="bi bi-search"> </span> </button>
@@ -8,64 +44,66 @@
 	<thead>
 		<tr>
 			<th class="table th">اسم المعلم</th>
+			<th class="table th">معلومات المعلم</th>
+
 			<th class="table th">حضور </th>
 			<th class="table th ">حذف  المعلم</th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr>
+			
 			<td class="table td"> آلاء قاسم </td>
+			<td>
+				<a class="btn btn-accent" @onclick="viewTeacher1"> عرض</a>
+				<a class="btn btn-accent" @onclick="editTeacher"> تعديل</a>
+			   
+			</td>
 			<td class="table td">
-				<details> <summary>
-				<button class="btn btn-accent">الحضور </button>
-					</summary>
+			
+					<div class="attendance-options">
+					<label><input type="radio" name="attend1" value="حاضر"> حاضر</label>
+					<label><input type="radio" name="attend1" value="غائب"> غائب</label>
+					<label><input type="radio" value="غياب مبرر" name="attend1"> مبرر</label>
+					</div>
 				
-				<select class="select" name="halaqa">
-					<option> حاضر</option>
-					<option> غائب</option>
-				    <option> غياب مبرر</option>
-
-
-				</select>
-				</details>
 			</td>
 			<td class="table td"><button class="btn btn-danger">حذف </button></td>
 		</tr>
 		<tr>
-			<td class="table td">ماريا العبد السلام </td>
+			
+			<td class="table td">  ماريا العبدالسلام </td>
+			<td>
+				<a class="btn btn-accent" @onclick="viewTeacher2"> عرض</a>
+				<a class="btn btn-accent" @onclick="editTeacher"> تعديل</a>
+			   
+			</td>
 			<td class="table td">
-				<details>
-					<summary>
-						<button class="btn btn-accent">الحضور </button>
-					</summary>
-					
-					<select class="select" name="halaqa">
-						<option> حاضر</option>
-						<option> غائب</option>
-						<option> غياب مبرر</option>
-
-
-					</select>
-				</details>
+			
+				<div class="attendance-options">
+					<label><input type="radio" name="attend1" value="حاضر"> حاضر</label>
+					<label><input type="radio" name="attend1" value="غائب"> غائب</label>
+					<label><input type="radio" value="غياب مبرر" name="attend1"> مبرر</label>
+				</div>
+				
 			</td>
 			<td class="table td"><button class="btn btn-danger">حذف </button></td>
 		</tr>
 		<tr>
 			<td class="table td">آية دعبول </td>
+			<td>
+				<a class="btn btn-accent" @onclick="viewTeacher3"> عرض</a>
+				<a class="btn btn-accent" @onclick="editTeacher"> تعديل</a>
+			   
+			</td>
 			<td class="table td">
-				<details>
-					<summary>
-						<button class="btn btn-accent">الحضور </button>
-					</summary>
-					
-					<select class="select" name="halaqa">
-						<option> حاضر</option>
-						<option> غائب</option>
-						<option> غياب مبرر</option>
-
-
-					</select>
-				</details>
+			
+				<div class="attendance-options">
+					<label><input type="radio" name="attend1" value="حاضر"> حاضر</label>
+					<label><input type="radio" name="attend1" value="غائب"> غائب</label>
+					<label><input type="radio" value="غياب مبرر" name="attend1"> مبرر</label>
+				</div>
+				
 			</td>
 			<td class="table td"><button class="btn btn-danger">حذف </button></td>
 		</tr>
@@ -135,11 +173,11 @@
 			<option>الحلقة 3</option>
 			<option>الحلقة 4</option>
 		</select>
+		<br />
 		</div>
-		<br />
-		<br />
+		
 
-		<button class="btn btn-accent" type="submit">حفظ</button>
+
 		<button class="btn btn-accent" type="submit">إضافة</button>
 
 	</form>
@@ -147,5 +185,21 @@
 </details>
 
 @code {
-
+	private void viewTeacher1()
+	{
+		NavManager.NavigateTo("/supervisor/teacher1");
+	}
+	private void viewTeacher2()
+	{
+		NavManager.NavigateTo("/supervisor/teacher2");
+	}
+	private void viewTeacher3()
+	{
+		NavManager.NavigateTo("/supervisor/teacher3");
+	}
+	private void editTeacher()
+	{
+		NavManager.NavigateTo("/supervisor/editinfo_teacher");
+		// Logic to edit student information
+	}
 }

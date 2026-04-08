@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Moeen.Api.Shared.Requests.Circle
+namespace Moeen.Api.Shared.Requests.CircleQuery
 {
     public class StudentFilterDto
     {
