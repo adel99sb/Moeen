@@ -62,86 +62,82 @@
 
 </style>
 <!-- زر تعيين مشرف -->
-<button type="button" class="btn custom-outline-btn">تعيين مشرف</button>
+<button type="button" class="btn custom-outline-btn" @onclick="moveTopage"> تعيين مشرف</button>
 
     <h2>الفوج الأول</h2>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>اسم الأستاذ</th>
-            <th>الحالة</th>
-            <th>المشرف</th>
-            <th>إجراء</th>
-        </tr>
-    </thead>
-  
-        <tr>
-            <td>محمود</td>
-            <td>نشط</td>
-            <td>مصطفى </td>
-        <td class="d-flex justify-content-center align-items-center gap-2">
-            <button class="btn btn-primary">تعديل</button>
-            <button class="btn btn-danger">
-                <i class="bi bi-trash"></i>
-            </button>
-        </td>
+<div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>الاسم الاستاذ</th>
+                    <th>الحالة</th>
+                    <th>المشرف</th>
+                    <th class="text-center">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
                 
-        </tr>
-        <tr>
-            <td>أحمد</td>
-            <td>موقوف</td>
-            <td> مصطفى </td>
-        <td class="d-flex justify-content-center align-items-center gap-2">
-            <button class="btn btn-primary">تعديل</button>
-            <button class="btn btn-danger">
-                <i class="bi bi-trash"></i>
-            </button>
-        </td>
-               
-        </tr>
-    
-    </table>
+                <tr>
+                    <td>محمود </td>
+                    <td>نشط </td>
+                    <td>مصطفى </td>
+                    <td class="actions-cell">
+                        <a href="/owner/Form"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td> أحمد</td>
+                    <td>متوقف</td>
+                    <td> مصطفى </td>
+                    <td class="actions-cell">
+                        <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button>
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
 <hr />
 <section>
     <h2>الفوج الثاني</h2>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th> اسم الأستاذ</th>
-                <th>الحالة</th>
-                <th> المشرف</th>
-                <th>إجراء</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>حسين</td>
-                <td>نشط</td>
-                <td>عمر </td>
-                <td class="d-flex justify-content-center align-items-center gap-2">
-                    <button class="btn btn-primary">تعديل</button>
-                    <button class="btn btn-danger">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </td>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>الاسم الاستاذ</th>
+                    <th>الحالة</th>
+                    <th>المشرف</th>
+                    <th class="text-center">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
                 
-            </tr>
-            <tr>
-                <td>محمد</td>
-                <td>موقوف</td>
-                <td>عمر </td>
-                <td class="d-flex justify-content-center align-items-center gap-2">
-                    <button class="btn btn-primary">تعديل</button>
-                    <button class="btn btn-danger">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </td>
-               
-            </tr>
-        </tbody>
-    </table>
+                <tr>
+                    <td>محمود </td>
+                    <td>نشط </td>
+                    <td>مصطفى </td>
+                    <td class="actions-cell">
+                        <a href="/owner/Form"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td> أحمد</td>
+                    <td>متوقف</td>
+                    <td> مصطفى </td>
+                    <td class="actions-cell">
+                        <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button>
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </section>
 <br>
 <hr />
