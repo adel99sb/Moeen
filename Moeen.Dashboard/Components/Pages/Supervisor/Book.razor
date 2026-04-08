@@ -1,9 +1,29 @@
 ﻿@page "/supervisor/book"
 <h3>Book</h3>
-<div class="search-container">
-	<input class="search-input" placeholder="ابحث عن كتاب..." />
-	<button class="btn btn-primary"> <span class="bi bi-search"> </span> </button>
+<style>
+	.btn-pprimary {
+		background-color: var(--primary-green);
+		font-size: 15px;
+		padding: 10px 20px;
+		color: var(--white);
+		border-radius: 12px;
+		transition: 0.3s;
+	}
+
+		.btn-pprimary:hover {
+			background-color: #123d32;
+			transform: translateY(-2px);
+		}
+</style>
+<header class="page-header">
+	<h2 class="page-title">إدارة الكتب</h2>
+</header>
+<br />
+<div class="search-wrapper">
+	<i class="bi bi-search"></i>
+	<input type="text" class="search-input" placeholder="ابحث عن كتاب...">
 </div>
+<br>
 <table class="table">
 	<thead>
 		<tr>
@@ -12,27 +32,30 @@
 			<th class="table th">رابط التحميل </th>
 		</tr>
 	</thead>
+	<br />
+
 	<tbody>
-		
 		<tr>
 			<td class="table td">كتاب التجويد </td>
 			<td class="table td">كتاب لتعلم قواعد التجويد </td>
 			<td class="table td">
-				<a href="https://example.com/taqweed.pdf" target="_blank" class="btn btn-accent">تحميل</a>
+				<a href="https://example.com/tafsir.pdf" target="_blank" title="تحميل"><i class="bi bi-save"></i></a>
+
 			</td>
 		</tr>
-		
+		<br />
 		<tr>
 			<td class="table td">كتاب التفسير </td>
 			<td class="table td">كتاب لتعلم تفسير القرآن الكريم </td>
 			<td class="table td">
-				<a href="https://example.com/tafsir.pdf" target="_blank" class="btn btn-accent">تحميل</a>
+				<a href="https://example.com/tafsir.pdf" target="_blank" title="تحميل"><i class="bi bi-save"></i></a>
 			</td>
 		</tr>
 		</tbody>
 		</table>
+		<br />
 		<details class="details">
-		<summary class="summary">إضافة كتاب جديد</summary>
+	<summary class="btn-pprimary">إضافة كتاب جديد</summary>
 
 		<br>
 
@@ -49,9 +72,9 @@
 <label class="label">رابط لتحميل الكتاب :</label><br>
 <input class="input" placeholder="اكتب هنا..." type="text" name="name">
               </div>
-		<br><br>
-<button class="btn btn-accent" type="submit">حفظ</button>
-<button class="btn btn-accent" type="submit">تحميل</button>
+		
+		<br />
+		<button class="btn-pprimary" type="submit"> <i class="bi bi-upload"></i></button>
 </form>
 </details>
 

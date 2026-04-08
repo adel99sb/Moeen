@@ -5,8 +5,21 @@
 
 <h3>Teacher</h3>
 <style>
-	/* تنسيق خيارات الحضور */
+	
+	
+	.btn-pprimary {
+		background-color: var(--primary-green);
+		font-size: 15px;
+		padding: 10px 20px;
+		color: var(--white);
+		border-radius: 12px;
+		transition: 0.3s;
+	}
 
+		.btn-pprimary:hover {
+			background-color: #123d32;
+			transform: translateY(-2px);
+		}
 
 		
 		.attendance-options label {
@@ -36,48 +49,54 @@
 
 
 </style>
-<div class="search-container">
-	<input class="search-input" placeholder="ابحث هنا..." />
-	<button class="btn btn-primary"> <span class="bi bi-search"> </span> </button>
+<header class="page-header">
+	<h2 class="page-title">إدارة المعلمين</h2>
+</header>
+<br />
+<div class="search-wrapper">
+	<i class="bi bi-search"></i>
+	<input type="text" class="search-input" placeholder="ابحث عن معلم...">
 </div>
-<table class="table">
+
+	<table class="table">
 	<thead>
 		<tr>
 			<th class="table th">اسم المعلم</th>
-			<th class="table th">معلومات المعلم</th>
-
 			<th class="table th">حضور </th>
-			<th class="table th ">حذف  المعلم</th>
+			<th class="table th">معلومات المعلم</th>
+            <th class="table th">حذف  المعلم</th>
 		</tr>
 	</thead>
 	<tbody>
+		<br>
 		<tr>
 			
 			<td class="table td"> آلاء قاسم </td>
-			<td>
-				<a class="btn btn-accent" @onclick="viewTeacher1"> عرض</a>
-				<a class="btn btn-accent" @onclick="editTeacher"> تعديل</a>
-			   
-			</td>
+			
 			<td class="table td">
 			
-					<div class="attendance-options">
+				<div class="attendance-options">
 					<label><input type="radio" name="attend1" value="حاضر"> حاضر</label>
 					<label><input type="radio" name="attend1" value="غائب"> غائب</label>
 					<label><input type="radio" value="غياب مبرر" name="attend1"> مبرر</label>
-					</div>
+				</div>
 				
 			</td>
-			<td class="table td"><button class="btn btn-danger">حذف </button></td>
+			<td>
+				<a @onclick="viewTeacher1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
+				<a @onclick="editTeacher"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+
+			   
+			</td>
+			<td>
+			<button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+			</td>
 		</tr>
+		<br>
 		<tr>
 			
 			<td class="table td">  ماريا العبدالسلام </td>
-			<td>
-				<a class="btn btn-accent" @onclick="viewTeacher2"> عرض</a>
-				<a class="btn btn-accent" @onclick="editTeacher"> تعديل</a>
-			   
-			</td>
+			
 			<td class="table td">
 			
 				<div class="attendance-options">
@@ -87,15 +106,18 @@
 				</div>
 				
 			</td>
-			<td class="table td"><button class="btn btn-danger">حذف </button></td>
+			<td>
+				<a @onclick="viewTeacher2"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
+				<a @onclick="editTeacher"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+
+			</td>
+			 <td><button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+			</td>
 		</tr>
+		<br>
 		<tr>
 			<td class="table td">آية دعبول </td>
-			<td>
-				<a class="btn btn-accent" @onclick="viewTeacher3"> عرض</a>
-				<a class="btn btn-accent" @onclick="editTeacher"> تعديل</a>
-			   
-			</td>
+			
 			<td class="table td">
 			
 				<div class="attendance-options">
@@ -105,12 +127,23 @@
 				</div>
 				
 			</td>
-			<td class="table td"><button class="btn btn-danger">حذف </button></td>
+			<td>
+				<a @onclick="viewTeacher3"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
+
+				<a @onclick="editTeacher"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+
+			</td>
+			<td>
+
+			<button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+			</td>
+
 		</tr>
 		</tbody>
 		</table>
+<br>
 		<details class="details">
-		<summary class="summary">إضافة معلم جديد</summary>
+	<summary class="btn-pprimary">إضافة معلم جديد</summary>
 
 		<br>
 
@@ -175,10 +208,10 @@
 		</select>
 		<br />
 		</div>
-		
+		<br>
+         <br />
 
-
-		<button class="btn btn-accent" type="submit">إضافة</button>
+		<button class="btn-pprimary" type="submit">إضافة</button>
 
 	</form>
 
