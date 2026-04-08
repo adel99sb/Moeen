@@ -1,0 +1,60 @@
+﻿@page "/mend-m"
+@inject NavigationManager mgr
+<style>
+    /* الكارد */
+    .custom-card {
+        width: 500px;
+        background-color: #efebe9; /* بيج فاتح */
+        border-radius: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        min-height: 500px;
+        padding:20px 20px 10px 20px;
+    }
+
+    /* الإنبوت */
+    .custom-input {
+        border: 1px solid #D6C2A1; /* بيج */
+        background-color: #FFFFFF; /* أبيض */
+        transition: 0.3s;
+    }
+
+        /* عند الضغط */
+        .custom-input:focus {
+            border-color: #C8A97E;
+            box-shadow: 0 0 5px #C8A97E; /* ظل بيج غامق */
+        }
+
+    /* زر الحفظ */
+    .submit-btn {
+        background-color: #195042;
+        color: white;
+        border: none;
+       
+    }
+
+        .submit-btn:hover {
+            background-color: #143d34;
+        }
+</style>
+
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="custom-card p-4">
+
+        <h4 class="text-center mb-4">إضافة البيانات</h4>
+
+        <input type="text" class="form-control custom-input mb-3" required placeholder="ادخل الاسم ..">
+
+        <input type="text" class="form-control custom-input mb-3" required placeholder="ادخل العنوان ..">
+
+        <input type="tel" class="form-control custom-input mb-3" required placeholder="ادخل الرقم ..">
+
+        <textarea class="form-control custom-input mb-3" placeholder="ادخل الوصف.."></textarea>
+        <button class="btn w-100 submit-btn  mb-3">تعيين مشرف</button>
+        <button class="btn w-100 submit-btn">حفظ</button>
+       
+
+    </div>
+</div>
+@code {
+
+}
