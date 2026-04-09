@@ -1,8 +1,29 @@
 ﻿@page "/supervisor/posts"
+@rendermode InteractiveServer
+
+@inject NavigationManager NavManager
+
 <h3>Posts</h3>
+<style>
+    .btn-pprimary {
+        background-color: var(--primary-green);
+        font-size: 15px;
+        padding: 10px 20px;
+        color: var(--white);
+        border-radius: 12px;
+        transition: 0.3s;
+    }
 
+        .btn-pprimary:hover {
+            background-color: #123d32;
+            transform: translateY(-2px);
+        }
+</style>
 
-    <h2>قائمة التحكم بالمنشورات</h2>
+<header class="page-header">
+    <h2 class="page-title">إدارة المنشوارات</h2>
+</header>
+    
 
     <table class="table">
     
@@ -16,114 +37,65 @@
 
         <tr>
             <td class="table td">إعلان بدء التسجيل  </td>
+        <td>
+            <a @onclick="viewPost1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
+            <a @onclick="editPost"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
 
-            <td class="table td">
-                <details class="details">
-                    <summary class="summary">  تعديل معلومات المعلومات</summary>>
-
-                <label class="label">تعديل عنوان المنشور:</label><br>
-                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
-                <label class="label">تعديل محتوى المنشور:</label><br>
-                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
-                <label class="label">تاريخ ووقت النشر:</label><br>
-                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
-
-                <label class="label">نوع المنشور :</label><br>
-                <select class="select">
-                        <option>عام</option>
-                        <option>خاص</option>
-                    </select><br><br>
-
-                <button class="btn btn-accent" type="submit">حفظ</button>
-                <button class="btn btn-accent" type="submit">نشر</button>
-             
-
-                </details>
-            </td>
+            
+			   
+        </td>
 
             <td>
                 25 إعجاب
             </td>
-        <td class="table td"><button class="btn btn-danger">حذف </button></td>
+        <td class="table td">
+            <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i>
+                </button>
+
+        </td>
         </tr>
     <tr>
         <td class="table td">حملات للتشجيع على حفظ القرآن الكريم  </td>
 
         <td class="table td">
-            <details class="details">
-                <summary class="summary">  عرض/تعديل المعلومات</summary>
+            <a @onclick="viewPost1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
+            <a @onclick="editPost"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
 
-                <label class="label">تعديل عنوان المنشور:</label><br>
-                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
-                <label class="label">تعديل محتوى المنشور:</label><br>
-                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
-                <label class="label">تاريخ ووقت النشر:</label><br>
-                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
-
-                <label class="label">نوع المنشور :</label><br>
-                <select class="select">
-                    <option>عام</option>
-                    <option>خاص</option>
-                </select><br><br>
-
-                <button class="btn btn-accent" type="submit">حفظ</button>
-                <button class="btn btn-accent" type="submit">نشر</button>
-             
-
-            </details>
         </td>
 
         <td class="table td">
             15 إعجاب
         </td>
-        <td class="table td"><button class="btn btn-danger">حذف </button></td>
+        <td class="table td"><button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i> </button></td>
     </tr>
     <tr>
         <td class="table td">مبادرة تحفيزية للطلاب  </td>
 
         <td class="table td">
-            <details class="details">
-                <summary class="summary">عرض/تعديل المعلومات</summary>
+            <a @onclick="viewPost1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
+            <a @onclick="editPost"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
 
-                <label class="label">تعديل عنوان المنشور:</label><br>
-                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
-                <label class="label">تعديل محتوى المنشور:</label><br>
-                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
-                <label class="label">تاريخ ووقت النشر:</label><br>
-                <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
-
-                <label class="label">نوع المنشور :</label><br>
-                <select class="select">
-                    <option>عام</option>
-                    <option>خاص</option>
-                </select><br><br>
-
-                <button class="btn btn-accent" type="submit">حفظ</button>
-                <button class="btn btn-accent" type="submit">نشر</button>
-             
-
-            </details>
         </td>
 
         <td class="table td">
             30 إعجاب
         </td>
-        <td class="table td"><button class="btn btn-danger">حذف </button></td>
+        <td class="table td"><button class="" btn-icon delete" title="حذف"><i class="bi bi-trash"></i> </button></td>
     </tr>
 
     </table>
     <details class="details">
-		<summary class="summary">إضافة منشور جديد</summary>
+    <summary class="btn-pprimary">إضافة منشور جديد</summary>
 
 		<br>
 
 		<form class="form-box">
             <div class="form-group">
-        <label class="label">تعديل عنوان المنشور:</label><br>
+        <label class="label"> عنوان المنشور:</label><br>
         <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
              </div>
               <div class="form-group">
-        <label class="label">تعديل محتوى المنشور:</label><br>
+        <label class="label"> محتوى المنشور:</label><br>
         <input class="input" placeholder="اكتب هنا..." type="text"><br><br>
               </div>
                <div class="form-group">
@@ -139,10 +111,18 @@
         </div>
         <br><br>
 
-<button class="btn btn-accent" type="submit">حفظ</button>
-<button class="btn btn-accent" type="submit">نشر</button>
              </form>
+    <button class="btn-pprimary" type="submit">نشر</button>
+
              </details>
 @code {
-
+    private void editPost()
+    {
+        NavManager.NavigateTo("/supervisor/edit-post");
+        // Logic to edit student information
+    }
+    private void viewPost1()
+    {
+        NavManager.NavigateTo("/supervisor/post1");
+    }
 }

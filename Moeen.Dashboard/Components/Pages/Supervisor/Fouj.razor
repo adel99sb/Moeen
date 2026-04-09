@@ -1,0 +1,57 @@
+﻿@page "/supervisor/fouj"
+@rendermode InteractiveServer
+@inject NavigationManager NavManager
+
+<h3>Fouj</h3>
+<h4>قائمة الأفواج</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th class="table th">اسم الفوج</th>
+            <th class="table th">الحلقات التابعة له </th>
+            <th class="table th">حذف الفوج</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="table td">فوج 1</td>
+            <td class="table td">حلقة 1، حلقة 2</td>
+            <td class="table td"><button class="btn btn-danger">حذف </button></td>
+        </tr>
+        <tr>
+            <td class="table td">فوج 2</td>
+            <td class="table td">حلقة 3، حلقة 4</td>
+            <td class="table td"><button class="btn btn-danger">حذف </button></td>
+        </tr>
+
+    </tbody>
+</table>
+<details class="details">
+    <summary class="summary">إضافة فوج جديد...</summary>
+
+    <br>
+
+    <form class="form-box">
+        <div class="form-group">
+            <label class="label">اسم الفوج:</label><br>
+            <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
+        </div>
+        <div class="form-group">
+            <label class="label">وقت بداية الفوج :</label><br>
+            <input class="input" placeholder="اكتب هنا..." type="number" name="age"><br><br>
+        </div>
+        <div class="form-group">
+            <label class="label">وقت نهاية الفوج :</label><br>
+            <input class="input" placeholder="اكتب هنا..." type="number" name="status"><br><br>
+        </div>
+        <div class="form-group">
+            <label class="label"> الحلقات التابعة له:</label><br>
+            <input class="input" placeholder="اكتب هنا..." type="number" name="status">
+        </div>
+        <br><br>
+        <button class="btn btn-primary">إضافة</button>
+    </form>
+</details>
+@code {
+
+}

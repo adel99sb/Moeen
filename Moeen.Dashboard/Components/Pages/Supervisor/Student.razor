@@ -4,35 +4,21 @@
 @inject NavigationManager NavManager
 <h3>Student</h3>
 <style>
-	.table {
-    width: 100%;
-    table-layout:fixed;
-    border-collapse: separate;
-    border-spacing: 0;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    background-color:#fcfbf9;
-    box-shadow: var(--shadow-sm);
+	.btn-pprimary {
+    background-color: var(--primary-green);
+    font-size: 15px;
+    padding: 10px 20px;
+    color: var(--white);
+    border-radius: 12px;
+    display: inline;
+    transition: 0.3s;
 }
-		.table th {
-		background-color: var(--color-primary);
-		color: var(--color-beige);
-		padding: 12px;
-		text-align: center;
-		font-size: 30px;
-	}
 
-	.table td {
-		padding: 10px;
-		text-align: center;
-		border-bottom: 1px solid #eee;
-		font-family: 'Cairo', sans-serif;
-		font-size: 25px;
-	}
-
-	.table tbody tr:hover {
-		background-color:   #f4f1ee;
-	}
+    .btn-pprimary:hover {
+        background-color: #123d32;
+        transform: translateY(-2px);
+    }
+	
 	.form-container {
     max-width: 900px;
     margin: 20px auto;
@@ -102,10 +88,16 @@ form { padding: 30px; }
 }
 
 </style>
-<div class="search-container">
-	<input class="search-input" placeholder="ابحث هنا..." />
-	<button class="btn btn-primary"> <span class="bi bi-search"> </span> </button>
+ <header class="page-header">
+        <h2 class="page-title">إدارة الطلاب</h2>
+    </header>
+<br />
+	
+<div class="search-wrapper">
+	<i class="bi bi-search"></i>
+	<input type="text" class="search-input" placeholder="ابحث عن طالب...">
 </div>
+<br />
 <table class="table">
 	<thead>
 		<tr>
@@ -114,39 +106,45 @@ form { padding: 30px; }
 			<th class="table th">حذف الطالب</th>
 		</tr>
 	</thead>
+	<br />
 	<tbody>
-		
 		<tr>
 			<td class="table td">آلاء قاسم </td>
 			<td >
-				<a class="btn btn-accent"  @onclick="viewStudent1"> عرض</a>
-				<a class="btn btn-accent" @onclick="editStudent"> تعديل</a>
-	               
+				<a @onclick="viewStudent1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
+                <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
 				</td>
 			<td class="table td">
-				<button class="btn btn-danger">حذف </button>
+				  <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+
 			</td>
 		</tr>
+		<br />
 		<tr>
 			<td class="table td">ماريا العبد السلام </td>
 			<td>
-				<a class="btn btn-accent" @onclick="viewStudent2"> عرض</a>
-				<a class="btn btn-accent" @onclick="editStudent"> تعديل</a>
+				<a @onclick="viewStudent2"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
+                <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+
 	               
 			</td>
 			<td class="table td">
-				<button class="btn btn-danger">حذف </button>
+			 <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+
 			</td>
 		</tr>
+		<br />
 		<tr>
 			<td class="table td">آية دعبول </td>
 			<td>
-				<a class="btn btn-accent" @onclick="viewStudent3"> عرض</a>
-				<a class="btn btn-accent" @onclick="editStudent"> تعديل</a>
+				<a @onclick="viewStudent3"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
+                <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+
 	               
 			</td>
 			<td class="table td">
-				<button class="btn btn-danger">حذف </button>
+			 <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+
 			</td>
 		</tr>
 		
@@ -155,9 +153,9 @@ form { padding: 30px; }
 	</tbody>
 	</table>
 
-
+	<br />
 	<details class="details">
-		<summary class="summary">إضافة طالب جديد</summary>
+		<summary class="btn-pprimary">إضافة طالب جديد</summary>
 
 		<br>
 
@@ -240,8 +238,8 @@ form { padding: 30px; }
 		<br />
 		<br />
 
-		<button class="btn btn-accent" type="button">ربط بولي الامر</button>
-		<button class="btn btn-accent" type="button">حفظ</button>
+		<button class="btn-pprimary"  type="button">ربط بولي الامر</button>
+		<button class="btn-pprimary" type="button">حفظ</button>
 		</form>
 	
 	</details>

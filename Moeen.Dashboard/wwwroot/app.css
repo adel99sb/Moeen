@@ -149,8 +149,9 @@ h1, h2, h3 {
     border-spacing: 0;
     border-radius: var(--radius-md);
     overflow: hidden;
-    background-color: #ccbfa3;
     box-shadow: var(--shadow-sm);
+    
+   
 }
 
 .table th {
@@ -172,6 +173,7 @@ h1, h2, h3 {
     background-color: #ffffff;
 }
 
+
 /* =========================================================
    8️⃣ Cards
 ========================================================= */
@@ -192,11 +194,11 @@ h1, h2, h3 {
 /* =========================================================
    9️⃣ Search
 ========================================================= */
-.search-container {
-    display: flex;
-    max-width: 500px;
-    margin-bottom: 20px;
-}
+    .search-container {
+        display: flex;
+        max-width: 500px;
+        margin-bottom: 20px;
+    }
 
 .search-input {
     flex: 1;
@@ -235,13 +237,13 @@ h1, h2, h3 {
 /* =========================================================
    1️⃣1️⃣ Validation
 ========================================================= */
-.valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
-}
+    .valid.modified:not([type=checkbox]) {
+        outline: 1px solid #26b050;
+    }
 
-.invalid {
-    outline: 1px solid var(--color-danger);
-}
+    .invalid {
+        outline: 1px solid var(--color-danger);
+    }
 
 .validation-message {
     color: var(--color-danger);
