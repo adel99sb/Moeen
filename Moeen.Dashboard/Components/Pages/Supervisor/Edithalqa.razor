@@ -1,0 +1,168 @@
+﻿@page "/supervisor/edithalqa"
+@rendermode InteractiveServer
+@inject NavigationManager NavManager
+<h3>Edit Halqa</h3>
+<style>
+
+.halqat-container{
+                background:white;
+            display:flex;
+                flex-wrap:wrap;
+                gap:10px;
+                align-items:center;
+            }
+            .checkbox-item{
+                display:flex;
+                align-items:center;
+                gap:5px;
+                padding:5px 10px;
+                border-radius:8px;
+                cursor:pointer;
+                font-size:20px;
+            }
+.actions { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+
+.save, .cancel {
+    padding: 12px 35px;
+    border-radius: 10px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.save {
+    background: linear-gradient(45deg, #195042, #1d3937);
+    color: white;
+    border: none;
+}
+
+.save:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(25, 80, 66, 0.3); }
+
+.cancel { background: #f5f5f5; color: #666; }
+.cancel:hover { background: #eee; color: #333; }
+/* دمج الإعدادات العامة والحاويات */
+.form-container {
+    max-width: 900px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+    overflow: hidden;
+}
+
+.form-header {
+    background: #195042;
+    color: #fff;
+    padding: 20px 30px;
+}
+
+form { padding: 30px; }
+
+/* دمج الصفوف والمجموعات */
+.grid-row, .actions, .form-header h2, .save, .cancel, .input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-radius:5px;
+    padding:5px;
+}
+
+.grid-row { margin-bottom: 20px; flex-wrap: wrap; gap: 20px; }
+.input-group { flex: 1; min-width: 250px; }
+
+.input-group {
+    flex:1 1 45%;
+    display: flex;
+    flex-direction:column;
+    margin-bottom: 8px;
+    color: #1d3937;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* تنسيق المدخلات الموحد */
+.input-wrapper { position: relative; }
+
+.input-wrapper i {
+    position: absolute;
+    right: 12px;
+    color: #195042;
+    font-size: 18px;
+}
+
+.input-wrapper input, .input-wrapper select {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    border: 2px solid #f0f0f0;
+    border-radius: 10px;
+    outline: none;
+    transition: 0.3s;
+    background: #fdfdfd;
+    font: inherit;
+    margin-right:5px;
+    flex:1;
+}
+
+.input-wrapper input:focus, .input-wrapper select:focus {
+    border-color: #d6cabc;
+    background: #fff;
+    box-shadow: 0 0 8px rgba(214, 202, 188, 0.3);
+}
+
+</style>
+<header class="page-header">
+    <h2 class="page-title"> تعديل معلومات الحلقة</h2>
+</header>
+<br />
+            <div class="form-container">
+
+		<form >
+            <div class="grid-row">
+            <div class="input-group">
+                <label>اسم الحلقة</label>
+                <div class="input-wrapper">
+                    <input type="text" placeholder="أدخل الاسم">
+                </div>
+            </div>
+             <div class="input-group">
+                <label>اسم معلم الحلقة :</label>
+                <div class="input-wrapper">
+                    <input type="text" placeholder="أدخل اسم المعلم">
+                </div>
+            </div>
+          </div>
+        <div class="grid-row">
+                  <div class="input-group">
+                <label> الفوج الذي تابعة له الحلقة :</label>
+                <select class="select">
+                        <option>الفوج الأول</option>
+                        <option>الفوج الثاني</option>
+                    </select>
+            </div>
+                  <div class="input-group">
+            
+       
+            <label > نوع الحلقة:</label><br>
+            <select class="select">
+                        <option>غيبي</option>
+                        <option>حاضر</option>
+                    </select>
+        </div>
+        </div>
+
+        <br />
+        <br />
+        
+    <div class="actions">
+        <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ البيانات</button>
+        <a href="supervisor/managementfouj" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+    </div>
+    </form>
+    </div>
+
+
+@code {
+
+}

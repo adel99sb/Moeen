@@ -1,0 +1,360 @@
+﻿@page "/supervisor/managementhalqa"
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+<style>
+           
+
+            /* الكاردات */
+            .card-container{
+                display:flex;
+                gap:20px;
+                flex-wrap:wrap;
+
+            }
+           .card {
+               flex:1 1 calc(50%-20px);
+   
+    grid-template-columns: repeat(2,1fr);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 20px;
+    background-color: #efebe9;
+    transition: var(--transition);
+    align-content:center;
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+            border-color: #195042;
+    }
+                /* اسم الفوج */
+                .card h3 {
+                    margin-bottom: 10px;
+                    padding-right:10px;
+                }
+
+            /* الحلقات */
+            .sessions {
+                width:100%;
+                margin-right:20px;
+                padding-right:30px;
+                background: #d6cabc;
+                padding: 8px;
+                font-size:20px;
+                border-radius: 10px;
+        border-color: #195042;
+                margin-bottom: 3px;
+            }
+            .azrar{
+                padding-right:30px;
+            }
+            .student-table{
+                width:100%;
+                border-collapse:collapse;
+                margin-top:10px;
+            }
+            .student-table th{
+                 background-color: var(--light-beige);
+        color: var(--primary-green);
+        padding: 12px;
+        text-align: center;
+        font-size: 30px;
+            } 
+            .student-table td{
+        background-color: var(--white);
+
+                border-bottom:1px solid #ccc;
+                padding:8px;
+                text-align:center;
+                 font-family: 'Cairo', sans-serif;
+        font-size: 25px;
+            }
+            
+            .student-table tr:hover{
+                  background-color: #fafafa;
+        transform: scale(1.01);
+            }
+            .form-label{
+                display:block;
+                margin-bottom:5px;
+                font-weight:bold;
+            }
+            .halqat-container{
+                background:white;
+            display:flex;
+                flex-wrap:wrap;
+                gap:10px;
+                align-items:center;
+            }
+            .checkbox-item{
+                display:flex;
+                align-items:center;
+                gap:5px;
+                padding:5px 10px;
+                border-radius:8px;
+                cursor:pointer;
+                font-size:20px;
+            }
+    </style>
+
+<h3>Managementhalqa</h3>
+ <section class="management-container">
+    <header class="page-header">
+        <h2 class="page-title">إدارة  الأفواج والحلقات</h2>
+    </header>
+    <nav class="tabs-navigation">
+        <NavLink class="tab-item" href="/supervisor/managementfouj">
+            إدارة الأفواج
+        </NavLink>
+        <NavLink class="tab-item" href="/supervisor/managementhalqa">
+            إدارة الحلقات
+        </NavLink>
+    </nav>
+    <div class="action-bar">
+        </div>
+        <div class="card-container">
+
+        <!-- حلقة 1 -->
+        <div class="card">
+            <h3>الحلقة الأولى</h3>
+            <br />
+            
+            <div class="sessions">
+                    <p>الفوج التابعة له الحلقة:</p>
+
+                <p>الفوج الأول</p>
+               <p> معلم/ة الحلقة:الآنسة ماريا العبدالسلام</p>
+               <table class="student-table"
+                 <thead>
+                     <tr>
+                         <th>اسم الطالب</th>
+                         <th>الحضور</th>
+
+                     </tr>
+                 </thead>
+                 <tbody>
+                     <tr>
+                         <td>محمد أحمد</td>
+                         <td> 
+                             <input type="radio" name="ahmad" value="حاضر" />حاضر
+                             <input type="radio" name="ahmad" value="غائب" />غائب
+
+                             </td>
+                     </tr>
+                     <tr>
+                         <td> علي</td>
+                         <td><input type="radio" name="ahmad" value="حاضر" />حاضر
+                             <input type="radio" name="ahmad" value="غائب" />غائب
+</td>
+                     </tr>
+                     <tr>
+                         <td>علي حسن</td>
+                         <td><input type="radio" name="ahmad" value="حاضر" />حاضر
+                             <input type="radio" name="ahmad" value="غائب" />غائب
+</td>
+                     </tr>
+                 </tbody>
+                 </table>
+            </div>
+            <br />
+            <div class="azrar">
+                <a @onclick="editHalqa"> <button  title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+            <button title="حذف"><i class="bi bi-trash"></i></button>
+
+            </div>
+        </div>
+        <br />
+        <!-- حلقة 2 -->
+        <div class="card">
+            <h3>الحلقة الثانية</h3>
+            <br />
+            
+            <div class="sessions">
+                    <p>الفوج التابعة له الحلقة:</p>
+                <p>الفوج الأول</p>
+               <p> معلم/ة الحلقة:الآنسة آية دعبول</p>
+               <table class="student-table"
+                 <thead>
+                     <tr>
+                         <th>اسم الطالب</th>
+                         <th>الحضور</th>
+
+                     </tr>
+                 </thead>
+                 <tbody>
+                     <tr>
+                         <td>محمد أحمد</td>
+                         <td> 
+                             <input type="radio" name="ahmad" value="حاضر" />حاضر
+                             <input type="radio" name="ahmad" value="غائب" />غائب
+
+                             </td>
+                     </tr>
+                     <tr>
+                         <td> علي</td>
+                         <td><input type="radio" name="ahmad" value="حاضر" />حاضر
+                             <input type="radio" name="ahmad" value="غائب" />غائب
+</td>
+                     </tr>
+                     <tr>
+                         <td>علي حسن</td>
+                         <td><input type="radio" name="ahmad" value="حاضر" />حاضر
+                             <input type="radio" name="ahmad" value="غائب" />غائب
+</td>
+                     </tr>
+                 </tbody>
+                 </table>
+
+            </div>
+            <br />
+            <div class="azrar">
+                <a @onclick="editHalqa"> <button title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                <button title="حذف"><i class="bi bi-trash"></i></button>
+
+            </div>
+        </div>
+        <!-- حلقة 3 -->
+        <div class="card">
+            <h3>الحلقة الثالثة</h3>
+            <br />
+            
+            <div class="sessions">
+                     <p>الفوج التابعة له الحلقة:</p>
+                <p>الفوج الأول</p>
+               <p> معلم/ة الحلقة:الآنسة هبة عجم</p>
+               <table class="student-table"
+                 <thead>
+                     <tr>
+                         <th>اسم الطالب</th>
+                         <th>الحضور</th>
+
+                     </tr>
+                 </thead>
+                 <tbody>
+                     <tr>
+                         <td>محمد أحمد</td>
+                         <td> 
+                             <input type="radio" name="ahmad" value="حاضر" />حاضر
+                             <input type="radio" name="ahmad" value="غائب" />غائب
+
+                             </td>
+                     </tr>
+                     <tr>
+                         <td> علي</td>
+                         <td><input type="radio" name="ahmad" value="حاضر" />حاضر
+                             <input type="radio" name="ahmad" value="غائب" />غائب
+</td>
+                     </tr>
+                     <tr>
+                         <td>علي حسن</td>
+                         <td><input type="radio" name="ahmad" value="حاضر" />حاضر
+                             <input type="radio" name="ahmad" value="غائب" />غائب
+</td>
+                     </tr>
+                 </tbody>
+                 </table>
+
+            </div>
+            <br />
+            <div class="azrar">
+                <a @onclick="editHalqa"> <button title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                <button title="حذف"><i class="bi bi-trash"></i></button>
+
+            </div>
+        </div>
+        <br />
+        <!-- حلقة 4 -->
+        <div class="card">
+            <h3> الحلقة الرابعة</h3>
+            <br />
+            
+            <div class="sessions">
+                     <p>الفوج التابعة له الحلقة:</p>
+                <p>الفوج الأول</p>
+               <p> معلم/ة الحلقة:الآنسة زينب السباعي</p>
+               <table class="student-table"
+                 <thead>
+                     <tr>
+                         <th>اسم الطالب</th>
+                         <th>الحضور</th>
+
+                     </tr>
+                 </thead>
+                 <tbody>
+                     <tr>
+                         <td>محمد أحمد</td>
+                         <td> 
+                             <input type="radio" name="ahmad" value="حاضر" />حاضر
+                             <input type="radio" name="ahmad" value="غائب" />غائب
+
+                             </td>
+                     </tr>
+                     <tr>
+                         <td> علي</td>
+                         <td><input type="radio" name="ahmad" value="حاضر" />حاضر
+                             <input type="radio" name="ahmad" value="غائب" />غائب
+</td>
+                     </tr>
+                     <tr>
+                         <td>علي حسن</td>
+                         <td><input type="radio" name="ahmad" value="حاضر" />حاضر
+                             <input type="radio" name="ahmad" value="غائب" />غائب
+</td>
+                     </tr>
+                 </tbody>
+                 </table>
+            </div>
+            <br />
+            <div class="azrar">
+                <a @onclick="editHalqa"> <button title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                <button title="حذف"><i class="bi bi-trash"></i></button>
+            </div>
+
+            </div>
+    </div>
+        <br />
+        <!-- زر إضافة -->
+    
+     <details class="details">
+<summary class="btn-pprimary">إضافة حلقة جديدة</summary>
+
+		<form class="form-box">
+        <div class="form-group">
+            <label class="label">اسم الحلقة:</label><br>
+            <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
+        </div>
+        <div class="form-group">
+            <label class="label">اسم معلم الحلقة:</label><br>
+            <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
+        </div>
+      
+         <div class="form-group">
+                <label class="label">الفوج</label><br />
+                    <select class="select">
+                        <option>الفوج الأول</option>
+                        <option>الفوج الثاني</option>
+                    </select>
+                </div>
+              <div class="form-group">
+                <label class="label">نوع الحلقة</label>
+               
+                    <select class="select">
+                        <option>غيبي</option>
+                        <option>حاضر</option>
+
+                    </select>
+                </div>
+
+        
+        <button class="btn btn-primary">إضافة</button>
+
+    </form>
+</details>
+        </section>
+@code {
+    private void editHalqa()
+    {
+        NavManager.NavigateTo("/supervisor/edithalqa");
+        // Logic to edit student information
+    }
+}

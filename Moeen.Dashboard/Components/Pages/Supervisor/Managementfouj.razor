@@ -1,0 +1,191 @@
+﻿@page "/supervisor/managementfouj"
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+
+<h3>Halaqatt</h3>
+
+
+    <style>
+           
+
+            /* الكاردات */
+             .card-container{
+                display:flex;
+                gap:20px;
+                flex-wrap:wrap;
+
+           .card {
+               flex:1 1 calc(50%-20px);
+    grid-template-columns: repeat(2,1fr);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 20px;
+    background-color: #efebe9;
+    transition: var(--transition);
+    align-content:center;
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+            border-color: #195042;
+    }
+                /* اسم الفوج */
+                .card h3 {
+                    margin-bottom: 10px;
+                    padding-right:10px;
+                }
+
+            /* الحلقات */
+            .sessions {
+                margin-right:20px;
+                padding-right:30px;
+                background: #d6cabc;
+                padding: 8px;
+                font-size:20px;
+                border-radius: 10px;
+        border-color: #195042;
+                margin-bottom: 3px;
+            }
+            .azrar{
+                padding-right:30px;
+            }
+            .form-label{
+                display:block;
+                margin-bottom:5px;
+                font-weight:bold;
+            }
+            .halqat-container{
+                background:white;
+            display:flex;
+                flex-wrap:wrap;
+                gap:10px;
+                align-items:center;
+            }
+            .checkbox-item{
+                display:flex;
+                align-items:center;
+                gap:5px;
+                padding:5px 10px;
+                border-radius:8px;
+                cursor:pointer;
+                font-size:20px;
+            }
+    </style>
+
+
+
+
+
+    <!-- الأزرار العلوية -->
+    <section class="management-container">
+    <header class="page-header">
+        <h2 class="page-title">إدارة  الأفواج والحلقات</h2>
+    </header>
+    <nav class="tabs-navigation">
+        <NavLink class="tab-item" href="/supervisor/managementfouj">
+            إدارة الأفواج
+        </NavLink>
+        <NavLink class="tab-item" href="/supervisor/managementhalqa">
+            إدارة الحلقات
+        </NavLink>
+    </nav>
+    <div class="action-bar">
+        </div>
+    <!-- الكاردات -->
+    <div class="table-responsive">
+
+    <div class="card-container">
+
+        <!-- فوج 1 -->
+        <div class="card">
+            <h3>الفوج الأول</h3>
+            <br />
+            
+            <div class="sessions">
+                    <p>الحلقات التابعة له:</p>
+
+                <p>حلقة 1</p>
+                <p>حلقة 2</p>
+               <p>وقت بداية الفوج:الساعة الثامنة صباحا</p>
+               <p>وقت نهاية الفوج:الساعة العاشرة صباحا</p>
+
+
+            </div>
+            <br />
+            <div class="azrar">
+                <a @onclick="editFouj"> <button  title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+            <button title="حذف"><i class="bi bi-trash"></i></button>
+
+            </div>
+        </div>
+        <br />
+        <!-- فوج 2 -->
+        <div class="card">
+            <h3>الفوج الثاني</h3>
+            <br />
+            
+            <div class="sessions">
+                    <p>الحلقات التابعة له:</p>
+
+                <p>حلقة 3</p>
+                <p>حلقة 4</p>
+                    <p>وقت بداية الفوج:الساعة العاشرة صباحا</p>
+                    <p>وقت نهاية الفوج:الساعة الثانية عشر ظهرا</p>
+
+            </div>
+            <br />
+            <div class="azrar">
+                <a @onclick="editFouj"> <button title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                <button title="حذف"><i class="bi bi-trash"></i></button>
+
+            </div>
+        </div>
+    </div>
+
+        </div><br />
+    <!-- زر إضافة -->
+    
+     <details class="details">
+<summary class="btn-pprimary">إضافة فوج جديد</summary>
+
+		<form class="form-box">
+        <div class="form-group">
+            <label class="label">اسم الفوج:</label><br>
+            <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
+        </div>
+        <div class="form-group">
+            <label class="label">وقت بداية الفوج :</label><br>
+            <input class="input" placeholder="اكتب هنا..." type="number" name="age"><br><br>
+        </div>
+        <div class="form-group">
+            <label class="label">وقت نهاية الفوج :</label><br>
+            <input class="input" placeholder="اكتب هنا..." type="number" name="status"><br><br>
+        </div>
+        <div class="form-group">
+            <label class="form-label"> الحلقات التابعة له:</label><br>
+            <div class="halqat-container">
+            <label class="checkbox-item"><input type="checkbox"> حلقة 1</label>
+            <label class="checkbox-item"><input type="checkbox"> حلقة 2</label>
+
+            <label class="checkbox-item"><input type="checkbox"> حلقة 3</label>
+            <label class="checkbox-item"><input type="checkbox"> حلقة 4</label>
+</div>
+        </div>
+        
+        <button class="btn btn-primary">إضافة</button>
+
+    </form>
+</details>
+</section>
+
+@code {
+    private void editFouj()
+    {
+        NavManager.NavigateTo("/supervisor/editfouj");
+        // Logic to edit student information
+    }
+    private void viewFouj1()
+    {
+        NavManager.NavigateTo("/supervisor/fouj");
+    }
+}
