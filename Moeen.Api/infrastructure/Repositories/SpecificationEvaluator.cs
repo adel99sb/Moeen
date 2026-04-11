@@ -1,11 +1,14 @@
-﻿using System.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Specifications;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Moeen.Infrastructure.Specifications
+namespace Moeen.Api.infrastructure.Repositories
 {
     /// <summary>
-    /// مسؤول عن تطبيق المواصفة على IQueryable وتحويلها إلى استعلام قابل للتنفيذ
+    /// مسؤول عن تطبيق المواSpecification على IQueryable وتحويلها إلى استعلام قابل للتنفيذ
     /// </summary>
     public class SpecificationEvaluator<T> where T : class
     {
@@ -17,11 +20,11 @@ namespace Moeen.Infrastructure.Specifications
             var query = inputQuery;
 
             // تطبيق شرط التصفية
-            if (spec.Criteria != null)
+            if (spec.Criteria is not null)
                 query = query.Where(spec.Criteria);
 
             // تطبيق Includes اللامبدا
-            foreach (var includeString in spec.Includes)
+            foreach (var include in spec.Includes)
                 query = query.Include(include);
 
             // تطبيق ThenIncludes النصية (للمسارات المتداخلة)
@@ -29,16 +32,12 @@ namespace Moeen.Infrastructure.Specifications
                 query = query.Include(includeString);
 
             // تطبيق الترتيب (إجباري إذا كان هناك Paging)
-            if (spec.OrderBy != null)
+            if (spec.OrderBy is not null)
                 query = query.OrderBy(spec.OrderBy);
-            else if (spec.OrderByDescending != null)
+            else if (spec.OrderByDescending is not null)
                 query = query.OrderByDescending(spec.OrderByDescending);
             else if (spec.IsPagingEnabled)
-                throw new InvalidOperationException("Paging requires an OrderBy to ensure stable results.");
-
-            // تطبيق الإسقاط (اختيار أعمدة محددة) – ملاحظة: قد يحتاج إلى تحويل النوع
-            if (spec.IsProjectionEnabled && spec.Selector != null)
-                query = query.Select(spec.Selector).Cast<T>();
+                throw new InvalidOperationException("Paging requires OrderBy/OrderByDescending for stable results.");
 
             // تحسينات الأداء
             if (spec.AsSplitQuery)
@@ -60,12 +59,14 @@ namespace Moeen.Infrastructure.Specifications
         /// <summary>
         /// حساب عدد السجلات التي تحقق المواصفة (قبل تطبيق Skip/Take)
         /// </summary>
-        public virtual async Task<int> CountAsync(IQueryable<T> inputQuery, ISpecification<T> spec, CancellationToken cancellationToken = default)
+        public virtual Task<int> CountAsync(IQueryable<T> inputQuery, ISpecification<T> spec, CancellationToken cancellationToken = default)
         {
             var query = inputQuery;
-            if (spec.Criteria != null)
+
+            if (spec.Criteria is not null)
                 query = query.Where(spec.Criteria);
-            return await query.CountAsync(cancellationToken);
+
+            return query.CountAsync(cancellationToken);
         }
     }
 }

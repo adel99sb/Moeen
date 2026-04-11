@@ -11,7 +11,7 @@ namespace Moeen.Api.Core.Specifications
     public interface ISpecification<T>
     {
         /// <summary> شرط التصفية الأساسي (WHERE) </summary>
-        Expression<Func<T, bool>> Criteria { get; }
+        Expression<Func<T, bool>>? Criteria { get; }
 
         /// <summary> قائمة العلاقات المراد تحميلها باستخدام Include اللامبدا </summary>
         List<Expression<Func<T, object>>> Includes { get; }
@@ -20,10 +20,10 @@ namespace Moeen.Api.Core.Specifications
         List<string> IncludeStrings { get; }
 
         /// <summary> ترتيب تصاعدي </summary>
-        Expression<Func<T, object>> OrderBy { get; }
+        Expression<Func<T, object>>? OrderBy { get; }
 
         /// <summary> ترتيب تنازلي </summary>
-        Expression<Func<T, object>> OrderByDescending { get; }
+        Expression<Func<T, object>>? OrderByDescending { get; }
 
         /// <summary> عدد السجلات المطلوبة (Take) </summary>
         int Take { get; }
@@ -33,12 +33,6 @@ namespace Moeen.Api.Core.Specifications
 
         /// <summary> هل تم تفعيل التقسيم إلى صفحات؟ </summary>
         bool IsPagingEnabled { get; }
-
-        /// <summary> خاصية الإسقاط (اختيار أعمدة معينة) </summary>
-        Expression<Func<T, object>> Selector { get; }
-
-        /// <summary> هل تم تفعيل الإسقاط؟ </summary>
-        bool IsProjectionEnabled { get; }
 
         /// <summary> تحسين الأداء: تقسيم الاستعلام (AsSplitQuery) </summary>
         bool AsSplitQuery { get; }

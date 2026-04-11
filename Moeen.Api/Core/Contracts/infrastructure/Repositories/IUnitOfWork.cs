@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,6 +25,9 @@ namespace Moeen.Api.Core.Contracts
         void ClearTracking();
 
         // حفظ مجزأ للمجموعات الكبيرة (اختياري)
-        Task<int> SaveChangesInBatchesAsync(IEnumerable<object> entities, int batchSize = 100, CancellationToken cancellationToken = default);
+        Task<int> SaveChangesInBatchesAsync(
+            IEnumerable<object> entities,
+            int batchSize = 100,
+            CancellationToken cancellationToken = default);
     }
 }

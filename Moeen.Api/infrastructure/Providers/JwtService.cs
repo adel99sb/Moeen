@@ -57,12 +57,12 @@ namespace Moeen.Api.infrastructure.Providers
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // معرّف فريد للتوكن
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
             };
-
-            // 4. إضافة معرف الجامع (إن وُجد)
-            if (user.MosqueId.HasValue && user.MosqueId.Value != Guid.Empty)
-            {
-                claims.Add(new Claim("MosqueId", user.MosqueId.Value.ToString()));
-            }
+            //error
+           // 4.إضافة معرف الجامع)
+            //if (user.MosqueId.HasValue && user.MosqueId.Value != Guid.Empty)
+            //{
+            //    claims.Add(new Claim("MosqueId", user.MosqueId.Value.ToString()));
+            //}
 
             // 5. إضافة أدوار المستخدم (كـ Claims متعددة أو كقيمة واحدة مفصولة بفواصل)
             var roles = await _userManager.GetRolesAsync(user);

@@ -1,80 +1,76 @@
-﻿
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using Moeen.Api.Core.Contracts;
+using Moeen.Api.infrastructure.Data;    
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.DependencyInjection;
-using Moeen.Api.Core.Contracts;
 
-namespace Moeen.Infrastructure.Repositories
+namespace Moeen.Api.infrastructure.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly DbContext _dbContext;                     // استخدم DbContext بدلاً من AppDbContext
+        private readonly AppDbContext _dbContext;
         private readonly IServiceProvider _serviceProvider;
+
         private IDbContextTransaction? _currentTransaction;
-        private readonly Dictionary<Type, object> _repositories;      // للمستودعات العامة
-        private readonly Dictionary<Type, object> _customRepositories; // للمستودعات المخصصة
+        private readonly Dictionary<Type, object> _repositories = new();
+        private readonly Dictionary<Type, object> _customRepositories = new();
         private bool _disposed;
 
-        public UnitOfWork(DbContext dbContext, IServiceProvider serviceProvider)
+        public UnitOfWork(AppDbContext dbContext, IServiceProvider serviceProvider)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-            _repositories = new Dictionary<Type, object>();
-            _customRepositories = new Dictionary<Type, object>();
         }
 
-        // ============= المستودع العام (مع TKey) =============
-        public virtual IRepository<T, TKey> Repository<T, TKey>() where T : class
+        public IRepository<T, TKey> Repository<T, TKey>() where T : class
         {
             var entityType = typeof(T);
-            if (!_repositories.ContainsKey(entityType))
+
+            if (!_repositories.TryGetValue(entityType, out var repository))
             {
-                var repositoryInstance = new Repository<T, TKey>(_dbContext);
-                _repositories[entityType] = repositoryInstance;
+                repository = new Repository<T, TKey>(_dbContext);
+                _repositories[entityType] = repository;
             }
-            return (IRepository<T, TKey>)_repositories[entityType];
+
+            return (IRepository<T, TKey>)repository;
         }
 
-        // ============= المستودع المخصص =============
-        public virtual TRepository CustomRepository<TRepository>() where TRepository : class
+        public TRepository CustomRepository<TRepository>() where TRepository : class
         {
             var type = typeof(TRepository);
-            if (!_customRepositories.ContainsKey(type))
+
+            if (!_customRepositories.TryGetValue(type, out var repository))
             {
-                // إنشاء المستودع المخصص باستخدام ServiceProvider وتمرير DbContext
-                var repository = ActivatorUtilities.CreateInstance<TRepository>(_serviceProvider, _dbContext);
+                repository = ActivatorUtilities.CreateInstance<TRepository>(_serviceProvider, _dbContext);
                 _customRepositories[type] = repository;
             }
-            return (TRepository)_customRepositories[type];
+
+            return (TRepository)repository;
         }
 
-        // ============= حفظ التغييرات =============
-        public virtual async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            return await _dbContext.SaveChangesAsync(cancellationToken);
-        }
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+            => _dbContext.SaveChangesAsync(cancellationToken);
 
-        // ============= المعاملات الصريحة =============
-        public virtual async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
+        public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
         {
-            if (_currentTransaction != null)
+            if (_currentTransaction is not null)
                 throw new InvalidOperationException("A transaction is already in progress.");
+
             _currentTransaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
         }
 
-        public virtual async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
+        public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
         {
-            if (_currentTransaction == null)
+            if (_currentTransaction is null)
                 throw new InvalidOperationException("No transaction in progress.");
 
             try
             {
-                // لا نستدعي SaveChangesAsync هنا - المستخدم مسؤول عن استدعائه قبل Commit
                 await _currentTransaction.CommitAsync(cancellationToken);
             }
             finally
@@ -84,20 +80,14 @@ namespace Moeen.Infrastructure.Repositories
             }
         }
 
-        public virtual async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
+        public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
         {
-            if (_currentTransaction == null)
+            if (_currentTransaction is null)
                 throw new InvalidOperationException("No transaction in progress.");
 
             try
             {
                 await _currentTransaction.RollbackAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                // تسجيل الخطأ (يمكن إضافة ILogger)
-                Console.WriteLine($"Rollback failed: {ex.Message}");
-                throw;  // أو معالجة حسب الحاجة
             }
             finally
             {
@@ -106,48 +96,48 @@ namespace Moeen.Infrastructure.Repositories
             }
         }
 
-        // ============= مسح التتبع =============
-        public virtual void ClearTracking()
-        {
-            _dbContext.ChangeTracker.Clear();
-        }
+        public void ClearTracking() => _dbContext.ChangeTracker.Clear();
 
-        // ============= حفظ مجزأ (للمجموعات الكبيرة) =============
-        public virtual async Task<int> SaveChangesInBatchesAsync(IEnumerable<object> entities, int batchSize = 100, CancellationToken cancellationToken = default)
+        public async Task<int> SaveChangesInBatchesAsync(IEnumerable<object> entities, int batchSize = 100, CancellationToken cancellationToken = default)
         {
-            int totalSaved = 0;
-            var batch = new List<object>();
+            if (entities is null)
+                throw new ArgumentNullException(nameof(entities));
+            if (batchSize <= 0)
+                throw new ArgumentOutOfRangeException(nameof(batchSize));
+
+            var totalSaved = 0;
+            var batch = new List<object>(batchSize);
+
             foreach (var entity in entities)
             {
                 batch.Add(entity);
-                if (batch.Count >= batchSize)
-                {
-                    totalSaved += await _dbContext.SaveChangesAsync(cancellationToken);
-                    _dbContext.ChangeTracker.Clear();
-                    batch.Clear();
-                }
-            }
-            if (batch.Any())
+
+                if (batch.Count < batchSize)
+                    continue;
+
+                await _dbContext.AddRangeAsync(batch, cancellationToken);
                 totalSaved += await _dbContext.SaveChangesAsync(cancellationToken);
+                _dbContext.ChangeTracker.Clear();
+                batch.Clear();
+            }
+
+            if (batch.Any())
+            {
+                await _dbContext.AddRangeAsync(batch, cancellationToken);
+                totalSaved += await _dbContext.SaveChangesAsync(cancellationToken);
+                _dbContext.ChangeTracker.Clear();
+            }
+
             return totalSaved;
         }
 
-        // ============= التخلص من الموارد =============
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+            if (_disposed) return;
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed && disposing)
-            {
-                _currentTransaction?.Dispose();
-                // لا نتخلص من DbContext هنا - الحاوية تدارها
-                // _dbContext.Dispose(); // تم إزالتها بناءً على التوصية
-            }
+            _currentTransaction?.Dispose();
             _disposed = true;
+            GC.SuppressFinalize(this);
         }
     }
 }
