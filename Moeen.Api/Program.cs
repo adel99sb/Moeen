@@ -15,9 +15,29 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ÅÖÇİÉ DbContext ÃæáÇğ
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// ÊÓÌíá ÇáãÓÊæÏÚ ÇáÚÇã (Generic)
+builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
+
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(option =>
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// ÊÓÌíá UnitOfWork
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// (ÇÎÊíÇÑí) ÊÓÌíá ÇáãÓÊæÏÚ ÇáÚÇã ÅĞÇ ÃÑÏÊ ÇÓÊÎÏÇãå ãÈÇÔÑÉ
+builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
+
+// ÊÓÌíá ÇáãÓÊæÏÚÇÊ ÇáãÎÕÕÉ (ãËÇá)
+// builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+
+var app = builder.Build();
+// ÊÓÌíá ÇáãÓÊæÏÚ ÇáÚÇã (Generic Repository) áíÊãßä ÇáÜ DI ãä ÍŞäå
+builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
 
 ////////////////////////////////////
 // ÑÈØ ÅÚÏÇÏÇÊ JwtSettings ãä ãáİ appsettings.json
