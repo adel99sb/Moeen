@@ -37,7 +37,7 @@ namespace Moeen.Api.Core.Specifications
 
         /// <summary> إضافة ThenInclude باستخدام مسار نصي (مثل "Orders.OrderItems") </summary>
         protected void AddThenInclude(string thenIncludePath)
-            => ThenIncludes.Add(thenIncludePath);
+            => IncludeStrings.Add(thenIncludePath);
 
         /// <summary> تطبيق ترتيب تصاعدي </summary>
         protected void ApplyOrderBy(Expression<Func<T, object>> orderByExpression)

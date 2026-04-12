@@ -2,7 +2,6 @@
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.Circle;
 using Moeen.Api.Shared.Responses.Circle;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.Controllers
 {
@@ -18,33 +17,24 @@ namespace Moeen.Api.Controllers
         }
 
         /// <summary>
-        /// إنشاء حلقة جديدة
+        /// أمر: إنشاء حلقة جديدة.
         /// </summary>
         [HttpPost("create")]
         public async Task<ActionResult<CircleDto>> CreateCircle(CreateCircleRequest request)
-        {
-            var result = await _circleCommandService.CreateCircleAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _circleCommandService.CreateCircleAsync(request));
 
         /// <summary>
-        /// تحديث بيانات حلقة موجودة
+        /// أمر: تحديث حلقة.
         /// </summary>
         [HttpPut("update")]
         public async Task<ActionResult<CircleDto>> UpdateCircle(UpdateCircleRequest request)
-        {
-            var result = await _circleCommandService.UpdateCircleAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _circleCommandService.UpdateCircleAsync(request));
 
         /// <summary>
-        /// حذف حلقة
+        /// أمر: حذف حلقة.
         /// </summary>
         [HttpDelete("delete")]
         public async Task<ActionResult<bool>> DeleteCircle(DeleteCircleRequest request)
-        {
-            var result = await _circleCommandService.DeleteCircleAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _circleCommandService.DeleteCircleAsync(request));
     }
 }

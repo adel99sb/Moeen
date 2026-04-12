@@ -20,7 +20,7 @@ namespace Moeen.Api.Controllers
         [HttpPost("publish")]
         public async Task<ActionResult<PostDto>> PublishPost(PublishPostRequest request)
         {
-            var result = await _contentService.PublishPostAsync(request);           
+            var result = await _contentService.PublishPostAsync(request);
             return Ok(result);
         }
 
@@ -31,9 +31,23 @@ namespace Moeen.Api.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// POST (قديم/متوافق): بحث متقدم/حالي.
+        /// </summary>
         [HttpPost("search")]
         public async Task<ActionResult<SearchContentResponse>> SearchContent(SearchContentRequest request)
         {
+            var result = await _contentService.SearchContentAsync(request);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// GET (جديد): بحث سريع عبر Query String.
+        /// </summary>
+        [HttpGet("search")]
+        public async Task<ActionResult<SearchContentResponse>> SearchContentGet([FromQuery] string query)
+        {
+            var request = new SearchContentRequest { Query = query };
             var result = await _contentService.SearchContentAsync(request);
             return Ok(result);
         }

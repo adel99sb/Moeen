@@ -2,7 +2,6 @@
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.CircleTeacherAssignment;
 using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.Controllers
 {
@@ -18,23 +17,17 @@ namespace Moeen.Api.Controllers
         }
 
         /// <summary>
-        /// تعيين معلم مسؤول عن حلقة
+        /// أمر: تعيين معلم لحلقة.
         /// </summary>
         [HttpPost("assign-teacher")]
         public async Task<ActionResult<OperationResponse>> AssignTeacherToCircle(AssignTeacherToCircleRequest request)
-        {
-            var result = await _assignmentService.AssignTeacherToCircleAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _assignmentService.AssignTeacherToCircleAsync(request));
 
         /// <summary>
-        /// إزالة معلم من الإشراف على حلقة
+        /// أمر: إزالة معلم من حلقة.
         /// </summary>
         [HttpPost("remove-teacher")]
         public async Task<ActionResult<OperationResponse>> RemoveTeacherFromCircle(RemoveTeacherFromCircleRequest request)
-        {
-            var result = await _assignmentService.RemoveTeacherFromCircleAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _assignmentService.RemoveTeacherFromCircleAsync(request));
     }
 }

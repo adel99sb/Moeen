@@ -2,7 +2,6 @@
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.Reporting;
 using Moeen.Api.Shared.Responses.Reporting;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.Controllers
 {
@@ -17,53 +16,52 @@ namespace Moeen.Api.Controllers
             _reportingService = reportingService;
         }
 
+        /// <summary>
+        /// POST (قديم/متوافق): تقرير الحضور.
+        /// </summary>
         [HttpPost("attendance")]
         public async Task<ActionResult<ReportDto>> GenerateAttendanceReport(GenerateAttendanceReportRequest request)
-        {
-            var result = await _reportingService.GenerateAttendanceReportAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _reportingService.GenerateAttendanceReportAsync(request));
 
+        /// <summary>
+        /// GET (جديد): تقرير الحضور عبر CircleId.
+        /// </summary>
+        [HttpGet("attendance/{circleId:guid}")]
+        public async Task<ActionResult<ReportDto>> GenerateAttendanceReportGet([FromRoute] Guid circleId)
+            => Ok(await _reportingService.GenerateAttendanceReportAsync(new GenerateAttendanceReportRequest { CircleId = circleId }));
+
+        /// <summary>
+        /// POST (قديم/متوافق): تقرير الأداء.
+        /// </summary>
         [HttpPost("performance")]
         public async Task<ActionResult<ReportDto>> GeneratePerformanceReport(GeneratePerformanceReportRequest request)
-        {
-            var result = await _reportingService.GeneratePerformanceReportAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _reportingService.GeneratePerformanceReportAsync(request));
+
+        /// <summary>
+        /// GET (جديد): تقرير الأداء عبر StudentId.
+        /// </summary>
+        [HttpGet("performance/{studentId:guid}")]
+        public async Task<ActionResult<ReportDto>> GeneratePerformanceReportGet([FromRoute] Guid studentId)
+            => Ok(await _reportingService.GeneratePerformanceReportAsync(new GeneratePerformanceReportRequest { StudentId = studentId }));
 
         [HttpPost("template")]
         public async Task<ActionResult<CustomizeReportTemplateResponse>> CustomizeTemplate(CustomizeReportTemplateRequest request)
-        {
-            var result = await _reportingService.CustomizeReportTemplateAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _reportingService.CustomizeReportTemplateAsync(request));
 
         [HttpPost("schedule")]
         public async Task<ActionResult<SchedulePeriodicReportResponse>> ScheduleReport(SchedulePeriodicReportRequest request)
-        {
-            var result = await _reportingService.SchedulePeriodicReportAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _reportingService.SchedulePeriodicReportAsync(request));
 
         [HttpPost("share")]
         public async Task<ActionResult<ShareReportResponse>> ShareReport(ShareReportRequest request)
-        {
-            var result = await _reportingService.ShareReportAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _reportingService.ShareReportAsync(request));
 
         [HttpPost("archive")]
         public async Task<ActionResult<ArchiveReportResponse>> ArchiveReport(ArchiveReportRequest request)
-        {
-            var result = await _reportingService.ArchiveReportAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _reportingService.ArchiveReportAsync(request));
 
         [HttpPost("compare")]
         public async Task<ActionResult<ComparisonReportDto>> CompareReports(CompareReportsRequest request)
-        {
-            var result = await _reportingService.CompareReportsAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _reportingService.CompareReportsAsync(request));
     }
-}
+}   

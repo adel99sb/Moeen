@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Constants;
-using System.Runtime.InteropServices;
 
 namespace Moeen.Api.Controllers
 {
@@ -10,22 +8,24 @@ namespace Moeen.Api.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
-        [HttpGet("Test")]
-        public async Task<IActionResult> Test()
-        {
-            return Ok("Test Secs");
-        }
+            /// <summary>
+        /// GET: فحص بسيط لعمل الـ API.
+        /// </summary>
+        [HttpGet("test")]
+        public IActionResult Test() => Ok("Test Secs");
+
+        /// <summary>
+        /// GET: فحص endpoint محمي بمصادقة.
+        /// </summary>
         [Authorize]
-        [HttpGet("TestAuth")]
-        public async Task<IActionResult> TestAuth()
-        {
-            return Ok("Auth Secs");
-        }
+        [HttpGet("test-auth")]
+        public IActionResult TestAuth() => Ok("Auth Secs");
+
+        /// <summary>
+        /// GET: فحص endpoint محمي بدور Student.
+        /// </summary>
         [Authorize(Roles = nameof(Roles.Student))]
-        [HttpGet("TestRole")]
-        public async Task<IActionResult> TestRole()
-        {
-            return Ok("Auth with role Secs");
-        }
+        [HttpGet("test-role")]
+        public IActionResult TestRole() => Ok("Auth with role Secs");
     }
 }

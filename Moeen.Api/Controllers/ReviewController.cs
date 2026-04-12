@@ -2,7 +2,6 @@
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.Review;
 using Moeen.Api.Shared.Responses.Review;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.Controllers
 {
@@ -18,33 +17,24 @@ namespace Moeen.Api.Controllers
         }
 
         /// <summary>
-        /// تسجيل مراجعة صفحة
+        /// أمر: تسجيل مراجعة صفحة.
         /// </summary>
         [HttpPost("record-page")]
         public async Task<ActionResult<RecordReviewPageResponse>> RecordReviewPage(RecordReviewPageRequest request)
-        {
-            var result = await _reviewService.RecordReviewPageAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _reviewService.RecordReviewPageAsync(request));
 
         /// <summary>
-        /// تسجيل مراجعة جزء
+        /// أمر: تسجيل مراجعة جزء.
         /// </summary>
         [HttpPost("record-juz")]
         public async Task<ActionResult<ReviewResultDto>> RecordJuzReview(RecordJuzReviewRequest request)
-        {
-            var result = await _reviewService.RecordJuzReviewAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _reviewService.RecordJuzReviewAsync(request));
 
         /// <summary>
-        /// تسجيل مراجعة عدة أجزاء دفعة واحدة
+        /// أمر: تسجيل مراجعة عدة أجزاء.
         /// </summary>
         [HttpPost("record-multiple-juz")]
         public async Task<ActionResult<MultipleJuzReviewResponse>> RecordMultipleJuzReview(RecordMultipleJuzReviewRequest request)
-        {
-            var result = await _reviewService.RecordMultipleJuzReviewAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _reviewService.RecordMultipleJuzReviewAsync(request));
     }
 }

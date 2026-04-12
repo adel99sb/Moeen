@@ -2,17 +2,15 @@
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.Identity;
 using Moeen.Api.Shared.Responses.Identity;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.Controllers
 {
-    [Route("api/[controller]")]          // الرابط: api/identity
+    [Route("api/[controller]")]
     [ApiController]
     public class IdentityController : ControllerBase
     {
         private readonly IIdentityService _identityService;
 
-        // حقن الخدمة عبر الـ Constructor
         public IdentityController(IIdentityService identityService)
         {
             _identityService = identityService;
@@ -22,17 +20,12 @@ namespace Moeen.Api.Controllers
         public async Task<ActionResult<AuthResponse>> Login(LoginRequest request)
         {
             var result = await _identityService.LoginAsync(request);
-            if (result.Success)
-                return Ok(result);
-            return BadRequest(result);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPost("register")]
+        [HttpPost("register")]  
         public async Task<ActionResult<UserDto>> Register(RegisterRequest request)
-        {
-            var result = await _identityService.RegisterAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _identityService.RegisterAsync(request));
 
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
@@ -43,23 +36,24 @@ namespace Moeen.Api.Controllers
 
         [HttpPut("profile")]
         public async Task<ActionResult<UserDto>> UpdateProfile(UpdateProfileRequest request)
-        {
-            var result = await _identityService.UpdateProfileAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _identityService.UpdateProfileAsync(request));
 
         [HttpPost("change-password")]
         public async Task<ActionResult<bool>> ChangePassword(ChangePasswordRequest request)
-        {
-            var result = await _identityService.ChangePasswordAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _identityService.ChangePasswordAsync(request));
 
+        /// <summary>
+        /// GET (أساسي): بيانات المستخدم الحالي.
+        /// </summary>
         [HttpGet("current-user")]
         public async Task<ActionResult<UserDto>> GetCurrentUser()
-        {
-            var result = await _identityService.GetCurrentUserAsync();
-            return Ok(result);
-        }
+            => Ok(await _identityService.GetCurrentUserAsync());
+
+        /// <summary>
+        /// GET (جديد - Alias): نفس current-user لكن endpoint أقصر.
+        /// </summary>
+        [HttpGet("me")]
+        public async Task<ActionResult<UserDto>> Me()
+            => Ok(await _identityService.GetCurrentUserAsync());
     }
 }
