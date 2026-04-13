@@ -25,7 +25,7 @@ namespace Moeen.Api.Controllers
                 return BadRequest(ModelState);
 
             var key = string.IsNullOrWhiteSpace(request.Key) ? request.Email : request.Key;
-            await _verificationService.SendCodeToEmailAsync(request.Email, key);
+            //await _verificationService.SendCodeToEmailAsync(request.Email, key);
 
             return Ok("Code sent");
         }
@@ -39,8 +39,9 @@ namespace Moeen.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var isValid = await _verificationService.VerifyCodeAsync(request.Key, request.Code);
-            return isValid ? Ok("Verified") : BadRequest("Invalid code");
+            //var isValid = await _verificationService.VerifyCodeAsync(request.Key, request.Code);
+            //return isValid ? Ok("Verified") : BadRequest("Invalid code");
+            return BadRequest("Invalid code");
         }
 
         /// <summary>
@@ -52,8 +53,9 @@ namespace Moeen.Api.Controllers
             if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(code))
                 return BadRequest("Key and code are required.");
 
-            var isValid = await _verificationService.VerifyCodeAsync(key, code);
-            return isValid ? Ok("Verified") : BadRequest("Invalid code");
+            //var isValid = await _verificationService.VerifyCodeAsync(key, code);
+            //return isValid ? Ok("Verified") : BadRequest("Invalid code");
+            return BadRequest("Invalid code");
         }
     }
 }

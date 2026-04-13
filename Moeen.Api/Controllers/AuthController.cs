@@ -78,8 +78,8 @@ namespace Moeen.Api.Controllers
                 return Unauthorized(new AuthResponse { IsSuccess = false, Message = "كلمة المرور غير صحيحة" });
 
             // إنشاء توكن JWT
-            var token = await _jwtService.GenerateTokenAsync(user);
-
+            //var token = await _jwtService.GenerateJwtToken(user);
+            var token = "dummy-jwt-token"; // استبدل هذا بالتوكن الحقيقي من خدمة JWT
             return Ok(new AuthResponse
             {
                 IsSuccess = true,

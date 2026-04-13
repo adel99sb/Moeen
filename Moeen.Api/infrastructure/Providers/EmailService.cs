@@ -1,101 +1,86 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Moeen.Api.Core.Contracts.infrastructure.Providers;
+﻿using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.infrastructure.Configurations;
-using System;
+using Moeen.Api.Shared;
 using System.Net;
 using System.Net.Mail;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.infrastructure.Providers
 {
     public class EmailService : IEmailService
     {
         private readonly SmtpSettings _smtpSettings;
-        private readonly ILogger<EmailService> _logger;
-        private const int MaxBodySize = 10 * 1024 * 1024; // 10 MB حد أقصى لحجم نص البريد
 
-        public EmailService(IOptions<SmtpSettings> smtpSettings, ILogger<EmailService> logger)
+        public EmailService()
         {
-            _smtpSettings = smtpSettings.Value;
-            _logger = logger;
+            _smtpSettings = AppSettings.Instance.SmtpSettings;
         }
 
-        /// <summary>
-        /// إرسال بريد إلكتروني إلى مستلم واحد
-        /// </summary>
-        public async Task SendEmailAsync(string toEmail, string subject, string body, bool isBodyHtml = true)
+        public async Task<bool> SendEmailAsync(string toEmail, string subject, string code, string lang, bool isRest = false)
         {
-            // 1. التحقق من صحة المستلم
-            if (string.IsNullOrWhiteSpace(toEmail))
-                throw new ArgumentException("بريد المستلم مطلوب.", nameof(toEmail));
-
-            // 2. التحقق من صيغة البريد الإلكتروني
-            if (!IsValidEmail(toEmail))
-                throw new ArgumentException("بريد المستلم غير صحيح.", nameof(toEmail));
-
-            // 3. التحقق من وجود نص البريد
-            if (string.IsNullOrWhiteSpace(body))
-                throw new ArgumentException("محتوى البريد مطلوب.", nameof(body));
-
-            // 4. التحقق من حجم النص
-            if (body.Length > MaxBodySize)
-                throw new ArgumentException($"حجم نص البريد يتجاوز الحد المسموح ({MaxBodySize / (1024 * 1024)} MB).");
-
-            // 5. التأكد من إعدادات SMTP الأساسية
-            if (string.IsNullOrWhiteSpace(_smtpSettings.Host))
-                throw new InvalidOperationException("SMTP Host غير مضبوط.");
-            if (string.IsNullOrWhiteSpace(_smtpSettings.FromEmail))
-                throw new InvalidOperationException("البريد المرسل (FromEmail) غير مضبوط.");
-            if (string.IsNullOrWhiteSpace(_smtpSettings.Username) || string.IsNullOrWhiteSpace(_smtpSettings.Password))
-                throw new InvalidOperationException("اسم المستخدم أو كلمة المرور لـ SMTP غير مضبوطة.");
-
-            // 6. بناء كائن الرسالة
-            using var message = new MailMessage
-            {
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = isBodyHtml,
-                From = string.IsNullOrWhiteSpace(_smtpSettings.FromName)
-                    ? new MailAddress(_smtpSettings.FromEmail)
-                    : new MailAddress(_smtpSettings.FromEmail, _smtpSettings.FromName)
-            };
-            message.To.Add(new MailAddress(toEmail));
-
-            // 7. تكوين عميل SMTP
-            using var smtpClient = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port)
-            {
-                EnableSsl = _smtpSettings.EnableSsl,
-                Credentials = new NetworkCredential(_smtpSettings.Username, _smtpSettings.Password),
-                Timeout = 30000 // 30 ثانية مهلة الإرسال
-            };
-
+            var smtpClient = CreateSmtpClient();
+            string htmlContent = emailContent(lang, isRest, code);
+            var mailMessage = CreateMailMessage(toEmail, subject, htmlContent);
             try
             {
-                // 8. الإرسال (يمكن إضافة CancellationToken لاحقاً إذا عدلت الواجهة)
-                await smtpClient.SendMailAsync(message);
-                _logger.LogInformation("تم إرسال البريد إلى {ToEmail} بموضوع {Subject}", toEmail, subject);
+                await smtpClient.SendMailAsync(mailMessage);
+                return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "فشل إرسال البريد إلى {ToEmail}", toEmail);
-                throw new InvalidOperationException("فشل إرسال البريد. راجع السجلات.", ex);
+                await Console.Out.WriteLineAsync(ex.Message);
+                return false;
             }
         }
 
-        // دالة مساعدة للتحقق من صيغة البريد
-        private static bool IsValidEmail(string email)
+        private SmtpClient CreateSmtpClient()
         {
-            try
+            return new SmtpClient
             {
-                var addr = new MailAddress(email);
-                return addr.Address == email;
-            }
-            catch
+                Host = _smtpSettings.Host,
+                Port = _smtpSettings.Port,
+                EnableSsl = _smtpSettings.EnableSsl,
+                Credentials = new NetworkCredential(_smtpSettings.SenderEmail, _smtpSettings.SenderPassword)
+            };
+        }
+        private string emailContent(string lang, bool isRest, string code)
+        {
+            string mainTemplatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ValueObject");
+            string usedTemplatePath;
+            string textToReplace = "{{verificationCode}}";
+            switch (lang)
             {
-                return false;
+                case "ar":
+                    if (isRest)
+                    {
+                        usedTemplatePath = Path.Combine(mainTemplatePath, "reset-password-ar.html");
+                        textToReplace = "{{resetLink}}";
+                    }
+                    else
+                        usedTemplatePath = Path.Combine(mainTemplatePath, "email-verification-ar.html");
+                    break;
+                default:
+                    if (isRest)
+                    {
+                        usedTemplatePath = Path.Combine(mainTemplatePath, "reset-password-en.html");
+                        textToReplace = "{{resetLink}}";
+                    }
+                    else
+                        usedTemplatePath = Path.Combine(mainTemplatePath, "email-verification-en.html");
+                    break;
             }
+            string htmlContent = File.ReadAllText(usedTemplatePath);
+            htmlContent = htmlContent.Replace(textToReplace, code);
+            return htmlContent;
+        }
+        private MailMessage CreateMailMessage(string toEmail, string subject, string body)
+        {
+            return new MailMessage
+            {
+                From = new MailAddress(_smtpSettings.SenderEmail, "oro Support"),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true
+            }.AddRecipient(toEmail);
         }
     }
 }

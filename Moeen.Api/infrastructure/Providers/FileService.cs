@@ -1,127 +1,66 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using Moeen.Api.Core.Constants;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
-using Moeen.Api.infrastructure.Configurations;
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.infrastructure.Providers
 {
     public class FileService : IFileService
     {
-        private readonly string _rootPath;               // المسار الجذري لتخزين الملفات (مثل C:\Project\Uploads)
-        private readonly ILogger<FileService> _logger;   // لتسجيل الأخطاء
-        private readonly List<string> _allowedExtensions = new() { ".jpg", ".jpeg", ".png", ".gif", ".pdf", ".docx" }; // الامتدادات المسموحة
-        private const long MaxFileSize = 10 * 1024 * 1024; // الحد الأقصى للحجم: 10 ميغابايت
+        private readonly string _baseDirectory;
+        private readonly ICurrentUserService _currentUserService;
 
-        public FileService(
-            IWebHostEnvironment environment,
-            IOptions<FileStorageSettings> fileStorageSettings,
-            ILogger<FileService> logger)
+        public FileService(ICurrentUserService currentUserService)
         {
-            // قراءة المجلد الجذري من الإعدادات أو استخدام "Uploads" كقيمة افتراضية
-            var configuredRoot = fileStorageSettings.Value.RootPath?.Trim() ?? "Uploads";
-            _rootPath = Path.Combine(environment.ContentRootPath, configuredRoot);
-            _logger = logger;
+            _baseDirectory = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+
+            if (!Directory.Exists(_baseDirectory))
+                Directory.CreateDirectory(_baseDirectory);
+            _currentUserService = currentUserService;
         }
 
-        /// <summary>
-        /// حفظ ملف مرفوع على الخادم
-        /// </summary>
-        /// <param name="file">الملف القادم من العميل</param>
-        /// <param name="folder">المجلد الفرعي (مثل "khotbas" أو "students")</param>
-        /// <returns>المسار النسبي للملف المحفوظ (مثل "khotbas/abc123.pdf")</returns>
-        public async Task<string> SaveFileAsync(IFormFile file, string folder, CancellationToken cancellationToken = default)
+        public async Task<string> UploadFileAsync(FilePathType fileType, Guid ownerId, string fileName, byte[] fileData)
         {
-            // 1. التحقق من وجود الملف
-            if (file is null || file.Length == 0)
-                throw new ArgumentException("الملف مطلوب.", nameof(file));
+            var relativeFolder = FilePathConstants.PathMappings[fileType];
+            string targetFolder;
+            string fullFolderPath;
 
-            // 2. التحقق من حجم الملف (ألا يتجاوز 10 ميغابايت)
-            if (file.Length > MaxFileSize)
-                throw new ArgumentException($"حجم الملف يتجاوز الحد المسموح ({MaxFileSize / (1024 * 1024)} MB).");
+            targetFolder = Path.Combine(relativeFolder, ownerId.ToString());
 
-            // 3. استخراج امتداد الملف وتحويله إلى أحرف صغيرة
-            var extension = Path.GetExtension(file.FileName).ToLower();
+            fullFolderPath = Path.Combine(Directory.GetCurrentDirectory(), targetFolder);
 
-            // 4. التحقق من أن الامتداد مسموح به
-            if (!_allowedExtensions.Contains(extension))
-                throw new ArgumentException($"نوع الملف {extension} غير مسموح. الامتدادات المسموحة: {string.Join(", ", _allowedExtensions)}");
 
-            // 5. تطبيع اسم المجلد (إزالة المسافات والفواصل غير المتجانسة)
-            folder = (folder ?? string.Empty).Trim().Replace("\\", "/").Trim('/');
+            if (!Directory.Exists(fullFolderPath))
+                Directory.CreateDirectory(fullFolderPath);
 
-            // 6. إنشاء اسم ملف فريد باستخدام GUID
-            var newFileName = $"{Guid.NewGuid():N}{extension}";
+            var filePath = Path.Combine(fullFolderPath, fileName);
 
-            // 7. بناء المسار النسبي (سيُخزَّن في قاعدة البيانات)
-            var relativePath = string.IsNullOrWhiteSpace(folder) ? newFileName : $"{folder}/{newFileName}";
+            await File.WriteAllBytesAsync(filePath, fileData);
 
-            // 8. إنشاء المجلد الكامل على القرص (إذا لم يكن موجوداً)
-            var fullDirectory = Path.Combine(_rootPath, folder);
-            Directory.CreateDirectory(fullDirectory);
-
-            // 9. المسار الكامل للملف الجديد
-            var fullPath = Path.Combine(fullDirectory, newFileName);
-
-            try
-            {
-                // 10. فتح تيار الكتابة ونسخ محتوى الملف إليه
-                await using var stream = new FileStream(fullPath, FileMode.Create);
-                await file.CopyToAsync(stream, cancellationToken);
-
-                // 11. إرجاع المسار النسبي لحفظه في قاعدة البيانات
-                return relativePath;
-            }
-            catch (Exception ex)
-            {
-                // 12. تسجيل الخطأ وإعادة رميه مع رسالة مفهومة
-                _logger.LogError(ex, "فشل حفظ الملف {RelativePath}", relativePath);
-                throw new IOException("تعذر حفظ الملف. راجع السجلات.", ex);
-            }
+            var relativePath = Path.Combine("/", targetFolder.Replace("\\", "/"), fileName.Replace("\\", "/"));
+            return relativePath;
         }
 
-        /// <summary>
-        /// حذف ملف من الخادم باستخدام مساره النسبي
-        /// </summary>
-        /// <returns>true إذا تم الحذف، false إذا لم يوجد الملف أو حدث خطأ</returns>
         public Task<bool> DeleteFileAsync(string relativePath)
         {
-            // 1. التحقق من صحة المسار
-            if (string.IsNullOrWhiteSpace(relativePath))
-                return Task.FromResult(false);
+            var fileFullPath = Path.Combine(Directory.GetCurrentDirectory(), relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
 
-            // 2. تحويل فواصل المسار إلى ما يناسب نظام التشغيل (مثلاً / → \ في ويندوز)
-            relativePath = relativePath.Replace("/", Path.DirectorySeparatorChar.ToString());
-
-            // 3. بناء المسار الكامل المطلق
-            var fullPath = Path.GetFullPath(Path.Combine(_rootPath, relativePath));
-            var rootFullPath = Path.GetFullPath(_rootPath);
-
-            // 4. منع هجوم اختراق المسار (Path Traversal)
-            if (!fullPath.StartsWith(rootFullPath, StringComparison.OrdinalIgnoreCase))
-                return Task.FromResult(false);
-
-            // 5. التحقق من وجود الملف فعلاً
-            if (!File.Exists(fullPath))
-                return Task.FromResult(false);
-
-            try
+            if (File.Exists(fileFullPath))
             {
-                // 6. حذف الملف
-                File.Delete(fullPath);
+                File.Delete(fileFullPath);
                 return Task.FromResult(true);
             }
-            catch (Exception ex)
+
+            return Task.FromResult(false);
+        }
+
+        public async Task<string> GetFileUrlAsync(string relativePath)
+        {
+            if (!string.IsNullOrEmpty(relativePath))
             {
-                // 7. تسجيل الخطأ وإرجاع false (لا نعيد رمي الاستثناء لأن الحذف ليس حرجاً)
-                _logger.LogError(ex, "فشل حذف الملف {RelativePath}", relativePath);
-                return Task.FromResult(false);
+                var imagePath = _currentUserService.GetBaseUrl(relativePath);
+                return await Task.FromResult(imagePath);
             }
+            return null;
         }
     }
 }
