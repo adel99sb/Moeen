@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Moeen.Api.Shared.Responses;
 using System.Net.Mail;
 
 namespace Moeen.Api.Shared
@@ -10,12 +11,12 @@ namespace Moeen.Api.Shared
             mailMessage.To.Add(toEmail);
             return mailMessage;
         }
-        //public static IActionResult ToActionResult(this GeneralResponse response)
-        //{
-        //    return new ObjectResult(response)
-        //    {
-        //        StatusCode = response.StatusCode
-        //    };
-        //}
+        public static IActionResult ToActionResult(this GeneralResponse response)
+        {
+            return new ObjectResult(response)
+            {
+                StatusCode = response.StatusCode
+            };
+        }
     }
 }

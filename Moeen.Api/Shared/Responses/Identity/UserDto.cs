@@ -10,7 +10,7 @@ namespace Moeen.Api.Shared.Responses.Identity
         public string Phone { get; set; }
         public string Gender { get; set; }
         public int FontSize { get; set; }
-        public int Role { get; set; }
+        public List<string> Roles { get; set; } = new List<string>();
         public string Theme { get; set; }
         public string ProfileImageUrl { get; set; }
         public DateTime CreatedAt { get; set; }

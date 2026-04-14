@@ -73,7 +73,7 @@ builder.Services.AddScoped<IFileService, FileService>();
 // Application Services
 builder.Services.AddScoped<IMosquService, MosquService>();
 builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
-builder.Services.AddScoped<IIdentityService, IdentityService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 builder.Services.AddScoped<ICircleCommandService, CircleCommandService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();

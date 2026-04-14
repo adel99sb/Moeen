@@ -44,7 +44,7 @@ namespace Moeen.Api.infrastructure.Providers
         }
         private string emailContent(string lang, bool isRest, string code)
         {
-            string mainTemplatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ValueObject");
+            string mainTemplatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Shared", "ValueObject");
             string usedTemplatePath;
             string textToReplace = "{{verificationCode}}";
             switch (lang)
