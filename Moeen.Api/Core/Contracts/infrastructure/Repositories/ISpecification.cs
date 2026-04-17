@@ -4,46 +4,44 @@ using System.Linq.Expressions;
 
 namespace Moeen.Api.Core.Specifications
 {
-    /// <summary>
-    /// واجهة تحدد مكونات الـ Specification (المواصفة) للاستعلامات المعقدة
-    /// </summary>
-    /// <typeparam name="T">نوع الكيان</typeparam>
     public interface ISpecification<T>
+        where T : class
     {
-        /// <summary> شرط التصفية الأساسي (WHERE) </summary>
-        Expression<Func<T, bool>>? Criteria { get; }
+        /// <summary>
+        /// Main filtering criteria for the query.
+        /// </summary>
+        Expression<Func<T, bool>> Criteria { get; }
 
-        /// <summary> قائمة العلاقات المراد تحميلها باستخدام Include اللامبدا </summary>
+        /// <summary>
+        /// Legacy includes: simple navigation property includes.
+        /// Example: x => x.Customer
+        /// </summary>
         List<Expression<Func<T, object>>> Includes { get; }
 
-        /// <summary> قائمة المسارات النصية للعلاقات المتداخلة (مثل "Orders.OrderItems") </summary>
-        List<string> IncludeStrings { get; }
+        /// <summary>
+        /// New style includes: full Include/ThenInclude chains as query transformers.
+        /// Example: q => q.Include(x => x.Customer).ThenInclude(c => c.Addresses)
+        /// </summary>
+        List<Func<IQueryable<T>, IQueryable<T>>> IncludeChains { get; }
 
-        /// <summary> ترتيب تصاعدي </summary>
+        /// <summary>
+        /// Order ascending.
+        /// </summary>
         Expression<Func<T, object>>? OrderBy { get; }
 
-        /// <summary> ترتيب تنازلي </summary>
+        /// <summary>
+        /// Order descending.
+        /// </summary>
         Expression<Func<T, object>>? OrderByDescending { get; }
 
-        /// <summary> عدد السجلات المطلوبة (Take) </summary>
-        int Take { get; }
+        /// <summary>
+        /// Number of records to skip.
+        /// </summary>
+        int? Skip { get; }
 
-        /// <summary> عدد السجلات المطلوب تجاوزها (Skip) </summary>
-        int Skip { get; }
-
-        /// <summary> هل تم تفعيل التقسيم إلى صفحات؟ </summary>
-        bool IsPagingEnabled { get; }
-
-        /// <summary> تحسين الأداء: تقسيم الاستعلام (AsSplitQuery) </summary>
-        bool AsSplitQuery { get; }
-
-        /// <summary> تحسين الأداء: عدم تتبع التغييرات (AsNoTracking) </summary>
-        bool AsNoTracking { get; }
-
-        /// <summary> تجاهل التضمينات التلقائية (IgnoreAutoIncludes) </summary>
-        bool IgnoreAutoIncludes { get; }
-
-        /// <summary> تجاهل فلاتر الاستعلام العمومية (IgnoreQueryFilters) مثل Soft Delete </summary>
-        bool IgnoreQueryFilters { get; }
+        /// <summary>
+        /// Number of records to take.
+        /// </summary>
+        int? Take { get; }
     }
 }

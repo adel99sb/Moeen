@@ -3,7 +3,7 @@ using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.ExamQuery;
 using Moeen.Api.Shared.Responses.ExamCommand;
 using Moeen.Api.Shared.Responses.ExamQuery;
-using System.Threading.Tasks;
+using System;
 
 namespace Moeen.Api.Controllers
 {
@@ -23,29 +23,34 @@ namespace Moeen.Api.Controllers
         /// </summary>
         [HttpPost("get-by-id")]
         public async Task<ActionResult<ExamResultDto>> GetExamResultById(GetExamResultByIdRequest request)
-        {
-            var result = await _examQueryService.GetExamResultByIdAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _examQueryService.GetExamResultByIdAsync(request));
+
+        /// <summary>
+        /// GET (جديد): جلب نتيجة اختبار مباشرة.
+        /// </summary>
+        [HttpGet("{examId:guid}")]
+        public async Task<ActionResult<ExamResultDto>> GetExamResultByIdGet([FromRoute] Guid examId)
+            => Ok(await _examQueryService.GetExamResultByIdAsync(new GetExamResultByIdRequest { ExamId = examId }));
 
         /// <summary>
         /// البحث في نتائج الاختبارات
         /// </summary>
         [HttpPost("search")]
         public async Task<ActionResult<SearchExamResultsResponse>> SearchExamResults(SearchExamResultsRequest request)
-        {
-            var result = await _examQueryService.SearchExamResultsAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _examQueryService.SearchExamResultsAsync(request));
 
         /// <summary>
         /// الحصول على اختبارات طالب معين
         /// </summary>
         [HttpPost("student-exams")]
         public async Task<ActionResult<GetStudentExamsResponse>> GetStudentExams(GetStudentExamsRequest request)
-        {
-            var result = await _examQueryService.GetStudentExamsAsync(request);
-            return Ok(result);
-        }
-    }
+            => Ok(await _examQueryService.GetStudentExamsAsync(request));
+
+        /// <summary>
+        /// GET (جديد): جلب اختبارات الطالب.
+        /// </summary>
+        [HttpGet("students/{studentId:guid}/exams")]
+        public async Task<ActionResult<GetStudentExamsResponse>> GetStudentExamsGet([FromRoute] Guid studentId)
+            => Ok(await _examQueryService.GetStudentExamsAsync(new GetStudentExamsRequest { StudentId = studentId }));
+       }
 }

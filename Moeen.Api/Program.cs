@@ -19,16 +19,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// Bind Settings
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
-builder.Services.Configure<FileStorageSettings>(builder.Configuration.GetSection("FileStorageSettings"));
-
-// JWT settings (ﬁ—«¡… Ê«Õœ… „⁄  Õﬁﬁ)
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()
-    ?? throw new InvalidOperationException("JwtSettings section is missing.");
+{
+    options.UseSqlServer(AppSettings.Instance.ConnectionString);
+});
 
 // Identity
 builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
@@ -57,15 +50,15 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings.Issuer,
-        ValidAudience = jwtSettings.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+        ValidIssuer = AppSettings.Instance.JwtSettings.Issuer,
+        ValidAudience = AppSettings.Instance.JwtSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppSettings.Instance.JwtSettings.SecretKey)),
         RoleClaimType = ClaimTypes.Role
     };
 });
 
 // Infrastructure - Repositories
-builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Providers
@@ -80,7 +73,7 @@ builder.Services.AddScoped<IFileService, FileService>();
 // Application Services
 builder.Services.AddScoped<IMosquService, MosquService>();
 builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
-builder.Services.AddScoped<IIdentityService, IdentityService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 builder.Services.AddScoped<ICircleCommandService, CircleCommandService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();

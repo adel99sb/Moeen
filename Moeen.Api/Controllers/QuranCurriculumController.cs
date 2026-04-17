@@ -2,7 +2,6 @@
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.QuranCurriculum;
 using Moeen.Api.Shared.Responses.QuranCurriculum;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.Controllers
 {
@@ -17,44 +16,34 @@ namespace Moeen.Api.Controllers
             _quranCurriculumService = quranCurriculumService;
         }
 
-        /// <summary>
-        /// تهيئة المصحف (جزء وصفحات)
-        /// </summary>
         [HttpPost("initialize")]
         public async Task<ActionResult<InitializeQuranResponse>> InitializeQuran(InitializeQuranRequest request)
-        {
-            var result = await _quranCurriculumService.InitializeQuranAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _quranCurriculumService.InitializeQuranAsync(request));
 
-        /// <summary>
-        /// الحصول على قائمة الأجزاء
-        /// </summary>
         [HttpPost("juz-list")]
         public async Task<ActionResult<GetJuzListResponse>> GetJuzList(GetJuzListRequest request)
-        {
-            var result = await _quranCurriculumService.GetJuzListAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _quranCurriculumService.GetJuzListAsync(request));
 
         /// <summary>
-        /// الحصول على صفحات جزء معين
+        /// GET (جديد): قائمة الأجزاء.
         /// </summary>
+        [HttpGet("juz-list")]
+        public async Task<ActionResult<GetJuzListResponse>> GetJuzListGet()
+            => Ok(await _quranCurriculumService.GetJuzListAsync(new GetJuzListRequest()));
+
         [HttpPost("pages-by-juz")]
         public async Task<ActionResult<GetPagesByJuzResponse>> GetPagesByJuz(GetPagesByJuzRequest request)
-        {
-            var result = await _quranCurriculumService.GetPagesByJuzAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _quranCurriculumService.GetPagesByJuzAsync(request));
 
         /// <summary>
-        /// الحصول على صفحات جديدة للحفظ لطالب معين
+        /// GET (جديد): صفحات جزء محدد.
         /// </summary>
+        [HttpGet("juz/{juzNumber:int}/pages")]
+        public async Task<ActionResult<GetPagesByJuzResponse>> GetPagesByJuzGet([FromRoute] int juzNumber)
+            => Ok(await _quranCurriculumService.GetPagesByJuzAsync(new GetPagesByJuzRequest { JuzNumber = juzNumber }));
+
         [HttpPost("new-memorization-pages")]
         public async Task<ActionResult<GetNewMemorizationPagesResponse>> GetNewMemorizationPages(GetNewMemorizationPagesRequest request)
-        {
-            var result = await _quranCurriculumService.GetNewMemorizationPagesAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _quranCurriculumService.GetNewMemorizationPagesAsync(request));
     }
 }

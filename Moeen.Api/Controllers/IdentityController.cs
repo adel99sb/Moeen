@@ -1,65 +1,63 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
+using Moeen.Api.Shared;
 using Moeen.Api.Shared.Requests.Identity;
 using Moeen.Api.Shared.Responses.Identity;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.Controllers
 {
-    [Route("api/[controller]")]          // الرابط: api/identity
+    [Route("api/[controller]")]
     [ApiController]
     public class IdentityController : ControllerBase
     {
-        private readonly IIdentityService _identityService;
+        private readonly IUserService _userService;
 
-        // حقن الخدمة عبر الـ Constructor
-        public IdentityController(IIdentityService identityService)
+        public IdentityController(IUserService userService)
         {
-            _identityService = identityService;
+            _userService = userService;
         }
-
-        [HttpPost("login")]
-        public async Task<ActionResult<AuthResponse>> Login(LoginRequest request)
-        {
-            var result = await _identityService.LoginAsync(request);
-            if (result.Success)
-                return Ok(result);
-            return BadRequest(result);
-        }
-
+        /// <summary>
+        /// Register a New User
+        /// </summary>
+        [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<ActionResult<UserDto>> Register(RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
         {
-            var result = await _identityService.RegisterAsync(request);
-            return Ok(result);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            try
+            {
+                var Result = await _userService.RegisterAsync(registerRequest);
+                var Response = Result.ToActionResult();
+                return Response;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
-
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
+        /// <summary>
+        /// Login
+        /// </summary>
+        /// <param name="loginRequest"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
-            await _identityService.LogoutAsync();
-            return Ok();
-        }
-
-        [HttpPut("profile")]
-        public async Task<ActionResult<UserDto>> UpdateProfile(UpdateProfileRequest request)
-        {
-            var result = await _identityService.UpdateProfileAsync(request);
-            return Ok(result);
-        }
-
-        [HttpPost("change-password")]
-        public async Task<ActionResult<bool>> ChangePassword(ChangePasswordRequest request)
-        {
-            var result = await _identityService.ChangePasswordAsync(request);
-            return Ok(result);
-        }
-
-        [HttpGet("current-user")]
-        public async Task<ActionResult<UserDto>> GetCurrentUser()
-        {
-            var result = await _identityService.GetCurrentUserAsync();
-            return Ok(result);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            try
+            {
+                var Result = await _userService.LoginAsync(loginRequest);
+                var Response = Result.ToActionResult();
+                return Response;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
