@@ -76,7 +76,7 @@ namespace Moeen.Api.infrastructure.Providers
         {
             return new MailMessage
             {
-                From = new MailAddress(_smtpSettings.SenderEmail, "oro Support"),
+                From = new MailAddress(_smtpSettings.SenderEmail, "Moeen Support"),
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = true

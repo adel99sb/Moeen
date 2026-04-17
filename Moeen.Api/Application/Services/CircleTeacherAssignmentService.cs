@@ -1,4 +1,5 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
+using Moeen.Api.infrastructure.Data;
 using Moeen.Api.Shared.Requests.CircleTeacherAssignment;
 using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
 

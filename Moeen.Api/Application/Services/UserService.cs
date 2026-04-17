@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using Moeen.Api.Core.Constants;
 using Moeen.Api.Core.Contracts;
 using Moeen.Api.Core.Contracts.Application;
@@ -150,7 +151,6 @@ namespace Moeen.Api.Application.Services
                 EmailConfirmed = false,
                 name= registerRequest.Name,
                 UserName = Guid.NewGuid().ToString(),
-                PhoneNumberConfirmed = false,
                 gender = registerRequest.Gender,
                 PhoneNumber = registerRequest.Phone,                
             };
