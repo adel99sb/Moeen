@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Moeen.Api.Core.Constants;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.ExamGrading;
 using Moeen.Api.Shared.Responses.ExamGrading;
@@ -18,7 +19,7 @@ namespace Moeen.Api.Controllers
         }
 
         /// <summary>
-        /// إضافة أو تحديث معيار تقدير
+        /// إضافة/تحديث معيار (أمر - POST).
         /// </summary>
         [HttpPost("set-criteria")]
         public async Task<ActionResult<GradingCriteriaDto>> SetGradingCriteria(SetGradingCriteriaRequest request)
@@ -28,7 +29,7 @@ namespace Moeen.Api.Controllers
         }
 
         /// <summary>
-        /// الحصول على جميع معايير التقدير (مع تصفية اختيارية)
+        /// POST (قديم/متوافق): جلب المعايير مع فلتر اختياري.
         /// </summary>
         [HttpPost("get-criteria")]
         public async Task<ActionResult<GetGradingCriteriaResponse>> GetGradingCriteria(GetGradingCriteriaRequest request)
@@ -38,7 +39,18 @@ namespace Moeen.Api.Controllers
         }
 
         /// <summary>
-        /// حذف معيار تقدير
+        /// GET (جديد): جلب المعايير مباشرة (فلتر نوع الاختبار اختياري).
+        /// </summary>
+        [HttpGet]
+        public async Task<ActionResult<GetGradingCriteriaResponse>> GetGradingCriteriaGet([FromQuery] ExamType? applicableTo)
+        {
+            var request = new GetGradingCriteriaRequest { ApplicableTo = applicableTo };
+            var result = await _gradingCriteriaService.GetGradingCriteriaAsync(request);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// حذف معيار (أمر - POST).
         /// </summary>
         [HttpPost("delete-criteria")]
         public async Task<ActionResult<DeleteGradingCriteriaResponse>> DeleteGradingCriteria(DeleteGradingCriteriaRequest request)

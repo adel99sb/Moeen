@@ -1,9 +1,10 @@
-﻿using Moeen.Api.Core.Entities;
+﻿using Microsoft.AspNetCore.Identity;
+using Moeen.Api.Core.Entities;
 
 namespace Moeen.Api.Core.Contracts.infrastructure.Providers
 {
     public interface IJwtService
     {
-        Task<string> GenerateTokenAsync(User user);
+        Task<string> GenerateJwtToken(User customer, UserManager<User> userManager);
     }
 }

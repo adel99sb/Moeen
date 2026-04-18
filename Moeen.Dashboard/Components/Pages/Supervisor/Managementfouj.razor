@@ -10,6 +10,10 @@
 --text-dark: #2d3436;
 --status-green: #2ecc71;
 --danger-red: #e74c3c;
+        --transition: all 0.3s ease;
+    --shadow-md: 0 6px 15px rgba(0,0,0,0.12);
+
+
 }
 body {
 font-family: 'Tajawal', sans-serif;
@@ -75,7 +79,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 flex-wrap:wrap;
              }
            .card {
-               flex:1 1 calc(50%-20px);
+               flex:1 1 calc(50% - 20px);
     grid-template-columns: repeat(2,1fr);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
@@ -127,14 +131,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
        .form-container, .form-container * {
         box-sizing: border-box;
     }
-    :root {
-        --primary-green: #195042;
-        --accent-beige: #d6cabc;
-        --light-beige: #f4f1ee;
-        --white: #ffffff;
-        --text-dark: #2d3436;
-        --transition: all 0.3s ease;
-    }
+  
     .form-container {
         max-width: 850px;
         margin: 2rem auto;
@@ -398,8 +395,5 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         NavManager.NavigateTo("/supervisor/editfouj");
         // Logic to edit student information
     }
-    private void viewFouj1()
-    {
-        NavManager.NavigateTo("/supervisor/fouj");
-    }
+  
 }

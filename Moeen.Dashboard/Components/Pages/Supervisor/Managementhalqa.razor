@@ -10,6 +10,8 @@
 --text-dark: #2d3436;
 --status-green: #2ecc71;
 --danger-red: #e74c3c;
+        --transition: all 0.3s ease;
+
 }
 body {
 font-family: 'Tajawal', sans-serif;
@@ -75,7 +77,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 flex-wrap:wrap;
              }
            .card {
-               flex:1 1 calc(50%-20px);
+               flex:1 1 320px;
     grid-template-columns: repeat(2,1fr);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
@@ -102,7 +104,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 padding-right:30px;
                 background: #d6cabc;
                 padding: 8px;
-                font-size:20px;
+                font-size:clamp(14px, 2.5vw, 18px);
                 border-radius: 10px;
         border-color: #195042;
                 margin-bottom: 3px;
@@ -127,14 +129,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
        .form-container, .form-container * {
         box-sizing: border-box;
     }
-    :root {
-        --primary-green: #195042;
-        --accent-beige: #d6cabc;
-        --light-beige: #f4f1ee;
-        --white: #ffffff;
-        --text-dark: #2d3436;
-        --transition: all 0.3s ease;
-    }
+  
     .form-container {
         max-width: 850px;
         margin: 2rem auto;
@@ -235,12 +230,19 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
             background: #f8f9fa;
             color: #dc3545;
         }
-    /* حل مشكلة الميديا كويري في Razor */
-    @@media (max-width: 768px) {
-        .grid-row, .grid-row:nth-of-type(4) {
-            grid-template-columns: 1fr !important;
-        }
-    }
+  @@media (max-width: 768px) {
+  .card-container {
+    flex-direction: column;
+  }
+
+  .card {
+    flex: 1 1 100%;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+}
             .form-label{
                 display:block;
                 margin-bottom:5px;

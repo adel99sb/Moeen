@@ -2,7 +2,6 @@
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.Scheduling;
 using Moeen.Api.Shared.Responses.Scheduling;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.Controllers
 {
@@ -17,18 +16,18 @@ namespace Moeen.Api.Controllers
             _schedulingService = schedulingService;
         }
 
+        /// <summary>
+        /// أمر: إنشاء جدول حلقة.
+        /// </summary>
         [HttpPost("create-circle-schedule")]
         public async Task<ActionResult<ScheduleResponseDto>> CreateCircleSchedule(CreateCircleScheduleRequest request)
-        {
-            var result = await _schedulingService.CreateCircleScheduleAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _schedulingService.CreateCircleScheduleAsync(request));
 
+        /// <summary>
+        /// أمر: تعيين جدول لمعلم.
+        /// </summary>
         [HttpPost("assign-to-teacher")]
         public async Task<ActionResult<AssignScheduleToTeacherResponse>> AssignScheduleToTeacher(AssignScheduleToTeacherRequest request)
-        {
-            var result = await _schedulingService.AssignScheduleToTeacherAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _schedulingService.AssignScheduleToTeacherAsync(request));
     }
 }

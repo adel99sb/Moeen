@@ -17,53 +17,43 @@ namespace Moeen.Api.Controllers
         }
 
         /// <summary>
-        /// التحقق من صلاحية وصول المستخدم لإذن معين
+        /// POST (قديم/متوافق): التحقق من صلاحية وصول المستخدم.
         /// </summary>
         [HttpPost("check-access")]
         public async Task<ActionResult<CheckAccessResponse>> CheckAccess(CheckAccessRequest request)
-        {
-            var result = await _authorizationService.CheckAccessAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _authorizationService.CheckAccessAsync(request));
 
         /// <summary>
-        /// إدارة الأدوار (إنشاء أو تحديث دور)
+        /// GET (جديد): التحقق من الصلاحية عبر Query.
         /// </summary>
+        [HttpGet("check-access")]
+        public async Task<ActionResult<CheckAccessResponse>> CheckAccessGet([FromQuery] string userId, [FromQuery] string permission)
+            => Ok(await _authorizationService.CheckAccessAsync(new CheckAccessRequest { UserId = userId, Permission = permission }));
+
         [HttpPost("manage-role")]
         public async Task<ActionResult<RoleDto>> ManageRole(ManageRoleRequest request)
-        {
-            var result = await _authorizationService.ManageRoleAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _authorizationService.ManageRoleAsync(request));
 
-        /// <summary>
-        /// تعيين دور لمستخدم
-        /// </summary>
         [HttpPost("assign-role")]
         public async Task<ActionResult<bool>> AssignRoleToUser(AssignRoleRequest request)
-        {
-            var result = await _authorizationService.AssignRoleToUserAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _authorizationService.AssignRoleToUserAsync(request));
 
-        /// <summary>
-        /// إزالة دور من مستخدم
-        /// </summary>
         [HttpPost("remove-role")]
         public async Task<ActionResult<bool>> RemoveRoleFromUser(RemoveRoleRequest request)
-        {
-            var result = await _authorizationService.RemoveRoleFromUserAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _authorizationService.RemoveRoleFromUserAsync(request));
 
         /// <summary>
-        /// الحصول على قائمة أدوار المستخدم
+        /// POST (قديم/متوافق): أدوار المستخدم.
         /// </summary>
         [HttpPost("user-roles")]
         public async Task<ActionResult<UserRolesResponse>> GetUserRoles(UserRolesRequest request)
-        {
-            var result = await _authorizationService.GetUserRolesAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _authorizationService.GetUserRolesAsync(request));
+
+        /// <summary>
+        /// GET (جديد): أدوار المستخدم عبر Route.
+        /// </summary>
+        [HttpGet("users/{userId}/roles")]
+        public async Task<ActionResult<UserRolesResponse>> GetUserRolesGet([FromRoute] string userId)
+            => Ok(await _authorizationService.GetUserRolesAsync(new UserRolesRequest { UserId = userId }));
     }
 }

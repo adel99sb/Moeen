@@ -1,6 +1,8 @@
-﻿namespace Moeen.Api.Core.Contracts.infrastructure.Repositories
+﻿namespace Moeen.Api.Core.Contracts
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork : IDisposable
     {
+        IRepository<T> Repository<T>() where T : class;
+        Task<int> CompleteAsync();
     }
 }

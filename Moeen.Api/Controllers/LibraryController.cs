@@ -38,11 +38,22 @@ namespace Moeen.Api.Controllers
         }
 
         /// <summary>
-        /// البحث في المكتبة
+        /// POST (قديم/متوافق): بحث متقدم/حالي.
         /// </summary>
         [HttpPost("search")]
         public async Task<ActionResult<SearchLibraryResponse>> SearchLibrary(SearchLibraryRequest request)
         {
+            var result = await _libraryService.SearchLibraryAsync(request);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// GET (جديد): بحث سريع عبر Query String.
+        /// </summary>
+        [HttpGet("search")]
+        public async Task<ActionResult<SearchLibraryResponse>> SearchLibraryGet([FromQuery] string query)
+        {
+            var request = new SearchLibraryRequest { Query = query };
             var result = await _libraryService.SearchLibraryAsync(request);
             return Ok(result);
         }

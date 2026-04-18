@@ -23,8 +23,5 @@ namespace Moeen.Api.Shared.Requests.Identity
         [Required(ErrorMessage = "Gender is required")]
         [RegularExpression("^(Male|Female)$", ErrorMessage = "Gender must be Male or Female")]
         public string Gender { get; set; }
-
-        [Range(0, 2, ErrorMessage = "Role must be between 0 and 2")] // مثال: 0=User,1=Teacher,2=Student
-        public int? Role { get; set; }
     }
 }

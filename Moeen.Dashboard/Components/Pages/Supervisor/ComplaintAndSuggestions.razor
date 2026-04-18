@@ -8,6 +8,8 @@
 --text-dark: #2d3436;
 --status-green: #2ecc71;
 --danger-red: #e74c3c;
+--radius-md: 12px;
+ --shadow-sm: 0 3px 8px rgba(0,0,0,0.08);
 }
 body {
 font-family: 'Tajawal', sans-serif;
@@ -28,6 +30,7 @@ position: relative;
 padding-bottom: 10px; /* مسافة بين النص والخط */
 border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
 display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+margin-top:15px;
 }
 .table {
     width: 100%;
@@ -36,7 +39,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
     overflow: hidden;
     box-shadow: var(--shadow-sm);
      font-family: 'Tajawal', sans-serif;
-        font-size: clamp(1rem,2.5vw,1.5rem);
+        font-size: clamp(0.95rem,2.5vw,1.5rem);
         text-align: center;
 }
     .table th {
@@ -54,7 +57,21 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         background-color: #fafafa;
         transform: scale(1.01);
     }
+	.table-wrapper{
+		overflow-x: auto;
+		width: 100%;
+		border-radius: var(--radius-md);
+	}
+	.select {
+	padding: 5px;
+	border-radius: 7px;
+	border: 1px solid #ccc;
+	font-family: 'Tajawal', sans-serif;
+	background-color: var(--white);
+	font-size: 1rem;
+	transition: border-color 0.3s ease;	}
 	</style>
+	<section class="management-container">
 <header class="page-header">
 	<h2 class="page-title">إدارة الشكاوي والاقتراحات</h2>
 </header>
@@ -62,22 +79,23 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 <header class="page-header">
 	<h4 class="page-title">قائمة الشكاوي</h4>
 </header>
+<div class="table-wrapper">
 <table class="table">
 	<thead>
 		<tr>
-			<th class="table th">ID المستخدم </th>
-			<th class="table th">ملخص الشكوى </th>
-			<th class="table th">تارسخ الإرسال </th>
-			<th class="table th">حالة الشكوى  </th>
+			<th >ID المستخدم </th>
+			<th>ملخص الشكوى </th>
+			<th >تاريخ الإرسال </th>
+			<th >حالة الشكوى  </th>
 
 		</tr>
 	</thead>
 	<tbody>
 		<tr>
-			<td class="table td">aaa</td>
-			<td class="table td">بطء في التحميل</td>
-			<td class="table td">15/3/2026</td>
-			<td class="table td">
+			<td >aaa</td>
+			<td >بطء في التحميل</td>
+			<td >15/3/2026</td>
+			<td >
 				<select class="select" name="حالة الشكوى">
 					<option> مرفوضة</option>
 					<option> قيد المعالجة</option>
@@ -86,10 +104,10 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 			</td>
 		</tr>
 		<tr>
-			<td class="table td">bb</td>
-			<td class="table td">وجود مشاكل بالمشرف</td>
-			<td class="table td">15/3/2026</td>
-			<td class="table td">
+			<td >bb</td>
+			<td >وجود مشاكل بالمشرف</td>
+			<td >15/3/2026</td>
+			<td >
 				<select class="select" name="حالة الشكوى">
 					<option> مرفوضة</option>
 					<option> قيد المعالجة</option>
@@ -98,10 +116,10 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 			</td>
 		</tr>
 		<tr>
-			<td class="table td">aba</td>
-			<td class="table td">مشاكل في تسجيل الدخول</td>
-			<td class="table td"> 15/3/2026</td>
-			<td class="table td">
+			<td >aba</td>
+			<td >مشاكل في تسجيل الدخول</td>
+			<td > 15/3/2026</td>
+			<td >
 				<select class="select" name="حالة الشكوى">
 					<option> مرفوضة</option>
 					<option> قيد المعالجة</option>
@@ -111,26 +129,28 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 		</tr>
 	</tbody>
 	</table>
+	</div>
 <header class="page-header">
 	<h4 class="page-title">قائمة الاقتراحات</h4>
 </header>
 <br />
+<div class="table-wrapper">
 <table class="table">
 	<thead>
 		<tr>
-			<th class="table th">ID المستخدم </th>
-			<th class="table th">ملخص الاقتراح </th>
-			<th class="table th">تارسخ الإرسال </th>
-			<th class="table th">حالة الاقتراح  </th>
+			<th >ID المستخدم </th>
+			<th >ملخص الاقتراح </th>
+			<th >تارسخ الإرسال </th>
+			<th >حالة الاقتراح  </th>
 
 		</tr>
 	</thead>
 	<tbody>
 		<tr>
-			<td class="table td">aaa</td>
-			<td class="table td">توسيع البرنامج واضافة شرح للفقه والحديث  </td>
-			<td class="table td">15/3/2026</td>
-			<td class="table td">
+			<td >aaa</td>
+			<td >توسيع البرنامج واضافة شرح للفقه والحديث  </td>
+			<td >15/3/2026</td>
+			<td >
 				<select class="select" name="حالة الاقتراح">
 					<option> مرفوضة</option>
 					<option> قيد المعالجة</option>
@@ -140,10 +160,10 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 			</td>
 		</tr>
 		<tr>
-			<td class="table td">aaa</td>
-			<td class="table td">تحديث  </td>
-			<td class="table td">15/3/2026</td>
-			<td class="table td">
+			<td >aaa</td>
+			<td >تحديث  </td>
+			<td >15/3/2026</td>
+			<td >
 				<select class="select" name="حالة الاقتراح">
 					<option> مرفوضة</option>
 					<option> قيد المعالجة</option>
@@ -152,10 +172,10 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 			</td>
 		</tr>
 		<tr>
-			<td class="table td">aaa</td>
-			<td class="table td">العمل على تحيث البرنامج  </td>
-			<td class="table td">15/3/2026</td>
-			<td class="table td">
+			<td	>aaa</td>
+			<td >العمل على تحديث البرنامج  </td>
+			<td >15/3/2026</td>
+			<td >
 				<select class="select" name="حالة الاقتراح">
 					<option> مرفوضة</option>
 					<option> قيد المعالجة</option>
@@ -164,10 +184,10 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 			</td>
 		</tr>
 		<tr>
-			<td class="table td">aaa</td>
-			<td class="table td">إضافة جامع النور للبرنامج  </td>
-			<td class="table td">15/3/2026</td>
-			<td class="table td">
+			<td >aaa</td>
+			<td >إضافة جامع النور للبرنامج  </td>
+			<td >15/3/2026</td>
+			<td >
 				<select class="select" name="حالة الاقتراح">
 					<option> مرفوضة</option>
 					<option> قيد المعالجة</option>
@@ -177,6 +197,8 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 		</tr>
 	</tbody>
 </table>
+</div>
+</section>
 @code {
 
 }

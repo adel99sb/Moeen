@@ -12,6 +12,8 @@
 --text-dark: #2d3436;
 --status-green: #2ecc71;
 --danger-red: #e74c3c;
+        --transition: all 0.3s ease;
+
 }
 
 body {
@@ -88,6 +90,11 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         background-color: #fafafa;
         transform: scale(1.01);
     }
+    .table-wrapper{
+		overflow-x: auto;
+		width: 100%;
+		border-radius: var(--radius-md);
+	}
 	.btn-pprimary {
     background-color: var(--primary-green);
     font-size: 15px;
@@ -107,15 +114,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         box-sizing: border-box;
     }
 
-    :root {
-        --primary-green: #195042;
-        --accent-beige: #d6cabc;
-        --light-beige: #f4f1ee;
-        --white: #ffffff;
-        --text-dark: #2d3436;
-        --transition: all 0.3s ease;
-    }
-
+    
     .form-container {
         max-width: 850px;
         margin: 2rem auto;
@@ -247,6 +246,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 	<i class="bi bi-search"></i>
 	<input type="text" class="search-input" placeholder="ابحث عن طالب...">
 </div>
+<div class="table-wrapper">
 <div class="table-responsive">
 <table class="table">
 	<thead>
@@ -289,7 +289,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 		</tr>
 	</tbody>
 	</table>
-	</div>
+	</div></div>
 	<br />
 	<details>
 		<summary class="btn-pprimary">إضافة طالب جديد</summary>

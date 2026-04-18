@@ -2,7 +2,6 @@
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.Feedback;
 using Moeen.Api.Shared.Responses.Feedback;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.Controllers
 {
@@ -18,33 +17,24 @@ namespace Moeen.Api.Controllers
         }
 
         /// <summary>
-        /// تقديم شكوى
+        /// أمر: تقديم شكوى.
         /// </summary>
         [HttpPost("complaint")]
         public async Task<ActionResult<SubmitComplaintResponse>> SubmitComplaint(SubmitComplaintRequest request)
-        {
-            var result = await _feedbackService.SubmitComplaintAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _feedbackService.SubmitComplaintAsync(request));
 
         /// <summary>
-        /// تقديم اقتراح
+        /// أمر: تقديم اقتراح.
         /// </summary>
         [HttpPost("suggestion")]
         public async Task<ActionResult<SubmitSuggestionResponse>> SubmitSuggestion(SubmitSuggestionRequest request)
-        {
-            var result = await _feedbackService.SubmitSuggestionAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _feedbackService.SubmitSuggestionAsync(request));
 
         /// <summary>
-        /// إدارة الشكاوى والاقتراحات (الرد)
+        /// أمر: إدارة الشكاوى والاقتراحات.
         /// </summary>
         [HttpPut("manage")]
         public async Task<ActionResult<ManageFeedbackResponse>> ManageFeedback(ManageFeedbackRequest request)
-        {
-            var result = await _feedbackService.ManageFeedbacksAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _feedbackService.ManageFeedbacksAsync(request));
     }
 }

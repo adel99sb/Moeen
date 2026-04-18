@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تأكيد البريد الإلكتروني</title>
+
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --accent-color: #66ccff;
+            --text-color: #ffffff;
+            --card-bg: #1b2a33;
+            --bg-gradient: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: auto;
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 35px;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo-box {
+            width: 85px;
+            height: 85px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: 26px;
+            margin: 0;
+            color: var(--accent-color);
+        }
+
+        p {
+            line-height: 1.7;
+            font-size: 16px;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .code-box {
+            text-align: center;
+            margin: 35px 0;
+        }
+
+        .code {
+            display: inline-block;
+            padding: 14px 32px;
+            font-size: 28px;
+            letter-spacing: 8px;
+            font-weight: bold;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer {
+            margin-top: 35px;
+            font-size: 13px;
+            text-align: center;
+            color: #bbbbbb;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            padding-top: 20px;
+        }
+
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <div class="logo-box">
+                <img src="logo.svg" alt="Logo" width="55">
+            </div>
+            <h1>تأكيد بريدك الإلكتروني</h1>
+            <p>مرحباً بك في منصتك!</p>
+        </div>
+
+        <p>مرحباً،</p>
+
+        <p>
+            شكراً لإنضمامك إلى منصتنا! لإكمال عملية التسجيل، يرجى إدخال رمز التحقق التالي في الموقع:
+        </p>
+
+        <div class="code-box">
+            <div class="code">
+                {{verificationCode}}
+            </div>
+            <p style="margin-top: 10px; font-size: 14px; opacity: 0.7;">
+                هذا الرمز صالح لمدة 10 دقائق.
+            </p>
+        </div>
+
+        <p>
+            إذا لم تقم بطلب هذا الإجراء، يمكنك تجاهل هذه الرسالة بكل أمان.
+        </p>
+
+        <p>
+            مع التحية،<br>
+            فريق المنصة
+        </p>
+
+        <div class="footer">
+            <p>هذه رسالة مرسلة تلقائياً. الرجاء عدم الرد عليها مباشرة.</p>
+            <p>للمساعدة: <a href="mailto:support@example.com">support@example.com</a></p>
+            <p><a href="https://your-website.com">منصتك</a></p>
+        </div>
+
+    </div>
+
+</body>
+</html>

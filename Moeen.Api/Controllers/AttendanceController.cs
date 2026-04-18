@@ -2,7 +2,7 @@
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.Attendance;
 using Moeen.Api.Shared.Responses.Attendance;
-using System.Threading.Tasks;
+using System;
 
 namespace Moeen.Api.Controllers
 {
@@ -22,50 +22,49 @@ namespace Moeen.Api.Controllers
         /// </summary>
         [HttpPost("record-daily")]
         public async Task<ActionResult<RecordDailyAttendanceResponse>> RecordDailyAttendance(RecordDailyAttendanceRequest request)
-        {
-            var result = await _attendanceService.RecordDailyAttendanceAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _attendanceService.RecordDailyAttendanceAsync(request));
 
         /// <summary>
         /// تسجيل الغياب
         /// </summary>
         [HttpPost("record-absence")]
         public async Task<ActionResult<RecordAbsenceResponse>> RecordAbsence(RecordAbsenceRequest request)
-        {
-            var result = await _attendanceService.RecordAbsenceAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _attendanceService.RecordAbsenceAsync(request));
 
         /// <summary>
         /// تعديل سجل حضور
         /// </summary>
         [HttpPut("modify-record")]
         public async Task<ActionResult<ModifyAttendanceRecordResponse>> ModifyAttendanceRecord(ModifyAttendanceRecordRequest request)
-        {
-            var result = await _attendanceService.ModifyAttendanceRecordAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _attendanceService.ModifyAttendanceRecordAsync(request));
 
         /// <summary>
         /// حساب نسبة الحضور لطالب
         /// </summary>
         [HttpPost("calculate-rate")]
         public async Task<ActionResult<CalculateAttendanceRateResponse>> CalculateAttendanceRate(CalculateAttendanceRateRequest request)
-        {
-            var result = await _attendanceService.CalculateAttendanceRateAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _attendanceService.CalculateAttendanceRateAsync(request));
+
+        /// <summary>
+        /// GET (جديد): نسبة حضور الطالب.
+        /// </summary>
+        [HttpGet("students/{studentId:guid}/rate")]
+        public async Task<ActionResult<CalculateAttendanceRateResponse>> CalculateAttendanceRateGet([FromRoute] Guid studentId)
+            => Ok(await _attendanceService.CalculateAttendanceRateAsync(new CalculateAttendanceRateRequest { StudentId = studentId }));
 
         /// <summary>
         /// مراقبة الغياب المتكرر
         /// </summary>
         [HttpPost("frequent-absences")]
         public async Task<ActionResult<MonitorFrequentAbsencesResponse>> MonitorFrequentAbsences(MonitorFrequentAbsencesRequest request)
-        {
-            var result = await _attendanceService.MonitorFrequentAbsencesAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _attendanceService.MonitorFrequentAbsencesAsync(request));
+
+        /// <summary>
+        /// GET (جديد): مراقبة الغياب المتكرر بعتبة.
+        /// </summary>
+        [HttpGet("frequent-absences")]
+        public async Task<ActionResult<MonitorFrequentAbsencesResponse>> MonitorFrequentAbsencesGet([FromQuery] int threshold = 3)
+            => Ok(await _attendanceService.MonitorFrequentAbsencesAsync(new MonitorFrequentAbsencesRequest { Threshold = threshold }));
 
         /// <summary>
         /// تصدير سجلات الحضور
