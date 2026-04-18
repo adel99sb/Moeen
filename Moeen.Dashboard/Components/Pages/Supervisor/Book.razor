@@ -1,25 +1,225 @@
 ﻿@page "/supervisor/book"
-<h3>Book</h3>
-<style>
-	.btn-pprimary {
-		background-color: var(--primary-green);
-		font-size: 15px;
-		padding: 10px 20px;
-		color: var(--white);
-		border-radius: 12px;
-		transition: 0.3s;
-	}
+	<style>
+   :root {
+--primary-green: #195042;
+--accent-beige: #d6cabc;
+--light-beige: #f4f1ee;
+--white: #ffffff;
+--text-dark: #2d3436;
+--status-green: #2ecc71;
+--danger-red: #e74c3c;
+}
+body {
+font-family: 'Tajawal', sans-serif;
+background-color: #f9f9f9;
+direction: rtl;
+}
+.management-container {
+background: var(--white);
+margin: 20px;
+padding: 30px;
+border-radius: 20px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+/* العنوان */
+.page-title {
+color: var(--primary-green);
+position: relative;
+padding-bottom: 10px; /* مسافة بين النص والخط */
+border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
+display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+}
 
-		.btn-pprimary:hover {
-			background-color: #123d32;
-			transform: translateY(-2px);
-		}
+.search-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 45px 12px 15px;
+    border: 1.5px solid var(--accent-beige);
+    border-radius: 12px;
+    outline: none;
+    transition: 0.3s;
+}
+
+    .search-input:focus {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
+    }
+
+.search-wrapper i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary-green);
+}
+.table {
+    width: 100%;
+    table-layout: fixed;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+     font-family: 'Tajawal', sans-serif;
+        font-size: clamp(1rem,2.5vw,1.5rem);
+        text-align: center;
+}
+    .table th {
+        background-color: var(--light-beige);
+        color: var(--primary-green);
+        padding: 12px;
+    }
+    .table td {
+        background-color: var(--white);
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+
+    }
+    .table tbody tr:hover {
+        background-color: #fafafa;
+        transform: scale(1.01);
+    }
+   	.btn-pprimary {
+    background-color: var(--primary-green);
+    font-size: 15px;
+    padding: 10px 20px;
+    color: var(--white);
+    border-radius: 12px;
+    display: inline;
+    transition: 0.3s;
+}
+
+    .btn-pprimary:hover {
+        background-color: #123d32;
+        transform: translateY(-2px);
+    }
+         .form-container, .form-container * {
+        box-sizing: border-box;
+    }
+    :root {
+        --primary-green: #195042;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --text-dark: #2d3436;
+        --transition: all 0.3s ease;
+    }
+    .form-container {
+        max-width: 850px;
+        margin: 2rem auto;
+        background: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        direction: rtl; 
+        overflow: hidden;
+    }
+    .form-header {
+        background: var(--accent-beige);
+        color: var(--white);
+        padding: 0.7rem;
+        text-align: center;
+    }
+    form {
+        padding: 1.5rem;
+    }
+
+    .grid-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 1.5rem;
+        margin-bottom: 1.2rem;
+    }
+        .grid-row:nth-of-type(4) {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+        .input-group label {
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: right;
+        }
+    /* حل مشكلة الأيقونات والمحاذاة */
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+        .input-wrapper i {
+            position: absolute;
+            right: 12px; /* تثبيت الأيقونة جهة اليمين */
+            color: var(--primary-green);
+            z-index: 2;
+            pointer-events: none;
+        }
+        .input-wrapper input,
+        .input-wrapper select {
+            width: 100%;
+            padding: 10px 35px 10px 10px;
+            border: 1px solid var(--accent-beige);
+            border-radius: 8px;
+            background: var(--light-beige);
+            font-size: 0.9rem;
+            height: 45px; 
+            outline: none;
+            transition: var(--transition);
+        }
+            .input-wrapper input:focus,
+            .input-wrapper select:focus {
+                border-color: var(--primary-green);
+                background: #fff;
+            }
+    .actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+    }
+        .actions button, .actions a {
+            flex: 1;
+            height: 48px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .actions .save {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .actions .cancel {
+            background: #f8f9fa;
+            color: #dc3545;
+        }
+    /* حل مشكلة الميديا كويري في Razor */
+    @@media (max-width: 768px) {
+        .grid-row, .grid-row:nth-of-type(4) {
+            grid-template-columns: 1fr !important;
+        }
+    }
 </style>
+<section class="management-container">
 <header class="page-header">
 	<h2 class="page-title">إدارة الكتب</h2>
 </header>
 <br />
-<div class="search-wrapper">
+<div class="search-wrapper mb-3">
 	<i class="bi bi-search"></i>
 	<input type="text" class="search-input" placeholder="ابحث عن كتاب...">
 </div>
@@ -32,18 +232,14 @@
 			<th class="table th">رابط التحميل </th>
 		</tr>
 	</thead>
-	<br />
-
 	<tbody>
 		<tr>
 			<td class="table td">كتاب التجويد </td>
 			<td class="table td">كتاب لتعلم قواعد التجويد </td>
 			<td class="table td">
 				<a href="https://example.com/tafsir.pdf" target="_blank" title="تحميل"><i class="bi bi-save"></i></a>
-
 			</td>
 		</tr>
-		<br />
 		<tr>
 			<td class="table td">كتاب التفسير </td>
 			<td class="table td">كتاب لتعلم تفسير القرآن الكريم </td>
@@ -54,30 +250,46 @@
 		</tbody>
 		</table>
 		<br />
-		<details class="details">
+		<details>
 	<summary class="btn-pprimary">إضافة كتاب جديد</summary>
-
-		<br>
-
-		<form class="form-box">
-			<div class="form-group">
-<label class="label">اسم الكتاب:</label><br>
-<input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
-	    	</div>
-			<div class="form-group">
-<label class="label">وصف الكتاب :</label><br>
-<input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
-             </div>
-			 <div class="form-group">
-<label class="label">رابط لتحميل الكتاب :</label><br>
-<input class="input" placeholder="اكتب هنا..." type="text" name="name">
-              </div>
-		
-		<br />
-		<button class="btn-pprimary" type="submit"> <i class="bi bi-upload"></i></button>
+    <div class="form-container">
+    <div class="form-header">
+        <h2><i class="bi bi-plus-circle-dotted"></i> إضافة كتاب</h2>
+    </div>
+                <form>
+        <div class="grid-row">
+            <div class="input-group">
+         <label>اسم الكتاب </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-fonts"></i>
+                    <input type="text" placeholder="أدخل الاسم">
+                </div>
+            </div>
+             <div class="input-group">
+                <label> وصف الكتاب</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-pencil"></i>
+                    <input type="text" placeholder="اكتب هنا...">
+                </div>
+            </div>
+            </div>
+        <div class="grid-row">
+			 <div class="input-group">
+                <label> رابط لتحميل الكتاب</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-pencil"></i>
+                    <input type="text" placeholder="اكتب هنا...">
+                </div>
+            </div>
+            </div>
+			  <div class="actions">
+            <button type="submit" class="save"><i class="bi bi-check2-all"></i> رفع الكتب</button>
+            <a href="/supervisor/book" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+        </div>
 </form>
+    </div>
 </details>
-
+</section>
 
 @code {
 

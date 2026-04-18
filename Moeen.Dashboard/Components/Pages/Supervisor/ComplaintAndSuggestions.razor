@@ -1,5 +1,60 @@
 ﻿@page "/supervisor/complaint-and-suggestions"
-<h3>ComplaintAndSuggestions</h3>
+<style>
+   :root {
+--primary-green: #195042;
+--accent-beige: #d6cabc;
+--light-beige: #f4f1ee;
+--white: #ffffff;
+--text-dark: #2d3436;
+--status-green: #2ecc71;
+--danger-red: #e74c3c;
+}
+body {
+font-family: 'Tajawal', sans-serif;
+background-color: #f9f9f9;
+direction: rtl;
+}
+.management-container {
+background: var(--white);
+margin: 20px;
+padding: 30px;
+border-radius: 20px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+/* العنوان */
+.page-title {
+color: var(--primary-green);
+position: relative;
+padding-bottom: 10px; /* مسافة بين النص والخط */
+border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
+display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+}
+.table {
+    width: 100%;
+    table-layout: fixed;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+     font-family: 'Tajawal', sans-serif;
+        font-size: clamp(1rem,2.5vw,1.5rem);
+        text-align: center;
+}
+    .table th {
+        background-color: var(--light-beige);
+        color: var(--primary-green);
+        padding: 12px;
+    }
+    .table td {
+        background-color: var(--white);
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+
+    }
+    .table tbody tr:hover {
+        background-color: #fafafa;
+        transform: scale(1.01);
+    }
+	</style>
 <header class="page-header">
 	<h2 class="page-title">إدارة الشكاوي والاقتراحات</h2>
 </header>
@@ -7,8 +62,6 @@
 <header class="page-header">
 	<h4 class="page-title">قائمة الشكاوي</h4>
 </header>
-<br />
-
 <table class="table">
 	<thead>
 		<tr>
@@ -19,7 +72,6 @@
 
 		</tr>
 	</thead>
-	<br />
 	<tbody>
 		<tr>
 			<td class="table td">aaa</td>
@@ -30,12 +82,9 @@
 					<option> مرفوضة</option>
 					<option> قيد المعالجة</option>
 					<option> تمت المعالجة</option>
-
-
 				</select>
 			</td>
 		</tr>
-		<br />
 		<tr>
 			<td class="table td">bb</td>
 			<td class="table td">وجود مشاكل بالمشرف</td>
@@ -45,13 +94,9 @@
 					<option> مرفوضة</option>
 					<option> قيد المعالجة</option>
 					<option> تمت المعالجة</option>
-
-
 				</select>
 			</td>
-
 		</tr>
-		<br />
 		<tr>
 			<td class="table td">aba</td>
 			<td class="table td">مشاكل في تسجيل الدخول</td>
@@ -61,8 +106,6 @@
 					<option> مرفوضة</option>
 					<option> قيد المعالجة</option>
 					<option> تمت المعالجة</option>
-
-
 				</select>
 			</td>
 		</tr>
@@ -82,7 +125,6 @@
 
 		</tr>
 	</thead>
-	<br />
 	<tbody>
 		<tr>
 			<td class="table td">aaa</td>
@@ -94,11 +136,9 @@
 					<option> قيد المعالجة</option>
 					<option> سيتم العمل على الاقتراح</option>
 
-
 				</select>
 			</td>
 		</tr>
-		<br />
 		<tr>
 			<td class="table td">aaa</td>
 			<td class="table td">تحديث  </td>
@@ -108,12 +148,9 @@
 					<option> مرفوضة</option>
 					<option> قيد المعالجة</option>
 					<option> سيتم العمل على الاقتراح</option>
-
-
 				</select>
 			</td>
 		</tr>
-		<br />
 		<tr>
 			<td class="table td">aaa</td>
 			<td class="table td">العمل على تحيث البرنامج  </td>
@@ -126,7 +163,6 @@
 				</select>
 			</td>
 		</tr>
-		<br />
 		<tr>
 			<td class="table td">aaa</td>
 			<td class="table td">إضافة جامع النور للبرنامج  </td>
@@ -136,8 +172,6 @@
 					<option> مرفوضة</option>
 					<option> قيد المعالجة</option>
 					<option> سيتم العمل على الاقتراح</option>
-
-
 				</select>
 			</td>
 		</tr>

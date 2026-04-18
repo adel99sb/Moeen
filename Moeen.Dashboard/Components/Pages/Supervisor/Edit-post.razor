@@ -2,15 +2,41 @@
 @rendermode InteractiveServer
 
 @inject NavigationManager NavManager
-
-<h3>Edit_post</h3>
- <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
     <style>
+         :root {
+--primary-green: #195042;
+--accent-beige: #d6cabc;
+--light-beige: #f4f1ee;
+--white: #ffffff;
+--text-dark: #2d3436;
+--status-green: #2ecc71;
+--danger-red: #e74c3c;
+}
+body {
+font-family: 'Tajawal', sans-serif;
+background-color: #f9f9f9;
+direction: rtl;
+}
+        .management-container {
+background: var(--white);
+margin: 20px;
+padding: 30px;
+border-radius: 20px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+/* العنوان */
+.page-title {
+color: var(--primary-green);
+position: relative;
+padding-bottom: 10px; /* مسافة بين النص والخط */
+border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
+display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+}
 /* دمج الإعدادات العامة والحاويات */
+.form-container, .form-container * {
+        box-sizing: border-box;
+    }
+
 .form-container {
     max-width: 900px;
     margin: 20px auto;
@@ -22,13 +48,11 @@
 }
 
 .form-header {
-    background: #195042;
+    background: var(--accent-beige);
     color: #fff;
     padding: 20px 30px;
 }
-
 form { padding: 30px; }
-
 /* دمج الصفوف والمجموعات */
 .grid-row, .actions, .form-header h2, .save, .cancel, .input-wrapper {
     display: flex;
@@ -37,10 +61,8 @@ form { padding: 30px; }
     border-radius:5px;
     padding:5px;
 }
-
 .grid-row { margin-bottom: 20px; flex-wrap: wrap; gap: 20px; }
 .input-group { flex: 1; min-width: 250px; }
-
 .input-group {
     flex:1 1 45%;
     display: flex;
@@ -103,6 +125,8 @@ form { padding: 30px; }
 .cancel { background: #f5f5f5; color: #666; }
 .cancel:hover { background: #eee; color: #333; }
     </style>
+<section class="management-container">
+
     <header class="page-header">
 	<h2 class="page-title"> تعديل على منشور</h2>
 </header>
@@ -111,22 +135,19 @@ form { padding: 30px; }
     <div class="form-header">
         <h2><i class="bi bi-person-plus-fill"></i>  تعديل على منشور</h2>
     </div>
-    
     <form>
         <div class="grid-row">
             <div class="input-group">
                 <label>تعديل عنوان المنشور</label>
                 <div class="input-wrapper">
-                    <i class="bi bi-person"></i>
+                    <i class="bi bi-fonts"></i>
                     <input type="text" placeholder="أدخل العنوان">
                 </div>
             </div>
-        
-   
             <div class="input-group">
                 <label>تعديل محتوى المنشور</label>
                 <div class="input-wrapper">
-                    <i class="bi bi-person"></i>
+                    <i class="bi bi-pencil"></i>
                     <input type="text" placeholder="اكتب هنا">
                 </div>
             </div>
@@ -144,6 +165,8 @@ form { padding: 30px; }
                 <div class="input-group">
                 <label>نوع المنشور</label>
                 <div class="input-wrapper">
+                    <i class="bi bi-text-paragraph"></i>
+
                     <select>
                         <option value="" disabled selected>اختر نوع المنشور</option>
                         <option value="male">عام</option>
@@ -154,11 +177,11 @@ form { padding: 30px; }
                 </div>
                 <div class="actions">
             <button type="submit" class="save"><i class="bi bi-check2-all"></i> إعادة النشر </button>
-            <a href="supervisor/post" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+            <a href="/supervisor/posts" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
         </div>
     </form>
 </div>
-
+</section>
 
 @code {
 
