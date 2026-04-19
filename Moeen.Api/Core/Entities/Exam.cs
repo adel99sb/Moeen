@@ -9,11 +9,13 @@
         public int juz_to { get; set; }
         public int score { get; set; }
         public DateTime date { get; set; }
+
         public string notes { get; set; }
         public int mark { get; set; }
         public Student Student { get; set; }
         public Teacher Teacher { get; set; }
-
+        public Guid TeacherExamId { get; set; }
+        public TeacherExam TeacherExams { get; set; }
 
     }
 }
