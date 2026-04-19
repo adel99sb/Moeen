@@ -1,9 +1,8 @@
-﻿@page "/supervisor/edithalqa"
-@rendermode InteractiveServer
+﻿@page "/supervisor/edithalaqaa"
 @inject NavigationManager NavManager
-<h3>Edit Halqa</h3>
+@rendermode InteractiveServer
 <style>
-         :root {
+ :root {
 --primary-green: #195042;
 --accent-beige: #d6cabc;
 --light-beige: #f4f1ee;
@@ -11,8 +10,6 @@
 --text-dark: #2d3436;
 --status-green: #2ecc71;
 --danger-red: #e74c3c;
-        --transition: all 0.3s ease;
-
 }
 body {
 font-family: 'Tajawal', sans-serif;
@@ -34,10 +31,18 @@ padding-bottom: 10px; /* مسافة بين النص والخط */
 border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
 display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
 }
- .form-container, .form-container * {
+
+       .form-container, .form-container * {
         box-sizing: border-box;
     }
-    
+    :root {
+        --primary-green: #195042;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --text-dark: #2d3436;
+        --transition: all 0.3s ease;
+    }
     .form-container {
         max-width: 850px;
         margin: 2rem auto;
@@ -144,36 +149,14 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
             grid-template-columns: 1fr !important;
         }
     }
-            .form-label{
-                display:block;
-                margin-bottom:5px;
-                font-weight:bold;
-            }
-            .halqat-container{
-                background:white;
-            display:flex;
-                flex-wrap:wrap;
-                gap:10px;
-                align-items:center;
-            }
-            .checkbox-item{
-                display:flex;
-                align-items:center;
-                gap:5px;
-                padding:5px 10px;
-                border-radius:8px;
-                cursor:pointer;
-                font-size:20px;
-            }
 </style>
-<section class="management-container">
-<header class="page-header">
-    <h2 class="page-title"> تعديل معلومات الحلقة</h2>
-</header> 
-
-             <div class="form-container">
+ <section class="management-container">
+    <header class="page-header">
+        <h2 class="page-title">تعديل حلقة</h2>
+    </header>
+     <div class="form-container">
     <div class="form-header">
-        <h2><i class="bi bi-pencil"></i> تعديل حلقة</h2>
+        <h2><i class="bi bi-pencil"></i> تعديل معلومات حلقة</h2>
     </div>
                 <form>
         <div class="grid-row">
@@ -184,45 +167,56 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                     <input type="text" placeholder="أدخل الاسم">
                 </div>
                 </div>
-        <div class="input-group">
-         <label>اسم معلم الحلقة </label>
+
+                 <div class="input-group">
+         <label>الفئة المتضمنة </label>
                 <div class="input-wrapper">
-                    <i class="bi bi-fonts"></i>
-                    <input type="text" placeholder="أدخل الاسم">
-                </div>
-                </div>
-        </div>
-      
-          <div class="grid-row">
-            <div class="input-group">
-                <label>الفوج</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-layers"></i>
+                    <i class="bi bi-text-paragraph"></i>
                     <select>
-                        <option>الفوج الأول</option>
-                        <option>الفوج الثاني</option>
-                    </select>
-                </div>
-            </div>
-             <div class="input-group">
-                <label>نوع الحلقة</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-layers"></i>
-                    <select>
-                        <option>غيبي</option>
-                        <option>حاضر</option>
+                        <option>اصغر من تسع سنوات</option>
+                        <option>9-13 سنة</option>
+                        <option>14-18 سنة</option>
+                        <option>اكبر من 18 سنة</option>
+
                     </select>
                 </div>
                 </div>
-            </div>
-          <div class="actions">
-            <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ </button>
-            <a href="/supervisor/managementhalqa" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
-        </div>
-    </form>
                 </div>
 
-</section>
+        <div class="grid-row">
+       
+              <div class="input-group">
+         <label>توقيت الحلقة </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-clock-history"></i>
+                    <select>
+                        <option>الثامنة صباحا</option>
+                        <option>التاسعة صباحا</option>
+                        <option>العاشرة صباحا</option>
+                    </select>
+                </div>
+                </div>
+         <div class="input-group">
+         <label>اسم معلم الحلقة </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-layers"></i>
+                    <select>
+                        <option>ماريا العبدالسلام</option>
+                        <option>آية دعبول</option>
+                    </select>
+                </div>
+                </div>
+
+                </div>
+           <div class="actions">
+            <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ</button>
+            <a href="/supervisor/saturdaylesson" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+        </div>
+    </form>
+        </div>
+
+        </section>
+
 @code {
 
 }

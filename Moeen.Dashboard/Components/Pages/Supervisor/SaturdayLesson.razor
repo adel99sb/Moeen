@@ -1,372 +1,435 @@
 ﻿@page "/supervisor/saturdaylesson"
-<h3>SuaturdayLesson</h3>
-<div class="card" >
-            <h3> إدارة الدروس</h3>
-            <details class="details">
-		  <summary class="summary">
-            <button class="btn btn-primary">تفاصيل</button>
-          </summary>
- <h4> دروس السبت</h4>
-  <table class="table">
-   <thead>
-     <tr>
-	   <th class="table th">اسم الدرس</th>
-       <th class="table th">معلومات الدرس </th>
-       <th class="table th">حذف الحلقة</th>
-     </tr>
-   </thead>
-   <tbody>
-     <tr>
-        <td class="table td">فقه </td>
-        <td class="table td">
-           <details class="details">
-            <summary class="summary">
-            <button class="btn btn-primary">معلومات الدرس</button>
-            </summary>
-               <form class="form-box">
-		          <label class="label">اسم الدرس:</label><br>
-                  <label class="label">فكرة عامة عن الدرس :</label><br>
-                  <label class="label">الفئة المستهدفة:</label><br>
-                  <label class="label">اسم المعلم:</label><br>
-                  
-             </form>
-             </details>
-      </td>
-        <td class="table td"><button class="btn btn-danger">حذف </button></td>
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+<style>
+           :root {
+--primary-green: #195042;
+--accent-beige: #d6cabc;
+--light-beige: #f4f1ee;
+--white: #ffffff;
+--text-dark: #2d3436;
+--status-green: #2ecc71;
+--danger-red: #e74c3c;
+}
+body {
+font-family: 'Tajawal', sans-serif;
+background-color: #f9f9f9;
+direction: rtl;
+}
+.management-container {
+background: var(--white);
+margin: 20px;
+padding: 30px;
+border-radius: 20px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+/* العنوان */
+.page-title {
+color: var(--primary-green);
+position: relative;
+padding-bottom: 10px; /* مسافة بين النص والخط */
+border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
+display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+}
 
-      </tr>
-                <tr>
-                    <td class="table td">حديث </td>
-                    <td class="table td">
-                        <details class="details">
-                            <summary class="summary">
-                                <button class="btn btn-primary">معلومات الدرس</button>
-                            </summary>
-                            <form class="form-box">
-                                <label class="label">اسم الدرس:</label><br>
-                                <label class="label">فكرة عامة عن الدرس :</label><br>
-                                <label class="label">الفئة المستهدفة:</label><br>
-                                <label class="label">اسم المعلم:</label><br>
-                               
-                            </form>
-                        </details>
-                    </td>
-                    <td class="table td"><button class="btn btn-danger">حذف </button></td>
+    .tabs-navigation {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        border-bottom: 2px solid var(--light-beige);
+    }
 
-                </tr>
-                <tr>
-                    <td class="table td">شريعة </td>
-                    <td class="table td">
-                        <details class="details">
-                            <summary class="summary">
-                                <button class="btn btn-primary">معلومات الدرس</button>
-                            </summary>
-                            <form class="form-box">
-                                <label class="label">اسم الدرس:</label><br>
-                                <label class="label">فكرة عامة عن الدرس :</label><br>
-                                <label class="label">الفئة المستهدفة:</label><br>
-                                <label class="label">اسم المعلم:</label><br>
-                              
-                            </form>
-                        </details>
-                    </td>
-                    <td class="table td"><button class="btn btn-danger">حذف </button></td>
+    .tab-item {
+        padding: 12px 25px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-weight: 500;
+        color: #636e72;
+        transition: 0.3s;
+        border-radius: 12px 12px 0 0;
+    }
 
-                </tr>
-      </tbody>
-      </table>
-      <details class="details">
-		<summary class="summary">إضافة درس جديد...</summary>
+        .tab-item.active {
+            background-color: var(--primary-green);
+            color: var(--white);
+        }
 
-		<br>
+        .tab-item:hover:not(.active) {
+            background-color: var(--accent-beige);
+            color: var(--primary-green);
+        }
+    /* شريط البحث والأزرار */
+    .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+            /* الكاردات */
+             .card-container{
+                display:flex;
+                gap:20px;
+                flex-wrap:wrap;
+             }
+           .card {
+               flex:1 1 calc(50%-20px);
+    grid-template-columns: repeat(2,1fr);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 20px;
+    background-color: #efebe9;
+    transition: var(--transition);
+    align-content:center;
+}
 
-		<form class="form-box">
-            <div class="form-group">
-                <label class="label">اسم الدرس:</label><br>
-                <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
-                </div>
-                 <div class="form-group">
-                <label class="label">فكرة عامة عن الدرس :</label><br>
-                <input class="input" placeholder="اكتب هنا..." type="text" name="status"><br><br>
-                 </div>
-                  <div class="form-group">
-                <label class="label">الفئة المستهدفة:</label><br>
-                <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
-                   </div>
-                    <div class="form-group">
-                <label class="label">اسم المعلم:</label><br>
-                <select class="select" name="halaqa">
-                    <option> ماريا العبدالسلام</option>
-                    <option> آية دعبول</option>
-                </select>
-                </div><br />
-                <button class="btn btn-accent" type="submit">حفظ</button>
-            </form>
-        </details>
-      </details>
-      </div>
-      <div class="card" >
-            <h3> إدارة الحلقات</h3>
-            <details class="details">
-		  <summary class="summary">
-            <button class="btn btn-primary">تفاصيل</button>
-          </summary>
- <h4> الحلقات</h4>
-  <table class="table">
-   <thead>
-     <tr>
-       <th class="table th">اسم الحلقة</th>
-       <th class="table th">معلومات الحلقة </th>
-       <th class="table th"> الطلاب التابعين للحلقة </th>
-       <th class="table th">حذف الحلقة</th>
-     </tr>
-   </thead>
-   <tbody>
-     <tr>
-                    <td class="table td">حلقة أولى </td>
-                    <td class="table td">
-                        <details class="details">
-                            <summary class="summary">
-                                <button class="btn btn-primary">معلومات الحلقة</button>
-                            </summary>
-                            <form class="form-box">
-                                <label class="label">اسم الحلقة:</label><br>
-                                <label class="label">الفئة المستهدفة:</label><br>
-                                <label class="label">توقيت الحلقة:</label><br>
-                                <label class="label">اسم المعلم:</label><br>
-                               
-                                <details class="details">
-		                        <summary class="summary">إضافة طالب جديد</summary>
-	                            <br>
-                                    <form class="form-box">
-                                        <label class="label">اسم والكنية:</label><br>
-                                        <button class="btn btn-accent" type="submit">إضافة</button>
+    .card:hover {
+        transform: translateY(-5px);
+            border-color: #195042;
+    }
+                /* اسم الفوج */
+                .card h3 {
+                    margin-bottom: 10px;
+                    padding-right:10px;
+                }
 
-                                   </form>
-                                   </details>
-                                        
-                                 <button class="btn btn-accent" type="submit">حفظ</button>
-                            </form>
-                        </details>
-                    </td>
-                    <td class="table td">
-                        <details class="details">
-                            <summary class="summary">
-                                <button class="btn btn-primary">طلاب الحلقة الأولى</button>
-                            </summary>
-                            <h4>قائمة طلاب الحلقة الأولى:</h4>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th class="table th">اسماء الطلاب:</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="table td">بيان</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="table td">آية</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </details>
+            /* الحلقات */
+            .sessions {
+                width:auto;
+                margin-right:20px;
+                padding-right:30px;
+                background: #d6cabc;
+                padding: 8px;
+                font-size:20px;
+                border-radius: 10px;
+        border-color: #195042;
+                margin-bottom: 3px;
+            }
+            .azrar{
+                padding-right:30px;
+            }
+            .btn-pprimary {
+    background-color: var(--primary-green);
+    font-size: 15px;
+    padding: 10px 20px;
+    color: var(--white);
+    border-radius: 12px;
+    display: inline;
+    transition: 0.3s;
+}
 
+    .btn-pprimary:hover {
+        background-color: #123d32;
+        transform: translateY(-2px);
+    }
+       .form-container, .form-container * {
+        box-sizing: border-box;
+    }
+    :root {
+        --primary-green: #195042;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --text-dark: #2d3436;
+        --transition: all 0.3s ease;
+    }
+    .form-container {
+        max-width: 850px;
+        margin: 2rem auto;
+        background: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        direction: rtl; 
+        overflow: hidden;
+    }
+    .form-header {
+        background: var(--accent-beige);
+        color: var(--white);
+        padding: 0.7rem;
+        text-align: center;
+    }
+    form {
+        padding: 1.5rem;
+    }
 
+    .grid-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 1.5rem;
+        margin-bottom: 1.2rem;
+    }
+        .grid-row:nth-of-type(4) {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+        .input-group label {
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: right;
+        }
+    /* حل مشكلة الأيقونات والمحاذاة */
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+        .input-wrapper i {
+            position: absolute;
+            right: 12px; /* تثبيت الأيقونة جهة اليمين */
+            color: var(--primary-green);
+            z-index: 2;
+            pointer-events: none;
+        }
+        .input-wrapper input,
+        .input-wrapper select {
+            width: 100%;
+            padding: 10px 35px 10px 10px;
+            border: 1px solid var(--accent-beige);
+            border-radius: 8px;
+            background: var(--light-beige);
+            font-size: 0.9rem;
+            height: 45px; 
+            outline: none;
+            transition: var(--transition);
+        }
+            .input-wrapper input:focus,
+            .input-wrapper select:focus {
+                border-color: var(--primary-green);
+                background: #fff;
+            }
+    .actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+    }
+        .actions button, .actions a {
+            flex: 1;
+            height: 48px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .actions .save {
+            background: var(--primary-green);
+            color: white;
+        }
 
-                    </td>
-                    <td><button class="btn btn-danger">حذف </button></td>
-
-                </tr>
-                <tr>
-                    <td class="table td">حلقة ثانية </td>
-                    <td class="table td">
-                        <details class="details">
-                            <summary class="summary">
-                                <button class="btn btn-primary">معلومات الحلقة</button>
-                            </summary>
-                            <form class="form-box">
-                                <label class="label">اسم الحلقة:</label><br>
-                                <label class="label">الفئة المستهدفة:</label><br>
-                                <label class="label">توقيت الحلقة:</label><br>
-                                <label class="label">اسم المعلم:</label><br>
-                                
-                                <details class="details">
-                                    <summary class="summary">إضافة طالب جديد</summary>
-                                    <br>
-                                    <form class="form-box">
-                                        <label class="label">اسم والكنية:</label><br>
-                                        <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
-                                        <button class="btn btn-accent" type="submit">إضافة</button>
-
-                                    </form>
-                                </details>
-
-                                <button class="btn btn-accent" type="submit">حفظ</button>
-                            </form>
-                        </details>
-                    </td>
-                    <td class="table td">
-                        <details class="details">
-                            <summary class="summary">
-                                <button class="btn btn-primary">طلاب الحلقة الثانية</button>
-                            </summary>
-                            <h4>قائمة طلاب الحلقة الثانية:</h4>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th class="table th">اسماء الطلاب:</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="table td">بيان</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="table td">آية</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </details>
-
-
-
-                    </td>
-                    <td class="table td"><button class="btn btn-danger">حذف </button></td>
-
-                </tr>
-                </tbody>
-                </table>
-                </details>
-                </div>
-                <div class="card" >
-            <h3> إدارة دروس السبت</h3>
-            <details class="details">
-		  <summary class="summary">
-            <button class="btn btn-primary">تفاصيل</button>
-          </summary>
-          <h4>قائمة الدروس</h4>
-          <table class="table">
-   <thead>
-     <tr>
-        <th class="table th">اسم الدرس</th>
-        <th class="table th">معلومات الدرس </th>
-        <th class="table th">حذف الحلقة</th>
-     </tr>
-   </thead>
-   <tbody>
-     <tr>
-          <td class="table td">فقه </td>
-          <td class="table td">
-           <details class="details">
-            <summary class="summary">
-            <button class="btn btn-primary">عرض/تعديل الدرس</button>
-            </summary>
-               <form class="form-box">
-		          <label class="label">اسم الدرس:</label><br>
-		          <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
-                  <label class="label">فكرة عامة عن الدرس :</label><br>
-                  <input class="input" placeholder="اكتب هنا..." type="text" name="status"><br><br>
-                  <label class="label">الفئة المستهدفة:</label><br>
-                  <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
-                  <label class="label">اسم المعلم:</label><br>
-                   <select class="select" name="halaqa">
-                      <option> ماريا العبدالسلام</option>
-                      <option> آية دعبول</option>
-                   </select>
-                  <button class="btn btn-accent" type="submit">حفظ</button>
-             </form>
-             </details>
-      </td>
-        <td class="table td"><button class="btn btn-danger">حذف </button></td>
-
-      </tr>
-            </tbody>
-        </table>
-        </details>
-    <h3> إدارة حلقات السبت</h3>
-    <details class="details">
-		  <summary class="summary">
-            <button class="btn btn-primary">تفاصيل</button>
-          </summary>
- <h4>قائمة الحلقات</h4>
-  <table class="table">
-   <thead>
-     <tr>
-	   <th>اسم الحلقة</th>
-       <th>معلومات الحلقة </th>
-       <th> الطلاب التابعين للحلقة </th>
-       <th>حذف الحلقة</th>
-     </tr>
-   </thead>
-   <tbody>
-     <tr>
-                    <td>حلقة أولى </td>
-                    <td>
-                        <details>
-                            <summary>
-                                <button class="btn btn-primary">معلومات الحلقة</button>
-                            </summary>
-                            <form>
-                                <label class="label">اسم الحلقة:</label><br>
-                                <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
-                                <label class="label">الفئة المستهدفة:</label><br>
-                                <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
-                                <label class="label">توقيت الحلقة:</label><br>
-                                <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
-                                <label class="label">اسم المعلم:</label><br>
-                                <select class="select" name="halaqa">
-                                    <option> ماريا العبدالسلام</option>
-                                    <option> آية دعبول</option>
-                                </select>
-                                <details>
-		                        <summary>إضافة طالب جديد</summary>
-	                            <br>
-                                    <form>
-                                        <label class="label">اسم والكنية:</label><br>
-                                        <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
-                                        <button class="btn btn-accent" type="submit">إضافة</button>
-
-                                   </form>
-                                   </details>
-                                        
-                                        <button class="btn btn-accent" type="submit">حفظ</button>
-                            </form>
-                        </details>
-                    </td>
-                    <td>
-                        <details>
-                            <summary>
-                                <button class="btn btn-primary">طلاب الحلقة الأولى</button>
-                            </summary>
-                            <h4>قائمة طلاب الحلقة الأولى:</h4>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>اسماء الطلاب:</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>بيان</td>
-                                    </tr>
-                                    <tr>
-                                        <td>آية</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </details>
+        .actions .cancel {
+            background: #f8f9fa;
+            color: #dc3545;
+        }
+    /* حل مشكلة الميديا كويري في Razor */
+    @@media (max-width: 768px) {
+        .grid-row, .grid-row:nth-of-type(4) {
+            grid-template-columns: 1fr !important;
+        }
+    }
+    
+    </style>
 
 
-
-                    </td>
-                    <td><button class="btn btn-danger">حذف </button></td>
-
-                </tr>
-            </tbody>
-        </table>
-    </details>
+    <section class="management-container">
+    <header class="page-header">
+        <h2 class="page-title">إدارة  الدروس والحلقات</h2>
+    </header>
+    <nav class="tabs-navigation">
+        <NavLink class="tab-item" href="/supervisor/saturdaylesson">
+            إدارة الدروس
+        </NavLink>
+        <NavLink class="tab-item" href="/supervisor/saturdayhalaqa">
+            إدارة الحلقات
+        </NavLink>
+    </nav>
+    <div class="action-bar">
         </div>
-@code {
+        <div class="card-container">
+            <!-- درس 1 -->
+        <div class="card">
+            <h3>الدرس الأول</h3>
+            <br />
+            
+            <div class="sessions">
+                    <p>اسم الدرس:</p>
+                    <p>  فقه  </p>
+                    <p>اسم الدرس:</p>
+                    <p>  فقه  </p>
+                    <p>فكرة عامة عن الدرس:</p>
+                    <p>تعلم المسائل الفقهية</p>
+                    <p>  الفئة المستهدفة:   </p>
+                    <p>10-13 سنوات</p>
+                    <p>  اسم المعلم/ة:   </p>
+                    <p>آية دعبول</p>
 
+            </div>
+            <br />
+            <div class="azrar">
+                <a @onclick="editlesson"> <button  title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+            <button title="حذف"><i class="bi bi-trash"></i></button>
+
+            </div>
+        </div>
+        <br />
+        <!-- درس 2 -->
+        <div class="card">
+            <h3>الدرس الثاني</h3>
+            <br />
+            
+            <div class="sessions">
+                  <p>اسم الدرس:</p>
+                    <p>  حديث  </p>
+                    <p>اسم الدرس:</p>
+                    <p>  احايث  </p>
+                    <p>فكرة عامة عن الدرس:</p>
+                    <p>شرح الأحاديث النبوية</p>
+                    <p>  الفئة المستهدفة:   </p>
+                    <p>10-13 سنوات</p>
+                    <p>  اسم المعلم/ة:   </p>
+                    <p>ماريا العبدالسلام</p>
+
+            </div>
+            <br />
+            <div class="azrar">
+                <a @onclick="editlesson"> <button title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                <button title="حذف"><i class="bi bi-trash"></i></button>
+
+            </div>
+        </div>
+        <!-- درس 3 -->
+        <div class="card">
+            <h3>الدرس الثالث</h3>
+            <br />
+            
+            <div class="sessions">
+                 <p>اسم الدرس:</p>
+                    <p>  فقه  </p>
+                    <p>اسم الدرس:</p>
+                    <p>  فقه  </p>
+                    <p>فكرة عامة عن الدرس:</p>
+                    <p>تعلم المسائل الفقهية</p>
+                    <p>  الفئة المستهدفة:   </p>
+                    <p>10-13 سنوات</p>
+                    <p>  اسم المعلم/ة:   </p>
+                    <p>آية دعبول</p>
+            </div>
+            <br />
+            <div class="azrar">
+                <a @onclick="editlesson"> <button title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                <button title="حذف"><i class="bi bi-trash"></i></button>
+
+            </div>
+        </div>
+        <br />
+        <!-- درس 4 -->
+        <div class="card">
+            <h3> الدرس الرابع</h3>
+            <br />
+            
+            <div class="sessions">
+                   <p>اسم الدرس:</p>
+                    <p>  فقه  </p>
+                    <p>اسم الدرس:</p>
+                    <p>  فقه  </p>
+                    <p>فكرة عامة عن الدرس:</p>
+                    <p>تعلم المسائل الفقهية</p>
+                    <p>  الفئة المستهدفة:   </p>
+                    <p>10-13 سنوات</p>
+                    <p>  اسم المعلم/ة:   </p>
+                    <p>آية دعبول</p>
+            </div>
+            <br />
+            <div class="azrar">
+                <a @onclick="editlesson"> <button title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                <button title="حذف"><i class="bi bi-trash"></i></button>
+            </div>
+
+            </div>
+    </div>
+        <br />
+          <!-- زر إضافة -->
+    
+     <details>
+<summary class="btn-pprimary">إضافة درس جديد</summary>
+<div class="form-container">
+    <div class="form-header">
+        <h2><i class="bi bi-plus-circle-dotted"></i> إضافة درس</h2>
+    </div>
+                <form>
+        <div class="grid-row">
+            <div class="input-group">
+         <label>اسم الدرس </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-fonts"></i>
+                    <input type="text" placeholder="أدخل الاسم">
+                </div>
+                </div>
+         <div class="input-group">
+         <label>فكرة عامة عن الدرس </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-fonts"></i>
+                    <input type="text" placeholder="اكتب هنا...">
+                </div>
+                </div>
+                </div>
+        <div class="grid-row">
+
+          <div class="input-group">
+         <label>الفئة المستهدفة </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-text-paragraph"></i>
+                    <select>
+                        <option>اصغر من تسع سنوات</option>
+                        <option>9-13 سنة</option>
+                        <option>14-18 سنة</option>
+                        <option>اكبر من 18 سنة</option>
+
+                    </select>
+                </div>
+                </div>
+         <div class="input-group">
+         <label>اسم معلم الحلقة </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-fonts"></i>
+                    <select>
+                        <option>ماريا العبدالسلام</option>
+                        <option>آية دعبول</option>
+                    </select>
+                </div>
+                </div>
+                </div>
+
+          <div class="actions">
+            <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ</button>
+            <a href="/supervisor/saturdaylesson" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+        </div>
+    </form>
+        </div>
+
+</details>
+        </section>
+
+
+     
+@code {
+     private void editlesson()
+    {
+        NavManager.NavigateTo("/supervisor/editlesson");
+        // Logic to edit student information
+    }
 }

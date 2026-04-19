@@ -5,28 +5,241 @@
 
 <h3>Teacher</h3>
 <style>
-	
-	
+	:root {
+--primary-green: #195042;
+--accent-beige: #d6cabc;
+--light-beige: #f4f1ee;
+--white: #ffffff;
+--text-dark: #2d3436;
+--status-green: #2ecc71;
+--danger-red: #e74c3c;
+}
+
+body {
+font-family: 'Tajawal', sans-serif;
+background-color: #f9f9f9;
+direction: rtl;
+}
+
+.management-container {
+background: var(--white);
+margin: 20px;
+padding: 30px;
+border-radius: 20px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+/* العنوان */
+.page-title {
+color: var(--primary-green);
+position: relative;
+padding-bottom: 10px; /* مسافة بين النص والخط */
+border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
+display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+}
+
+.search-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 45px 12px 15px;
+    border: 1.5px solid var(--accent-beige);
+    border-radius: 12px;
+    outline: none;
+    transition: 0.3s;
+}
+
+    .search-input:focus {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
+    }
+
+.search-wrapper i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary-green);
+}
+.table {
+    width: 100%;
+    table-layout: fixed;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    font-family: 'Tajawal', sans-serif;
+    font-size: clamp(1rem,2.5vw,1.5rem);
+	text-align: center;
+}
+    .table th {
+        background-color: var(--light-beige);
+        color: var(--primary-green);
+        padding: 12px;
+    }
+    .table td {
+        background-color: var(--white);
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+
+    }
+    .table tbody tr:hover {
+        background-color: #fafafa;
+        transform: scale(1.01);
+    }
 	.btn-pprimary {
-		background-color: var(--primary-green);
-		font-size: 15px;
-		padding: 10px 20px;
-		color: var(--white);
-		border-radius: 12px;
-		transition: 0.3s;
+    background-color: var(--primary-green);
+    font-size: 15px;
+    padding: 10px 20px;
+    color: var(--white);
+    border-radius: 12px;
+    display: inline;
+    transition: 0.3s;
+}
+
+    .btn-pprimary:hover {
+        background-color: #123d32;
+        transform: translateY(-2px);
+    }
+   
+  .form-container, .form-container * {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --primary-green: #195042;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --text-dark: #2d3436;
+        --transition: all 0.3s ease;
+    }
+
+    .form-container {
+        max-width: 850px;
+        margin: 2rem auto;
+        background: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        direction: rtl; 
+        overflow: hidden;
+    }
+
+    .form-header {
+        background: var(--accent-beige);
+        color: var(--white);
+        padding: 1.2rem;
+        text-align: center;
+    }
+
+    form {
+        padding: 2rem;
+    }
+
+    .grid-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 1.5rem;
+        margin-bottom: 1.2rem;
+    }
+        .grid-row:nth-of-type(4) {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+        .input-group label {
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: right;
+        }
+
+    /* حل مشكلة الأيقونات والمحاذاة */
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+        .input-wrapper i {
+            position: absolute;
+            right: 12px; /* تثبيت الأيقونة جهة اليمين */
+            color: var(--primary-green);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .input-wrapper input,
+        .input-wrapper select {
+            width: 100%;
+            padding: 10px 35px 10px 10px;
+            border: 1px solid var(--accent-beige);
+            border-radius: 8px;
+            background: var(--light-beige);
+            font-size: 0.9rem;
+            height: 45px; 
+            outline: none;
+            transition: var(--transition);
+        }
+
+            .input-wrapper input:focus,
+            .input-wrapper select:focus {
+                border-color: var(--primary-green);
+                background: #fff;
+            }
+    .actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+    }
+
+        .actions button, .actions a {
+            flex: 1;
+            height: 48px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .actions .save {
+            background: var(--primary-green);
+            color: white;
+        }
+        
+        .actions .cancel {
+            background: #f8f9fa;
+            color: #dc3545;
+        }
+
+    
+    @@media (max-width: 768px) {
+    .grid-row, .grid-row:nth-of-type(4) {
+        grid-template-columns: 1fr !important;
+    }
 	}
-
-		.btn-pprimary:hover {
-			background-color: #123d32;
-			transform: translateY(-2px);
-		}
-
 		
 		.attendance-options label {
     margin: 0 10px;
     cursor: pointer;
-    font-size: 25px;/* خط أكبر */
-    font-weight: 500;   /* شوي ثخانة */
+    font-family: 'Tajawal', sans-serif;
+    font-size: clamp(1rem,2.5vw,1.5rem);
     padding: 4px 8px;
     border-radius: 6px;
     transition: background 0.2s;
@@ -34,7 +247,7 @@
 
 	/* تغيير لون الخلفية عند اختيار الحالة */
 .attendance-options input[type="radio"]:checked + span {
-    color: white;
+    color:var(--primary-green);
     font-weight: bold;
     padding: 4px 8px;
     border-radius: 6px;
@@ -46,9 +259,8 @@
     margin-right: 5px;
     cursor: pointer;
 }
-
-
 </style>
+<section class="management-container">
 <header class="page-header">
 	<h2 class="page-title">إدارة المعلمين</h2>
 </header>
@@ -57,7 +269,6 @@
 	<i class="bi bi-search"></i>
 	<input type="text" class="search-input" placeholder="ابحث عن معلم...">
 </div>
-
 	<table class="table">
 	<thead>
 		<tr>
@@ -68,168 +279,187 @@
 		</tr>
 	</thead>
 	<tbody>
-		<br>
 		<tr>
-			
 			<td class="table td"> آلاء قاسم </td>
-			
 			<td class="table td">
-			
 				<div class="attendance-options">
 					<label><input type="radio" name="attend1" value="حاضر"> حاضر</label>
 					<label><input type="radio" name="attend1" value="غائب"> غائب</label>
 					<label><input type="radio" value="غياب مبرر" name="attend1"> مبرر</label>
 				</div>
-				
 			</td>
 			<td>
 				<a @onclick="viewTeacher1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
 				<a @onclick="editTeacher"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-
-			   
 			</td>
 			<td>
 			<button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
 			</td>
 		</tr>
-		<br>
 		<tr>
-			
 			<td class="table td">  ماريا العبدالسلام </td>
-			
 			<td class="table td">
-			
 				<div class="attendance-options">
 					<label><input type="radio" name="attend1" value="حاضر"> حاضر</label>
 					<label><input type="radio" name="attend1" value="غائب"> غائب</label>
 					<label><input type="radio" value="غياب مبرر" name="attend1"> مبرر</label>
 				</div>
-				
 			</td>
 			<td>
-				<a @onclick="viewTeacher2"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
+				<a @onclick="viewTeacher1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
 				<a @onclick="editTeacher"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-
 			</td>
 			 <td><button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
 			</td>
 		</tr>
-		<br>
 		<tr>
 			<td class="table td">آية دعبول </td>
-			
 			<td class="table td">
-			
 				<div class="attendance-options">
 					<label><input type="radio" name="attend1" value="حاضر"> حاضر</label>
 					<label><input type="radio" name="attend1" value="غائب"> غائب</label>
 					<label><input type="radio" value="غياب مبرر" name="attend1"> مبرر</label>
 				</div>
-				
 			</td>
 			<td>
-				<a @onclick="viewTeacher3"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-
+				<a @onclick="viewTeacher1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
 				<a @onclick="editTeacher"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-
 			</td>
 			<td>
-
 			<button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
 			</td>
-
 		</tr>
 		</tbody>
 		</table>
-<br>
-		<details class="details">
+		<details>
 	<summary class="btn-pprimary">إضافة معلم جديد</summary>
-
-		<br>
-
-		<form class="form-box">
-			 <div class="form-group">
-		<label class="label">اسم والكنية:</label><br>
-		<input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
-		      </div>
-			   <div class="form-group">
-		<label class="label">تاريخ الميلاد:</label><br>
-		<input class="input" placeholder="اكتب هنا..." type="number" name="age"><br><br>
-		       </div>
-			   <div class="form-group">
-
-        <label class="label">تاريخ التسجيل:</label><br>
-		<input class="input" placeholder="اكتب هنا..." type="number" name="status"><br><br>
-		</div>
-		        <div class="form-group">
-		<label class="label">البريد الالكتروني:</label><br>
-		<input class="input" placeholder="اكتب هنا..." type="email" name="status"><br><br>
-		        </div>
-		        <div class="form-group">
-
-		<label class="label">رقم الهاتف:</label><br>
-		<input class="input" placeholder="اكتب هنا..." type="number" name="status"><br><br>
-		        </div>
-		        <div class="form-group">
-
-		<label class="label">الجنس:</label><br>
-		<select class="select" name="halaqa">
-			<option> ذكر</option>
-			<option> انثى</option>
-		</select>
-		</div>
-		        <div class="form-group">
-
-		<label class="label">لمحة عن الخبرات:</label><br>
-		<input class="input" placeholder="اكتب هنا..." type="text" name="status"><br><br>
+		<div class="form-container">
+    <div class="form-header">
+        <h2><i class="bi bi-person-plus-fill"></i> إضافة معلم</h2>
+    </div>
+    <form>
+        <div class="grid-row">
+            <div class="input-group">
+                <label>الاسم الكامل</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-person"></i>
+                    <input type="text" placeholder="أدخل الاسم">
                 </div>
-		        <div class="form-group">
+            </div>
+             <div class="input-group">
+                <label>رقم الهاتف</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-telephone"></i>
+                    <input type="tel" placeholder="أدخل الرقم">
+                </div>
+            </div>
+            </div>
+	    <div class="grid-row">
+             <div class="input-group">
+                <label>تاريخ التسجيل</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-calendar-event"></i>
+                    <input type="date" placeholder="أدخل تاريخ التسجيل">
+                </div>
+            </div>
+               <div class="input-group">
+                <label>تاريخ الميلاد</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-calendar-event"></i>
+                    <input type="date" placeholder="أدخل تاريخ الميلاد">
+                </div>
+            </div> 
+        </div>
+	    <div class="grid-row">
+               <div class="input-group">
+                <label>البريد الإلكتروني</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-envelope"></i>
+                    <input type="email" placeholder="أدخل البريد الالكتروني">
+                </div>
+            </div>
+		         <div class="input-group">
+                <label>كلمة المرور</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-lock"></i>
+                    <input type="password" placeholder="أدخل كلمة المرور">
+                </div>
+            </div>
+        </div>
+		        <div class="grid-row">
+            <div class="input-group">
+                <label>الفوج</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-layers"></i>
+                    <select>
+                        <option value="" disabled selected>اختر الفوج</option>
 
-		<label class="label">كلمة السر:</label><br>
-		<input class="input" placeholder="اكتب هنا..." type="password" name="status"><br><br>
-		        </div>
-		        <div class="form-group">
+                        <option>الفوج الأول</option>
+                        <option>الفوج الثاني</option>
+                    </select>
+                </div>
+            </div>
+				 <div class="input-group">
+                <label>الحلقة</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-layers"></i>
+                    <select>
+                        <option value="" disabled selected>اختر الحلقة</option>
 
-		<label class="label">الفوج:</label><br>
-		<select class="select" name="halaqa">
-			<option> فوج اول</option>
-			<option> فوج ثاني</option>
+                        <option>الحلقة الاولى</option>
+                        <option>الحلقة الثانية</option>
+                    </select>
+                </div>
+                </div>
+                </div>
+		        <div class="grid-row">
+		       <div class="input-group">
+                <label>الجنس</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-gender-ambiguous"></i>
+                    <select>
+                        <option value="" disabled selected>اختر الجنس</option>
+                        <option value="male">ذكر</option>
+                        <option value="female">أنثى</option>
+                    </select>
+                </div>
+            </div>
+              <div class="input-group">
+                <label>حالة الحساب</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-check-circle"></i>
+                    <select>
+                        <option value="active">نشط</option>
+                        <option value="inactive">متوقف</option>
+                    </select>
+                </div>
+            </div>
+            </div>
 
-		</select><br><br>
-		</div>
-		        <div class="form-group">
+             <div class="grid-row">
 
-		<label class="label">رقم الحلقة:</label><br>
-		<select class="select" name="halaqa">
-			<option>الحلقة 1</option>
-			<option>الحلقة 2</option>
-			<option>الحلقة 3</option>
-			<option>الحلقة 4</option>
-		</select>
-		<br />
-		</div>
-		<br>
-         <br />
-
-		<button class="btn-pprimary" type="submit">إضافة</button>
-
-	</form>
-
+		          <div class="input-group">
+                <label>لمحة عن الخبرات </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-person-workspace"></i>
+                    <input type="text" placeholder="اكتب هنا...">
+                </div>
+            </div>
+            </div>
+        <div class="actions">
+            <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ الطالب</button>
+            <a href="/supervisor/teache" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+        </div>
+		</form>
+       </div>
 </details>
-
+</section>
 @code {
 	private void viewTeacher1()
 	{
 		NavManager.NavigateTo("/supervisor/teacher1");
 	}
-	private void viewTeacher2()
-	{
-		NavManager.NavigateTo("/supervisor/teacher2");
-	}
-	private void viewTeacher3()
-	{
-		NavManager.NavigateTo("/supervisor/teacher3");
-	}
+	
 	private void editTeacher()
 	{
 		NavManager.NavigateTo("/supervisor/editinfo_teacher");
