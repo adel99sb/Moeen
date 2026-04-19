@@ -20,21 +20,35 @@ namespace Moeen.Api.Controllers
         /// أمر: إنشاء حلقة جديدة.
         /// </summary>
         [HttpPost("create")]
-        public async Task<ActionResult<CircleDto>> CreateCircle(CreateCircleRequest request)
+        public async Task<ActionResult<CircleDto>> CreateCircle([FromBody] CreateCircleRequest request)
             => Ok(await _circleCommandService.CreateCircleAsync(request));
 
         /// <summary>
-        /// أمر: تحديث حلقة.
+        /// أمر: تحديث بيانات حلقة.
         /// </summary>
         [HttpPut("update")]
-        public async Task<ActionResult<CircleDto>> UpdateCircle(UpdateCircleRequest request)
+        public async Task<ActionResult<CircleDto>> UpdateCircle([FromBody] UpdateCircleRequest request)
             => Ok(await _circleCommandService.UpdateCircleAsync(request));
 
         /// <summary>
         /// أمر: حذف حلقة.
         /// </summary>
         [HttpDelete("delete")]
-        public async Task<ActionResult<bool>> DeleteCircle(DeleteCircleRequest request)
+        public async Task<ActionResult<bool>> DeleteCircle([FromBody] DeleteCircleRequest request)
             => Ok(await _circleCommandService.DeleteCircleAsync(request));
+
+        /// <summary>
+        /// أمر: إعادة تعيين معلم للحلقة.
+        /// </summary>
+        [HttpPut("reassign-teacher")]
+        public async Task<ActionResult<CircleDto>> ReassignTeacher([FromBody] ReassignCircleTeacherRequest request)
+            => Ok(await _circleCommandService.ReassignTeacherAsync(request));
+
+        /// <summary>
+        /// أمر: نقل الحلقة إلى فوج آخر.
+        /// </summary>
+        [HttpPut("move-to-fouj")]
+        public async Task<ActionResult<CircleDto>> MoveToFouj([FromBody] MoveCircleToFoujRequest request)
+            => Ok(await _circleCommandService.MoveToFoujAsync(request));
     }
 }

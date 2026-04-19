@@ -1,6 +1,8 @@
-﻿
-using Moeen.Api.Shared.Requests.ContentSharing;
+﻿using Moeen.Api.Shared.Requests.ContentSharing;
+using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
 using Moeen.Api.Shared.Responses.ContentSharing;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application
 {
@@ -35,5 +37,25 @@ namespace Moeen.Api.Core.Contracts.Application
         /// إضافة وسائط متعددة (صور) لمنشور
         /// </summary>
         Task<AddMultimediaResponse> AddMultimediaAsync(AddMultimediaRequest request);
+
+        /// <summary>
+        /// [GET] جلب منشور محدد بمعرفه مع تفاصيل التفاعلات
+        /// </summary>
+        Task<PostDto> GetPostByIdAsync(GetPostByIdRequest request);
+
+        /// <summary>
+        /// [GET] جلب قائمة التفاعلات على منشور معين
+        /// </summary>
+        Task<List<InteractionDto>> GetPostInteractionsAsync(GetPostInteractionsRequest request);
+
+        /// <summary>
+        /// [PUT] تحديث محتوى منشور موجود
+        /// </summary>
+        Task<PostDto> UpdatePostAsync(UpdatePostRequest request);
+
+        /// <summary>
+        /// [DELETE] حذف منشور نهائيًا
+        /// </summary>
+        Task<OperationResponseDto> DeletePostAsync(DeletePostRequest request);
     }
 }

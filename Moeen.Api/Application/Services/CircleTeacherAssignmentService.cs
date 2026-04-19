@@ -6,12 +6,27 @@ namespace Moeen.Api.Application.Services
 {
     public class CircleTeacherAssignmentService : ICircleTeacherAssignmentService
     {
-        public Task<OperationResponse> AssignTeacherToCircleAsync(AssignTeacherToCircleRequest request)
+        public Task<OperationResponseDto> AssignTeacherToCircleAsync(AssignTeacherToCircleRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<OperationResponse> RemoveTeacherFromCircleAsync(RemoveTeacherFromCircleRequest request)
+        public Task<List<CircleAssignmentDto>> GetCirclesByTeacherAsync(GetCirclesByTeacherRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<CircleAssignmentDto>> GetTeachersByCircleAsync(GetTeachersByCircleRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<OperationResponseDto> RemoveTeacherFromCircleAsync(RemoveTeacherFromCircleRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<OperationResponseDto> ReplaceTeacherInCircleAsync(ReplaceTeacherRequest request)
         {
             throw new NotImplementedException();
         }

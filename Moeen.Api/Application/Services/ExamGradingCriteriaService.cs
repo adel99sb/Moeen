@@ -11,6 +11,11 @@ namespace Moeen.Api.Application.Services
             throw new NotImplementedException();
         }
 
+        public Task<GradingCriteriaDto> GetCriteriaByIdAsync(GetCriteriaByIdRequest request)
+        { 
+            throw new NotImplementedException();
+        }
+
         public Task<GetGradingCriteriaResponse> GetGradingCriteriaAsync(GetGradingCriteriaRequest request)
         {
             throw new NotImplementedException();

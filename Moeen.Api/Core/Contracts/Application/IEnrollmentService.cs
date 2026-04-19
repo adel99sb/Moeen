@@ -1,5 +1,8 @@
 ﻿using Moeen.Api.Shared.Requests.Enrollment;
+using Moeen.Api.Shared.Responses;
+using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
 using Moeen.Api.Shared.Responses.Enrollment;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application
@@ -9,64 +12,106 @@ namespace Moeen.Api.Core.Contracts.Application
         /// <summary>
         /// تسجيل طالب جديد
         /// </summary>
-        /// <param name="request">بيانات الطالب للتسجيل</param>
-        /// <returns>بيانات الطالب المسجل</returns>
         Task<StudentDto> RegisterStudentAsync(RegisterStudentRequest request);
 
         /// <summary>
         /// إضافة معلم جديد للكادر
         /// </summary>
-        /// <param name="request">بيانات المعلم للإضافة</param>
-        /// <returns>بيانات المعلم المضاف</returns>
         Task<TeacherDto> AddTeacherAsync(AddTeacherRequest request);
 
         /// <summary>
         /// تسجيل ولي أمر جديد
         /// </summary>
-        /// <param name="request">بيانات ولي الأمر للتسجيل</param>
-        /// <returns>بيانات ولي الأمر المسجل</returns>
         Task<ParentDto> RegisterParentAsync(RegisterParentRequest request);
 
         /// <summary>
-        /// تحديث معلومات عضو (طالب، معلم، ولي أمر)
+        /// تحديث معلومات عضو (عام)
         /// </summary>
-        /// <param name="request">معرف العضو والبيانات المراد تحديثها</param>
-        /// <returns>بيانات العضو بعد التحديث</returns>
         Task<MemberDto> UpdateMemberInfoAsync(UpdateMemberInfoRequest request);
 
         /// <summary>
         /// إلغاء عضوية عضو (إنهاء العضوية)
         /// </summary>
-        /// <param name="request">معرف العضو وسبب الإلغاء</param>
-        /// <returns>true إذا تم الإلغاء بنجاح</returns>
         Task<bool> CancelMembershipAsync(CancelMembershipRequest request);
 
         /// <summary>
         /// البحث عن أعضاء بناءً على معايير محددة
         /// </summary>
-        /// <param name="request">معايير البحث (الاسم، البريد، النوع، ...)</param>
-        /// <returns>قائمة الأعضاء مع معلومات التصفح</returns>
         Task<SearchMembersResponse> SearchMembersAsync(SearchMembersRequest request);
 
         /// <summary>
         /// الحصول على الملف الشخصي الكامل لعضو معين
         /// </summary>
-        /// <param name="request">معرف العضو</param>
-        /// <returns>الملف الشخصي المفصل</returns>
         Task<MemberProfileDto> GetMemberProfileAsync(GetMemberProfileRequest request);
 
         /// <summary>
         /// تحديث حالة العضو (نشط، موقوف، متخرج)
         /// </summary>
-        /// <param name="request">معرف العضو والحالة الجديدة</param>
-        /// <returns>true إذا تم التحديث بنجاح</returns>
         Task<bool> UpdateMemberStatusAsync(UpdateMemberStatusRequest request);
 
         /// <summary>
-        /// تصدير قائمة الأعضاء إلى ملف (Excel, PDF, CSV)
+        /// تصدير قائمة الأعضاء إلى ملف
         /// </summary>
-        /// <param name="request">معايير التصدير (الصيغة، الحقول، التصفية)</param>
-        /// <returns>محتوى الملف كـ byte[] مع معلومات إضافية (اختياري)</returns>
-        Task<byte[]> ExportMembersListAsync(ExportMembersRequest request); // أو Task<ExportMembersResponse>
+        Task<byte[]> ExportMembersListAsync(ExportMembersRequest request);
+
+        /// <summary>
+        /// [GET] جلب قائمة جميع الطلاب مع التصفح والتصفية
+        /// </summary>
+        Task<PagedList<StudentDto>> GetAllStudentsAsync(GetAllStudentsRequest request);
+
+        /// <summary>
+        /// [GET] جلب قائمة جميع المعلمين مع التصفح والتصفية
+        /// </summary>
+        Task<PagedList<TeacherDto>> GetAllTeachersAsync(GetAllTeachersRequest request);
+
+        /// <summary>
+        /// [GET] جلب قائمة جميع أولياء الأمور مع التصفح والتصفية
+        /// </summary>
+        Task<PagedList<ParentDto>> GetAllParentsAsync(GetAllParentsRequest request);
+
+        /// <summary>
+        /// [GET] جلب قائمة جميع المشرفين (لواجهة المالك)
+        /// </summary>
+        Task<PagedList<SupervisorDto>> GetAllSupervisorsAsync(GetAllSupervisorsRequest request);
+
+        /// <summary>
+        /// [GET] جلب الأبناء المرتبطين بولي أمر معين
+        /// </summary>
+        Task<List<StudentDto>> GetChildrenByParentAsync(GetChildrenByParentRequest request);
+
+        /// <summary>
+        /// [GET] إحصائيات الأعضاء (حسب النوع/الحالة/المسجد)
+        /// </summary>
+        Task<MemberStatisticsDto> GetMemberStatisticsAsync(GetMemberStatisticsRequest request);
+
+        /// <summary>
+        /// [PUT] تحديث معلومات طالب محددة
+        /// </summary>
+        Task<StudentDto> UpdateStudentInfoAsync(UpdateStudentInfoRequest request);
+
+        /// <summary>
+        /// [PUT] تحديث معلومات معلم محددة
+        /// </summary>
+        Task<TeacherDto> UpdateTeacherInfoAsync(UpdateTeacherInfoRequest request);
+
+        /// <summary>
+        /// [PUT] تحديث معلومات ولي أمر محددة
+        /// </summary>
+        Task<ParentDto> UpdateParentInfoAsync(UpdateParentInfoRequest request);
+
+        /// <summary>
+        /// [DELETE] حذف سجل طالب نهائيًا
+        /// </summary>
+        Task<OperationResponseDto> DeleteStudentAsync(DeleteStudentRequest request);
+
+        /// <summary>
+        /// [DELETE] حذف سجل معلم نهائيًا
+        /// </summary>
+        Task<OperationResponseDto> DeleteTeacherAsync(DeleteTeacherRequest request);
+
+        /// <summary>
+        /// [DELETE] حذف سجل ولي أمر نهائيًا
+        /// </summary>
+        Task<OperationResponseDto> DeleteParentAsync(DeleteParentRequest request);
     }
 }

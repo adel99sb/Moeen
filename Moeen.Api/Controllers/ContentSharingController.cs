@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.ContentSharing;
+using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
 using Moeen.Api.Shared.Responses.ContentSharing;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Controllers
@@ -17,60 +20,104 @@ namespace Moeen.Api.Controllers
             _contentService = contentService;
         }
 
+        /// <summary>
+        /// أمر: نشر منشور جديد.
+        /// </summary>
         [HttpPost("publish")]
-        public async Task<ActionResult<PostDto>> PublishPost(PublishPostRequest request)
-        {
-            var result = await _contentService.PublishPostAsync(request);
-            return Ok(result);
-        }
-
-        [HttpPost("interact")]
-        public async Task<ActionResult<InteractWithPostResponse>> InteractWithPost(InteractWithPostRequest request)
-        {
-            var result = await _contentService.InteractWithPostAsync(request);
-            return Ok(result);
-        }
+        public async Task<ActionResult<PostDto>> PublishPost([FromBody] PublishPostRequest request)
+            => Ok(await _contentService.PublishPostAsync(request));
 
         /// <summary>
-        /// POST (قديم/متوافق): بحث متقدم/حالي.
+        /// أمر: التفاعل مع منشور.
+        /// </summary>
+        [HttpPost("interact")]
+        public async Task<ActionResult<InteractWithPostResponse>> InteractWithPost([FromBody] InteractWithPostRequest request)
+            => Ok(await _contentService.InteractWithPostAsync(request));
+
+        /// <summary>
+        /// POST (قديم/متوافق): بحث متقدم بالمحتوى.
         /// </summary>
         [HttpPost("search")]
-        public async Task<ActionResult<SearchContentResponse>> SearchContent(SearchContentRequest request)
-        {
-            var result = await _contentService.SearchContentAsync(request);
-            return Ok(result);
-        }
+        public async Task<ActionResult<SearchContentResponse>> SearchContent([FromBody] SearchContentRequest request)
+            => Ok(await _contentService.SearchContentAsync(request));
 
         /// <summary>
-        /// GET (جديد): بحث سريع عبر Query String.
+        /// GET (جديد): بحث سريع عبر Query.
         /// </summary>
         [HttpGet("search")]
         public async Task<ActionResult<SearchContentResponse>> SearchContentGet([FromQuery] string query)
-        {
-            var request = new SearchContentRequest { Query = query };
-            var result = await _contentService.SearchContentAsync(request);
-            return Ok(result);
-        }
+            => Ok(await _contentService.SearchContentAsync(new SearchContentRequest { Query = query }));
 
+        /// <summary>
+        /// أمر: أرشفة المحتوى القديم.
+        /// </summary>
         [HttpPost("archive-old")]
-        public async Task<ActionResult<ArchiveOldContentResponse>> ArchiveOldContent(ArchiveOldContentRequest request)
-        {
-            var result = await _contentService.ArchiveOldContentAsync(request);
-            return Ok(result);
-        }
+        public async Task<ActionResult<ArchiveOldContentResponse>> ArchiveOldContent([FromBody] ArchiveOldContentRequest request)
+            => Ok(await _contentService.ArchiveOldContentAsync(request));
 
+        /// <summary>
+        /// أمر: إدارة الإعلانات.
+        /// </summary>
         [HttpPost("manage-announcement")]
-        public async Task<ActionResult<ManageAnnouncementResponse>> ManageAnnouncement(ManageAnnouncementRequest request)
+        public async Task<ActionResult<ManageAnnouncementResponse>> ManageAnnouncement([FromBody] ManageAnnouncementRequest request)
+            => Ok(await _contentService.ManageAnnouncementsAsync(request));
+
+        /// <summary>
+        /// أمر: إضافة وسائط متعددة لمنشور.
+        /// </summary>
+        [HttpPost("add-multimedia")]
+        public async Task<ActionResult<AddMultimediaResponse>> AddMultimedia([FromBody] AddMultimediaRequest request)
+            => Ok(await _contentService.AddMultimediaAsync(request));
+
+        /// <summary>
+        /// GET: جلب منشور محدد مع تفاصيل التفاعلات (اختياري).
+        /// </summary>
+        [HttpGet("posts/{postId:guid}")]
+        public async Task<ActionResult<PostDto>> GetPostById(
+            [FromRoute] Guid postId,
+            [FromQuery] bool includeInteractions = true)
         {
-            var result = await _contentService.ManageAnnouncementsAsync(request);
-            return Ok(result);
+            var request = new GetPostByIdRequest
+            {
+                PostId = postId,
+                IncludeInteractions = includeInteractions
+            };
+
+            return Ok(await _contentService.GetPostByIdAsync(request));
         }
 
-        [HttpPost("add-multimedia")]
-        public async Task<ActionResult<AddMultimediaResponse>> AddMultimedia(AddMultimediaRequest request)
+        /// <summary>
+        /// GET: جلب قائمة التفاعلات على منشور.
+        /// </summary>
+        [HttpGet("posts/{postId:guid}/interactions")]
+        public async Task<ActionResult<List<InteractionDto>>> GetPostInteractions(
+            [FromRoute] Guid postId,
+            [FromQuery] GetPostInteractionsRequest request)
         {
-            var result = await _contentService.AddMultimediaAsync(request);
-            return Ok(result);
+            request.PostId = postId;
+            return Ok(await _contentService.GetPostInteractionsAsync(request));
         }
+
+        /// <summary>
+        /// PUT: تحديث منشور موجود.
+        /// </summary>
+        [HttpPut("posts/{postId:guid}")]
+        public async Task<ActionResult<PostDto>> UpdatePost(
+            [FromRoute] Guid postId,
+            [FromBody] UpdatePostRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            request.PostId = postId;
+            return Ok(await _contentService.UpdatePostAsync(request));
+        }
+
+        /// <summary>
+        /// DELETE: حذف منشور.
+        /// </summary>
+        [HttpDelete("posts/{postId:guid}")]
+        public async Task<ActionResult<OperationResponseDto>> DeletePost([FromRoute] Guid postId)
+            => Ok(await _contentService.DeletePostAsync(new DeletePostRequest { PostId = postId }));
     }
 }

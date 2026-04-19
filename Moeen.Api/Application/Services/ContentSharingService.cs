@@ -1,6 +1,8 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.ContentSharing;
+using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
 using Moeen.Api.Shared.Responses.ContentSharing;
+using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
 
 namespace Moeen.Api.Application.Services
 {
@@ -12,6 +14,21 @@ namespace Moeen.Api.Application.Services
         }
 
         public Task<ArchiveOldContentResponse> ArchiveOldContentAsync(ArchiveOldContentRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<OperationResponseDto> DeletePostAsync(DeletePostRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PostDto> GetPostByIdAsync(GetPostByIdRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<InteractionDto>> GetPostInteractionsAsync(GetPostInteractionsRequest request)
         {
             throw new NotImplementedException();
         }
@@ -32,6 +49,11 @@ namespace Moeen.Api.Application.Services
         }
 
         public Task<SearchContentResponse> SearchContentAsync(SearchContentRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PostDto> UpdatePostAsync(UpdatePostRequest request)
         {
             throw new NotImplementedException();
         }
