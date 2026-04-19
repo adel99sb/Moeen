@@ -23,10 +23,16 @@
 
     /* البحث */
     .search-box {
-        position: fixed;
-        right: 20px;
-        top: 20px;
-        width: 300px;
+        position: relative;
+           width: 300px;
+    }
+
+    .search-container {
+        display: flex;
+        justify-content: space-between; /* لوضع الزر في جهة والبحث في جهة */
+        align-items: center;
+        padding: 20px;
+        width: 100%;
     }
 
         .search-box input {
@@ -112,6 +118,7 @@
 </style>
 
 <!-- البحث -->
+<div class="search-container">
 <div class="search-box">
     <input type="text" placeholder=" البحث عن جامع..." />
     <span class="icon"><i class="bi bi-search"></i></span>
@@ -119,7 +126,7 @@
 
 <!-- زر إضافة جامع -->
 <button type="button" class="btn custom-outline-btn" @onclick="moveTopage2">إضافة جامع</button>
-
+</div>
 <!-- الكاردات -->
 <div class="container mt-5 pt-5 d-flex flex-column align-items-center">
     <div class="row justify-content-center w-100" >

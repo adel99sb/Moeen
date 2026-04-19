@@ -1,6 +1,129 @@
 ﻿@page "/Teacher/TeacherDashboard"
 
+<style>
+        :root{--pg:#195042;--sb:#d6cabc;--lb:#f8f5f2;--cb:#fdfbf9;--bc:rgba(214,202,188,.5);--sg:#8fc9b9}
+        body{background:var(--lb);font-family:'Segoe UI',sans-serif;margin:0;overflow-x:hidden}
+        #sidebar-toggler{display:none}
+        .sidebar{width:260px;background:var(--pg);height:100vh;position:fixed;right:0;top:0;transition:.4s;z-index:1000;padding-top:20px}
+        .main-content{margin-right:260px;transition:.4s;padding:25px}
+        #sidebar-toggler:checked~.sidebar{right:-260px}
+        #sidebar-toggler:checked~.main-content{margin-right:0}
+        .nav-link-custom{color:var(--sb);padding:12px 20px;display:flex;align-items:center;gap:12px;text-decoration:none;transition:.3s}
+        .nav-link-custom:hover,.nav-link-custom.active{background:rgba(214,202,188,.1);color:#fff}
+        .toggle-label{cursor:pointer;font-size:1.5rem;color:var(--pg);margin-bottom:20px;display:inline-block}
+        
+        /* 🟢 تعديل إطار الكاردات باللون الأخضر الناعم */
+        .stat-card{background:var(--cb);border:2px solid var(--sg);border-radius:15px;padding:20px;transition:.3s;height:100%;cursor:pointer}
+        .stat-card:hover{border:2px solid var(--pg);box-shadow:0 5px 15px rgba(25,80,66,.08)}
+        
+        .icon-box{width:40px;height:40px;background:var(--lb);color:var(--pg);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:15px}
+        .btn-view{background:var(--pg);color:var(--sb);border-radius:10px;font-size:.8rem;padding:8px;width:100%;border:none;margin-top:15px}
+        .student-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #eee}
+        .student-item:last-child{border-bottom:none}
+        .section-title{font-weight:600;color:var(--pg);margin:25px 0 15px;font-size:1.1rem;display:flex;align-items:center;gap:8px}
+        .chart-card{background:var(--cb);border:1px solid var(--bc);border-radius:15px;padding:20px;height:100%}
+        .chart-wrap{position:relative;height:280px;width:100%}
+        
+        /* 🔄 زر طي/نشر قوائم الطلاب */
+        details.student-list{margin:0}
+       /*  summary.student-toggle{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:8px 0;color:var(--pg);font-weight:600;font-size:.9rem}
+        summary.student-toggle  ::-webkit-details-marker{display:none} */
+        .toggle-arrow{transition:transform .3s ease;color:var(--pg);opacity:.7}
+        details[open] .toggle-arrow{transform:rotate(180deg)}
+        .students-content{overflow:hidden;transition:max-height .3s ease}
+        details:not([open]) .students-content{display:none}
+        
+       @@media(max-width:992px){.sidebar{right:-260px}.main-content{margin-right:0}#sidebar-toggler:checked~.sidebar{right:0}}
+    </style>
 
+<body>
+<input type="checkbox" id="sidebar-toggler">
+<aside class="sidebar">
+    <div class="text-center mb-4">
+        <h3 class="text-white fw-bold">مـعـيـن</h3>
+        <small style="color:var(--sb)">لوحة المعلم</small>
+    </div>
+    <nav class="mt-4">
+        <a href="tesher.html" class="nav-link-custom active"><i class="bi bi-pie-chart"></i> <span>الإحصائيات</span></a>
+        <a href="halaka.html" class="nav-link-custom"><i class="bi bi-bar-chart-line"></i> <span>التقدم</span></a>
+        <a href="#" class="nav-link-custom"><i class="bi bi-journal-bookmark"></i> <span>الدروس</span></a>
+        <a href="#" class="nav-link-custom"><i class="bi bi-bookshelf"></i> <span>المكتبة</span></a>
+        <a href="#" class="nav-link-custom"><i class="bi bi-megaphone"></i> <span>الإعلانات</span></a>
+    </nav>
+</aside>
+
+<main class="main-content">
+    <label for="sidebar-toggler" class="toggle-label"><i class="bi bi-list"></i></label>
+    
+    <div class="section-title"><i class="bi bi-speedometer2"></i> مؤشرات الأداء العام</div>
+    <div class="row g-3">
+        <div class="col-md-3"><div class="stat-card"><div class="icon-box"><i class="bi bi-person-check"></i></div><small class="text-muted">حضور اليوم</small><h5 class="fw-bold">92%</h5></div></div>
+        <div class="col-md-3"><div class="stat-card"><div class="icon-box"><i class="bi bi-book"></i></div><small class="text-muted">إجمالي الحفظ</small><h5 class="fw-bold">1,420 ص</h5></div></div>
+        <div class="col-md-3"><div class="stat-card"><div class="icon-box"><i class="bi bi-gem"></i></div><small class="text-muted">نقاط التميز</small><h5 class="fw-bold">3,850</h5></div></div>
+        <div class="col-md-3"><div class="stat-card"><div class="icon-box text-danger"><i class="bi bi-exclamation-triangle"></i></div><small class="text-muted">تنبيهات المتابعة</small><h5 class="fw-bold text-danger">3 تنبيهات</h5></div></div>
+    </div>
+
+    <div class="section-title"><i class="bi bi-bar-chart-steps"></i> الإحصائيات الشهرية للحلقات</div>
+    <div class="row g-3">
+        <div class="col-lg-6"><div class="chart-card"><h6 class="fw-bold mb-3"><i class="bi bi-circle-fill text-success"></i> حلقة التحفيظ الأولى</h6><div class="chart-wrap"><canvas id="chartH1"></canvas></div></div></div>
+        <div class="col-lg-6"><div class="chart-card"><h6 class="fw-bold mb-3"><i class="bi bi-circle-fill text-info"></i> حلقة التحفيظ الثانية</h6><div class="chart-wrap"><canvas id="chartH2"></canvas></div></div></div>
+    </div>
+
+    <!-- قوائم الطلاب مع زر الطي/النشر -->
+    <div class="row mt-2">
+        <div class="col-md-6">
+            <div class="section-title"><i class="bi bi-graph-up text-success"></i> الطلاب الأكثر تقدماً</div>
+            <details class="student-list" open>
+                <summary class="student-toggle">
+                    <span><i class="bi bi-trophy me-1"></i> عرض الطلاب</span>
+                    <i class="bi bi-chevron-down toggle-arrow"></i>
+                </summary>
+                <div class="students-content">
+                    <div class="student-item">
+                        <i class="bi bi-person-circle text-muted"></i>
+                        <div class="flex-grow-1"><b>أحمد محمد</b> <br><small class="text-muted">حفظ 3 صفحات اليوم</small></div>
+                        <span class="badge bg-success-subtle text-success">+15</span>
+                    </div>
+                    <div class="student-item">
+                        <i class="bi bi-person-circle text-muted"></i>
+                        <div class="flex-grow-1"><b>عمر خالد</b> <br><small class="text-muted">أتم مراجعة جزء كامل</small></div>
+                        <span class="badge bg-success-subtle text-success">+10</span>
+                    </div>
+                </div>
+            </details>
+        </div>
+        <div class="col-md-6">
+            <div class="section-title"><i class="bi bi-graph-down text-danger"></i> الطلاب الأكثر تراجعاً</div>
+            <details class="student-list" open>
+                <summary class="student-toggle">
+                    <span><i class="bi bi-exclamation-circle me-1"></i> عرض الطلاب</span>
+                    <i class="bi bi-chevron-down toggle-arrow"></i>
+                </summary>
+                <div class="students-content">
+                    <div class="student-item">
+                        <i class="bi bi-person-circle text-muted"></i>
+                        <div class="flex-grow-1"><b>ياسين علي</b> <br><small class="text-muted">غياب متكرر (3 أيام)</small></div>
+                        <span class="badge bg-danger-subtle text-danger">تنبيه</span>
+                    </div>
+                    <div class="student-item">
+                        <i class="bi bi-person-circle text-muted"></i>
+                        <div class="flex-grow-1"><b>براء حسن</b> <br><small class="text-muted">تأخر في تسميع </small></div>
+                        <span class="badge bg-warning-subtle text-warning">متابعة</span>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </div>
+</main>
+
+<script>
+const C={pg:'#195042',sb:'#d6cabc',lb:'#f8f5f2',labels:['أسبوع 1','أسبوع 2','أسبوع 3','أسبوع 4'],metrics:[{k:'tests',l:'اختبارات',c:'#195042'},{k:'recite',l:'تسميعات',c:'#2e7d6a'},{k:'review',l:'مراجعات',c:'#5a9f8e'},{k:'attend',l:'حضور',c:'#8fc9b9'}]};
+const makeChart=(id,data)=>new Chart(document.getElementById(id),{type:'bar',data:{labels:C.labels,datasets:C.metrics.map(m=>({label:m.l,data:data.map(d=>d[m.k]),backgroundColor:m.c,borderRadius:6,borderSkipped:false}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{family:'Segoe UI'},color:C.pg}},tooltip:{mode:'index',intersect:false}},scales:{x:{grid:{display:false},ticks:{color:C.pg,font:{size:11}}},y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:C.pg,stepSize:5}}}}});
+const dataH1=[{tests:8,recite:15,review:12,attend:28},{tests:10,recite:18,review:14,attend:30},{tests:12,recite:20,review:16,attend:29},{tests:9,recite:17,review:15,attend:30}];
+const dataH2=[{tests:6,recite:12,review:10,attend:25},{tests:7,recite:14,review:11,attend:27},{tests:8,recite:16,review:13,attend:26},{tests:7,recite:15,review:12,attend:28}];
+document.addEventListener('DOMContentLoaded',()=>{makeChart('chartH1',dataH1);makeChart('chartH2',dataH2);});
+</script>
+</body>
 
 @code{
 
