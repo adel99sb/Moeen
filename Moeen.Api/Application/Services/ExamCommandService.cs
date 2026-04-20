@@ -6,12 +6,22 @@ namespace Moeen.Api.Application.Services
 {
     public class ExamCommandService : IExamCommandService
     {
+        public Task<ExamFeedbackDto> AddExamFeedbackAsync(AddExamFeedbackRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<DeleteExamResultResponse> DeleteExamResultAsync(DeleteExamResultRequest request)
         {
             throw new NotImplementedException();
         }
 
         public Task<ExamResultDto> RegisterExamAsync(RegisterExamRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ExamResultDto> UpdateExamInfoAsync(UpdateExamInfoRequest request)
         {
             throw new NotImplementedException();
         }

@@ -20,21 +20,28 @@ namespace Moeen.Api.Controllers
         /// أمر: تقديم شكوى.
         /// </summary>
         [HttpPost("complaint")]
-        public async Task<ActionResult<SubmitComplaintResponse>> SubmitComplaint(SubmitComplaintRequest request)
+        public async Task<ActionResult<SubmitComplaintResponse>> SubmitComplaint([FromBody] SubmitComplaintRequest request)
             => Ok(await _feedbackService.SubmitComplaintAsync(request));
 
         /// <summary>
         /// أمر: تقديم اقتراح.
         /// </summary>
         [HttpPost("suggestion")]
-        public async Task<ActionResult<SubmitSuggestionResponse>> SubmitSuggestion(SubmitSuggestionRequest request)
+        public async Task<ActionResult<SubmitSuggestionResponse>> SubmitSuggestion([FromBody] SubmitSuggestionRequest request)
             => Ok(await _feedbackService.SubmitSuggestionAsync(request));
 
         /// <summary>
         /// أمر: إدارة الشكاوى والاقتراحات.
         /// </summary>
         [HttpPut("manage")]
-        public async Task<ActionResult<ManageFeedbackResponse>> ManageFeedback(ManageFeedbackRequest request)
+        public async Task<ActionResult<ManageFeedbackResponse>> ManageFeedback([FromBody] ManageFeedbackRequest request)
             => Ok(await _feedbackService.ManageFeedbacksAsync(request));
+
+        /// <summary>
+        /// PUT: تحديث حالة الشكوى.
+        /// </summary>
+        [HttpPut("complaint/status")]
+        public async Task<ActionResult<ManageFeedbackResponse>> UpdateComplaintStatus([FromBody] UpdateComplaintStatusRequest request)
+            => Ok(await _feedbackService.UpdateComplaintStatusAsync(request));
     }
 }

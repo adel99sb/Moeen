@@ -10,22 +10,26 @@ namespace Moeen.Api.Core.Contracts.Application
         /// <summary>
         /// الحصول على تفاصيل حلقة محددة
         /// </summary>
-        /// <param name="request">معرف الحلقة</param>
-        /// <returns>بيانات الحلقة</returns>
         Task<CircleDto> GetCircleByIdAsync(GetCircleByIdRequest request);
 
         /// <summary>
         /// الحصول على قائمة الطلاب المسجلين في الحلقة مع إمكانية التصفية والتصفح
         /// </summary>
-        /// <param name="request">معرف الحلقة ومعايير التصفية</param>
-        /// <returns>قائمة الطلاب مع معلومات التصفح</returns>
         Task<CircleStudentsResponse> GetCircleStudentsAsync(GetCircleStudentsRequest request);
 
         /// <summary>
         /// الحصول على عدد الطلاب المسجلين في الحلقة
         /// </summary>
-        /// <param name="request">معرف الحلقة</param>
-        /// <returns>عدد الطلاب</returns>
         Task<CircleStudentsCountResponse> GetCircleStudentsCountAsync(GetCircleStudentsCountRequest request);
+
+        /// <summary>
+        /// [GET] جلب إحصائيات وتقدم الحلقة (متوسط الحفظ، نسبة الحضور، التقييم)
+        /// </summary>
+        Task<CircleStatisticsDto> GetCircleStatisticsAsync(GetCircleStatisticsRequest request);
+
+        /// <summary>
+        /// [GET] جلب جدول الحضور والغياب للحلقة خلال فترة زمنية محددة
+        /// </summary>
+        Task<CircleAttendanceReportResponse> GetCircleAttendanceReportAsync(GetCircleAttendanceReportRequest request);
     }
 }

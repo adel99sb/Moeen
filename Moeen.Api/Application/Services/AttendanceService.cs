@@ -1,5 +1,6 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.Attendance;
+using Moeen.Api.Shared.Responses.Analytics;
 using Moeen.Api.Shared.Responses.Attendance;
 
 namespace Moeen.Api.Application.Services
@@ -11,7 +12,32 @@ namespace Moeen.Api.Application.Services
             throw new NotImplementedException();
         }
 
+        public Task<bool> DeleteAttendanceRecordAsync(Guid recordId)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<ExportAttendanceResponse> ExportAttendanceAsync(ExportAttendanceRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PagedResult<AttendanceRecordSummaryDto>> GetAllAttendanceRecordsAsync(AttendanceRecordFilter filter)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<AttendanceRecordDto> GetAttendanceRecordByIdAsync(Guid recordId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<FrequentAbsencesResultDto> GetFrequentAbsencesAsync(FrequentAbsencesFilter filter)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<AttendanceRateDto> GetStudentAttendanceRateAsync(Guid studentId, DateTime fromDate, DateTime toDate)
         {
             throw new NotImplementedException();
         }
@@ -32,6 +58,11 @@ namespace Moeen.Api.Application.Services
         }
 
         public Task<RecordDailyAttendanceResponse> RecordDailyAttendanceAsync(RecordDailyAttendanceRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<AttendanceRecordDto> UpdateAttendanceStatusAsync(Guid recordId, UpdateAttendanceStatusRequest request)
         {
             throw new NotImplementedException();
         }
