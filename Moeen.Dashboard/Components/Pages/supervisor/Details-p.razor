@@ -1,0 +1,146 @@
+﻿@page "/details-p" 
+@inject NavigationManager mgr
+<style>
+    .details-card-container {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+        max-width: 500px;
+        margin: 20px auto;
+        border: 1px solid #d6cabc; /* نفس درجة البيج في مشروعك */
+    }
+
+    .details-header {
+        background-color: #195042; /* اللون الأخضر المعتمد عندك */
+        color: white;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .person-icon {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 10px;
+        color: #d6cabc;
+    }
+
+    .details-body {
+        padding: 25px;
+        direction: rtl;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* تقسيم المعلومات لعمودين */
+        gap: 20px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+        .info-item.full-width {
+            grid-column: span 2; /* العنوان يأخذ العرض كاملاً */
+        }
+
+        .info-item label {
+            font-size: 0.85rem;
+            color: #91855a; /* اللون الذهبي/البيج الغامق */
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .info-item .value {
+            font-size: 1rem;
+            color: #195042;
+            background: #fcfbf9;
+            padding: 8px 12px;
+            border-radius: 8px;
+            width: 100%;
+            border-right: 3px solid #d6cabc; /* حركة جمالية بسيطة */
+        }
+
+    .details-footer {
+        padding: 15px;
+        text-align: center;
+        background: #f8f9fa;
+    }
+
+    .btn-close-details {
+        background: #d6cabc;
+        color: #195042;
+        border: none;
+        padding: 8px 30px;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+        .btn-close-details:hover {
+            background: #195042;
+            color: white;
+        }
+</style>
+<div class="details-card-container">
+    <div class="details-header">
+        <i class="bi bi-person-badge-fill person-icon"></i>
+        <h4>تفاصيل ولي الأمر</h4>
+    </div>
+    
+    <div class="details-body">
+        <div class="info-grid">
+            <div class="info-item">
+                <label>الاسم الكامل</label>
+                <div class="value">مصطفى محمد المحمد</div>
+            </div>
+
+            <div class="info-item">
+                <label>المهنة / الوظيفة</label>
+                <div class="value">مهندس برمجيات</div>
+            </div>
+
+            <div class="info-item">
+                <label>البريد الإلكتروني</label>
+                <div class="value">mostafa@example.com</div>
+            </div>
+
+            <div class="info-item full-width">
+                <label>العنوان</label>
+                <div class="value">سوريا - حلب - الحي المرديان   </div>
+            </div>
+        </div>
+    </div>
+</div>
+<section class="management-container">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>اسم الابن</th>
+                    <th class="text-center">الإجراء</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td>عمر العلي</td>
+                    <td class="actions-cell">
+                        <button class="btn-icon delete" title="عرض"><i class="bi bi-info-circle"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>أحمد العلي</td>
+                    <td class="actions-cell">
+                        <button class="btn-icon delete" title="عرض"><i class="bi bi-info-circle"></i></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+@code {
+
+}
