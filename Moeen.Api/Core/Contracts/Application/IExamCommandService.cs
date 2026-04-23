@@ -9,22 +9,26 @@ namespace Moeen.Api.Core.Contracts.Application
         /// <summary>
         /// تسجيل اختبار جديد مع حساب التقدير والنقاط تلقائياً
         /// </summary>
-        /// <param name="request">بيانات الاختبار</param>
-        /// <returns>نتيجة الاختبار المسجلة</returns>
         Task<ExamResultDto> RegisterExamAsync(RegisterExamRequest request);
 
         /// <summary>
         /// تحديث نتيجة اختبار (إذا كان هناك خطأ)
         /// </summary>
-        /// <param name="request">معرف الاختبار والنتيجة الجديدة والملاحظات</param>
-        /// <returns>نتيجة الاختبار بعد التحديث</returns>
         Task<ExamResultDto> UpdateExamResultAsync(UpdateExamResultRequest request);
-
+            
         /// <summary>
         /// حذف نتيجة اختبار
         /// </summary>
-        /// <param name="request">معرف الاختبار</param>
-        /// <returns>حالة النجاح مع رسالة</returns>
         Task<DeleteExamResultResponse> DeleteExamResultAsync(DeleteExamResultRequest request);
+
+        /// <summary>
+        /// [PUT] تحديث البيانات الوصفية للاختبار (التاريخ، النوع، الملاحظات)
+        /// </summary>
+        Task<ExamResultDto> UpdateExamInfoAsync(UpdateExamInfoRequest request);
+
+        /// <summary>
+        /// [PUT] إضافة ملاحظات تقييمية أو توصيات للطالب بعد الاختبار
+        /// </summary>
+        Task<ExamFeedbackDto> AddExamFeedbackAsync(AddExamFeedbackRequest request);
     }
 }

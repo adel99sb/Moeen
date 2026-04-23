@@ -1,5 +1,6 @@
 ﻿using Moeen.Api.Shared.Requests.CircleTeacherAssignment;
 using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application
@@ -9,15 +10,26 @@ namespace Moeen.Api.Core.Contracts.Application
         /// <summary>
         /// تعيين معلم مسؤول عن حلقة دراسية
         /// </summary>
-        /// <param name="request">معرف الحلقة، معرف المعلم، وتحديد ما إذا كان المعلم أساسياً</param>
-        /// <returns>نتيجة العملية مع رسالة توضيحية</returns>
-        Task<OperationResponse> AssignTeacherToCircleAsync(AssignTeacherToCircleRequest request);
+        Task<OperationResponseDto> AssignTeacherToCircleAsync(AssignTeacherToCircleRequest request);
 
         /// <summary>
         /// إزالة معلم من الإشراف على حلقة دراسية
         /// </summary>
-        /// <param name="request">معرف الحلقة ومعرف المعلم</param>
-        /// <returns>نتيجة العملية مع رسالة توضيحية</returns>
-        Task<OperationResponse> RemoveTeacherFromCircleAsync(RemoveTeacherFromCircleRequest request);
+        Task<OperationResponseDto> RemoveTeacherFromCircleAsync(RemoveTeacherFromCircleRequest request);
+
+        /// <summary>
+        /// [GET] جلب الحلقات المسندة لمعلم محدد (النشطة أو مع التاريخ)
+        /// </summary>
+        Task<List<CircleAssignmentDto>> GetCirclesByTeacherAsync(GetCirclesByTeacherRequest request);
+
+        /// <summary>
+        /// [GET] جلب المعلمين المسندين لحلقة محددة
+        /// </summary>
+        Task<List<CircleAssignmentDto>> GetTeachersByCircleAsync(GetTeachersByCircleRequest request);
+
+        /// <summary>
+        /// [PUT] استبدال معلم بآخر في نفس الحلقة
+        /// </summary>
+        Task<OperationResponseDto> ReplaceTeacherInCircleAsync(ReplaceTeacherRequest request);
     }
 }

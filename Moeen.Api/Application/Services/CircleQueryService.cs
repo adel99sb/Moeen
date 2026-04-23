@@ -7,7 +7,17 @@ namespace Moeen.Api.Application.Services
 {
     public class CircleQueryService : ICircleQueryService
     {
+        public Task<CircleAttendanceReportResponse> GetCircleAttendanceReportAsync(GetCircleAttendanceReportRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<CircleDto> GetCircleByIdAsync(GetCircleByIdRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CircleStatisticsDto> GetCircleStatisticsAsync(GetCircleStatisticsRequest request)
         {
             throw new NotImplementedException();
         }

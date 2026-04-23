@@ -16,7 +16,22 @@ namespace Moeen.Api.Application.Services
             throw new NotImplementedException();
         }
 
+        public Task<ExamPhaseDto> GetExamPhaseByIdAsync(GetExamPhaseByIdRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<GetExamPhasesResponse> GetExamPhasesAsync(GetExamPhasesRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<ExamPhaseDto>> GetExamPhasesByCircleAsync(GetExamPhasesByCircleRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ExamPhaseDto> UpdateExamPhaseInfoAsync(UpdateExamPhaseInfoRequest request)
         {
             throw new NotImplementedException();
         }

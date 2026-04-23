@@ -20,5 +20,10 @@ namespace Moeen.Api.Application.Services
         {
             throw new NotImplementedException();
         }
+
+        public Task<ManageFeedbackResponse> UpdateComplaintStatusAsync(UpdateComplaintStatusRequest request)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,5 +1,8 @@
 ﻿using Moeen.Api.Shared.Requests.Registration;
+using Moeen.Api.Shared.Responses;
 using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
+using Moeen.Api.Shared.Responses.Registration;
+using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application
 {
@@ -8,22 +11,31 @@ namespace Moeen.Api.Core.Contracts.Application
         /// <summary>
         /// تسجيل طالب في حلقة دراسية
         /// </summary>
-        /// <param name="request">معرف الطالب ومعرف الحلقة</param>
-        /// <returns>نتيجة العملية مع رسالة توضيحية</returns>
-        Task<OperationResponse> RegisterInCircleAsync(RegisterInCircleRequest request);
+        Task<OperationResponseDto> RegisterInCircleAsync(RegisterInCircleRequest request);
 
         /// <summary>
         /// إلغاء تسجيل طالب من حلقة دراسية
         /// </summary>
-        /// <param name="request">معرف الطالب ومعرف الحلقة</param>
-        /// <returns>نتيجة العملية مع رسالة توضيحية</returns>
-        Task<OperationResponse> UnregisterFromCircleAsync(UnregisterFromCircleRequest request);
+        Task<OperationResponseDto> UnregisterFromCircleAsync(UnregisterFromCircleRequest request);
 
         /// <summary>
         /// نقل طالب بين حلقتين دراسيتين
         /// </summary>
-        /// <param name="request">معرف الطالب ومعرف الحلقة المصدر ومعرف الحلقة الهدف</param>
-        /// <returns>نتيجة العملية مع رسالة توضيحية</returns>
-        Task<OperationResponse> TransferStudentAsync(TransferStudentRequest request);
+        Task<OperationResponseDto> TransferStudentAsync(TransferStudentRequest request);
+
+        /// <summary>
+        /// [GET] جلب تفاصيل تسجيل طالب في حلقة بمعرف التسجيل
+        /// </summary>
+        Task<RegistrationDto> GetRegistrationByIdAsync(GetRegistrationByIdRequest request);
+
+        /// <summary>
+        /// [GET] جلب جميع الطلاب المسجلين في حلقة مع التصفح والتصفية
+        /// </summary>
+        Task<PagedList<CircleStudentDto>> GetCircleStudentsAsync(GetCircleRegisteredStudentsRequest request);
+
+        /// <summary>
+        /// [PUT] تحديث حالة التسجيل
+        /// </summary>
+        Task<RegistrationDto> UpdateRegistrationStatusAsync(UpdateRegistrationStatusRequest request);
     }
 }

@@ -16,6 +16,16 @@ namespace Moeen.Api.Application.Services
             throw new NotImplementedException();
         }
 
+        public Task<CircleDto> MoveToFoujAsync(MoveCircleToFoujRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CircleDto> ReassignTeacherAsync(ReassignCircleTeacherRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<CircleDto> UpdateCircleAsync(UpdateCircleRequest request)
         {
             throw new NotImplementedException();

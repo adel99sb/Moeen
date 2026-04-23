@@ -20,5 +20,10 @@ namespace Moeen.Api.Core.Contracts.Application
         /// إدارة الشكاوى والاقتراحات (الرد عليها)
         /// </summary>
         Task<ManageFeedbackResponse> ManageFeedbacksAsync(ManageFeedbackRequest request);
+
+        /// <summary>
+        /// تحديث حالة الشكوى
+        /// </summary>
+        Task<ManageFeedbackResponse> UpdateComplaintStatusAsync(UpdateComplaintStatusRequest request);
     }
 }
