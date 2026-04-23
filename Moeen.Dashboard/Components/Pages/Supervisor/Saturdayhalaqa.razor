@@ -1,8 +1,9 @@
-﻿@page "/supervisor/managementfouj"
+﻿
+@page "/supervisor/saturdayhalaqa"
 @inject NavigationManager NavManager
 @rendermode InteractiveServer
-    <style>
-         :root {
+<style>
+             :root {
 --primary-green: #195042;
 --accent-beige: #d6cabc;
 --light-beige: #f4f1ee;
@@ -10,10 +11,6 @@
 --text-dark: #2d3436;
 --status-green: #2ecc71;
 --danger-red: #e74c3c;
-        --transition: all 0.3s ease;
-    --shadow-md: 0 6px 15px rgba(0,0,0,0.12);
-
-
 }
 body {
 font-family: 'Tajawal', sans-serif;
@@ -131,7 +128,14 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
        .form-container, .form-container * {
         box-sizing: border-box;
     }
-  
+    :root {
+        --primary-green: #195042;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --text-dark: #2d3436;
+        --transition: all 0.3s ease;
+    }
     .form-container {
         max-width: 850px;
         margin: 2rem auto;
@@ -238,162 +242,194 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
             grid-template-columns: 1fr !important;
         }
     }
-            .form-label{
-                display:block;
-                margin-bottom:5px;
-                font-weight:bold;
-            }
-            .halqat-container{
-                background:white;
-            display:flex;
-                flex-wrap:wrap;
-                gap:10px;
-                align-items:center;
-            }
-            .checkbox-item{
-                display:flex;
-                align-items:center;
-                gap:5px;
-                padding:5px 10px;
-                border-radius:8px;
-                cursor:pointer;
-                font-size:20px;
-            }
-
+    
     </style>
 
-
-
-
-
-    <!-- الأزرار العلوية -->
+    
     <section class="management-container">
     <header class="page-header">
-        <h2 class="page-title">إدارة  الأفواج والحلقات</h2>
+        <h2 class="page-title">إدارة  الدروس والحلقات</h2>
     </header>
     <nav class="tabs-navigation">
-        <NavLink class="tab-item" href="/supervisor/managementfouj">
-            إدارة الأفواج
+        <NavLink class="tab-item" href="/supervisor/saturdaylesson">
+            إدارة الدروس
         </NavLink>
-        <NavLink class="tab-item" href="/supervisor/managementhalqa">
+        <NavLink class="tab-item" href="/supervisor/saturdayhalaqa">
             إدارة الحلقات
         </NavLink>
     </nav>
     <div class="action-bar">
         </div>
-    <!-- الكاردات -->
-    <div class="table-responsive">
-
-    <div class="card-container">
-
-        <!-- فوج 1 -->
+        <div class="card-container">
+          
+        <!-- حلقة 1 -->
         <div class="card">
-            <h3>الفوج الأول</h3>
+            <h3>الحلقة الأولى</h3>
             <br />
             
             <div class="sessions">
-                    <p>الحلقات التابعة له:</p>
-
-                <p>حلقة 1</p>
-                <p>حلقة 2</p>
-               <p>وقت بداية الفوج:الساعة الثامنة صباحا</p>
-               <p>وقت نهاية الفوج:الساعة العاشرة صباحا</p>
-
-
+                  <p>اسم الحلقة:</p>
+                    <p>  الأولى  </p>
+                     <p>  الفئة المستهدفة:   </p>
+                    <p>10-13 سنوات</p>
+                    <p>  اسم المعلم/ة:   </p>
+                    <p>آية دعبول</p>
+                    <p>توقيت الحلقة:</p>
+                    <p>الثامنة صباحا</p>
+                   
             </div>
             <br />
             <div class="azrar">
-                <a @onclick="editFouj"> <button  title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                <a @onclick="edithalaqaa"> <button  title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
             <button title="حذف"><i class="bi bi-trash"></i></button>
 
             </div>
         </div>
         <br />
-        <!-- فوج 2 -->
+        <!-- حلقة 2 -->
         <div class="card">
-            <h3>الفوج الثاني</h3>
+            <h3>الحلقة الثانية</h3>
             <br />
             
             <div class="sessions">
-                    <p>الحلقات التابعة له:</p>
-
-                <p>حلقة 3</p>
-                <p>حلقة 4</p>
-                    <p>وقت بداية الفوج:الساعة العاشرة صباحا</p>
-                    <p>وقت نهاية الفوج:الساعة الثانية عشر ظهرا</p>
+                    <p>اسم الحلقة:</p>
+                    <p>  الثانية  </p>
+                     <p>  الفئة المستهدفة:   </p>
+                    <p>13-15 سنوات</p>
+                    <p>  اسم المعلم/ة:   </p>
+                    <p>هبة عجم</p>
+                    <p>توقيت الحلقة:</p>
+                    <p>التاسعة صباحا</p>
+                   
 
             </div>
             <br />
             <div class="azrar">
-                <a @onclick="editFouj"> <button title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                <a @onclick="edithalaqaa"> <button title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
                 <button title="حذف"><i class="bi bi-trash"></i></button>
 
             </div>
         </div>
-    </div>
+        <!-- حلقة 3 -->
+        <div class="card">
+            <h3>الحلقة الثالثة</h3>
+            <br />
+            
+            <div class="sessions">
+                    <p>اسم الحلقة:</p>
+                    <p>  الثالثة  </p>
+                     <p>  الفئة المستهدفة:   </p>
+                    <p>6-8 سنوات</p>
+                    <p>  اسم المعلم/ة:   </p>
+                    <p>زينب السباعي</p>
+                    <p>توقيت الحلقة:</p>
+                    <p>الثامنة صباحا</p>
+                   
 
-        </div><br />
-    <!-- زر إضافة -->
+            </div>
+            <br />
+            <div class="azrar">
+                <a @onclick="edithalaqaa"> <button title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                <button title="حذف"><i class="bi bi-trash"></i></button>
+
+            </div>
+        </div>
+        <br />
+        <!-- حلقة 4 -->
+        <div class="card">
+            <h3> الحلقة الرابعة</h3>
+            <br />
+            
+            <div class="sessions">
+                    <p>اسم الحلقة:</p>
+                    <p>  الرابعة  </p>
+                     <p>  الفئة المستهدفة:   </p>
+                    <p>9-10 سنوات</p>
+                    <p>  اسم المعلم/ة:   </p>
+                    <p>آية دعبول</p>
+                    <p>توقيت الحلقة:</p>
+                    <p>العاشرة صباحا</p>
+                   
+            </div>
+            <br />
+            <div class="azrar">
+                <a @onclick="edithalaqaa"> <button title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                <button title="حذف"><i class="bi bi-trash"></i></button>
+            </div>
+
+            </div>
+    </div>
+        <br />
+          <!-- زر إضافة -->
     
-  <details>
-	<summary class="btn-pprimary">إضافة فوج جديد</summary>
-    <div class="form-container">
+     <details>
+<summary class="btn-pprimary">إضافة حلقة جديدة</summary>
+<div class="form-container">
     <div class="form-header">
-        <h2><i class="bi bi-plus-circle-dotted"></i> إضافة فوج</h2>
+        <h2><i class="bi bi-plus-circle-dotted"></i> إضافة حلقة</h2>
     </div>
                 <form>
         <div class="grid-row">
             <div class="input-group">
-         <label>اسم الفوج </label>
+         <label>اسم الحلقة </label>
                 <div class="input-wrapper">
                     <i class="bi bi-fonts"></i>
                     <input type="text" placeholder="أدخل الاسم">
                 </div>
                 </div>
 
-        <div class="input-group">
-         <label>وقت بداية الفوج </label>
+                 <div class="input-group">
+         <label>الفئة المتضمنة </label>
                 <div class="input-wrapper">
-                    <i class="bi bi-clock-history"></i>
-                    <input type="number" placeholder="اكتب هنا...">
+                    <i class="bi bi-text-paragraph"></i>
+                    <select>
+                        <option>اصغر من تسع سنوات</option>
+                        <option>9-13 سنة</option>
+                        <option>14-18 سنة</option>
+                        <option>اكبر من 18 سنة</option>
+
+                    </select>
                 </div>
                 </div>
                 </div>
+
         <div class="grid-row">
-
-        <div class="input-group">
-         <label>وقت نهاية الفوج </label>
+       
+              <div class="input-group">
+         <label>توقيت الحلقة </label>
                 <div class="input-wrapper">
                     <i class="bi bi-clock-history"></i>
-                    <input type="number" placeholder="اكتب هنا...">
+                    <select>
+                        <option>الثامنة صباحا</option>
+                        <option>التاسعة صباحا</option>
+                        <option>العاشرة صباحا</option>
+                    </select>
                 </div>
                 </div>
-        <div class="input-group">
-            <label class="form-label"> الحلقات التابعة له:</label><br>
-            <div class="halqat-container">
-            <label class="checkbox-item"><input type="checkbox"> حلقة 1</label>
-            <label class="checkbox-item"><input type="checkbox"> حلقة 2</label>
+         <div class="input-group">
+         <label>اسم معلم الحلقة </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-fonts"></i>
+                    <select>
+                        <option>ماريا العبدالسلام</option>
+                        <option>آية دعبول</option>
+                    </select>
+                </div>
+                </div>
 
-            <label class="checkbox-item"><input type="checkbox"> حلقة 3</label>
-            <label class="checkbox-item"><input type="checkbox"> حلقة 4</label>
-</div>
-        </div>
-        </div>
- <div class="actions">
+                </div>
+           <div class="actions">
             <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ</button>
-            <a href="/supervisor/managementfouj" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+            <a href="/supervisor/saturdaylesson" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
         </div>
     </form>
-                </div>
-
+        </div>
 </details>
-</section>
-
+        </section>
 @code {
-    private void editFouj()
+     private void edithalaqaa()
     {
-        NavManager.NavigateTo("/supervisor/editfouj");
+        NavManager.NavigateTo("/supervisor/edithalaqaa");
         // Logic to edit student information
     }
-  
 }
