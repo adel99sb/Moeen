@@ -1,115 +1,149 @@
 ﻿@rendermode InteractiveServer
-<dicv class="top-row ps-3 navbar navbar-dark">
+
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div>
-        <label for="NavCheckBox" style="color:red">is Test</label>
-        <input type="checkbox" name="NavCheckBox" @bind-value="isTest" />
+        <label style="color:red; margin-left: 10px;">اختر الدور:</label>
+        <select @bind="userRole" style="padding: 5px; border-radius: 5px;">
+            <option value="owner"> مالك</option>
+            <option value="supervisor"> مشرف</option>
+            <option value="teacher"> معلم</option>
+        </select>
     </div>
     <div class="container-fluid">
         <a class="navbar-brand" href="">Dashboard</a>
     </div>
-</dicv>
+</div>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
-        @if (!isTest)
+        
+        @if (userRole == "owner")
         {
-
+            <!-- قائمة المالك -->
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                    <span class="bi bi-house-door nav-menu" aria-hidden="true"></span> Home
+                    <span class="bi bi-house-door-fill"></span> Home
                 </NavLink>
             </div>
-
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/owner/AccountManagement">
+                    <span class="bi bi-person-lines-fill"></span> حسابات المستخدمين
+                </NavLink>
+            </div>
+           
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/management/mosques-management">
+                    <span class="bi bi-building"></span> إدارة المساجد
+                </NavLink>
+            </div>
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="style-guide">
-                    <span class="bi bi-palette nav-menu" aria-hidden="true"></span>
+                    <span class="bi bi-palette-fill nav-menu" aria-hidden="true"></span>
                     <span>نموذج</span>
                 </NavLink>
             </div>
 
+        }
+        else if (userRole == "supervisor")
+        {
+            <!-- قائمة المشرف -->
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="settings">
-                    <span class="bi bi-graph-up nav-menu"></span>
-                    <span>الإحصائيات</span>
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill"></span> الرئيسية
                 </NavLink>
             </div>
-
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/owner/AccountManagement">
-                    <span class="bi bi-people nav-menu"></span>
-                    <span>حسابات المستخدمين</span>
-                </NavLink>
-            </div>
-
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="supervisor/student">
-                    <span class="bi bi-mortarboard nav-menu"></span>
-                    <span>إدارة طلاب</span>
+                    <span class="bi bi-mortarboard-fill"></span> إدارة طلاب
                 </NavLink>
             </div>
-
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="supervisor/teacher">
-                    <span class="bi bi-person-badge nav-menu"></span>
-                    <span>إدارة معلمين</span>
+                    <span class="bi bi-person-workspace"></span> إدارة معلمين
                 </NavLink>
             </div>
-
             <div class="nav-item px-3">
+                <NavLink class="nav-link" href="supervisor/fouj-and-halqa">
+                    <span class="bi bi-diagram-3-fill"></span> الأفواج والحلقات
                 <NavLink class="nav-link" href="/supervisor/managementfouj">
                     <span class="bi bi-diagram-3 nav-menu"></span>
                     <span>الأفواج والحلقات</span>
                 </NavLink>
             </div>
-
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="supervisor/book">
+                    <span class="bi bi-book-fill"></span> إدارة الكتب
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/parents">
+                    <span class="bi bi-people-fill"></span> إدارة الأهالي
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="supervisor/posts">
+                    <span class="bi bi-megaphone-fill nav-menu"></span>
+                    <span>المنشورات</span>
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="supervisor/complaint-and-suggestions">
+                    <span class="bi bi-chat-dots-fill nav-menu"></span>
+                    <span>الشكاوي</span>
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="supervisor/reports">
+                    <span class="bi bi-file-earmark-text-fill nav-menu"></span>
+                    <span>التقارير</span>
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/supervisor/managementfouj">
+                    <span class="bi bi-people-fill nav-menu"></span>
+                    <span>إدارة halaqa</span>
+                </NavLink>
+            </div>
+            
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="supervisor/saturdaylesson">
-                    <span class="bi bi-calendar-week nav-menu"></span>
+                    <span class="bi bi-calendar-week-fill nav-menu"></span>
                     <span>دروس السبت</span>
                 </NavLink>
             </div>
 
+
+        }
+        else if (userRole == "teacher")
+        {
+            <!-- قائمة المعلم -->
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="supervisor/book">
-                    <span class="bi bi-book nav-menu"></span>
-                    <span>إدارة الكتب</span>
+                <NavLink class="nav-link" href="Teacher/TeacherDashboard" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill"></span> الرئيسية
                 </NavLink>
             </div>
 
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="supervisor/posts">
-                    <span class="bi bi-megaphone nav-menu"></span>
-                    <span>المنشورات</span>
+                <NavLink class="nav-link" href="Teacher/MyLessons">
+                    <span class="bi bi-graph-up-arrow"></span> تقدم حلقاتي
                 </NavLink>
             </div>
-
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="supervisor/complaint-and-suggestions">
-                    <span class="bi bi-chat-dots nav-menu"></span>
-                    <span>الشكاوي</span>
+                <NavLink class="nav-link" href="Teacher/Attendance">
+                    <span class="bi bi-calendar-check-fill"></span>  الدروس الاسبوعية
                 </NavLink>
             </div>
-
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="supervisor/reports">
-                    <span class="bi bi-file-earmark-text nav-menu"></span>
-                    <span>التقارير</span>
+                <NavLink class="nav-link" href="Teacher/Profile">
+                    <span class="bi bi-journals"></span> المكتبة
                 </NavLink>
             </div>
-
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/management/mosques-management">
-                    <span class="bi bi-building nav-menu"></span>
-                    <span>إدارة المساجد</span>
-                </NavLink>
-            </div>
-
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/parents">
-                    <span class="bi bi-people nav-menu"></span>
-                    <span>إدارة الأهالي</span>
+                <NavLink class="nav-link" href="Teacher/Profile">
+                    <span class="bi bi-megaphone-fill"></span>  الاعلانات
                 </NavLink>
             </div>
             <div class="nav-item px-3">
@@ -123,14 +157,15 @@
         else
         {
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="counter">
-                    <span class="bi bi-people nav-menu"></span>
-                    <span>Test New Nav</span>
+                <NavLink class="nav-link" href="Teacher/Profile">
+                    <span class="bi bi-person-circle"></span> ملفي الشخصي
                 </NavLink>
             </div>
         }
+
     </nav>
 </div>
-@code{
-    public bool isTest { get; set; }
+
+@code {
+    private string userRole = "owner";
 }
