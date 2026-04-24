@@ -1,0 +1,305 @@
+﻿@page "/Teacher/WeekSessions"
+
+<h3>WeekSessions</h3>
+ <style>
+        :root {
+            --primary-green: #195042;
+            --luxury-beige: #d6cabc;
+            --absent-red: #dc3545;
+            --present-green: #28a745;
+            --white: #ffffff;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .header-custom {
+            background-color: var(--primary-green);
+            color: var(--luxury-beige);
+            padding: 2.5rem 0;
+            border-bottom: 6px solid var(--luxury-beige);
+            margin-bottom: 2rem;
+        }
+
+        .card-circle {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .card-header-main {
+            background-color: var(--luxury-beige);
+            color: var(--primary-green);
+            font-weight: 800;
+            border: none;
+        }
+
+        .status-btn { display: none; }
+
+        .btn-label {
+            cursor: pointer;
+            padding: 6px 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+            display: inline-block;
+            font-size: 0.9rem;
+            user-select: none;
+        }
+
+        .status-btn-present:checked + .label-present {
+            background-color: var(--present-green) !important;
+            color: white !important;
+            border-color: var(--present-green);
+        }
+
+        .status-btn-absent:checked + .label-absent {
+            background-color: var(--absent-red) !important;
+            color: white !important;
+            border-color: var(--absent-red);
+        }
+
+        /* ✨ تنبيه بصري للطالب الغائب */
+        .status-btn-absent:checked ~ .point-input {
+            background-color: #ffe6e6;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .point-input {
+            width: 70px;
+            border: 2px solid var(--luxury-beige);
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary-green);
+            transition: all 0.3s ease;
+        }
+
+        .lesson-dropdown {
+            border: 2px solid var(--luxury-beige);
+            border-radius: 10px;
+        }
+      
+        .form-select:focus, 
+        .point-input:focus {
+            border-color: var(--primary-green) !important; 
+            box-shadow: 0 0 0 0.25rem rgba(6, 76, 65, 0.25) !important; 
+        }
+
+        .archive-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px dashed #eee;
+            text-align: right;
+        }
+
+        .icon-box {
+            width: 45px;
+            height: 45px;
+            background: var(--luxury-beige);
+            color: var(--primary-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            flex-shrink: 0;
+        }
+
+        .status-badge {
+            background: #e9f5f2;
+            color: var(--primary-green);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /*  طي/نشر الكاردات - نظيف وقصير */
+        details.card-circle { margin-bottom: 0; }
+        summary.card-header-main { list-style: none; cursor: pointer; user-select: none; }
+        summary.card-header-main::-webkit-details-marker { display: none; }
+        .toggle-icon { 
+            transition: transform 0.3s ease; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            color: var(--primary-green);
+        }
+        details[open] .toggle-icon { transform: rotate(180deg); }
+        .card-body.collapsible { transition: padding 0.3s ease; }
+        details:not([open]) .card-body.collapsible { display: none; }
+    </style>
+
+
+
+<header class="header-custom text-center">
+    <div class="container">
+        <h1 class="fw-bold">دروس الاسبوع</h1>
+        <p class="mb-0">متابعة كل مايخص الدروس</p>
+    </div>
+</header>
+
+<div class="container mb-5">
+    <div class="row g-4">
+        
+        <!-- كارد حلقة اليافعين - قابل للطي -->
+        <div class="col-lg-6">
+            <details class="card card-circle bg-white" open>
+                <summary class="card-header card-header-main p-3 d-flex justify-content-between align-items-center">
+                    <span>حلقة اليافعين</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-dark">العدد: 12</span>
+                        <span class="toggle-icon"><i class="bi bi-chevron-down"></i></span>
+                    </div>
+                </summary>
+                <div class="card-body p-4 collapsible">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small">الدرس الحالي من كتاب:</label>
+                        <select class="form-select lesson-dropdown">
+                            <option>رياض الصالحين</option>
+                            <option>منهاج المسلم</option>
+                            <option>الأربعون النووية</option>
+                        </select>
+                    </div>
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                            <tr class="small text-muted">
+                                <th>اسم الطالب</th>
+                                <th class="text-center">الحالة</th>
+                                <th class="text-center">النقاط</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold">زينب سباعي</td>
+                                <td class="text-center">
+                                    <input type="radio" name="status-1" id="p1" class="status-btn status-btn-present">
+                                    <label for="p1" class="btn-label label-present">حاضر</label>
+                                    <input type="radio" name="status-1" id="p2" class="status-btn status-btn-absent">
+                                    <label for="p2" class="btn-label label-absent">غائب</label>
+                                </td>
+                                <td class="text-center">
+                                    <input type="number" class="form-control point-input mx-auto" min="0">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">الاء قاسم</td>
+                                <td class="text-center">
+                                    <input type="radio" name="status-2" id="p2" class="status-btn status-btn-present">
+                                    <label for="p2" class="btn-label label-present">حاضر</label>
+                                    <input type="radio" name="status-2" id="a2" class="status-btn status-btn-absent">
+                                    <label for="a2" class="btn-label label-absent">غائب</label>
+                                </td>
+                                <td class="text-center">
+                                    <input type="number" class="form-control point-input mx-auto" min="0">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        </div>
+
+        <!-- ✨ كارد حلقة الأطفال - قابل للطي -->
+        <div class="col-lg-6">
+            <details class="card card-circle bg-white" open>
+                <summary class="card-header card-header-main p-3 d-flex justify-content-between align-items-center">
+                    <span>حلقة الأطفال</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-dark">العدد: 15</span>
+                        <span class="toggle-icon"><i class="bi bi-chevron-down"></i></span>
+                    </div>
+                </summary>
+                <div class="card-body p-4 collapsible">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small">الدرس الحالي من كتاب:</label>
+                        <select class="form-select lesson-dropdown">
+                            <option>قصص الأنبياء</option>
+                            <option>العقيدة الإسلامية</option>
+                            <option>الأربعون النووية</option>
+                        </select>
+                    </div>
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                            <tr class="small text-muted">
+                                <th>اسم الطالب</th>
+                                <th class="text-center">الحالة</th>
+                                <th class="text-center">النقاط</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold">هبة عجم</td>
+                                <td class="text-center">
+                                    <input type="radio" name="status-3" id="p3" class="status-btn status-btn-present">
+                                    <label for="p3" class="btn-label label-present">حاضر</label>
+                                    <input type="radio" name="status-3" id="a3" class="status-btn status-btn-absent">
+                                    <label for="a3" class="btn-label label-absent">غائب</label>
+                                </td>
+                                <td class="text-center">
+                                    <input type="number" class="form-control point-input mx-auto" min="0">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">اّية دعبول</td>
+                                <td class="text-center">
+                                    <input type="radio" name="status-4" id="p4" class="status-btn status-btn-present">
+                                    <label for="p4" class="btn-label label-present">حاضر</label>
+                                    <input type="radio" name="status-4" id="a4" class="status-btn status-btn-absent">
+                                    <label for="a4" class="btn-label label-absent">غائب</label>
+                                </td>
+                                <td class="text-center">
+                                    <input type="number" class="form-control point-input mx-auto" min="0">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        </div>
+        
+        <!-- سجل الدروس السابقة (بدون تغيير) -->
+        <div class="col-12 mt-5">
+            <div class="card card-circle bg-white">
+                <div class="card-header card-header-main p-3 d-flex align-items-center" style="background-color: var(--primary-green); color: var(--luxury-beige);">
+                    <i class="bi bi-clock-history ms-2"></i>
+                    <span>سجل الدروس السابقة</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="archive-item">
+                        <div class="icon-box"><i class="bi bi-book"></i></div>
+                        <div class="flex-grow-1">
+                            <span class="badge bg-light text-dark border mb-1" style="font-size: 0.7rem;">حلقة اليافعين</span>
+                            <h6 class="mb-1 fw-bold text-dark">سورة البقرة: الآيات 1-20</h6>
+                            <small class="text-muted">السبت 7 ذو القعدة | حضر: 10 طلاب</small>
+                        </div>
+                        <div class="status-badge">مكتمل</div>
+                    </div>
+                    <div class="archive-item">
+                        <div class="icon-box"><i class="bi bi-journal-text"></i></div>
+                        <div class="flex-grow-1">
+                            <span class="badge bg-light text-dark border mb-1" style="font-size: 0.7rem;">حلقة الأطفال</span>
+                            <h6 class="mb-1 fw-bold text-dark">قصص الأنبياء: النبي يوسف عليه السلام</h6>
+                            <small class="text-muted">السبت 30 شوال | حضر: 14 طالب</small>
+                        </div>
+                        <div class="status-badge">مكتمل</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@code {
+
+}
