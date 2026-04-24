@@ -273,7 +273,7 @@ margin-top:15px;
                     <td>
                   	<a @onclick="AddExam"><button title="إضافة اختبار"><i class="bi bi-plus"></i></button></a>
 
-                  	<a @onclick="DetailsExam"><button title="تفاصيل"><i class="bi bi-info-circle"></i></button></a>
+                  	<a @onclick="InformationExam"><button title="تفاصيل"><i class="bi bi-info-circle"></i></button></a>
                  
                         <button   class="bi bi-trash" title="حذف"></button>
                     </td>
@@ -287,7 +287,7 @@ margin-top:15px;
                    <td>
                   	<a @onclick="AddExam"><button title="إضافة اختبار"><i class="bi bi-plus"></i></button></a>
 
-                  	<a @onclick="DetailsExam"><button title="تفاصيل"><i class="bi bi-info-circle"></i></button></a>
+                  	<a @onclick="InformationExam"><button title="تفاصيل"><i class="bi bi-info-circle"></i></button></a>
                  
                         <button   class="bi bi-trash" title="حذف"></button>
                     </td>
@@ -386,8 +386,8 @@ margin-top:15px;
 	{
 		NavManager.NavigateTo("/examer/addexam");
 	}
-      private void DetailsExam()
+      private void InformationExam()
 	{
-		NavManager.NavigateTo("/examer/detailsexam");
+		NavManager.NavigateTo("/examer/information");
 	}
 }
