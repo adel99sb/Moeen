@@ -3,6 +3,8 @@
 /* =========================================================
    1️⃣ Design Tokens (هوية التطبيق)
 ========================================================= */
+
+
 :root {
     --color-primary: #195042; /* أخضر داكن */
     --color-secondary: #1d3937; /* أخضر غامق */
@@ -17,6 +19,14 @@
     --shadow-sm: 0 3px 8px rgba(0,0,0,0.08);
     --shadow-md: 0 6px 15px rgba(0,0,0,0.12);
     --transition: all 0.3s ease;
+    --primary-green: #195042; /*  الأخضر الداكن في الاحصائيات */
+    --sand-beige: #d6cabc; /* البيج الرملي */
+    --light-beige: #f8f5f2; /* خلفية الصفحة */
+    --card-white: #fdfbf9; /* خلفية المكونات */
+    --border-color: rgba(214, 202, 188, .5);
+    --soft-green: #8fc9b9;
+    /*color teacher*/
+   
 }
 
 /* =========================================================
@@ -403,7 +413,7 @@ body {
 }
 
     .btn-pary:hover {
-        background-color:;
+        background-color: var(--primary-green);
         transform: translateY(-2px);
     }
 
@@ -759,6 +769,7 @@ body {
         color: var(--danger-red);
         border: 1px solid rgba(231, 76, 60, 0.2);
     }
+}
 
     
        
