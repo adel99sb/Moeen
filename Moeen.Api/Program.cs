@@ -21,7 +21,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(AppSettings.Instance.ConnectionString);
+
 });
+
 
 // Identity
 builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>

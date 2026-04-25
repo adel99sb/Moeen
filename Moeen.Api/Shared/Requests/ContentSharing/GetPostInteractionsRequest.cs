@@ -1,0 +1,20 @@
+using Moeen.Api.Core.Constants;
+using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace Moeen.Api.Shared.Requests.ContentSharing
+{
+    public class GetPostInteractionsRequest
+    {
+        [Required(ErrorMessage = "Post ID is required")]
+        public Guid PostId { get; set; }
+
+        /// <summary>
+        /// ›· —… Õ”» ‰Ê⁄ «· ›«⁄· («Œ Ì«—Ì)
+        /// </summary>
+        public InteractionType? Type { get; set; }
+
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 20;
+    }
+}

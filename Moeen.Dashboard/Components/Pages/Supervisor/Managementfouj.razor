@@ -1,19 +1,83 @@
 ﻿@page "/supervisor/managementfouj"
 @inject NavigationManager NavManager
 @rendermode InteractiveServer
-
-<h3>Halaqatt</h3>
-
-
     <style>
-           
+         :root {
+--primary-green: #195042;
+--accent-beige: #d6cabc;
+--light-beige: #f4f1ee;
+--white: #ffffff;
+--text-dark: #2d3436;
+--status-green: #2ecc71;
+--danger-red: #e74c3c;
+        --transition: all 0.3s ease;
+    --shadow-md: 0 6px 15px rgba(0,0,0,0.12);
 
+
+}
+body {
+font-family: 'Tajawal', sans-serif;
+background-color: #f9f9f9;
+direction: rtl;
+}
+.management-container {
+background: var(--white);
+margin: 20px;
+padding: 30px;
+border-radius: 20px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+/* العنوان */
+.page-title {
+color: var(--primary-green);
+position: relative;
+padding-bottom: 10px; /* مسافة بين النص والخط */
+border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
+display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+}
+
+    .tabs-navigation {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        border-bottom: 2px solid var(--light-beige);
+    }
+
+    .tab-item {
+        padding: 12px 25px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-weight: 500;
+        color: #636e72;
+        transition: 0.3s;
+        border-radius: 12px 12px 0 0;
+    }
+
+        .tab-item.active {
+            background-color: var(--primary-green);
+            color: var(--white);
+        }
+
+        .tab-item:hover:not(.active) {
+            background-color: var(--accent-beige);
+            color: var(--primary-green);
+        }
+    /* شريط البحث والأزرار */
+    .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
             /* الكاردات */
              .card-container{
                 display:flex;
                 gap:20px;
                 flex-wrap:wrap;
-
+             }
            .card {
                flex:1 1 calc(50%-20px);
     grid-template-columns: repeat(2,1fr);
@@ -37,6 +101,7 @@
 
             /* الحلقات */
             .sessions {
+                width:auto;
                 margin-right:20px;
                 padding-right:30px;
                 background: #d6cabc;
@@ -49,6 +114,130 @@
             .azrar{
                 padding-right:30px;
             }
+            .btn-pprimary {
+    background-color: var(--primary-green);
+    font-size: 15px;
+    padding: 10px 20px;
+    color: var(--white);
+    border-radius: 12px;
+    display: inline;
+    transition: 0.3s;
+}
+
+    .btn-pprimary:hover {
+        background-color: #123d32;
+        transform: translateY(-2px);
+    }
+       .form-container, .form-container * {
+        box-sizing: border-box;
+    }
+  
+    .form-container {
+        max-width: 850px;
+        margin: 2rem auto;
+        background: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        direction: rtl; 
+        overflow: hidden;
+    }
+    .form-header {
+        background: var(--accent-beige);
+        color: var(--white);
+        padding: 0.7rem;
+        text-align: center;
+    }
+    form {
+        padding: 1.5rem;
+    }
+
+    .grid-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 1.5rem;
+        margin-bottom: 1.2rem;
+    }
+        .grid-row:nth-of-type(4) {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+        .input-group label {
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: right;
+        }
+    /* حل مشكلة الأيقونات والمحاذاة */
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+        .input-wrapper i {
+            position: absolute;
+            right: 12px; /* تثبيت الأيقونة جهة اليمين */
+            color: var(--primary-green);
+            z-index: 2;
+            pointer-events: none;
+        }
+        .input-wrapper input,
+        .input-wrapper select {
+            width: 100%;
+            padding: 10px 35px 10px 10px;
+            border: 1px solid var(--accent-beige);
+            border-radius: 8px;
+            background: var(--light-beige);
+            font-size: 0.9rem;
+            height: 45px; 
+            outline: none;
+            transition: var(--transition);
+        }
+            .input-wrapper input:focus,
+            .input-wrapper select:focus {
+                border-color: var(--primary-green);
+                background: #fff;
+            }
+    .actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+    }
+        .actions button, .actions a {
+            flex: 1;
+            height: 48px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .actions .save {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .actions .cancel {
+            background: #f8f9fa;
+            color: #dc3545;
+        }
+    /* حل مشكلة الميديا كويري في Razor */
+    @@media (max-width: 768px) {
+        .grid-row, .grid-row:nth-of-type(4) {
+            grid-template-columns: 1fr !important;
+        }
+    }
             .form-label{
                 display:block;
                 margin-bottom:5px;
@@ -70,6 +259,7 @@
                 cursor:pointer;
                 font-size:20px;
             }
+
     </style>
 
 
@@ -145,23 +335,40 @@
         </div><br />
     <!-- زر إضافة -->
     
-     <details class="details">
-<summary class="btn-pprimary">إضافة فوج جديد</summary>
+  <details>
+	<summary class="btn-pprimary">إضافة فوج جديد</summary>
+    <div class="form-container">
+    <div class="form-header">
+        <h2><i class="bi bi-plus-circle-dotted"></i> إضافة فوج</h2>
+    </div>
+                <form>
+        <div class="grid-row">
+            <div class="input-group">
+         <label>اسم الفوج </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-fonts"></i>
+                    <input type="text" placeholder="أدخل الاسم">
+                </div>
+                </div>
 
-		<form class="form-box">
-        <div class="form-group">
-            <label class="label">اسم الفوج:</label><br>
-            <input class="input" placeholder="اكتب هنا..." type="text" name="name"><br><br>
-        </div>
-        <div class="form-group">
-            <label class="label">وقت بداية الفوج :</label><br>
-            <input class="input" placeholder="اكتب هنا..." type="number" name="age"><br><br>
-        </div>
-        <div class="form-group">
-            <label class="label">وقت نهاية الفوج :</label><br>
-            <input class="input" placeholder="اكتب هنا..." type="number" name="status"><br><br>
-        </div>
-        <div class="form-group">
+        <div class="input-group">
+         <label>وقت بداية الفوج </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-clock-history"></i>
+                    <input type="number" placeholder="اكتب هنا...">
+                </div>
+                </div>
+                </div>
+        <div class="grid-row">
+
+        <div class="input-group">
+         <label>وقت نهاية الفوج </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-clock-history"></i>
+                    <input type="number" placeholder="اكتب هنا...">
+                </div>
+                </div>
+        <div class="input-group">
             <label class="form-label"> الحلقات التابعة له:</label><br>
             <div class="halqat-container">
             <label class="checkbox-item"><input type="checkbox"> حلقة 1</label>
@@ -171,10 +378,14 @@
             <label class="checkbox-item"><input type="checkbox"> حلقة 4</label>
 </div>
         </div>
-        
-        <button class="btn btn-primary">إضافة</button>
-
+        </div>
+ <div class="actions">
+            <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ</button>
+            <a href="/supervisor/managementfouj" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+        </div>
     </form>
+                </div>
+
 </details>
 </section>
 
@@ -184,8 +395,5 @@
         NavManager.NavigateTo("/supervisor/editfouj");
         // Logic to edit student information
     }
-    private void viewFouj1()
-    {
-        NavManager.NavigateTo("/supervisor/fouj");
-    }
+  
 }

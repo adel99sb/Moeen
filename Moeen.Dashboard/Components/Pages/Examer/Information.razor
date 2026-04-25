@@ -1,0 +1,694 @@
+﻿@page "/examer/information"	
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+
+<h3>Alaa_info</h3>
+<style>
+    /* ═══════════════════════════════════════════════════════
+           🎨 Design Variables - متغيرات التصميم
+           ═══════════════════════════════════════════════════════ */
+    :root {
+        /* الألوان الأساسية */
+        --primary: #195042;
+        --beige: #d6cabc;
+        --bg-light: #f9f7f5;
+        --white: #ffffff;
+        --text-muted: #6c757d;
+        /* حالات النظام */
+        --success: #28a745;
+        --warning: #ffc107;
+        --danger: #dc3545;
+        --info: #17a2b8;
+        /* الظلال والحدود */
+        --shadow-soft: 0 2px 8px rgba(0,0,0,.04);
+        --shadow-card: 0 10px 30px rgba(0,0,0,.08);
+        --border-soft: 1px solid rgba(214,202,188,.4);
+        --focus-ring: rgba(25,80,66,.25);
+        /* الأبعاد والمسافات */
+        --radius: 8px;
+        --radius-lg: 20px;
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 15px;
+        --space-4: 25px;
+        /* الخطوط */
+        --font: 'Segoe UI', Tahoma, Geneva, sans-serif;
+        --text-sm: .8rem;
+        --text-base: .9rem;
+        --text-lg: 1.1rem;
+    }
+    .management-container {
+background: var(--white);
+margin: 20px;
+padding: 30px;
+border-radius: 20px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+/* العنوان */
+.page-title {
+color: var(--primary-green);
+position: relative;
+padding-bottom: 10px; /* مسافة بين النص والخط */
+border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
+display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+margin-top:15px;
+}
+    /* ═══════════════════════════════════════════════════════
+           📐 Base Layout - التخطيط الأساسي
+           ═══════════════════════════════════════════════════════ */
+    .progress-container {
+        background: var(--bg-light);
+        font-family: var(--font);
+        color: var(--primary);
+        line-height: 1.6;
+        min-height: 100vh;
+        padding: var(--space-3);
+        direction: rtl;
+    }
+
+    .header-custom {
+        background: var(--primary);
+        color: var(--beige);
+        padding: var(--space-4) var(--space-3);
+        border-bottom: 4px solid var(--beige);
+        margin-bottom: var(--space-4);
+        border-radius: var(--radius);
+    }
+
+    .student-info {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        flex-wrap: wrap;
+    }
+
+    .student-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--beige);
+        color: var(--primary);
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: var(--text-lg);
+        flex-shrink: 0;
+    }
+    /* ═══════════════════════════════════════════════════════
+       📊 Statistics - الإحصائيات
+       ═══════════════════════════════════════════════════════ */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: var(--space-3);
+        margin-bottom: var(--space-4);
+    }
+
+    .stat-card {
+        background: var(--white);
+        border: var(--border-soft);
+        border-radius: var(--radius);
+        padding: var(--space-3);
+        text-align: center;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        display: block;
+        margin-top: var(--space-1);
+    }
+
+    .stat-label { font-size: var(--text-sm); color: var(--text-muted); }
+    .stat-icon { font-size: 1.5rem; color: var(--beige); }
+
+    /* ═══════════════════════════════════════════════════════
+       🔍 Filter Bar - شريط التصفية
+       ═══════════════════════════════════════════════════════ */
+    .filter-bar {
+        background: var(--white);
+        border: var(--border-soft);
+        border-radius: var(--radius);
+        padding: var(--space-3);
+        margin-bottom: var(--space-4);
+        display: flex;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+    }
+
+    .filter-label { font-size: var(--text-sm); color: var(--text-muted); }
+
+    .input, .select {
+        border: 1px solid #e0e0e0;
+        border-radius: var(--radius);
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-sm);
+        color: var(--primary);
+        background: var(--white);
+        min-width: 120px;
+    }
+
+    .input:focus, .select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 .2rem var(--focus-ring);
+        outline: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       🔘 Buttons - الأزرار
+       ═══════════════════════════════════════════════════════ */
+    .btn {
+        background: var(--primary);
+        color: var(--beige);
+        font-size: var(--text-sm);
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius);
+        border: 1px solid var(--primary);
+        transition: .3s;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-1);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .btn:hover { background: var(--beige); color: var(--primary); }
+    .btn.outline { background: transparent; border-color: var(--primary); color: var(--primary); }
+    .btn.outline:hover { background: var(--primary); color: var(--beige); }
+
+    .btn-edit-record {
+        background: transparent;
+        color: var(--primary);
+        border: 1px solid var(--beige);
+        padding: 6px 16px;
+        border-radius: var(--radius);
+        font-size: var(--text-sm);
+        cursor: pointer;
+        transition: .2s;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+        text-decoration: none;
+        flex-shrink: 0;
+    }
+
+    .btn-edit-record:hover { background: var(--beige); color: var(--primary); }
+
+    /* ═══════════════════════════════════════════════════════
+       📋 Progress Card & Timeline - البطاقة والجدول الزمني
+       ═══════════════════════════════════════════════════════ */
+    .progress-card {
+        border: var(--border-soft);
+        border-radius: var(--radius);
+        background: var(--white);
+        margin-bottom: var(--space-4);
+        overflow: hidden;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .card-header-custom {
+        background: var(--white);
+        border-bottom: var(--border-soft);
+        color: var(--primary);
+        padding: var(--space-3);
+        font-weight: 600;
+        font-size: var(--text-base);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .card-body-custom { padding: var(--space-3); }
+
+    .timeline {
+        position: relative;
+        padding-right: 45px;
+        padding-left: 0;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        right: 14px;
+        top: 10px;
+        bottom: 10px;
+        width: 2px;
+        background: var(--beige);
+    }
+
+    .timeline-item {
+        position: relative;
+        padding: var(--space-3);
+        margin-bottom: var(--space-3);
+        background: var(--white);
+        border: var(--border-soft);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-soft);
+        transition: transform .2s;
+    }
+
+    .timeline-item:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-card);
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        right: -37px;
+        top: 26px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--primary);
+        border: 3px solid var(--beige);
+        z-index: 1;
+    }
+
+    .timeline-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: var(--space-3);
+        gap: var(--space-2);
+    }
+
+    .timeline-header-content { flex: 1; }
+
+    .timeline-date {
+        font-size: var(--text-sm);
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+        margin-bottom: var(--space-1);
+    }
+
+    .timeline-title {
+        font-weight: 600;
+        color: var(--primary);
+        font-size: var(--text-base);
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+    }
+
+    .record-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-3);
+    }
+
+    .record-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        align-items: flex-start; /* ✅ إصلاح محاذاة الجوال */
+    }
+
+    .record-label { font-size: var(--text-sm); color: var(--text-muted); font-weight: 500; }
+    .record-value { font-weight: 600; color: var(--primary); font-size: var(--text-lg); }
+
+    .record-value.success { color: var(--success); }
+    .record-value.warning { color: #856404; }
+    .record-value.danger { color: var(--danger); }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: var(--text-sm);
+        font-weight: 500;
+    }
+
+    .badge.excellent { background: rgba(40,167,69,.15); color: var(--success); }
+    .badge.verygood { background: rgba(23,162,184,.15); color: var(--info); }
+    .badge.good { background: rgba(255,193,7,.15); color: #856404; }
+    .badge.repeat { background: rgba(220,53,69,.15); color: var(--danger); }
+
+    .teacher-note {
+        margin-top: var(--space-3);
+        padding: var(--space-2) var(--space-3);
+        background: var(--bg-light);
+        border-radius: var(--radius);
+        border-right: 3px solid var(--beige);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       📈 Progress Summary - ملخص التقدم
+       ═══════════════════════════════════════════════════════ */
+    .progress-section {
+        background: var(--white);
+        border: var(--border-soft);
+        border-radius: var(--radius);
+        padding: var(--space-3);
+        margin-top: var(--space-4);
+    }
+
+    .progress-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-3);
+        padding-bottom: var(--space-2);
+        border-bottom: 1px solid var(--bg-light);
+    }
+
+    .progress-section-header h5 {
+        font-size: var(--text-base);
+        font-weight: 600;
+        color: var(--primary);
+        margin: 0;
+    }
+
+    .progress-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-3) var(--space-4);
+    }
+
+    .progress-row {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        width: 100%;
+    }
+
+    .progress-row-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .progress-row-label {
+        font-size: var(--text-sm);
+        color: var(--primary);
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .progress-row-value {
+        font-size: var(--text-base);
+        font-weight: 700;
+        color: var(--primary);
+        white-space: nowrap;
+    }
+
+    .progress-row-value.success { color: var(--success); }
+    .progress-row-value.warning { color: var(--warning); }
+    .progress-row-value.info { color: var(--info); }
+
+    .progress-row-bar {
+        width: 100%;
+        height: 10px;
+        background: var(--bg-light);
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .progress-row-bar-fill {
+        height: 100%;
+        border-radius: 5px;
+        transition: width .3s;
+        display: block;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       🧰 Utility Classes - أدوات مساعدة
+       ═══════════════════════════════════════════════════════ */
+    .text-center { text-align: center; }
+    .text-muted { color: var(--text-muted); }
+    .text-success { color: var(--success); }
+    .fw-bold { font-weight: 700; }
+    .opacity-75 { opacity: .75; }
+
+    .mt-2 { margin-top: var(--space-2); }
+    .mt-3 { margin-top: var(--space-3); }
+    .mt-4 { margin-top: var(--space-4); }
+    .mb-0 { margin-bottom: 0; }
+    .mb-3 { margin-bottom: var(--space-3); }
+    .mb-5 { margin-bottom: var(--space-4); }
+
+    .ms-1 { margin-right: 4px; }
+    .ms-auto { margin-right: auto; }
+    .mx-2 { margin: 0 8px; }
+
+    .d-flex { display: flex; }
+    .flex-wrap { flex-wrap: wrap; }
+    .justify-content-between { justify-content: space-between; }
+    .align-items-center { align-items: center; }
+
+    /* ═══════════════════════════════════════════════════════
+       📱 Responsive - التجاوب مع الشاشات
+       ═══════════════════════════════════════════════════════ */
+    @@media (max-width: 768px) {
+        .timeline { padding-right: 35px; }
+        .timeline::before { right: 8px; }
+        .timeline-item::before { right: -33px; }
+        
+        .filter-bar { flex-direction: column; align-items: stretch; }
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .timeline-header { flex-direction: column; align-items: flex-start; }
+        
+        .record-grid { grid-template-columns: repeat(2, 1fr); }
+        .record-item { align-items: flex-start; text-align: right; } /* ✅ ضمان المحاذاة */
+        
+        .col-md-6 { flex: 0 0 100%; max-width: 100%; }
+        
+        .progress-grid { display: flex; flex-direction: column; gap: var(--space-4); }
+        .progress-row { width: 100%; gap: var(--space-2); }
+        .progress-row-header { margin-bottom: var(--space-1); }
+        .progress-row-label { font-size: var(--text-base); }
+        .progress-row-value { font-size: var(--text-lg); }
+        .progress-row-bar { height: 12px; }
+        
+        .tabs-container { flex-direction: column; }
+        .tab-item { width: 100%; }
+    }
+
+    @@media (max-width: 480px) {
+        .stats-grid, .record-grid { grid-template-columns: 1fr; }
+        .record-item { align-items: flex-start; text-align: right; } /* ✅ ضمان المحاذاة */
+        
+        .student-info { flex-direction: column; text-align: center; }
+        .progress-section { padding: var(--space-2); }
+        .progress-row-bar { height: 10px; }
+    }
+
+    @@media print {
+        .filter-bar, .btn, .btn-edit-record, .tabs-wrapper { display: none !important; }
+        .progress-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+    }
+</style>
+<section class="management-container">
+<header class="page-header mb-3">
+  <h2 class="page-title">معلومات طالب</h2>
+</header>
+<br />
+
+    @* Statistics Cards *@
+    <div class="stats-grid">
+        <div class="stat-card">
+            <i class="bi bi-book stat-icon"></i>
+            <span class="stat-value">24</span>
+            <span class="stat-label">جلسة تسميع</span>
+        </div>
+        <div class="stat-card">
+            <i class="bi bi-arrow-repeat stat-icon"></i>
+            <span class="stat-value">18</span>
+            <span class="stat-label">مراجعة</span>
+        </div>
+        <div class="stat-card">
+            <i class="bi bi-trophy stat-icon"></i>
+            <span class="stat-value">3</span>
+            <span class="stat-label">اختبارات</span>
+        </div>
+        <div class="stat-card">
+            <i class="bi bi-star stat-icon"></i>
+            <span class="stat-value">145</span>
+            <span class="stat-label">نقاط مكتسبة</span>
+        </div>
+    </div>
+
+    @* Filter Controls *@
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label class="filter-label">من:</label>
+            <input type="date" class="input" id="dateFrom">
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">إلى:</label>
+            <input type="date" class="input" id="dateTo">
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">النوع:</label>
+            <select class="select" id="recordType">
+                <option value="">الكل</option>
+                <option value="memorization">تسميع</option>
+                <option value="review">مراجعة</option>
+                <option value="test">اختبار</option>
+            </select>
+        </div>
+        <button class="btn outline ms-auto"><i class="bi bi-funnel"></i> تصفية</button>
+        <button class="btn"><i class="bi bi-printer"></i> طباعة</button>
+    </div>
+
+    @* Timeline Records *@
+    <div class="progress-card">
+        <div class="card-header-custom">
+            <span><i class="bi bi-clock-history ms-1"></i> سجل التقدم التفصيلي</span>
+            <small class="text-muted"><i class="bi bi-calendar-range ms-1"></i> آخر 30 يوم</small>
+        </div>
+        <div class="card-body-custom">
+            <div class="timeline">
+                
+                @* Record: Test *@
+                <div class="timeline-item" data-type="test" data-date="2024-12-10">
+                    <div class="timeline-header">
+                        <div class="timeline-header-content">
+                            <div class="timeline-date"><i class="bi bi-calendar-check"></i> 10 ديسمبر 2024 - الثلاثاء</div>
+                            <div class="timeline-title"><i class="bi bi-clipboard-check"></i> اختبار مرحلي</div>
+                        </div>
+                        <button class="btn-edit-record" title="تعديل هذا السجل">
+                            <i class="bi bi-pencil"></i> تعديل
+                        </button>
+                    </div>
+                    <div class="record-grid">
+                        <div class="record-item"><span class="record-label">المرحلة</span><span class="record-value">الأولى</span></div>
+                        <div class="record-item"><span class="record-label">الأجزاء</span><span class="record-value">25-27</span></div>
+                        <div class="record-item"><span class="record-label">الدرجة</span><span class="record-value success">95/100</span></div>
+                        <div class="record-item"><span class="record-label">التقدير</span><span class="record-value success"><span class="badge excellent">ممتاز</span></span></div>
+                        <div class="record-item"><span class="record-label">النقاط</span><span class="record-value success">+25</span></div>
+                    </div>
+                </div>
+
+                @* Record: Memorization *@
+                <div class="timeline-item" data-type="memorization" data-date="2024-12-08">
+                    <div class="timeline-header">
+                        <div class="timeline-header-content">
+                            <div class="timeline-date"><i class="bi bi-calendar-check"></i> 8 ديسمبر 2024 - الأحد</div>
+                            <div class="timeline-title"><i class="bi bi-book"></i> تسميع جديد</div>
+                        </div>
+                        <button class="btn-edit-record" title="تعديل هذا السجل">
+                            <i class="bi bi-pencil"></i> تعديل
+                        </button>
+                    </div>
+                    <div class="record-grid">
+                        <div class="record-item"><span class="record-label">الجزء</span><span class="record-value">28</span></div>
+                        <div class="record-item"><span class="record-label">من صفحة</span><span class="record-value">535</span></div>
+                        <div class="record-item"><span class="record-label">إلى صفحة</span><span class="record-value">541</span></div>
+                        <div class="record-item"><span class="record-label">التقدير</span><span class="record-value warning"><span class="badge good">جيد</span></span></div>
+                        <div class="record-item"><span class="record-label">النقاط</span><span class="record-value">+3</span></div>
+                    </div>
+                    <div class="teacher-note">
+                        <small class="text-muted">
+                            <i class="bi bi-chat-square-text ms-1"></i> 
+                            ملاحظة المعلم: يحتاج لمراجعة مخارج الحروف في الصفحة 538
+                        </small>
+                    </div>
+                </div>
+
+                @* Record: Review *@
+                <div class="timeline-item" data-type="review" data-date="2024-12-14">
+                    <div class="timeline-header">
+                        <div class="timeline-header-content">
+                            <div class="timeline-date"><i class="bi bi-calendar-check"></i> 14 ديسمبر 2024 - السبت</div>
+                            <div class="timeline-title"><i class="bi bi-arrow-repeat"></i> مراجعة يومية</div>
+                        </div>
+                        <button class="btn-edit-record" title="تعديل هذا السجل">
+                            <i class="bi bi-pencil"></i> تعديل
+                        </button>
+                    </div>
+                    <div class="record-grid">
+                        <div class="record-item"><span class="record-label">الجزء</span><span class="record-value">27</span></div>
+                        <div class="record-item"><span class="record-label">من صفحة</span><span class="record-value">520</span></div>
+                        <div class="record-item"><span class="record-label">إلى صفحة</span><span class="record-value">530</span></div>
+                        <div class="record-item"><span class="record-label">التقدير</span><span class="record-value success"><span class="badge verygood">جيد جداً</span></span></div>
+                        <div class="record-item"><span class="record-label">النقاط</span><span class="record-value success">+5</span></div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="text-center mt-3">
+                <button class="btn outline"><i class="bi bi-plus-circle"></i> عرض المزيد من السجل</button>
+            </div>
+        </div>
+    </div>
+
+    @* Progress Summary Section *@
+    <div class="progress-section">
+        <div class="progress-section-header">
+            <h5><i class="bi bi-graph-up ms-1"></i> ملخص ديسمبر 2024</h5>
+        </div>
+        <div class="progress-grid">
+            <div class="progress-row">
+                <div class="progress-row-header">
+                    <span class="progress-row-label">نسبة إنجاز التسميع</span>
+                    <span class="progress-row-value">85%</span>
+                </div>
+                <div class="progress-row-bar">
+                    <div class="progress-row-bar-fill" style="width:85%;background:var(--primary)"></div>
+                </div>
+            </div>
+            <div class="progress-row">
+                <div class="progress-row-header">
+                    <span class="progress-row-label">نسبة إنجاز المراجعة</span>
+                    <span class="progress-row-value">92%</span>
+                </div>
+                <div class="progress-row-bar">
+                    <div class="progress-row-bar-fill" style="width:92%;background:var(--primary)"></div>
+                </div>
+            </div>
+            <div class="progress-row">
+                <div class="progress-row-header">
+                    <span class="progress-row-label">متوسط التقدير</span>
+                    <span class="progress-row-value success">ممتاز</span>
+                </div>
+                <div class="progress-row-bar">
+                    <div class="progress-row-bar-fill" style="width:95%;background:var(--success)"></div>
+                </div>
+            </div>
+            <div class="progress-row">
+                <div class="progress-row-header">
+                    <span class="progress-row-label">النقاط المكتسبة هذا الشهر</span>
+                    <span class="progress-row-value warning">68 نقطة</span>
+                </div>
+                <div class="progress-row-bar">
+                    <div class="progress-row-bar-fill" style="width:68%;background:var(--warning)"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Footer Actions *@
+    <div class="text-center mt-4 mb-5">
+       
+        <p class="text-muted mt-2" style="font-size:var(--text-sm)">
+            <i class="bi bi-info-circle ms-1"></i> 
+            يتم تحديث هذا السجل تلقائياً عند حفظ أي تقدم جديد للطالب
+        </p>
+    </div>
+
+
+    </section>
+	
+@code {
+
+}
+
+
+@code {
+
+}

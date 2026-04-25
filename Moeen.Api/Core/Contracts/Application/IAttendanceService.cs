@@ -1,6 +1,7 @@
 ﻿using Moeen.Api.Shared.Requests.Attendance;
+using Moeen.Api.Shared.Responses.Analytics;
 using Moeen.Api.Shared.Responses.Attendance;
-using System.Threading.Tasks;
+using System;
 
 namespace Moeen.Api.Core.Contracts.Application
 {
@@ -35,5 +36,35 @@ namespace Moeen.Api.Core.Contracts.Application
         /// تصدير سجلات الحضور
         /// </summary>
         Task<ExportAttendanceResponse> ExportAttendanceAsync(ExportAttendanceRequest request);
+
+        /// <summary>
+        /// استعلام عن سجل حضور محدد بواسطة معرفه
+        /// </summary>
+        Task<AttendanceRecordDto> GetAttendanceRecordByIdAsync(Guid recordId);
+
+        /// <summary>
+        /// الحصول على قائمة سجلات الحضور مع إمكانية الفلترة والترقيم
+        /// </summary>
+        Task<PagedResult<AttendanceRecordSummaryDto>> GetAllAttendanceRecordsAsync(AttendanceRecordFilter filter);
+
+        /// <summary>
+        /// الحصول على نسب حضور طالب معين في فترة زمنية
+        /// </summary>
+        Task<AttendanceRateDto> GetStudentAttendanceRateAsync(Guid studentId, DateTime fromDate, DateTime toDate);
+
+        /// <summary>
+        /// الحصول على قائمة الطلاب المتكرر غيابهم
+        /// </summary>
+        Task<FrequentAbsencesResultDto> GetFrequentAbsencesAsync(FrequentAbsencesFilter filter);
+
+        /// <summary>
+        /// حذف سجل حضور أو غياب
+        /// </summary>
+        Task<bool> DeleteAttendanceRecordAsync(Guid recordId);
+
+        /// <summary>
+        /// تحديث حالة حضور لسجل موجود
+        /// </summary>
+        Task<AttendanceRecordDto> UpdateAttendanceStatusAsync(Guid recordId, UpdateAttendanceStatusRequest request);
     }
 }

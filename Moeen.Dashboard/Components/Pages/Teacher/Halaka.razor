@@ -1,0 +1,487 @@
+﻿@page "/Teacher/Halaka"
+
+<style>
+    :root{
+         --primary-green: #195042;
+    --luxury-beige: #d6cabc;
+    --light-beige: #f9f7f5;
+    --white: #ffffff;
+    --status-success: #28a745;
+    --status-danger: #dc3545;
+    --shadow-soft: 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-card: 0 10px 30px rgba(0,0,0,0.08);
+    --border-soft: 1px solid rgba(214, 202, 188, 0.4);
+    --focus-shadow: rgba(25, 80, 66, 0.25);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .tabs-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 25px;
+        background: var(--white);
+        padding: 8px;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-soft);
+        border: var(--border-soft);
+    }
+
+    .tab-item {
+        flex: 1;
+        padding: 12px;
+        text-align: center;
+        cursor: pointer;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        transition: 0.3s ease;
+        color: var(--primary-green);
+        border: 1px solid transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+        .tab-item.active {
+            background-color: var(--primary-green);
+            color: var(--luxury-beige);
+        }
+
+        .tab-item:not(.active):hover {
+            background-color: var(--light-beige);
+            border-color: var(--luxury-beige);
+        }
+
+
+
+    .progress-page-container {
+        background-color: var(--light-beige);
+        font-family: var(--font-family);
+        color: var(--primary-green);
+        direction: rtl;
+        min-height: 100vh;
+    }
+
+    .header-custom {
+        background-color: var(--primary-green);
+        color: var(--luxury-beige);
+        padding: 2.5rem 0;
+        border-bottom: 6px solid var(--luxury-beige);
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .card-unified {
+        border: var(--border-soft);
+        border-radius: var(--radius-md);
+        background: var(--white);
+        margin-bottom: 15px;
+        overflow: hidden;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .card-header-unified {
+        background: linear-gradient(to left, var(--light-beige), var(--white));
+        border-bottom: var(--border-soft);
+        color: var(--primary-green);
+        padding: 8px 15px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .card-body-unified {
+        padding: 15px;
+    }
+
+    .status-btn {
+        display: none;
+    }
+
+    .btn-label {
+        cursor: pointer;
+        padding: 6px 20px;
+        border-radius: var(--radius-sm);
+        border: 1px solid #ddd;
+        transition: all 0.3s ease;
+        display: inline-block;
+        font-size: 0.8rem;
+        user-select: none;
+    }
+
+    .status-btn-present:checked + .label-present {
+        background-color: var(--status-success) !important;
+        color: white !important;
+        border-color: var(--status-success);
+    }
+
+    .status-btn-absent:checked + .label-absent {
+        background-color: var(--status-danger) !important;
+        color: white !important;
+        border-color: var(--status-danger);
+    }
+
+    .btn-unified {
+        background: var(--primary-green);
+        color: var(--luxury-beige);
+        font-size: 0.85rem;
+        padding: 10px 25px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--primary-green);
+        transition: 0.3s;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+        .btn-unified:hover {
+            background: var(--luxury-beige);
+            color: var(--primary-green);
+        }
+
+    .btn-edit-small {
+        background: transparent;
+        color: var(--primary-green);
+        border: 1px solid var(--luxury-beige);
+        padding: 4px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+        .btn-edit-small:hover {
+            background: var(--luxury-beige);
+            color: var(--primary-green);
+        }
+
+    .input-unified, .select-unified, .textarea-unified {
+        border: 1px solid #e0e0e0;
+        border-radius: var(--radius-sm);
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        transition: all 0.3s ease-in-out;
+        border: 1px solid rgba(214, 202, 188, 0.6);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .textarea-unified {
+        min-height: 80px;
+        resize: vertical;
+        font-family: inherit;
+        resize: none;
+    }
+
+    .main-content-fluid {
+        padding: 20px;
+    }
+
+    #sidebar-check {
+        display: none;
+    }
+
+    .sidebar-students {
+        position: fixed;
+        top: 0;
+        right: -280px;
+        width: 260px;
+        height: 100vh;
+        background: var(--primary-green);
+        z-index: 1100;
+        transition: 0.3s ease;
+    }
+
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.2);
+        display: none;
+        z-index: 1050;
+    }
+
+    #sidebar-check:checked ~ .sidebar-students {
+        right: 0;
+    }
+
+    #sidebar-check:checked ~ .sidebar-overlay {
+        display: block;
+    }
+
+    .search-box {
+        position: relative;
+        padding: 12px 15px;
+        background: rgba(255,255,255,0.05);
+        border-bottom: 1px solid rgba(214,202,188,0.3);
+    }
+
+    .search-input {
+        background: var(--luxury-beige);
+        border: 2px solid transparent;
+        border-radius: 25px;
+        padding: 10px 40px 10px 15px;
+        font-size: 0.85rem;
+        color: var(--primary-green);
+        width: 100%;
+        transition: 0.3s;
+    }
+
+    .menu-trigger {
+        cursor: pointer;
+        background: var(--primary-green);
+        color: var(--luxury-beige);
+        padding: 8px 15px;
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 15px;
+    }
+
+    .student-item {
+        cursor: pointer;
+        transition: 0.3s;
+        color: var(--luxury-beige);
+        font-size: 0.9rem;
+    }
+
+    .student-option:checked + .student-item {
+        background-color: var(--luxury-beige) !important;
+        color: var(--primary-green) !important;
+        font-weight: bold;
+    }
+
+    .input-unified:focus,
+    .select-unified:focus,
+    .textarea-unified:focus {
+        outline: none; /* إزالة الإطار الافتراضي للمتصفح */
+        border-color: var(--primary-green) !important; /* تغيير لون الحدود للأخضر الخاص بالتطبيق */
+        /* إضافة ظل ناعم بلون التطبيق الأخضر */
+        box-shadow: 0 0 0 4px var(--focus-shadow);
+        /* حركة بسيطة لرفع الحقل للأعلى قليلاً (اختياري لمظهر تفاعلي) */
+        transform: translateY(-1px);
+        background-color: var(--white);
+    }
+
+    .card-unified {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .card-unified:hover {
+            box-shadow: var(--shadow-card);
+            transform: scale(1.01);
+        }
+
+</style>
+
+<div class="progress-page-container">
+    <header class="header-custom">
+        <div class="container">
+            <h1 class="fw-bold mb-1">تقدم الطلاب</h1>
+            <p class="mb-0 opacity-75">متابعة مستوى التحفيظ والأداء</p>
+        </div>
+    </header>
+
+    @* مكونات اختيار الطالب *@
+    <input type="checkbox" id="sidebar-check">
+    <label for="sidebar-check" class="sidebar-overlay"></label>
+    
+    <nav class="sidebar-students">
+        <div class="sidebar-header d-flex justify-content-between p-3 text-white border-bottom border-secondary">
+            <span class="small fw-bold">قائمة الطلاب</span>
+            <label for="sidebar-check" style="cursor:pointer">✕</label>
+        </div>
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="ابحث عن طالب...">
+            <i class="bi bi-search position-absolute" style="right: 28px; top: 22px; color: var(--primary-green);"></i>
+        </div>
+        <div class="students-list">
+            <input type="radio" name="student" id="s1" class="student-option d-none">
+            <label for="s1" class="student-item d-block p-3 border-bottom border-dark border-opacity-25 opacity-75">أحمد محمد العبدالله</label>
+
+            <input type="radio" name="student" id="s2" class="student-option d-none">
+            <label for="s2" class="student-item d-block p-3 border-bottom border-dark border-opacity-25 opacity-75">ياسين ابراهيم القاسم</label>
+
+            <input type="radio" name="student" id="s3" class="student-option d-none">
+            <label for="s3" class="student-item d-block p-3 border-bottom border-dark border-opacity-25 opacity-75">خالد وليد الشيخ</label>
+        </div>
+    </nav>
+
+    <div class="main-content-fluid">
+        <div class="container-fluid" style="max-width: 800px;">
+            
+            <label for="sidebar-check" class="menu-trigger">
+                <i class="bi bi-list"></i> اختيار الطالب
+            </label>
+
+            <div class="tabs-container">
+                <div class="tab-item active" hraf="/Teacher/Halaka"  >
+                    <i class="bi bi-pencil-square"></i>
+                    إدخال بيانات اليوم
+                </div>
+                <NavLink class="tab-item" href="/Teacher/progress">
+               
+                    <i class="bi bi-clock-history"></i>
+                    السجل السابق
+               
+                </NavLink>
+            </div>
+
+            @* المحتوى الحالي (تبويبة الإدخال) *@
+            <div id="entry-section">
+                @* 1. كارد الحضور *@
+                <div class="card-unified">
+                    <div class="card-header-unified">
+                        <span><i class="bi bi-calendar-check ms-1"></i> الحضور والغياب</span>
+                    </div>
+                    <div class="card-body-unified d-flex justify-content-center gap-2">
+                        <input type="radio" name="att" id="h" class="status-btn status-btn-present">
+                        <label for="h" class="btn-label label-present">حاضر</label>
+
+                        <input type="radio" name="att" id="g" class="status-btn status-btn-absent">
+                        <label for="g" class="btn-label label-absent">غائب</label>
+                    </div>
+                </div>
+
+                @* 2. كارد التسميع *@
+                <div class="card-unified">
+                    <div class="card-header-unified">
+                        <span><i class="bi bi-book ms-1"></i> تسميع اليوم</span>
+                    </div>
+                    <div class="card-body-unified">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-4"><input type="number" class="input-unified" placeholder="جزء" min="0" max="30"></div>
+                            <div class="col-4"><input type="number" class="input-unified" placeholder="صفحة" min="0" ></div>
+                            <div class="col-4">
+                                <select class="select-unified">
+                                    <option selected disabled>التقدير</option>
+                                    <option>ممتاز</option>
+                                    <option>جيد جداً</option>
+                                    <option> جيد </option>
+                                    <option> مقبول </option>
+                                    <option>إعادة</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @* 3. كارد الاختبارات (تم نقله هنا ليكون تحت التسميع مباشرة) *@
+                <div class="card-unified">
+                    <div class="card-header-unified">
+                        <span><i class="bi bi-clipboard-check ms-1"></i> الاختبارات</span>
+                    </div>
+                    <div class="card-body-unified">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-4">
+                                <select class="select-unified">
+                                    <option selected disabled>المرحلة</option>
+                                    <option>المرحلة الأولى</option>
+                                    <option>المرحلة الثانية</option>
+                                    <option>المرحلة الثالثة</option>
+                                    <option>المرحلة الرابعة</option>
+                                    <option>المرحلة الخامسة</option>
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <select class="select-unified">
+                                    <option selected disabled>التقدير</option>
+                                    <option>ممتاز</option>
+                                    <option>جيد جداً</option>
+                                    <option>جيد</option>
+                                    <option>مقبول</option>
+                                    <option>إعادة</option>
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <input type="number" class="input-unified" placeholder="نقاط">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @* 4. كارد المراجعة *@
+                <div class="card-unified">
+                    <div class="card-header-unified">
+                        <span><i class="bi bi-arrow-repeat ms-1"></i> المراجعة اليومية</span>
+                    </div>
+                    <div class="card-body-unified">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-4"><input type="number" class="input-unified" placeholder="جزء" min="0" max="30"></div>
+                            <div class="col-4"><input type="number" class="input-unified" placeholder="صفحة"min="0"></div>
+                            <div class="col-4">
+                                <select class="select-unified">
+                                    <option selected disabled>التقدير</option>
+                                    <option>ممتاز</option>
+                                    <option> جيد جداً </option>
+                                    <option> جيد </option>
+                                    <option> مقبول </option>
+                                    <option>إعادة</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @* 5. كارد إضافة النقاط (تم نقله للنهاية) *@
+                <div class="card-unified">
+                    <div class="card-header-unified">
+                        <span><i class="bi bi-star ms-1"></i> إضافة نقاط للطالب</span>
+                    </div>
+                    <div class="card-body-unified">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-8">
+                                <span class="text-muted small">حدد النقاط الإضافية لليوم:</span>
+                            </div>
+                            <div class="col-4">
+                                <input type="number" class="input-unified" placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @* 6. كارد الملاحظات (تم نقله للنهاية) *@
+                <div class="card-unified">
+                    <div class="card-header-unified">
+                        <span><i class="bi bi-chat-square-text ms-1"></i> ملاحظات المعلم</span>
+                        <button class="btn-edit-small" type="button" title="تعديل الملاحظة">
+                            <i class="bi bi-pencil"></i> تعديل
+                        </button>
+                    </div>
+                    <div class="card-body-unified">
+                        <textarea class="textarea-unified" placeholder="اكتب ملاحظاتك حول أداء الطالب اليوم..."></textarea>
+                    </div>
+                </div>
+
+                @* 7. زر حفظ التقدم (في الأخير) *@
+                <div class="mt-4 mb-5 text-center">
+                    <button class="btn-unified w-100 py-3 shadow-sm">
+                        <i class="bi bi-cloud-arrow-up-fill fs-5"></i> 
+                        حفظ التقدم لهذا الطالب
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    // الجزء البرمجي يبقى كما هو جاهزاً للتوسع مستقبلاً
+}

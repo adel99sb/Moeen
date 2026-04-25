@@ -1,4 +1,5 @@
 ﻿using Moeen.Api.Shared.Requests.ImportExport;
+using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
 using Moeen.Api.Shared.Responses.ImportExport;
 using System.Threading.Tasks;
 
@@ -9,15 +10,21 @@ namespace Moeen.Api.Core.Contracts.Application
         /// <summary>
         /// تصدير سجل الحفظ والمراجعة لطالب بصيغة محددة
         /// </summary>
-        /// <param name="request">معرف الطالب والصيغة المطلوبة</param>
-        /// <returns>ملف السجل مع معلوماته</returns>
         Task<ExportStudentRecordResponse> ExportStudentRecordAsync(ExportStudentRecordRequest request);
 
         /// <summary>
-        /// استيراد سجل لطالب من ملف (إذا كان الطالب منقولاً من مركز آخر)
+        /// استيراد سجل لطالب من ملف
         /// </summary>
-        /// <param name="request">معرف الطالب وبيانات الملف</param>
-        /// <returns>نتيجة الاستيراد</returns>
         Task<ImportStudentRecordResponse> ImportStudentRecordAsync(ImportStudentRecordRequest request);
+
+        /// <summary>
+        /// [DELETE] إلغاء عملية تصدير/استيراد قيد التنفيذ
+        /// </summary>
+        Task<OperationResponseDto> CancelJobAsync(CancelJobRequest request);
+
+        /// <summary>
+        /// [GET] جلب حالة عملية تصدير/استيراد
+        /// </summary>
+        Task<ImportExportJobStatusDto> GetJobStatusAsync(GetJobStatusRequest request);
     }
 }

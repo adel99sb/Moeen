@@ -1,0 +1,222 @@
+﻿@page "/supervisor/edithalaqaa"
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+<style>
+ :root {
+--primary-green: #195042;
+--accent-beige: #d6cabc;
+--light-beige: #f4f1ee;
+--white: #ffffff;
+--text-dark: #2d3436;
+--status-green: #2ecc71;
+--danger-red: #e74c3c;
+}
+body {
+font-family: 'Tajawal', sans-serif;
+background-color: #f9f9f9;
+direction: rtl;
+}
+.management-container {
+background: var(--white);
+margin: 20px;
+padding: 30px;
+border-radius: 20px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+/* العنوان */
+.page-title {
+color: var(--primary-green);
+position: relative;
+padding-bottom: 10px; /* مسافة بين النص والخط */
+border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
+display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+}
+
+       .form-container, .form-container * {
+        box-sizing: border-box;
+    }
+    :root {
+        --primary-green: #195042;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --text-dark: #2d3436;
+        --transition: all 0.3s ease;
+    }
+    .form-container {
+        max-width: 850px;
+        margin: 2rem auto;
+        background: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        direction: rtl; 
+        overflow: hidden;
+    }
+    .form-header {
+        background: var(--accent-beige);
+        color: var(--white);
+        padding: 0.7rem;
+        text-align: center;
+    }
+    form {
+        padding: 1.5rem;
+    }
+
+    .grid-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 1.5rem;
+        margin-bottom: 1.2rem;
+    }
+        .grid-row:nth-of-type(4) {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+        .input-group label {
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: right;
+        }
+    /* حل مشكلة الأيقونات والمحاذاة */
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+        .input-wrapper i {
+            position: absolute;
+            right: 12px; /* تثبيت الأيقونة جهة اليمين */
+            color: var(--primary-green);
+            z-index: 2;
+            pointer-events: none;
+        }
+        .input-wrapper input,
+        .input-wrapper select {
+            width: 100%;
+            padding: 10px 35px 10px 10px;
+            border: 1px solid var(--accent-beige);
+            border-radius: 8px;
+            background: var(--light-beige);
+            font-size: 0.9rem;
+            height: 45px; 
+            outline: none;
+            transition: var(--transition);
+        }
+            .input-wrapper input:focus,
+            .input-wrapper select:focus {
+                border-color: var(--primary-green);
+                background: #fff;
+            }
+    .actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+    }
+        .actions button, .actions a {
+            flex: 1;
+            height: 48px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .actions .save {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .actions .cancel {
+            background: #f8f9fa;
+            color: #dc3545;
+        }
+    /* حل مشكلة الميديا كويري في Razor */
+    @@media (max-width: 768px) {
+        .grid-row, .grid-row:nth-of-type(4) {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+ <section class="management-container">
+    <header class="page-header">
+        <h2 class="page-title">تعديل حلقة</h2>
+    </header>
+     <div class="form-container">
+    <div class="form-header">
+        <h2><i class="bi bi-pencil"></i> تعديل معلومات حلقة</h2>
+    </div>
+                <form>
+        <div class="grid-row">
+            <div class="input-group">
+         <label>اسم الحلقة </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-fonts"></i>
+                    <input type="text" placeholder="أدخل الاسم">
+                </div>
+                </div>
+
+                 <div class="input-group">
+         <label>الفئة المتضمنة </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-text-paragraph"></i>
+                    <select>
+                        <option>اصغر من تسع سنوات</option>
+                        <option>9-13 سنة</option>
+                        <option>14-18 سنة</option>
+                        <option>اكبر من 18 سنة</option>
+
+                    </select>
+                </div>
+                </div>
+                </div>
+
+        <div class="grid-row">
+       
+              <div class="input-group">
+         <label>توقيت الحلقة </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-clock-history"></i>
+                    <select>
+                        <option>الثامنة صباحا</option>
+                        <option>التاسعة صباحا</option>
+                        <option>العاشرة صباحا</option>
+                    </select>
+                </div>
+                </div>
+         <div class="input-group">
+         <label>اسم معلم الحلقة </label>
+                <div class="input-wrapper">
+                    <i class="bi bi-layers"></i>
+                    <select>
+                        <option>ماريا العبدالسلام</option>
+                        <option>آية دعبول</option>
+                    </select>
+                </div>
+                </div>
+
+                </div>
+           <div class="actions">
+            <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ</button>
+            <a href="/supervisor/saturdaylesson" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+        </div>
+    </form>
+        </div>
+
+        </section>
+
+@code {
+
+}

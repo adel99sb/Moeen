@@ -26,7 +26,19 @@ namespace Moeen.Api.Core.Contracts.Application
         /// <param name="request">معرف الحلقة المراد حذفها</param>
         /// <returns>true إذا تم الحذف بنجاح</returns>
         Task<bool> DeleteCircleAsync(DeleteCircleRequest request);
-        // أو إذا أردت استخدام DeleteCircleResponse:
-        // Task<DeleteCircleResponse> DeleteCircleAsync(DeleteCircleRequest request);
+
+        /// <summary>
+        /// إعادة تعيين معلم للحلقة
+        /// </summary>
+        /// <param name="request">معرف الحلقة والمعلم الجديد</param>
+        /// <returns>بيانات الحلقة بعد إعادة تعيين المعلم</returns>
+        Task<CircleDto> ReassignTeacherAsync(ReassignCircleTeacherRequest request);
+
+        /// <summary>
+        /// نقل الحلقة إلى فوج آخر
+        /// </summary>
+        /// <param name="request">معرف الحلقة والفوج الجديد</param>
+        /// <returns>بيانات الحلقة بعد النقل</returns>
+        Task<CircleDto> MoveToFoujAsync(MoveCircleToFoujRequest request);
     }
 }
