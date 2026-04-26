@@ -11,9 +11,11 @@ namespace Moeen.Api.Shared.Responses.Analytics
         public string Gender { get; set; }
         public DateTime EnrollmentDate { get; set; }
         public int TotalSessions { get; set; }
-        public double AttendanceRate { get; set; }
+        //public double AttendanceRate { get; set; }
         public int TotalMemorizedPages { get; set; }
         public int LastMemorizedPage { get; set; }
+
+        /// متوسط الدرجات في اختبارات هذا الشهر
         public double AverageExamScore { get; set; }
         public int TotalPoints { get; set; }
         public List<MonthlyProgress> MonthlyProgress { get; set; }
