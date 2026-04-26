@@ -1,10 +1,8 @@
-﻿@page "/supervisor/student"
+﻿@page "/examer/exam"
 @rendermode InteractiveServer
-
 @inject NavigationManager NavManager
-<h3>Student</h3>
 <style>
-	:root {
+   :root {
 --primary-green: #195042;
 --accent-beige: #d6cabc;
 --light-beige: #f4f1ee;
@@ -12,16 +10,14 @@
 --text-dark: #2d3436;
 --status-green: #2ecc71;
 --danger-red: #e74c3c;
-        --transition: all 0.3s ease;
-
+--radius-md: 12px;
+ --shadow-sm: 0 3px 8px rgba(0,0,0,0.08);
 }
-
 body {
 font-family: 'Tajawal', sans-serif;
 background-color: #f9f9f9;
 direction: rtl;
 }
-
 .management-container {
 background: var(--white);
 margin: 20px;
@@ -36,7 +32,9 @@ position: relative;
 padding-bottom: 10px; /* مسافة بين النص والخط */
 border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
 display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+margin-top:15px;
 }
+
 
 .search-wrapper {
     position: relative;
@@ -71,9 +69,9 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
     border-radius: var(--radius-md);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
-    font-family: 'Tajawal', sans-serif;
-    font-size: clamp(1rem,2.5vw,1.5rem);
-	text-align: center;
+     font-family: 'Tajawal', sans-serif;
+        font-size: clamp(0.95rem,2.5vw,1.5rem);
+        text-align: center;
 }
     .table th {
         background-color: var(--light-beige);
@@ -90,12 +88,12 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         background-color: #fafafa;
         transform: scale(1.01);
     }
-    .table-wrapper{
+	.table-wrapper{
 		overflow-x: auto;
 		width: 100%;
 		border-radius: var(--radius-md);
 	}
-	.btn-pprimary {
+    .btn-pprimary {
     background-color: var(--primary-green);
     font-size: 15px;
     padding: 10px 20px;
@@ -110,7 +108,15 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         transform: translateY(-2px);
     }
    
-  .form-container, .form-container * {
+	.select {
+	padding: 5px;
+	border-radius: 7px;
+	border: 1px solid #ccc;
+	font-family: 'Tajawal', sans-serif;
+	background-color: var(--white);
+	font-size: 1rem;
+	transition: border-color 0.3s ease;	}
+     .form-container, .form-container * {
         box-sizing: border-box;
     }
 
@@ -220,10 +226,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
             background: var(--primary-green);
             color: white;
         }
-         .actions .parent {
-            background: var(--accent-beige);
-            color: white;
-        }
+       
 
         .actions .cancel {
             background: #f8f9fa;
@@ -236,64 +239,67 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         grid-template-columns: 1fr !important;
     }
 	}
-</style>
+	</style>
 <section class="management-container">
 <header class="page-header mb-3">
-  <h2 class="page-title">إدارة الطلاب</h2>
+  <h2 class="page-title">جميع الطلاب</h2>
 </header>
 <br />
 <div class="search-wrapper mb-3">
 	<i class="bi bi-search"></i>
 	<input type="text" class="search-input" placeholder="ابحث عن طالب...">
-</div>
-<div class="table-wrapper">
-<div class="table-responsive">
-<table class="table">
-	<thead>
-		<tr>
-			<th class="table th">اسم الطالب</th>
-			<th class="table th">أداء الطالب</th>
-			<th class="table th">حذف الطالب</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td class="table td">آلاء قاسم </td>
-			<td >
-				<a @onclick="viewStudent1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-                <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-				</td>
-			<td class="table td">
-				  <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-			</td>
-		</tr>
-		<tr>
-			<td class="table td">ماريا العبد السلام </td>
-			<td>
-				<a @onclick="viewStudent1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-                <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>     
-			</td>
-			<td class="table td">
-			 <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-			</td>
-		</tr>
-		<tr>
-			<td class="table td">آية دعبول </td>
-			<td>
-				<a @onclick="viewStudent1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-                <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>     
-			</td>
-			<td class="table td">
-			 <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-			</td>
-		</tr>
-	</tbody>
-	</table>
-	</div></div>
-	<br />
+    </div>
+
+    <!-- الجدول -->
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th>الحلقة</th>
+                    <th>الفوج</th>
+                    <th>العمر</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>محمد أحمد</td>
+                    <td>حلقة النور</td>
+                    <td>الفوج الأول</td>
+                    <td>14</td>
+                    <td>
+                  	<a @onclick="AddExam"><button title="إضافة اختبار"><i class="bi bi-plus"></i></button></a>
+
+                  	<a @onclick="InformationExam"><button title="تفاصيل"><i class="bi bi-info-circle"></i></button></a>
+                 
+                        <button   class="bi bi-trash" title="حذف"></button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>علي حسن</td>
+                    <td>حلقة الفرقان</td>
+                    <td>الفوج الثاني</td>
+                    <td>15</td>
+                   <td>
+                  	<a @onclick="AddExam"><button title="إضافة اختبار"><i class="bi bi-plus"></i></button></a>
+
+                  	<a @onclick="InformationExam"><button title="تفاصيل"><i class="bi bi-info-circle"></i></button></a>
+                 
+                        <button   class="bi bi-trash" title="حذف"></button>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+    <br />
 	<details>
-		<summary class="btn-pprimary">إضافة طالب جديد</summary>
-		<div class="form-container">
+	<summary class="btn-pprimary">إضافة طالب جديد</summary>
+   <div class="form-container">
     <div class="form-header">
         <h2><i class="bi bi-person-plus-fill"></i> إضافة طالب</h2>
     </div>
@@ -314,39 +320,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 </div>
             </div>
             </div>
-	    <div class="grid-row">
-             <div class="input-group">
-                <label>تاريخ التسجيل</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-calendar-event"></i>
-                    <input type="date" placeholder="أدخل تاريخ التسجيل">
-                </div>
-            </div>
-               <div class="input-group">
-                <label>تاريخ الميلاد</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-calendar-event"></i>
-                    <input type="date" placeholder="أدخل تاريخ الميلاد">
-                </div>
-            </div> 
-        </div>
-	    <div class="grid-row">
-		 <div class="input-group">
-                <label>العنوان</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-alphabet"></i>
-                    <input type="text" placeholder="أدخل العنوان">
-                </div>
-            </div>
-             <div class="input-group">
-                <label>البريد الإلكتروني</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-envelope"></i>
-                    <input type="email" placeholder="أدخل البرييد الالكتروني">
-                </div>
-            </div>
-        </div>
-         <div class="grid-row">
+             <div class="grid-row">
 			   <div class="input-group">
                 <label>الجامع التابع له</label>
                 <div class="input-wrapper">
@@ -366,23 +340,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 </div>
             </div>
             </div>
-             <div class="grid-row">
-                     <div class="input-group">
-                <label>اسم ولي الامر </label>
-                <div class="input-wrapper">
-                    <i class="bi bi-person"></i>
-                    <input type="text" placeholder="أدخل الاسم">
-                </div>
-            </div>
-                  <div class="input-group">
-                <label>رقم ولي الامر</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-telephone"></i>
-                    <input type="tel" placeholder="أدخل الرقم">
-                </div>
-            </div>
-		        </div>
-                 <div class="grid-row">
+              <div class="grid-row">
             <div class="input-group">
                 <label>الفوج</label>
                 <div class="input-wrapper">
@@ -404,46 +362,32 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 </div>
                 </div>
                 </div>
-				 <div class="grid-row">
-              <div class="input-group">
-                <label>حالة الحساب</label>
+              <div class="grid-row">
+
+                 <div class="input-group">
+                <label>تاريخ الميلاد</label>
                 <div class="input-wrapper">
-                    <i class="bi bi-check-circle"></i>
-                    <select>
-                        <option value="active">نشط</option>
-                        <option value="inactive">متوقف</option>
-                    </select>
+                    <i class="bi bi-calendar-event"></i>
+                    <input type="date" placeholder="أدخل تاريخ الميلاد">
                 </div>
-            </div>
-            <div class="input-group">
-                <label>كلمة المرور</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-lock"></i>
-                    <input type="password" placeholder="أدخل كلمة المرور">
-                </div>
-            </div>
-        </div>
-		 <div class="actions">
+            </div> 
+            </div> 
+             <div class="actions">
             <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ الطالب</button>
-            <button type="submit" class="parent"><i class="bi bi-check2-all"></i> ربط بولي الامر </button>
-            <a href="/supervisor/student" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+            <a href="/examer/exam" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
         </div>
 		</form>
                 </div>
-	</details>
-	</section>
-@code {
-	private void editStudent()
-	{
-		NavManager.NavigateTo("/supervisor/edit");
-		// Logic to edit student information
-	}
-	private void viewStudent1()
-	{
-		NavManager.NavigateTo("/supervisor/alaa_info");
-		// Logic to edit student information
-	}
-	
 
-	
+    </details>
+</section>
+@code {
+    private void AddExam()
+	{
+		NavManager.NavigateTo("/examer/addexam");
+	}
+      private void InformationExam()
+	{
+		NavManager.NavigateTo("/examer/information");
+	}
 }
