@@ -1,4 +1,391 @@
 ﻿@page "/owner/teachers"
+<style>
+    /*AccountManagement style*/
+    :root {
+        /* الألوان الأساسية والثانوية */
+        --primary-green: #195042;
+        --primary-green-dark: #123d32;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --text-dark: #2d3436;
+        --text-gray: #636e72;
+        --status-green: #2ecc71;
+        --danger-red: #e74c3c;
+        --bg-gray: #f9f9f9;
+        --border-gray: #f1f1f1;
+        --bg-row-hover: #fafafa;
+        --bg-status-inactive: #fdeaea;
+        /* الخطوط */
+        --font-main: 'Tajawal', sans-serif;
+        /* الظلال */
+        --shadow-card: 0 10px 30px rgba(0,0,0,0.05);
+        --shadow-focus: 0 0 0 4px rgba(25, 80, 66, 0.1);
+        /* خلفيات الحالات */
+        --bg-status-active: rgba(46, 204, 113, 0.1);
+        --bg-status-inactive-badge: rgba(231, 76, 60, 0.15);
+        /* الحدود */
+        --border-status-inactive: 1px solid rgba(231, 76, 60, 0.2);
+        /* القياسات والمسافات */
+        --margin-container: 20px;
+        --padding-container: 30px;
+        --radius-container: 20px;
+        --radius-md: 12px;
+        --radius-sm: 10px;
+        --radius-badge: 20px;
+        --radius-icon: 6px;
+        --radius-tab: 12px 12px 0 0;
+        --gap-tabs: 10px;
+        --gap-btn: 8px;
+        --padding-tab: 12px 25px;
+        --padding-search: 12px 45px 12px 15px;
+        --padding-btn-lg: 12px 25px;
+        --padding-btn-md: 10px 20px;
+        --padding-btn-sm: 6px 14px;
+        --padding-table: 15px;
+        --padding-badge: 5px 12px;
+        --padding-icon: 8px;
+        --margin-icon: 0 2px;
+        --pos-icon-search: 15px;
+        --spacing-table-rows: 0 10px;
+        --table-min-width: 600px;
+        --min-width-actions: 100px;
+        --min-width-search: 250px;
+        --max-width-search: 400px;
+        --font-size-btn: 15px;
+        --font-size-badge: 0.85rem;
+        --font-size-sm: 12px;
+        --border-width-thin: 1.5px;
+        --border-width-base: 1px;
+        --border-width-thick: 3px;
+        --border-width-medium: 2px;
+        /* التأثيرات الحركية */
+        --scale-hover: scale(1.01);
+        --scale-icon-hover: scale(1.2);
+        --translate-hover: translateY(-2px);
+    }
+
+    body {
+        font-family: var(--font-main);
+        background-color: var(--bg-gray);
+        direction: rtl;
+        text-align: right;
+    }
+
+    .management-container {
+        background: var(--white);
+        margin: var(--margin-container);
+        padding: var(--padding-container);
+        border-radius: var(--radius-container);
+        box-shadow: var(--shadow-card);
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* العنوان */
+    .page-title {
+        color: var(--primary-green);
+        position: relative;
+        padding-bottom: 10px;
+        border-bottom: var(--border-width-thick) solid var(--accent-beige);
+        display: inline-block;
+        margin-bottom: 25px;
+    }
+
+    .tabs-navigation {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--gap-tabs);
+        margin-bottom: 30px;
+        border-bottom: var(--border-width-medium) solid var(--light-beige);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .tab-item {
+        padding: var(--padding-tab);
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--text-gray);
+        transition: 0.3s;
+        border-radius: var(--radius-tab);
+        white-space: nowrap;
+        flex: 0 0 auto;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+        .tab-item.active {
+            background-color: var(--primary-green);
+            color: var(--white);
+        }
+
+        .tab-item:hover:not(.active) {
+            background-color: var(--accent-beige);
+            color: var(--primary-green);
+        }
+
+    /* شريط البحث والأزرار */
+    .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .search-wrapper {
+        position: relative;
+        flex: 1;
+        min-width: var(--min-width-search);
+        max-width: var(--max-width-search);
+    }
+
+    .search-input {
+        width: 100%;
+        padding: var(--padding-search);
+        border: var(--border-width-thin) solid var(--accent-beige);
+        border-radius: var(--radius-md);
+        outline: none;
+        transition: 0.3s;
+        box-sizing: border-box;
+    }
+
+        .search-input:focus {
+            border-color: var(--primary-green);
+            box-shadow: var(--shadow-focus);
+        }
+
+    .search-wrapper i {
+        position: absolute;
+        right: var(--pos-icon-search);
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary-green);
+    }
+
+    .btn-pary {
+        background-color: var(--accent-beige);
+        color: white;
+        padding: var(--padding-btn-sm);
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: var(--gap-btn);
+        transition: 0.3s;
+    }
+
+        .btn-pary:hover {
+            background-color: var(--primary-green);
+            transform: var(--translate-hover);
+        }
+
+    .btn-primary {
+        background-color: var(--primary-green);
+        color: var(--white);
+        padding: var(--padding-btn-lg);
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--gap-btn);
+        transition: 0.3s;
+        white-space: nowrap;
+    }
+
+        .btn-primary:hover {
+            background-color: var(--primary-green-dark);
+            transform: var(--translate-hover);
+        }
+    
+    .btn-pprimary {
+        background-color: var(--primary-green);
+        font-size: var(--font-size-btn);
+        padding: var(--padding-btn-md);
+        color: var(--white);
+        border-radius: var(--radius-md);
+        display: inline;
+        transition: 0.3s;
+    }
+
+        .btn-pprimary:hover {
+            background-color: var(--primary-green-dark);
+            transform: var(--translate-hover);
+        }
+
+    /* الجدول */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: var(--spacing-table-rows);
+        margin: 0 auto;
+        min-width: var(--table-min-width);
+    }
+
+        .data-table th {
+            background-color: var(--light-beige);
+            color: var(--primary-green);
+            padding: var(--padding-table);
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .data-table tbody tr {
+            background-color: var(--white);
+            transition: 0.3s;
+        }
+
+            .data-table tbody tr td {
+                padding: var(--padding-table);
+                border-top: var(--border-width-base) solid var(--border-gray);
+                border-bottom: var(--border-width-base) solid var(--border-gray);
+            }
+
+            .data-table tbody tr:hover {
+                background-color: var(--bg-row-hover);
+                transform: var(--scale-hover);
+            }
+    
+    /* حالة النشط */
+    .status-badge {
+        padding: var(--padding-badge);
+        border-radius: var(--radius-badge);
+        font-size: var(--font-size-badge);
+        display: inline-block;
+    }
+
+        .status-badge.active {
+            background-color: var(--bg-status-active);
+            color: var(--status-green);
+        }
+    
+    /* الأزرار داخل الجدول */
+    .actions-cell {
+        text-align: center;
+        min-width: var(--min-width-actions);
+        white-space: nowrap;
+    }
+
+    .btn-icon {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: var(--padding-icon);
+        margin: var(--margin-icon);
+        border-radius: var(--radius-icon);
+        transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .btn-icon.edit {
+            color: var(--primary-green);
+        }
+
+        .btn-icon.delete {
+            color: var(--danger-red);
+        }
+
+        .btn-icon:hover {
+            transform: var(--scale-icon-hover);
+            background-color: var(--light-beige);
+        }
+
+    .inactive {
+        padding: 2px 10px;
+        border-radius: var(--radius-badge);
+        font-size: var(--font-size-sm);
+        background: var(--bg-status-inactive);
+        color: var(--danger-red);
+        display: inline-block;
+    }
+
+    .status-badge.inactive {
+        background-color: var(--bg-status-inactive-badge);
+        color: var(--danger-red);
+        border: var(--border-status-inactive);
+    }
+
+    /* تحسينات للشاشات المتوسطة والكبيرة */
+    @@media (min-width: 769px) {
+        .tabs-navigation {
+            flex-wrap: nowrap;
+        }
+        
+        .tab-item {
+            flex: 1;
+            text-align: center;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .management-container {
+            margin: 10px;
+            padding: 15px;
+        }
+
+        .tabs-navigation {
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .tab-item {
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            flex: 1 1 calc(50% - 10px);
+            text-align: center;
+        }
+
+        .action-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-wrapper {
+            max-width: 100%;
+            min-width: 100%;
+        }
+
+        .btn-primary {
+            justify-content: center;
+        }
+
+        .data-table th {
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            padding: 10px;
+        }
+
+        .data-table td {
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .tab-item {
+            flex: 1 1 100%;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+
+        .page-title {
+            font-size: 1.3rem;
+        }
+    }
+</style>
 <h3>Teachers</h3>
 <section class="management-container">
     <header class="page-header">
