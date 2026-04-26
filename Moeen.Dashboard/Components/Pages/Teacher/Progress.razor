@@ -1,9 +1,7 @@
 ﻿@page "/Teacher/Progress"
 
 <style>
-    /* ═══════════════════════════════════════════════════════
-       🎨 Design Variables - متغيرات التصميم
-       ═══════════════════════════════════════════════════════ */
+    
     :root {
         /* الألوان الأساسية */
         --primary: #195042;
@@ -189,9 +187,7 @@
         outline: 0;
     }
 
-    /* ═══════════════════════════════════════════════════════
-       🔘 Buttons - الأزرار
-       ═══════════════════════════════════════════════════════ */
+   
     .btn {
         background: var(--primary);
         color: var(--beige);
@@ -231,9 +227,6 @@
 
     .btn-edit-record:hover { background: var(--beige); color: var(--primary); }
 
-    /* ═══════════════════════════════════════════════════════
-       📋 Progress Card & Timeline - البطاقة والجدول الزمني
-       ═══════════════════════════════════════════════════════ */
     .progress-card {
         border: var(--border-soft);
         border-radius: var(--radius);
@@ -371,9 +364,6 @@
         border-right: 3px solid var(--beige);
     }
 
-    /* ═══════════════════════════════════════════════════════
-       📈 Progress Summary - ملخص التقدم
-       ═══════════════════════════════════════════════════════ */
     .progress-section {
         background: var(--white);
         border: var(--border-soft);
@@ -451,9 +441,6 @@
         display: block;
     }
 
-    /* ═══════════════════════════════════════════════════════
-       🧰 Utility Classes - أدوات مساعدة
-       ═══════════════════════════════════════════════════════ */
     .text-center { text-align: center; }
     .text-muted { color: var(--text-muted); }
     .text-success { color: var(--success); }
@@ -476,9 +463,7 @@
     .justify-content-between { justify-content: space-between; }
     .align-items-center { align-items: center; }
 
-    /* ═══════════════════════════════════════════════════════
-       📱 Responsive - التجاوب مع الشاشات
-       ═══════════════════════════════════════════════════════ */
+    
     @@media (max-width: 768px) {
         .timeline { padding-right: 35px; }
         .timeline::before { right: 8px; }
@@ -726,7 +711,7 @@
         </div>
     </div>
 
-    @* Footer Actions *@
+   
     <div class="text-center mt-4 mb-5">
        
         <p class="text-muted mt-2" style="font-size:var(--text-sm)">
@@ -738,8 +723,4 @@
 </div>
 
 @code {
-    // 🎯 ملاحظة للمطورين:
-    // هذا المكون يعرض سجل تقدم الطالب بشكل قراءة فقط.
-    // للتعديل: استخدم زر "تعديل" في كل سجل.
-    // لإضافة بيانات: استخدم تبويب "إدخال بيانات اليوم".
 }
