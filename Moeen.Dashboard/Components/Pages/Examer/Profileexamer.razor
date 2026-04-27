@@ -1,0 +1,311 @@
+﻿@page "/examer/profileexamer"
+
+<style>
+    
+    :root {
+        /* الألوان */
+        --color-primary-green: #195042;
+        --color-luxury-beige: #d6cabc;
+        --color-bg-light: #f4f7f6;
+        --color-white: #ffffff;
+        --color-text-muted: #5a6c7d;
+        --color-input-border: #d6cabc;
+        --color-input-bg: #fafbfb;
+        --color-input-readonly: #f8f9fa;
+        --color-btn-primary: #195042;
+        --color-btn-primary-hover: #246b59;
+
+        /* الظلال */
+        --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.08);
+        --shadow-card-hover: 0 14px 35px rgba(0, 0, 0, 0.12);
+        --shadow-input: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+        /* الزوايا */
+        --radius-card: 20px;
+        --radius-input: 12px;
+        --radius-btn: 10px;
+
+        /* الخطوط */
+        --font-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        --font-weight-normal: 400;
+        --font-weight-semibold: 600;
+        --font-weight-bold: 700;
+
+        /* الأحجام */
+        --font-size-sm: 0.88rem;
+        --font-size-base: 0.95rem;
+        --font-size-lg: 1.15rem;
+        --font-size-xl: 1.35rem;
+
+        /* المسافات */
+        --spacing-xs: 0.6rem;
+        --spacing-sm: 0.8rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
+        --spacing-xxl: 2.5rem;
+
+        /* التحولات */
+        --transition-base: 0.3s ease;
+        --border-header: 6px solid var(--color-luxury-beige);
+        --border-input: 2px solid var(--color-input-border);
+    }
+
+    /* حاويات والعناصر الاساسية */
+    .profile-wrapper {
+        direction: rtl;
+        text-align: right;
+        font-family: var(--font-base);
+        background-color: var(--color-bg-light);
+        padding-bottom: var(--spacing-xxl);
+        min-height: 100vh;
+    }
+
+    .header-custom {
+        background-color: var(--color-primary-green);
+        color: var(--color-luxury-beige);
+        padding: var(--spacing-xxl) 0;
+        border-bottom: var(--border-header);
+        margin-bottom: var(--spacing-xxl);
+    }
+
+    .profile-card {
+        background: var(--color-white);
+        border-radius: var(--radius-card);
+        box-shadow: var(--shadow-card);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
+        transition: transform var(--transition-base), box-shadow var(--transition-base);
+    }
+
+    .profile-card:hover {
+        box-shadow: var(--shadow-card-hover);
+    }
+
+    .profile-title {
+        color: var(--color-primary-green);
+        font-weight: var(--font-weight-bold);
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-sm);
+        border-bottom: var(--border-input);
+    }
+/* 
+    حقول الادخال */
+    .form-group { margin-bottom: var(--spacing-lg); }
+
+    .form-label {
+        display: block;
+        color: var(--color-primary-green);
+        font-weight: var(--font-weight-semibold);
+        font-size: var(--font-size-base);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .form-control-custom {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: var(--border-input);
+        border-radius: var(--radius-input);
+        background-color: var(--color-input-bg);
+        color: var(--color-text-muted);
+        font-family: var(--font-base);
+        font-size: var(--font-size-base);
+        transition: all var(--transition-base);
+        box-shadow: var(--shadow-input);
+    }
+
+    .form-control-custom:focus {
+        outline: none;
+        border-color: var(--color-primary-green);
+        background-color: var(--color-white);
+        box-shadow: 0 4px 12px rgba(25, 80, 66, 0.15);
+    }
+
+    .form-control-custom[readonly] {
+        background-color: var(--color-input-readonly);
+        cursor: not-allowed;
+        opacity: 0.85;
+    }
+
+    textarea.form-control-custom { min-height: 80px; resize: none; }
+
+    
+    .btn {
+        border: none;
+        border-radius: var(--radius-btn);
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-semibold);
+        font-family: var(--font-base);
+        cursor: pointer;
+        transition: all var(--transition-base);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        box-shadow: var(--shadow-input);
+    }
+
+    .btn-primary {
+        background-color: var(--color-btn-primary);
+        color: var(--color-luxury-beige);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--color-btn-primary-hover);
+        color: var(--color-white);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(25, 80, 66, 0.25);
+    }
+
+    .btn:active { transform: translateY(0); }
+
+   /*  الية التبديل */
+    #edit-toggle { display: none; }
+
+    #edit-toggle:checked ~ .profile-card .form-control-custom {
+        background-color: var(--color-input-bg);
+        cursor: text;
+        opacity: 1;
+    }
+
+    #edit-toggle:checked ~ .profile-card .btn-edit-mode { display: none; }
+    #edit-toggle:checked ~ .profile-card .btn-save-mode { display: inline-flex; }
+    .btn-edit-mode { display: inline-flex; }
+    .btn-save-mode { display: none; }
+/* التجاوب */ 
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+    @@media (max-width: 768px) {
+        .header-custom { padding: 2rem 0; margin-bottom: 2rem; }
+        .profile-card { padding: 1.2rem; }
+        .info-grid { grid-template-columns: 1fr; }
+        .btn { width: 100%; justify-content: center; }
+    }
+</style>
+
+<div class="profile-wrapper">
+    <!-- الترويسة -->
+    <header class="header-custom text-center">
+        <div class="container">
+            <h1 class="fw-bold">الملف الشخصي</h1>
+            <p class="mb-0">إدارة المعلومات الشخصية</p>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-12">
+                
+                <!-- عنصر التحكم في وضع التعديل -->
+                <input type="checkbox" id="edit-toggle">
+
+                <!-- بطاقة المعلومات الشخصية -->
+                <div class="profile-card">
+                    <h2 class="profile-title">
+                        <i class="bi bi-person-circle ms-2"></i>
+                        المعلومات الشخصية
+                    </h2>
+                    
+                    <div class="info-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="teacherName">
+                                <i class="bi bi-person ms-1"></i> اسم الأستاذ المختبر
+                            </label>
+                            <input type="text" id="teacherName" class="form-control-custom" value="أحمد محمد عبدالله" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="age">
+                                <i class="bi bi-calendar ms-1"></i> العمر
+                            </label>
+                            <input type="number" id="age" class="form-control-custom" value="35" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="groupName">
+                                <i class="bi bi-people ms-1"></i> اسم الفوج
+                            </label>
+                            <input type="text" id="groupName" class="form-control-custom" value="فوج الصباحي" readonly>
+                        </div>
+
+                       
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="experience">
+                            <i class="bi bi-briefcase ms-1"></i> الخبرات
+                        </label>
+                        <textarea id="experience" class="form-control-custom" readonly> تجويد معلم قرآن كريم منذ 10 سنوات، حاصل على إجازة في القراءات العشر، متخصص في تعليم </textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="mosques">
+                            <i class="bi bi-building ms-1"></i> الجوامع المسؤول عن اختباراتها
+                        </label>
+                        <textarea id="mosques" class="form-control-custom" readonly>جامع النور الكبير - جامع الهدى - جامع الرحمن</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="achievements">
+                            <i class="bi bi-trophy ms-1"></i> الإنجازات
+                        </label>
+                        <textarea id="achievements" class="form-control-custom" readonly>- تخريج 50 طالب في حفظ القرآن&#10;- الحصول على شهادة التميز في التعليم&#10;- تأليف كتاب في أحكام التجويد</textarea>
+                    </div>
+
+                    <!-- أزرار التحكم في التعديل -->
+                    <div class="text-center mt-4">
+                        <label for="edit-toggle" class="btn btn-primary btn-edit-mode">
+                            <i class="bi bi-pencil-square"></i> تعديل
+                        </label>
+                        <label for="edit-toggle" class="btn btn-primary btn-save-mode">
+                            <i class="bi bi-check-lg"></i> حفظ التغييرات
+                        </label>
+                    </div>
+                </div>
+
+                <!-- بطاقة الشكوى أو الاقتراح -->
+                <div class="profile-card">
+                    <h2 class="profile-title">
+                        <i class="bi bi-chat-dots ms-2"></i>
+                        شكوى أو اقتراح
+                    </h2>
+                    
+                    <form>
+                        <div class="form-group">
+                            <label class="form-label" for="feedback">
+                                <i class="bi bi-pencil-square ms-1"></i>
+                                اكتب شكواك أو اقتراحك
+                            </label>
+                            <textarea 
+                                id="feedback" 
+                                class="form-control-custom" 
+                                placeholder="اكتب هنا ما تريد مشاركته معنا..."
+                                style="min-height: 120px;"
+                            ></textarea>
+                        </div>
+
+                        <div class="text-center">
+                          
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send-fill"></i>
+                                إرسال
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+}
