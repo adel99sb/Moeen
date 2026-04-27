@@ -1,5 +1,4 @@
-﻿
-window.initTeacherCharts = () => {
+﻿window.initTeacherCharts = () => {
     const Config = {
         fontFamily: "'Segoe UI', sans-serif",
         colors: {
