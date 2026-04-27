@@ -1,12 +1,7 @@
-﻿@page "/supervisor/alaa_info"	
-@inject NavigationManager NavManager
-@rendermode InteractiveServer
+﻿@page "/Teacher/Progress"
 
-<h3>Alaa_info</h3>
 <style>
-    /* ═══════════════════════════════════════════════════════
-           🎨 Design Variables - متغيرات التصميم
-           ═══════════════════════════════════════════════════════ */
+    
     :root {
         /* الألوان الأساسية */
         --primary: #195042;
@@ -14,16 +9,19 @@
         --bg-light: #f9f7f5;
         --white: #ffffff;
         --text-muted: #6c757d;
+        
         /* حالات النظام */
         --success: #28a745;
         --warning: #ffc107;
         --danger: #dc3545;
         --info: #17a2b8;
+        
         /* الظلال والحدود */
         --shadow-soft: 0 2px 8px rgba(0,0,0,.04);
         --shadow-card: 0 10px 30px rgba(0,0,0,.08);
         --border-soft: 1px solid rgba(214,202,188,.4);
         --focus-ring: rgba(25,80,66,.25);
+        
         /* الأبعاد والمسافات */
         --radius: 8px;
         --radius-lg: 20px;
@@ -31,31 +29,17 @@
         --space-2: 8px;
         --space-3: 15px;
         --space-4: 25px;
+        
         /* الخطوط */
         --font: 'Segoe UI', Tahoma, Geneva, sans-serif;
         --text-sm: .8rem;
         --text-base: .9rem;
         --text-lg: 1.1rem;
     }
-    .management-container {
-background: var(--white);
-margin: 20px;
-padding: 30px;
-border-radius: 20px;
-box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-/* العنوان */
-.page-title {
-color: var(--primary-green);
-position: relative;
-padding-bottom: 10px; /* مسافة بين النص والخط */
-border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
-display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
-margin-top:15px;
-}
+
     /* ═══════════════════════════════════════════════════════
-           📐 Base Layout - التخطيط الأساسي
-           ═══════════════════════════════════════════════════════ */
+       📐 Base Layout - التخطيط الأساسي
+       ═══════════════════════════════════════════════════════ */
     .progress-container {
         background: var(--bg-light);
         font-family: var(--font);
@@ -94,6 +78,46 @@ margin-top:15px;
         font-size: var(--text-lg);
         flex-shrink: 0;
     }
+
+    /* ═══════════════════════════════════════════════════════
+       🗂️ Tabs - التبويبات
+       ═══════════════════════════════════════════════════════ */
+    .tabs-wrapper { margin-bottom: var(--space-4); }
+
+    .tabs-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 25px;
+        background: var(--white);
+        padding: 8px;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-soft);
+        border: var(--border-soft);
+    }
+
+    .tab-item {
+        flex: 1;
+        padding: 12px;
+        text-align: center;
+        cursor: pointer;
+        border-radius: var(--radius);
+        font-weight: 600;
+        transition: .3s;
+        color: var(--primary);
+        border: 1px solid transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+        font-size: var(--text-base);
+    }
+
+    .tab-item.active { background: var(--primary); color: var(--beige); }
+    .tab-item:not(.active):hover { background: var(--bg-light); border-color: var(--beige); }
+    .tab-item i { font-size: 1.1rem; }
+
     /* ═══════════════════════════════════════════════════════
        📊 Statistics - الإحصائيات
        ═══════════════════════════════════════════════════════ */
@@ -163,9 +187,7 @@ margin-top:15px;
         outline: 0;
     }
 
-    /* ═══════════════════════════════════════════════════════
-       🔘 Buttons - الأزرار
-       ═══════════════════════════════════════════════════════ */
+   
     .btn {
         background: var(--primary);
         color: var(--beige);
@@ -205,9 +227,6 @@ margin-top:15px;
 
     .btn-edit-record:hover { background: var(--beige); color: var(--primary); }
 
-    /* ═══════════════════════════════════════════════════════
-       📋 Progress Card & Timeline - البطاقة والجدول الزمني
-       ═══════════════════════════════════════════════════════ */
     .progress-card {
         border: var(--border-soft);
         border-radius: var(--radius);
@@ -345,9 +364,6 @@ margin-top:15px;
         border-right: 3px solid var(--beige);
     }
 
-    /* ═══════════════════════════════════════════════════════
-       📈 Progress Summary - ملخص التقدم
-       ═══════════════════════════════════════════════════════ */
     .progress-section {
         background: var(--white);
         border: var(--border-soft);
@@ -425,9 +441,6 @@ margin-top:15px;
         display: block;
     }
 
-    /* ═══════════════════════════════════════════════════════
-       🧰 Utility Classes - أدوات مساعدة
-       ═══════════════════════════════════════════════════════ */
     .text-center { text-align: center; }
     .text-muted { color: var(--text-muted); }
     .text-success { color: var(--success); }
@@ -450,9 +463,7 @@ margin-top:15px;
     .justify-content-between { justify-content: space-between; }
     .align-items-center { align-items: center; }
 
-    /* ═══════════════════════════════════════════════════════
-       📱 Responsive - التجاوب مع الشاشات
-       ═══════════════════════════════════════════════════════ */
+    
     @@media (max-width: 768px) {
         .timeline { padding-right: 35px; }
         .timeline::before { right: 8px; }
@@ -492,11 +503,39 @@ margin-top:15px;
         .progress-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
     }
 </style>
-<section class="management-container">
-<header class="page-header mb-3">
-  <h2 class="page-title">معلومات طالب</h2>
-</header>
-<br />
+
+@* ═══════════════════════════════════════════════════════
+   📄 Main Content - المحتوى الرئيسي
+   ═══════════════════════════════════════════════════════ *@
+
+<div class="progress-container">
+    
+    @* Header: Student Info *@
+    <header class="header-custom">
+        <div class="student-info">
+            <div class="student-avatar">أ م</div>
+            <div>
+                <h1 class="fw-bold mb-1">أحمد محمد العبدالله</h1>
+                <p class="mb-0 opacity-75">
+                    <i class="bi bi-calendar3 ms-1"></i> مسجل منذ: 2024/01/15
+                    <span class="mx-2">•</span>
+                    <i class="bi bi-hash ms-1"></i> رقم الطالب: #1024
+                </p>
+            </div>
+        </div>
+    </header>
+
+    @* Navigation Tabs *@
+    <div class="tabs-wrapper">
+        <div class="tabs-container">
+            <NavLink class="tab-item" href="/Teacher/Halaka">
+                <i class="bi bi-pencil-square"></i> إدخال بيانات اليوم
+            </NavLink>
+            <NavLink class="tab-item active" href="/Teacher/progress">
+                <i class="bi bi-clock-history"></i> السجل السابق
+            </NavLink>
+        </div>
+    </div>
 
     @* Statistics Cards *@
     <div class="stats-grid">
@@ -672,7 +711,7 @@ margin-top:15px;
         </div>
     </div>
 
-    @* Footer Actions *@
+   
     <div class="text-center mt-4 mb-5">
        
         <p class="text-muted mt-2" style="font-size:var(--text-sm)">
@@ -681,9 +720,7 @@ margin-top:15px;
         </p>
     </div>
 
+</div>
 
-    </section>
-	
 @code {
-
 }

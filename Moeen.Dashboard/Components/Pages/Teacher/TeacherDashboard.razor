@@ -1,0 +1,228 @@
+﻿@page "/Teacher/TeacherDashboard"
+@rendermode InteractiveServer
+@inject IJSRuntime JS
+<style>
+    :root {
+        /* لوحة الألوان الأساسية للمشروع */
+;       /* أخضر فاتح للحدود */
+    }
+
+    /* --- التنسيقات العامة للمحتوى --- */
+    .dashboard-container {
+        direction: rtl;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding: 10px;
+    }
+
+    /* --- كاردات الإحصائيات (Stat Cards) --- */
+    .stat-card {
+        background: var(--card-white);
+        border: 2px solid var(--soft-green);
+        border-radius: 15px;
+        padding: 20px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+        cursor: default;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-green);
+        box-shadow: 0 8px 20px rgba(25, 80, 66, 0.1);
+    }
+
+    .icon-box {
+        width: 45px;
+        height: 45px;
+        background: var(--light-beige);
+        color: var(--primary-green);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+
+    /* --- الرسوم البيانية (Charts) --- */
+    .chart-card {
+        background: var(--card-white);
+        border: 1px solid var(--border-color);
+        border-radius: 15px;
+        padding: 20px;
+        height: 100%;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    }
+
+    .chart-wrap {
+        position: relative;
+        height: 300px; /* زيادة الطول قليلاً للوضوح */
+        width: 100%;
+    }
+
+    /* --- عناوين الأقسام --- */
+    .section-title {
+        font-weight: 700;
+        color: var(--primary-green);
+        margin: 30px 0 20px;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-right: 4px solid var(--primary-green);
+        padding-right: 15px;
+    }
+
+    /* --- قائمة الطلاب وخصائص الـ Toggle --- */
+    .student-list-wrapper {
+        background: var(--card-white);
+        border-radius: 15px;
+        border: 1px solid var(--border-color);
+        padding: 10px 20px;
+    }
+
+    .student-toggle {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        color: var(--primary-green);
+        font-weight: 600;
+    }
+
+    .student-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--light-beige);
+    }
+
+    .student-item:last-child { border-bottom: none; }
+
+    .toggle-arrow { transition: transform 0.3s ease; }
+    details[open] .toggle-arrow { transform: rotate(180deg); }
+
+</style>
+
+<div class="dashboard-container">
+    
+    <section>
+        <div class="section-title"><i class="bi bi-speedometer2"></i> مؤشرات الأداء العام</div>
+        <div class="row g-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="icon-box"><i class="bi bi-person-check"></i></div>
+                    <small class="text-muted">حضور اليوم</small>
+                    <h4 class="fw-bold m-0">92%</h4>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="icon-box"><i class="bi bi-book"></i></div>
+                    <small class="text-muted">إجمالي الحفظ</small>
+                    <h4 class="fw-bold m-0">1,420 ص</h4>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="icon-box"><i class="bi bi-gem"></i></div>
+                    <small class="text-muted">نقاط التميز</small>
+                    <h4 class="fw-bold m-0">3,850</h4>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="icon-box text-danger"><i class="bi bi-exclamation-triangle"></i></div>
+                    <small class="text-muted">تنبيهات المتابعة</small>
+                    <h4 class="fw-bold text-danger m-0">3 تنبيهات</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mt-5">
+        <div class="section-title"><i class="bi bi-bar-chart-steps"></i> الإحصائيات الشهرية للحلقات</div>
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h6 class="fw-bold mb-4 text-success"><i class="bi bi-circle-fill me-2"></i> حلقة التحفيظ الأولى</h6>
+                    <div class="chart-wrap">
+                        <canvas id="chartH1"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h6 class="fw-bold mb-4 text-info"><i class="bi bi-circle-fill me-2"></i> حلقة التحفيظ الثانية</h6>
+                    <div class="chart-wrap">
+                        <canvas id="chartH2"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="row mt-4 g-4">
+        <div class="col-md-6">
+            <div class="section-title"><i class="bi bi-graph-up text-success"></i> الطلاب الأكثر تقدماً</div>
+            <div class="student-list-wrapper">
+                <details open>
+                    <summary class="student-toggle">
+                        <span><i class="bi bi-trophy text-warning me-2"></i> عرض قائمة الأوائل</span>
+                        <i class="bi bi-chevron-down toggle-arrow"></i>
+                    </summary>
+                    <div class="py-2">
+                        <div class="student-item">
+                            <i class="bi bi-person-circle fs-4 text-secondary"></i>
+                            <div class="flex-grow-1"><b>أحمد محمد</b> <br><small class="text-muted">حفظ 3 صفحات اليوم</small></div>
+                            <span class="badge bg-success-subtle text-success p-2">+15 نقطة</span>
+                        </div>
+                        <div class="student-item">
+                            <i class="bi bi-person-circle fs-4 text-secondary"></i>
+                            <div class="flex-grow-1"><b>عمر خالد</b> <br><small class="text-muted">أتم مراجعة جزء كامل</small></div>
+                            <span class="badge bg-success-subtle text-success p-2">+10 نقاط</span>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="section-title"><i class="bi bi-graph-down text-danger"></i> الطلاب الأكثر تراجعاً</div>
+            <div class="student-list-wrapper">
+                <details open>
+                    <summary class="student-toggle">
+                        <span><i class="bi bi-exclamation-circle text-danger me-2"></i> عرض حالات المتابعة</span>
+                        <i class="bi bi-chevron-down toggle-arrow"></i>
+                    </summary>
+                    <div class="py-2">
+                        <div class="student-item">
+                            <i class="bi bi-person-circle fs-4 text-secondary"></i>
+                            <div class="flex-grow-1"><b>ياسين علي</b> <br><small class="text-muted">غياب متكرر (3 أيام)</small></div>
+                            <span class="badge bg-danger-subtle text-danger p-2">تنبيه غياب</span>
+                        </div>
+                        <div class="student-item">
+                            <i class="bi bi-person-circle fs-4 text-secondary"></i>
+                            <div class="flex-grow-1"><b>براء حسن</b> <br><small class="text-muted">تأخر في برنامج التسميع</small></div>
+                            <span class="badge bg-warning-subtle text-warning p-2">متابعة خطة</span>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+</div>
+@code {
+    private bool _chartsInitialized;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_chartsInitialized)
+        {
+            await JS.InvokeVoidAsync("initTeacherCharts");
+            _chartsInitialized = true;
+        }
+    }
+}
