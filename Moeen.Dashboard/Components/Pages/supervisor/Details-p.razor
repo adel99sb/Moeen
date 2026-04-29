@@ -1,6 +1,20 @@
 ﻿@page "/details-p" 
 @inject NavigationManager mgr
+
 <style>
+    :root {
+        --primary-green: #195042;
+        --primary-green-dark: #123d32;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --text-dark: #2d3436;
+        --border-gray: #f1f1f1;
+        --bg-row-hover: #fafafa;
+        --font-main: 'Tajawal', sans-serif;
+    }
+
+    /* تنسيق كرت التفاصيل */
     .details-card-container {
         background: #ffffff;
         border-radius: 20px;
@@ -8,11 +22,12 @@
         overflow: hidden;
         max-width: 500px;
         margin: 20px auto;
-        border: 1px solid #d6cabc; /* نفس درجة البيج في مشروعك */
+        border: 1px solid var(--accent-beige);
+        font-family: var(--font-main);
     }
 
     .details-header {
-        background-color: #195042; /* اللون الأخضر المعتمد عندك */
+        background-color: var(--primary-green);
         color: white;
         padding: 20px;
         text-align: center;
@@ -22,7 +37,7 @@
         font-size: 2.5rem;
         display: block;
         margin-bottom: 10px;
-        color: #d6cabc;
+        color: var(--accent-beige);
     }
 
     .details-body {
@@ -32,7 +47,7 @@
 
     .info-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* تقسيم المعلومات لعمودين */
+        grid-template-columns: 1fr 1fr;
         gap: 20px;
     }
 
@@ -43,47 +58,88 @@
     }
 
         .info-item.full-width {
-            grid-column: span 2; /* العنوان يأخذ العرض كاملاً */
+            grid-column: span 2;
         }
 
         .info-item label {
             font-size: 0.85rem;
-            color: #91855a; /* اللون الذهبي/البيج الغامق */
+            color: #91855a;
             margin-bottom: 5px;
             font-weight: bold;
         }
 
         .info-item .value {
             font-size: 1rem;
-            color: #195042;
+            color: var(--primary-green);
             background: #fcfbf9;
             padding: 8px 12px;
             border-radius: 8px;
             width: 100%;
-            border-right: 3px solid #d6cabc; /* حركة جمالية بسيطة */
+            border-right: 3px solid var(--accent-beige);
         }
 
-    .details-footer {
-        padding: 15px;
-        text-align: center;
-        background: #f8f9fa;
+    /* تنسيق الجدول الموحد */
+    .management-container {
+        max-width: 500px; /* جعل الجدول بنفس عرض الكرت للتناسق */
+        margin: 0 auto 2rem;
+        padding: 0 10px;
+        direction: rtl;
+        font-family: var(--font-main);
     }
 
-    .btn-close-details {
-        background: #d6cabc;
-        color: #195042;
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+        .data-table th {
+            background-color: var(--light-beige);
+            color: var(--primary-green);
+            padding: 12px 15px;
+            text-align: right;
+        }
+
+        .data-table tbody tr {
+            background-color: var(--white);
+            transition: 0.3s;
+        }
+
+            .data-table tbody tr td {
+                padding: 12px 15px;
+                border-top: 1px solid var(--border-gray);
+                border-bottom: 1px solid var(--border-gray);
+            }
+
+            .data-table tbody tr:hover {
+                background-color: var(--bg-row-hover);
+            }
+
+    /* أيقونة العرض */
+    .actions-cell {
+        text-align: center;
+    }
+
+    .btn-icon.info {
+        background: none;
         border: none;
-        padding: 8px 30px;
-        border-radius: 10px;
-        font-weight: bold;
+        color: var(--primary-green);
+        font-size: 1.2rem;
+        cursor: pointer;
         transition: 0.3s;
     }
 
-        .btn-close-details:hover {
-            background: #195042;
-            color: white;
+        .btn-icon.info:hover {
+            transform: scale(1.2);
         }
+
 </style>
+
 <div class="details-card-container">
     <div class="details-header">
         <i class="bi bi-person-badge-fill person-icon"></i>
@@ -109,12 +165,14 @@
 
             <div class="info-item full-width">
                 <label>العنوان</label>
-                <div class="value">سوريا - حلب - الحي المرديان   </div>
+                <div class="value">سوريا - حلب - الحي المرديان</div>
             </div>
         </div>
     </div>
 </div>
+
 <section class="management-container">
+    <h3 style="color: var(--primary-green); margin-bottom: 10px; font-size: 1.2rem;">الأبناء المسجلون</h3>
     <div class="table-responsive">
         <table class="data-table">
             <thead>
@@ -124,23 +182,23 @@
                 </tr>
             </thead>
             <tbody>
-                
                 <tr>
                     <td>عمر العلي</td>
                     <td class="actions-cell">
-                        <button class="btn-icon delete" title="عرض"><i class="bi bi-info-circle"></i></button>
+                        <button class="btn-icon info" title="عرض التفاصيل"><i class="bi bi-info-circle"></i></button>
                     </td>
                 </tr>
                 <tr>
                     <td>أحمد العلي</td>
                     <td class="actions-cell">
-                        <button class="btn-icon delete" title="عرض"><i class="bi bi-info-circle"></i></button>
+                        <button class="btn-icon info" title="عرض التفاصيل"><i class="bi bi-info-circle"></i></button>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
 </section>
-@code {
 
+@code {
+    // يمكنك إضافة منطق العرض هنا
 }

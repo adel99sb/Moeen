@@ -1,149 +1,210 @@
 ﻿@page "/details"
 @inject NavigationManager mgr
+
 <style>
-    /* زر تعيين مشرف  */
-    .custom-outline-btn {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        background-color: var(--color-beige);
-        color: var(--color-primary);
-        transition: var(--transition);
+    :root {
+        /* الهوية البصرية الأساسية */
+        --primary-green: #195042;
+        --primary-green-dark: #123d32;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --text-gray: #636e72;
+        --status-green: #2ecc71;
+        --danger-red: #e74c3c;
+        --bg-gray: #f9f9f9;
+        --border-gray: #f1f1f1;
+        --bg-row-hover: #fafafa;
+        --font-main: 'Tajawal', sans-serif;
+        --radius-container: 20px;
+        --radius-badge: 20px;
+        --shadow-card: 0 10px 30px rgba(0,0,0,0.05);
     }
 
-        .custom-outline-btn:focus,
-        .custom-outline-btn:active {
-            outline: none !important;
-            box-shadow: none !important;
+    body {
+        font-family: var(--font-main);
+        background-color: var(--bg-gray);
+        direction: rtl;
+        text-align: right;
+    }
+
+    .management-container {
+        background: var(--white);
+        margin: 20px;
+        padding: 30px;
+        border-radius: var(--radius-container);
+        box-shadow: var(--shadow-card);
+    }
+
+    h2 {
+        color: var(--primary-green);
+        margin: 25px 0 15px 0;
+        font-size: 1.5rem;
+    }
+
+    /* تنسيق الزر العلوي */
+    .btn-primary {
+        background-color: var(--primary-green);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        transition: 0.3s;
+    }
+    .button-wrapper {
+    display: flex;
+    justify-content: flex-end; /* يدفع الزر لأقصى اليسار في وضعية RTL */
+    margin-bottom: -40px; /* لسحب الزر للأعلى بمحاذاة العنوان أو فوقه قليلاً */
+}
+
+        .btn-primary:hover {
+            background-color: var(--primary-green-dark);
+            transform: translateY(-2px);
         }
 
-        .custom-outline-btn:hover {
-            background-color: var(--color-beige);
-            color: var(--color-secondary);
-            box-shadow: 0 4px 10px rgba(29, 57, 55, 0.25);
+    /* الجدول الموحد */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        margin-bottom: 20px;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+        .data-table th {
+            background-color: var(--light-beige);
+            color: var(--primary-green);
+            padding: 15px;
+            text-align: right;
+            border-radius: 0;
         }
-    
-    .btn-m {
-        background: #d6cabc;
-        color: var(--color-primary);
-    }
 
-        .btn-m:hover {
-            background-color: var(--color-beige);
-            color: var(--color-secondary);
-            box-shadow: 0 4px 10px rgba(29, 57, 55, 0.25);
+        .data-table tbody tr {
+            background-color: var(--white);
+            transition: 0.3s;
         }
-    /* رأس الجدول */
-    .table th {
-        background-color: var(--color-beige); /* بيج غامق */
-        color: #195042; /* أخضر داكن */
-        text-align: center;
+
+            .data-table tbody tr td {
+                padding: 15px;
+                border-top: 1px solid var(--border-gray);
+                border-bottom: 1px solid var(--border-gray);
+            }
+
+            .data-table tbody tr:hover {
+                background-color: var(--bg-row-hover);
+            }
+
+    /*badges الحالات */
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: var(--radius-badge);
+        font-size: 0.85rem;
+        display: inline-block;
     }
 
-    /* الصفوف (تلوين بالتناوب) */
-    .table tr:nth-child(odd) td {
-        background-color: #efebe9; /* بيج فاتح */
+        .status-badge.active {
+            background-color: rgba(46, 204, 113, 0.1);
+            color: var(--status-green);
+        }
+
+        .status-badge.inactive {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--danger-red);
+        }
+
+    /* الأزرار */
+    .btn-icon {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--danger-red);
+        font-size: 1.2rem;
+        transition: 0.3s;
     }
 
-    .table tr:nth-child(even) td {
-        background-color: var(--color-bg); /* أفتح شوي */
-    }
-
-    /* تحسين الشكل العام */
-    .table td {
-        text-align: center;
-        vertical-align: middle;
-    }
-    /* زر الحذف */
-    .delete-button {
-        color: #195042;
-        background-color: #C0392B;
-    }
-
+        .btn-icon:hover {
+            transform: scale(1.2);
+        }
 </style>
-<!-- زر تعيين مشرف -->
+<section class="management-container">
+    
+    <div class="button-wrapper">
+        <button class="btn btn-primary" @onclick="moveTopage">إضافة مشرف +</button>
+    </div>
 
-<button class="btn btn-primary me-auto">إضافة مشرف +</button>
     <h2>الفوج الأول</h2>
-
-<div class="table-responsive">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>الاسم الاستاذ</th>
-                    <th>الحالة</th>
-                    <th>المشرف</th>
-                    <th class="text-center">الإجراء</th>
-                </tr>
-            </thead>
-            <tbody>
-                
-                <tr>
-                    <td>محمود </td>
-                    <td>نشط </td>
-                    <td>مصطفى </td>
-                    <td class="actions-cell">
-                        @* <a href="#"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a> *@
-
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td> أحمد</td>
-                    <td>متوقف</td>
-                    <td> مصطفى </td>
-                    <td class="actions-cell">
-                        @* <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button> *@
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        </div>
-<hr />
-<section>
-    <h2>الفوج الثاني</h2>
-
     <div class="table-responsive">
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>الاسم الاستاذ</th>
+                    <th>اسم الأستاذ</th>
                     <th>الحالة</th>
                     <th>المشرف</th>
-                    <th class="text-center">الإجراءات</th>
+                    <th style="text-align: center;">الإجراء</th>
                 </tr>
             </thead>
             <tbody>
-                
                 <tr>
-                    <td>محمود </td>
-                    <td>نشط </td>
-                    <td>مصطفى </td>
-                    <td class="actions-cell">
-                        @* <a href="#"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a> *@
-
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    <td>محمود جاسم</td>
+                    <td><span class="status-badge active">نشط</span></td>
+                    <td>مصطفى علي</td>
+                    <td style="text-align: center;">
+                        <button class="btn-icon" title="حذف"><i class="bi bi-trash"></i></button>
                     </td>
                 </tr>
                 <tr>
-                    <td> أحمد</td>
-                    <td>متوقف</td>
-                    <td> مصطفى </td>
-                    <td class="actions-cell">
-                        @* <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button> *@
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    <td>أحمد العبدالله</td>
+                    <td><span class="status-badge inactive">متوقف</span></td>
+                    <td>مصطفى علي</td>
+                    <td style="text-align: center;">
+                        <button class="btn-icon" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <hr />
+
+    <h2>الفوج الثاني</h2>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>اسم الأستاذ</th>
+                    <th>الحالة</th>
+                    <th>المشرف</th>
+                    <th style="text-align: center;">الإجراء</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>ياسين محمد</td>
+                    <td><span class="status-badge active">نشط</span></td>
+                    <td>عمر الخطيب</td>
+                    <td style="text-align: center;">
+                        <button class="btn-icon" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>علي محمد</td>
+                    <td><span class="status-badge active">نشط</span></td>
+                    <td>عمر الخطيب</td>
+                    <td style="text-align: center;">
+                        <button class="btn-icon" title="حذف"><i class="bi bi-trash"></i></button>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
 </section>
-<br>
-<hr />
+
 @code {
     private void moveTopage()
     {
-        mgr.NavigateTo("");
+        mgr.NavigateTo("/add-supervisor"); // عدل المسار حسب حاجتك
     }
 }
