@@ -1,0 +1,320 @@
+﻿
+@page "/examer/bookexamer"
+
+<style>
+   
+    :root {
+        /* الألوان */
+        --color-primary-green: #195042;
+        --color-luxury-beige: #d6cabc;
+        --color-bg-light: #f4f7f6;
+        --color-white: #ffffff;
+        --color-text-muted: #5a6c7d;
+        --color-btn-download: #246b59;
+        --color-btn-download-hover: #195042;
+        --color-btn-download-text: #ffffff;
+
+        /* الظلال */
+        --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.08);
+        --shadow-card-hover: 0 14px 35px rgba(0, 0, 0, 0.12);
+
+        /* الزوايا */
+        --radius-card: 20px;
+        --radius-badge: 12px;
+        --radius-btn: 10px;
+
+        /* الخطوط */
+        --font-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        --font-weight-normal: 400;
+        --font-weight-semibold: 600;
+        --font-weight-bold: 700;
+
+        /* الأحجام */
+        --font-size-xs: 0.82rem;
+        --font-size-sm: 0.88rem;
+        --font-size-base: 0.92rem;
+        --font-size-lg: 1.25rem;
+        --font-size-icon: 3.5rem;
+        --font-size-header: 1.5rem;
+
+        /* المسافات */
+        --spacing-xxs: 0.4rem;
+        --spacing-xs: 0.6rem;
+        --spacing-sm: 0.8rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2.5rem;
+
+        /* التحولات */
+        --transition-base: 0.3s ease;
+
+        /* الحدود */
+        --border-footer: 2px solid var(--color-luxury-beige);
+        --border-header: 6px solid var(--color-luxury-beige);
+    }
+
+   /* اوية الصفحة والاتجاه */
+    .library-wrapper {
+        direction: rtl;
+        text-align: right;
+        font-family: var(--font-base);
+        background-color: var(--color-bg-light);
+        padding-bottom: var(--spacing-xl);
+        min-height: 100vh;
+    }
+
+   /*  الترويسة */
+    .header-custom {
+        background-color: var(--color-primary-green);
+        color: var(--color-luxury-beige);
+        padding: var(--spacing-xl) 0;
+        border-bottom: var(--border-header);
+        margin-bottom: var(--spacing-xl);
+    }
+
+   /*  كارد الكتاب */
+    .book-card {
+        background: var(--color-white);
+        border-radius: var(--radius-card);
+        box-shadow: var(--shadow-card);
+        overflow: hidden;
+        transition: transform var(--transition-base), box-shadow var(--transition-base);
+        height: 100%;
+        border: none;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .book-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-card-hover);
+    }
+
+   
+    .book-cover {
+        background: linear-gradient(135deg, var(--color-primary-green) 0%, var(--color-btn-download) 100%);
+        height: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .book-cover::after {
+        content: '';
+        position: absolute;
+        width: 140px;
+        height: 140px;
+        background: rgba(214, 202, 188, 0.15);
+        border-radius: 50%;
+        top: -30px;
+        right: -30px;
+        pointer-events: none;
+    }
+
+    .book-icon {
+        font-size: var(--font-size-icon);
+        color: var(--color-luxury-beige);
+        z-index: 1;
+    }
+
+   /*  محتوى الكارد */
+    .book-content {
+        padding: var(--spacing-lg);
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .book-title {
+        color: var(--color-primary-green);
+        font-weight: var(--font-weight-bold);
+        font-size: var(--font-size-lg);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .book-desc {
+        color: var(--color-text-muted);
+        font-size: var(--font-size-base);
+        line-height: 1.65;
+        margin-bottom: var(--spacing-md);
+        flex-grow: 1;
+    }
+/* 
+   معلومات زائد زر التحميل */ 
+    .book-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: var(--spacing-md);
+        border-top: var(--border-footer);
+        margin-top: auto;
+        flex-wrap: wrap;
+        gap: var(--spacing-xs);
+    }
+
+    .book-meta {
+        font-size: var(--font-size-sm);
+        color: var(--color-primary-green);
+        font-weight: var(--font-weight-semibold);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xxs);
+    }
+
+    .book-date {
+        font-size: var(--font-size-xs);
+        color: var(--color-text-muted);
+        font-weight: var(--font-weight-normal);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xxs);
+    }
+
+    /* زر التحميل الجديد - بسيط ومعتمد على المتغيرات */
+    .btn-download {
+        background-color: var(--color-btn-download);
+        color: var(--color-btn-download-text);
+        border: none;
+        border-radius: var(--radius-btn);
+        padding: var(--spacing-xxs) var(--spacing-sm);
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-semibold);
+        font-family: var(--font-base);
+        cursor: pointer;
+        transition: all var(--transition-base);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xxs);
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .btn-download:hover {
+        background-color: var(--color-btn-download-hover);
+        color: var(--color-luxury-beige);
+        transform: translateY(-1px);
+    }
+
+    .btn-download:active {
+        transform: translateY(0);
+        opacity: 0.9;
+    }
+   /*  التجاوب */
+    @@media (max-width: 768px) {
+        .header-custom { padding: 2rem 0; margin-bottom: 2rem; }
+        .book-cover { height: 140px; }
+        .book-content { padding: 1.2rem; }
+        .book-footer { flex-direction: column; align-items: flex-start; gap: var(--spacing-sm); }
+        .btn-download { width: 100%; justify-content: center; }
+    }
+</style>
+
+<div class="library-wrapper">
+    <!-- الترويسة -->
+    <header class="header-custom text-center">
+        <div class="container">
+            <h1 class="fw-bold">الكتب</h1>
+            <p class="mb-0">متابعة كل ما يخص الكتب</p>
+        </div>
+    </header>
+
+    <!-- شبكة الكتب -->
+    <div class="container">
+        <div class="row g-4">
+            
+            <!-- الكتاب الأول -->
+            <div class="col-lg-6">
+                <div class="book-card">
+                    <div class="book-cover">
+                        <i class="bi bi-book book-icon"></i>
+                    </div>
+                    <div class="book-content">
+                        <h3 class="book-title">رياض الصالحين</h3>
+                        <p class="book-desc">كتاب شامل في الآداب والأخلاق الإسلامية، يحتوي على أحاديث نبوية شريفة مختارة تغطي مختلف أبواب الدين والدنيا.</p>
+                        <div class="book-footer">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span class="book-meta"><i class="bi bi-file-text me-2"></i>450 صفحة</span>
+                                <span class="book-date"><i class="bi bi-calendar3 me-1"></i>نشر: 2023</span>
+                            </div>
+                            <button class="btn-download" title="تحميل الكتاب">
+                                <i class="bi bi-download"></i> تحميل
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الكتاب الثاني -->
+            <div class="col-lg-6">
+                <div class="book-card">
+                    <div class="book-cover">
+                        <i class="bi bi-journal-text book-icon"></i>
+                    </div>
+                    <div class="book-content">
+                        <h3 class="book-title">قصص الأنبياء</h3>
+                        <p class="book-desc">سرد قصص الأنبياء والرسل عليهم السلام بأسلوب شيق ومبسط، مستمد مباشرة من القرآن الكريم والسنة النبوية الشريفة.</p>
+                        <div class="book-footer">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span class="book-meta"><i class="bi bi-file-text me-2"></i>380 صفحة</span>
+                                <span class="book-date"><i class="bi bi-calendar3 me-1"></i>نشر: 2022</span>
+                            </div>
+                            <button class="btn-download" title="تحميل الكتاب">
+                                <i class="bi bi-download"></i> تحميل
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الكتاب الثالث -->
+            <div class="col-lg-6">
+                <div class="book-card">
+                    <div class="book-cover">
+                        <i class="bi bi-journal-text book-icon"></i>
+                    </div>
+                    <div class="book-content">
+                        <h3 class="book-title">العقيدة الإسلامية</h3>
+                        <p class="book-desc">شرح مبسط وواضح لعقيدة أهل السنة والجماعة، يتناول أصول الإيمان وأركانه الستة بطريقة منهجية سهلة الفهم.</p>
+                        <div class="book-footer">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span class="book-meta"><i class="bi bi-file-text me-2"></i>320 صفحة</span>
+                                <span class="book-date"><i class="bi bi-calendar3 me-1"></i>نشر: 2023</span>
+                            </div>
+                            <button class="btn-download" title="تحميل الكتاب">
+                                <i class="bi bi-download"></i> تحميل
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الكتاب الرابع -->
+            <div class="col-lg-6">
+                <div class="book-card">
+                    <div class="book-cover">
+                        <i class="bi bi-book-half book-icon"></i>
+                    </div>
+                    <div class="book-content">
+                        <h3 class="book-title">الأربعون النووية</h3>
+                        <p class="book-desc">مجموعة جامعة من الأحاديث النبوية الأساسية التي تضم أصول الدين وقواعده، مقدمة مع شروح موجزة وافية.</p>
+                        <div class="book-footer">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span class="book-meta"><i class="bi bi-file-text me-2"></i>180 صفحة</span>
+                                <span class="book-date"><i class="bi bi-calendar3 me-1"></i>نشر: 2021</span>
+                            </div>
+                            <button class="btn-download" title="تحميل الكتاب">
+                                <i class="bi bi-download"></i> تحميل
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+
+}

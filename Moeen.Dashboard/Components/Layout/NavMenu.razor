@@ -8,6 +8,8 @@
             <option value="owner"> مالك</option>
             <option value="supervisor"> مشرف</option>
             <option value="teacher"> معلم</option>
+            <option value="examer"> مختبر</option>
+
         </select>
     </div>
     <div class="container-fluid">
@@ -33,7 +35,7 @@
                     <span class="bi bi-person-lines-fill"></span> حسابات المستخدمين
                 </NavLink>
             </div>
-           
+
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/management/mosques-management">
                     <span class="bi bi-building"></span> إدارة المساجد
@@ -72,7 +74,7 @@
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                   
+
                 <NavLink class="nav-link" href="/supervisor/managementfouj">
                     <span class="bi bi-diagram-3 nav-menu"></span>
                     <span>الأفواج والحلقات</span>
@@ -106,8 +108,8 @@
                     <span>التقارير</span>
                 </NavLink>
             </div>
-           
-            
+
+
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="supervisor/saturdaylesson">
                     <span class="bi bi-calendar-week-fill nav-menu"></span>
@@ -146,7 +148,37 @@
                     <span class="bi bi-megaphone-fill"></span>  الاعلانات
                 </NavLink>
             </div>
-           
+
+        }
+        else if (userRole == "examer")
+        {
+            <!-- قائمة المختبر -->
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/Examer/Dashboard" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill"></span> الرئيسية
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="examer/exam">
+                    <span class="bi bi-mortarboard-fill"></span> إدارة طلاب
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="examer/postexamer">
+                    <span class="bi bi-megaphone-fill"></span>  الاعلانات
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="examer/bookexamer">
+                    <span class="bi bi-journals"></span> المكتبة
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="examer/profileexamer">
+                    <span class="bi bi-person-circle"></span> ملفي الشخصي
+                </NavLink>
+            </div>
         }
         else
         {
