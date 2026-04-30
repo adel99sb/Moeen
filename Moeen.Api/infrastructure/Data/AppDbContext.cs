@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Moeen.Api.Core.Enities;
 using Moeen.Api.Core.Entities;
 
 namespace Moeen.Api.infrastructure.Data
@@ -23,6 +24,8 @@ namespace Moeen.Api.infrastructure.Data
         public DbSet<Post> Posts { get; set; }
         public DbSet<ProgressEntry> ProgressEntries { get; set; }
         public DbSet<SaturdayHalqa> SaturdayHalqes { get; set; }
+        public DbSet<ParentSudent> ParentSudents { get; set; }
+
         public DbSet<Student> Students { get; set; }
         public DbSet<Supervisor> Supervisors { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
