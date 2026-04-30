@@ -1,8 +1,8 @@
 ﻿using Moeen.Api.Core.Contracts;
 using Moeen.Api.Shared.Requests.Analytics;
-using Moeen.Api.Shared.Responses.Analytics;
+using Moeen.Api.Shared.Responses;
 using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application
 {
@@ -11,56 +11,56 @@ namespace Moeen.Api.Core.Contracts.Application
         /// <summary>
         /// تحليل بيانات طالب معين
         /// </summary>
-        Task<StudentAnalyticsDto> AnalyzeStudentDataAsync(AnalyzeStudentDataRequest request);
+        Task<GeneralResponse> AnalyzeStudentDataAsync(AnalyzeStudentDataRequest request);
 
         /// <summary>
         /// تحليل أداء معلم معين
         /// </summary>
-        Task<TeacherAnalyticsDto> AnalyzeTeacherPerformanceAsync(AnalyzeTeacherPerformanceRequest request);
+        Task<GeneralResponse> AnalyzeTeacherPerformanceAsync(AnalyzeTeacherPerformanceRequest request);
 
         /// <summary>
         /// تحليل فعالية حلقة معينة
         /// </summary>
-        Task<CircleAnalyticsDto> AnalyzeCircleEffectivenessAsync(AnalyzeCircleEffectivenessRequest request);
+        Task<GeneralResponse> AnalyzeCircleEffectivenessAsync(AnalyzeCircleEffectivenessRequest request);
 
         /// <summary>
         /// تحليل مباشر لبيانات طالب عبر المعرف
         /// </summary>
-        Task<StudentAnalyticsDto> AnalyzeStudentDataByIdAsync(Guid studentId);
+        Task<GeneralResponse> AnalyzeStudentDataByIdAsync(Guid studentId);
 
         /// <summary>
         /// تحليل مباشر لأداء معلم عبر المعرف
         /// </summary>      
-        Task<TeacherAnalyticsDto> AnalyzeTeacherPerformanceByIdAsync(Guid teacherId);
+        Task<GeneralResponse> AnalyzeTeacherPerformanceByIdAsync(Guid teacherId);
 
         /// <summary>
         /// تحليل مباشر لفعالية حلقة عبر المعرف
         /// </summary>
-        Task<CircleAnalyticsDto> AnalyzeCircleEffectivenessByIdAsync(Guid circleId);
+        Task<GeneralResponse> AnalyzeCircleEffectivenessByIdAsync(Guid circleId);
 
         /// <summary>
         /// حفظ تقرير تحليلي لاستخدامه لاحقاً
         /// </summary>
-        Task<AnalyticsReportDto> SaveAnalyticsReportAsync(SaveAnalyticsReportRequest request);
+        Task<GeneralResponse> SaveAnalyticsReportAsync(SaveAnalyticsReportRequest request);
 
         /// <summary>
         /// استعراض تقرير تحليلي محفوظ بواسطة المعرف
         /// </summary>
-        Task<AnalyticsReportDto> GetAnalyticsReportByIdAsync(Guid reportId);
+        Task<GeneralResponse> GetAnalyticsReportByIdAsync(Guid reportId);
 
         /// <summary>
         /// جلب قائمة التقارير التحليلية المحفوظة مع التصفية والتصفح
         /// </summary>
-        Task<PagedResult<AnalyticsReportSummaryDto>> GetAllAnalyticsReportsAsync(AnalyticsReportFilter filter);
+        Task<GeneralResponse> GetAllAnalyticsReportsAsync(AnalyticsReportFilter filter);
 
         /// <summary>
         /// تحديث تقرير تحليلي محفوظ
         /// </summary>
-        Task<AnalyticsReportDto> UpdateAnalyticsReportAsync(Guid reportId, UpdateAnalyticsReportRequest request);
+        Task<GeneralResponse> UpdateAnalyticsReportAsync(Guid reportId, UpdateAnalyticsReportRequest request);
 
         /// <summary>
         /// حذف تقرير تحليلي محفوظ
         /// </summary>
-        Task<bool> DeleteAnalyticsReportAsync(Guid reportId);
+        Task<GeneralResponse> DeleteAnalyticsReportAsync(Guid reportId);
     }
 }
