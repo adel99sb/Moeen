@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.Circle;
-using Moeen.Api.Shared.Responses.Circle;
+using Moeen.Shared.Requests.Circle;
+using Moeen.Shared.Responses.Circle;
 
 namespace Moeen.Api.Controllers
 {

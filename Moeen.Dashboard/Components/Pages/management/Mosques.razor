@@ -25,15 +25,19 @@
         padding: 40px 20px;
         height: 100%;
         transition: transform 0.3s ease;
-    /* البحث */
-    .search-box {
+        /* البحث */
+        .search-box
+
+    {
         position: relative;
-           width: 300px;
+        width: 300px;
     }
 
-        .custom-card:hover {
-            transform: translateY(-5px);
-    .search-container {
+    .custom-card:hover {
+        transform: translateY(-5px);
+        .search-container
+
+    {
         display: flex;
         justify-content: space-between; /* لوضع الزر في جهة والبحث في جهة */
         align-items: center;
@@ -41,16 +45,16 @@
         width: 100%;
     }
 
-        .search-box input {
-            width: 100%;
-            padding: 12px 45px 12px 15px;
-            border: 2px solid var(--color-beige);
-            border-radius: var(--radius-md);
-            background: var(--color-white);
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-            font-size: 14px;
-        }
+    .search-box input {
+        width: 100%;
+        padding: 12px 45px 12px 15px;
+        border: 2px solid var(--color-beige);
+        border-radius: var(--radius-md);
+        background: var(--color-white);
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        font-size: 14px;
+    }
 
     /* أيقونة الحذف في الزاوية اليسرى كما في الصورة */
     .delete-icon-top {
@@ -118,24 +122,29 @@
             إضافة جامع +
         </a>
     </div>
+</div>
 <div class="row g-4 justify-content-center">
-        
-        <div class="col-12 col-md-4">
-            <div class="custom-card text-center">
-                <a href="#" class="delete-icon-top">
+
+    <div class="col-12 col-md-4">
+        <div class="custom-card text-center">
+            <a href="#" class="delete-icon-top">
+            </a>
+        </div>
+    </div>
+</div>
 <!-- البحث -->
 <div class="search-container">
-<div class="search-box">
-    <input type="text" placeholder=" البحث عن جامع..." />
-    <span class="icon"><i class="bi bi-search"></i></span>
-</div>
+    <div class="search-box">
+        <input type="text" placeholder=" البحث عن جامع..." />
+        <span class="icon"><i class="bi bi-search"></i></span>
+    </div>
 
-<!-- زر إضافة جامع -->
-<button type="button" class="btn custom-outline-btn" @onclick="moveTopage2">إضافة جامع</button>
+    <!-- زر إضافة جامع -->
+    <button type="button" class="btn custom-outline-btn" @onclick="moveTopage2">إضافة جامع</button>
 </div>
 <!-- الكاردات -->
 <div class="container mt-5 pt-5 d-flex flex-column align-items-center">
-    <div class="row justify-content-center w-100" >
+    <div class="row justify-content-center w-100">
         <!-- الكارد 1 -->
         <div style="position: relative; width:20rem; margin:20px;">
 

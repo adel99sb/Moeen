@@ -1,4 +1,4 @@
-﻿using Moeen.Api.Core.Constants;
+﻿using Moeen.Shared.Constants;
 
 namespace Moeen.Api.Core.Contracts.infrastructure.Providers
 {

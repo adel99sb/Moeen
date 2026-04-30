@@ -1,6 +1,6 @@
-﻿using Moeen.Api.Shared.Requests.Reporting;
-using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
-using Moeen.Api.Shared.Responses.Reporting;
+﻿using Moeen.Shared.Requests.Reporting;
+using Moeen.Shared.Responses.CircleTeacherAssignment;
+using Moeen.Shared.Responses.Reporting;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

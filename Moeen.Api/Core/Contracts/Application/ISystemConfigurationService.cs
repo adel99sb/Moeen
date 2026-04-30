@@ -1,6 +1,6 @@
-﻿using Moeen.Api.Shared.Requests.SystemConfiguration;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.SystemConfiguration;
+﻿using Moeen.Shared.Requests.SystemConfiguration;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.SystemConfiguration;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application

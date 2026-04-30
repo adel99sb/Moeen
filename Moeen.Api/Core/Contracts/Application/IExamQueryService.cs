@@ -1,7 +1,7 @@
-﻿using Moeen.Api.Shared.Requests.ExamQuery;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.ExamCommand;
-using Moeen.Api.Shared.Responses.ExamQuery;
+﻿using Moeen.Shared.Requests.ExamQuery;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.ExamCommand;
+using Moeen.Shared.Responses.ExamQuery;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

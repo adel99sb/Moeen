@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Moeen.Api.Core.Constants;
+using Moeen.Shared.Constants;
 
 namespace Moeen.Api.infrastructure.Data
 {

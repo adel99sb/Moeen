@@ -1,8 +1,7 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.ContentSharing;
-using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
-using Moeen.Api.Shared.Responses.ContentSharing;
-using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
+using Moeen.Shared.Requests.ContentSharing;
+using Moeen.Shared.Responses.CircleTeacherAssignment;
+using Moeen.Shared.Responses.ContentSharing;
 
 namespace Moeen.Api.Application.Services
 {

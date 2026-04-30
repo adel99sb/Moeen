@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using Moeen.Api.Core.Constants;
-using Moeen.Api.Core.Contracts;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
+using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Repositories;
-using Moeen.Api.Shared.Requests;
-using Moeen.Api.Shared.Requests.Identity;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.Identity;
+using Moeen.Shared.Constants;
+using Moeen.Shared.Requests;
+using Moeen.Shared.Requests.Identity;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -227,7 +227,7 @@ namespace Moeen.Api.Application.Services
                 }
 
                 await _userManager.AddToRoleAsync(user, Roles.Student.ToString());
-                await _verificationService.SendVerificationCodeAsync(user.Id, user.Email, "Email Verification", "ar");
+                 await _verificationService.SendVerificationCodeAsync(user.Id, user.Email, "Email Verification", "ar");
             }
             catch
             {

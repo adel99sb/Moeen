@@ -1,7 +1,7 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.Authorization;
-using Moeen.Api.Shared.Responses.Analytics;
-using Moeen.Api.Shared.Responses.Authorization;
+using Moeen.Shared.Requests.Authorization;
+using Moeen.Shared.Responses.Analytics;
+using Moeen.Shared.Responses.Authorization;
 using System.Security.Claims;
 
 namespace Moeen.Api.Application.Services
