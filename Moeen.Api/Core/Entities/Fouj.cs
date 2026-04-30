@@ -9,8 +9,9 @@
         public Guid MosqueId { get; set; } 
         public Mosque Mosque { get; set; } 
         public ICollection<Halqa> Halqas { get; set; }
+        public ICollection<ExamTeacherHalqa> ExamTeacherHalqas { get; set; }
 
-        
+
 
     }
 }

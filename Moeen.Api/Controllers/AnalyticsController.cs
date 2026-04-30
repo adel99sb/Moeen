@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared;
-using Moeen.Api.Shared.Requests.Analytics;
-using System;
-using System.Threading.Tasks;
+using Moeen.Shared.Requests.Analytics;
+using Moeen.Shared.Responses.Analytics;
 
 namespace Moeen.Api.Controllers
 {

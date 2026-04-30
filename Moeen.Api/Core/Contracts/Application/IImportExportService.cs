@@ -1,6 +1,6 @@
-﻿using Moeen.Api.Shared.Requests.ImportExport;
-using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
-using Moeen.Api.Shared.Responses.ImportExport;
+﻿using Moeen.Shared.Requests.ImportExport;
+using Moeen.Shared.Responses.CircleTeacherAssignment;
+using Moeen.Shared.Responses.ImportExport;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application

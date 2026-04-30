@@ -1,6 +1,6 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.Feedback;
-using Moeen.Api.Shared.Responses.Feedback;
+using Moeen.Shared.Requests.Feedback;
+using Moeen.Shared.Responses.Feedback;
 
 namespace Moeen.Api.Application.Services
 {

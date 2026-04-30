@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
-using Moeen.Api.Core.Constants;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
+using Moeen.Shared.Constants;
 
 namespace Moeen.Api.infrastructure.Providers
 {

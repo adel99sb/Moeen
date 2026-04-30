@@ -1,6 +1,6 @@
-﻿using Moeen.Api.Shared.Requests.Scheduling;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.Scheduling;
+﻿using Moeen.Shared.Requests.Scheduling;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.Scheduling;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application

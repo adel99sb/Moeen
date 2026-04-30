@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using Moeen.Api.Core.Contracts;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
+using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Configurations;
 using System.IdentityModel.Tokens.Jwt;
@@ -32,14 +32,7 @@ namespace Moeen.Api.infrastructure.Providers
                     new Claim("FullName", user.name),
                     new Claim("Email", user.Email == null ? string.Empty : user.Email),
                     new Claim("EmailConfirmed",user.EmailConfirmed.ToString())
-                  //  new Claim("Phone",user.PhoneNumber),
-                    //new Claim("PhoneConfirmed",user.PhoneNumberConfirmed.ToString()),
                 };
-                //var imagePath = await _fileService.GetFileUrlAsync(user.ImagePath);
-                //if (user.ImagePath != null)
-                //    claims.Add(new Claim("ImagePath", imagePath));
-                //else
-                //    claims.Add(new Claim("ImagePath", string.Empty));
 
 
                 var roles = await userManager.GetRolesAsync(user);

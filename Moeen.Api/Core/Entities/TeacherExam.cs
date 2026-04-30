@@ -1,10 +1,13 @@
 ﻿namespace Moeen.Api.Core.Entities
 {
-    public class TeacherExam
+    public class TeacherExam : User
     {
-        public int Id { get; set; }
-        public int TeacherId { get; set; }
-        public int ExamId { get; set; }
-        public Teacher Teacher { get; set; }
+        public Guid Id { get; set; }
+        public Guid MosquId { get; set; }
+        public string? Bio { get; set; }
+        public Mosque Mosque { get; set; }
+
+        public ICollection<ExamTeacherHalqa> ExamTeacherHalqas { get; set; }
     }
 }
+

@@ -216,6 +216,9 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("TeacherExamId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("TeacherId")
                         .HasColumnType("uniqueidentifier");
 
@@ -242,9 +245,40 @@ namespace Moeen.Api.infrastructure.Data.Migrations
 
                     b.HasIndex("StudentId");
 
+                    b.HasIndex("TeacherExamId");
+
                     b.HasIndex("TeacherId");
 
                     b.ToTable("Exams");
+                });
+
+            modelBuilder.Entity("Moeen.Api.Core.Entities.ExamTeacherHalqa", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ExamTeacherId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FoujId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HalqaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TeacherExamsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FoujId");
+
+                    b.HasIndex("HalqaId");
+
+                    b.HasIndex("TeacherExamsId");
+
+                    b.ToTable("ExamTeacherHalqa");
                 });
 
             modelBuilder.Entity("Moeen.Api.Core.Entities.Fouj", b =>
@@ -720,6 +754,24 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                     b.ToTable("Teachers", (string)null);
                 });
 
+            modelBuilder.Entity("Moeen.Api.Core.Entities.TeacherExam", b =>
+                {
+                    b.HasBaseType("Moeen.Api.Core.Entities.User");
+
+                    b.Property<string>("Bio")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("MosquId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MosqueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasIndex("MosqueId");
+
+                    b.ToTable("TeacherExams");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -825,6 +877,12 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Moeen.Api.Core.Entities.TeacherExam", "TeacherExams")
+                        .WithMany()
+                        .HasForeignKey("TeacherExamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Moeen.Api.Core.Entities.Teacher", "Teacher")
                         .WithMany()
                         .HasForeignKey("TeacherId")
@@ -834,6 +892,35 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                     b.Navigation("Student");
 
                     b.Navigation("Teacher");
+
+                    b.Navigation("TeacherExams");
+                });
+
+            modelBuilder.Entity("Moeen.Api.Core.Entities.ExamTeacherHalqa", b =>
+                {
+                    b.HasOne("Moeen.Api.Core.Entities.Fouj", "Fouj")
+                        .WithMany("ExamTeacherHalqas")
+                        .HasForeignKey("FoujId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Moeen.Api.Core.Entities.Halqa", "Halqa")
+                        .WithMany("ExamTeacherHalqas")
+                        .HasForeignKey("HalqaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Moeen.Api.Core.Entities.TeacherExam", "TeacherExams")
+                        .WithMany("ExamTeacherHalqas")
+                        .HasForeignKey("TeacherExamsId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Fouj");
+
+                    b.Navigation("Halqa");
+
+                    b.Navigation("TeacherExams");
                 });
 
             modelBuilder.Entity("Moeen.Api.Core.Entities.Fouj", b =>
@@ -1046,13 +1133,34 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                     b.Navigation("Mosque");
                 });
 
+            modelBuilder.Entity("Moeen.Api.Core.Entities.TeacherExam", b =>
+                {
+                    b.HasOne("Moeen.Api.Core.Entities.User", null)
+                        .WithOne()
+                        .HasForeignKey("Moeen.Api.Core.Entities.TeacherExam", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Moeen.Api.Core.Entities.Mosque", "Mosque")
+                        .WithMany("TeacherExams")
+                        .HasForeignKey("MosqueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Mosque");
+                });
+
             modelBuilder.Entity("Moeen.Api.Core.Entities.Fouj", b =>
                 {
+                    b.Navigation("ExamTeacherHalqas");
+
                     b.Navigation("Halqas");
                 });
 
             modelBuilder.Entity("Moeen.Api.Core.Entities.Halqa", b =>
                 {
+                    b.Navigation("ExamTeacherHalqas");
+
                     b.Navigation("HalqeSessions");
 
                     b.Navigation("ProgressEntries");
@@ -1068,6 +1176,8 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                     b.Navigation("SaturdayLessons");
 
                     b.Navigation("Students");
+
+                    b.Navigation("TeacherExams");
 
                     b.Navigation("Teachers");
 
@@ -1124,6 +1234,11 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                     b.Navigation("ProgressEntrys");
 
                     b.Navigation("halaqas");
+                });
+
+            modelBuilder.Entity("Moeen.Api.Core.Entities.TeacherExam", b =>
+                {
+                    b.Navigation("ExamTeacherHalqas");
                 });
 #pragma warning restore 612, 618
         }

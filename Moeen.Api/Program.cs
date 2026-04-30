@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Moeen.Api.Application.Services;
-using Moeen.Api.Core.Contracts;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
+using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Configurations;
 using Moeen.Api.infrastructure.Data;
@@ -100,7 +100,7 @@ builder.Services.AddScoped<IReportingService, ReportingService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<ISystemConfigurationService, SystemConfigurationService>();
 builder.Services.AddScoped<ISchedulingService, SchedulingService>();
-
+builder.Services.AddScoped<IExamHalqaService, ExamHalqaService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 

@@ -1,6 +1,6 @@
 ﻿using Moeen.Api.Core.Contracts;
-using Moeen.Api.Shared.Requests.Analytics;
-using Moeen.Api.Shared.Responses;
+using Moeen.Shared.Requests.Analytics;
+using Moeen.Shared.Responses.Analytics;
 using System;
 using System.Threading.Tasks;
 

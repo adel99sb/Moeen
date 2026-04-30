@@ -1,7 +1,7 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.Review;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.Review;
+using Moeen.Shared.Requests.Review;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.Review;
 
 namespace Moeen.Api.Application.Services
 {

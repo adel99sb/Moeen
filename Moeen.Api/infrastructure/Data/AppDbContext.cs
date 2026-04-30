@@ -27,6 +27,8 @@ namespace Moeen.Api.infrastructure.Data
         public DbSet<Supervisor> Supervisors { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet <TeacherExam> TeacherExams { get; set; }
+        public DbSet<ExamTeacherHalqa> ExamTeacherHalqa { get; set; }
         override protected void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

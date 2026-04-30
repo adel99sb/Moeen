@@ -1,4 +1,4 @@
-﻿namespace Moeen.Api.Core.Contracts
+﻿namespace Moeen.Api.Core.Contracts.infrastructure.Repositories
 {
     public interface IUnitOfWork : IDisposable
     {

@@ -2,47 +2,159 @@
 @rendermode InteractiveServer
 @inject NavigationManager mgr
 
-<h3>parents</h3>
+<style>
+    :root {
+        --primary-green: #195042;
+        --primary-green-dark: #123d32;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --text-gray: #636e72;
+        --danger-red: #e74c3c;
+        --bg-gray: #f9f9f9;
+        --border-gray: #f1f1f1;
+        --bg-row-hover: #fafafa;
+        --font-main: 'Tajawal', sans-serif;
+        --radius-container: 20px;
+        --radius-icon: 6px;
+    }
+
+    /* تنسيق الحاوية والعناوين */
+    .management-container {
+        background: var(--white);
+        margin: 20px;
+        padding: 30px;
+        border-radius: var(--radius-container);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        direction: rtl;
+        font-family: var(--font-main);
+    }
+
+    .page-title {
+        color: var(--primary-green);
+        margin-bottom: 25px;
+    }
+
+    /* شريط البحث */
+    .action-bar { margin-bottom: 25px; }
+    .search-wrapper { position: relative; max-width: 400px; }
+    .search-input {
+        width: 100%;
+        padding: 12px 45px 12px 15px;
+        border: 1.5px solid var(--accent-beige);
+        border-radius: 12px;
+        outline: none;
+    }
+    .search-wrapper i {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary-green);
+    }
+
+    /* الجدول بتنسيقه الجديد */
+    .table-responsive { width: 100%; overflow-x: auto; }
+    
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px; /* تباعد الصفوف */
+    }
+
+    .data-table th {
+        background-color: var(--light-beige);
+        color: var(--primary-green);
+        padding: 15px;
+        text-align: right;
+    }
+
+    .data-table tbody tr {
+        background-color: var(--white);
+        transition: 0.3s;
+    }
+
+    .data-table tbody tr td {
+        padding: 15px;
+        border-top: 1px solid var(--border-gray);
+        border-bottom: 1px solid var(--border-gray);
+    }
+
+    .data-table tbody tr:hover {
+        background-color: var(--bg-row-hover);
+        transform: scale(1.005);
+    }
+
+    /* أزرار الإجراءات */
+    .actions-cell {
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .btn-icon {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        margin: 0 2px;
+        border-radius: var(--radius-icon);
+        transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-icon.info { color: var(--primary-green); }
+    .btn-icon.edit { color: var(--primary-green); }
+    .btn-icon.delete { color: var(--danger-red); }
+
+    .btn-icon:hover {
+        transform: scale(1.2);
+        background-color: var(--light-beige);
+    }
+</style>
+
 <section class="management-container">
     <header class="page-header">
-        <h2 class="page-title">إدارة أولياء الأمور </h2>
+        <h2 class="page-title">إدارة أولياء الأمور</h2>
     </header>
+
     <div class="action-bar">
         <div class="search-wrapper">
             <i class="bi bi-search"></i>
             <input type="text" class="search-input" placeholder="ابحث عن ولي أمر...">
         </div>
     </div>
-<div class="table-responsive">
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>الاسم</th>
-                <th class="text-center">الإجراءات</th>
-            </tr>
-        </thead>
-        <tbody>
-                
-            <tr>
-                <td>مصطفى المحمد</td>
-                <td class="actions-cell">
-                        <button class="btn-icon edit" title="عرض" @onclick="moveTopage2"><i class="bi bi-info-circle"></i></button>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th class="text-center">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>مصطفى المحمد</td>
+                    <td class="actions-cell">
+                        <button class="btn-icon info" title="عرض" @onclick="moveTopage2"><i class="bi bi-info-circle"></i></button>
                         <button class="btn-icon edit" title="تعديل" @onclick="moveTopage"><i class="bi bi-pencil-square"></i></button>
                         <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                </td>
-            </tr>
-            <tr>
-                <td>محمد العلي</td>
-                <td class="actions-cell">
-                        <button class="btn-icon edit" title="عرض" @onclick="moveTopage2"><i class="bi bi-info-circle"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>محمد العلي</td>
+                    <td class="actions-cell">
+                        <button class="btn-icon info" title="عرض" @onclick="moveTopage2"><i class="bi bi-info-circle"></i></button>
                         <button class="btn-icon edit" title="تعديل" @onclick="moveTopage"><i class="bi bi-pencil-square"></i></button>
-                    <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </section>
+
 @code {
     private void moveTopage()
     {

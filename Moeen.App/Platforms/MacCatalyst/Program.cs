@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace Moeen.App
+namespace Moeen.App.Platforms.MacCatalyst
 {
     public class Program
     {

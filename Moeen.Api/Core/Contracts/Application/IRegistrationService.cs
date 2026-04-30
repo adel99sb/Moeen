@@ -1,7 +1,7 @@
-﻿using Moeen.Api.Shared.Requests.Registration;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
-using Moeen.Api.Shared.Responses.Registration;
+﻿using Moeen.Shared.Requests.Registration;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.CircleTeacherAssignment;
+using Moeen.Shared.Responses.Registration;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application

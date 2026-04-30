@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.Goal;
-using Moeen.Api.Shared.Responses.Goal;
+using Moeen.Shared.Requests.Goal;
+using Moeen.Shared.Responses.Goal;
 
 namespace Moeen.Api.Controllers
 {
