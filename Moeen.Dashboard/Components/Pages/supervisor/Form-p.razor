@@ -1,17 +1,23 @@
 ﻿@page "/form-p"
 @inject NavigationManager mgr
-<style> 
-    .form-container, .form-container * {
-        box-sizing: border-box;
-    }
 
+<style> 
     :root {
         --primary-green: #195042;
+        --primary-green-dark: #123d32;
         --accent-beige: #d6cabc;
         --light-beige: #f4f1ee;
         --white: #ffffff;
         --text-dark: #2d3436;
+        --danger-red: #e74c3c;
+        --border-gray: #f1f1f1;
+        --bg-row-hover: #fafafa;
+        --font-main: 'Tajawal', sans-serif;
         --transition: all 0.3s ease;
+    }
+
+    .form-container, .form-container * {
+        box-sizing: border-box;
     }
 
     .form-container {
@@ -22,6 +28,7 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         direction: rtl; 
         overflow: hidden;
+        font-family: var(--font-main);
     }
 
     .form-header {
@@ -31,9 +38,7 @@
         text-align: center;
     }
 
-    form {
-        padding: 2rem;
-    }
+    form { padding: 2rem; }
 
     .grid-row {
         display: grid;
@@ -41,122 +46,98 @@
         gap: 1.5rem;
         margin-bottom: 1.2rem;
     }
-        .grid-row:nth-of-type(4) {
-            grid-template-columns: repeat(3, 1fr);
-        }
 
-    .input-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
+    .input-group { display: flex; flex-direction: column; gap: 8px; }
+    .input-group label { color: var(--text-dark); font-weight: 600; font-size: 0.85rem; text-align: right; }
 
-        .input-group label {
-            color: var(--text-dark);
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-align: right;
-        }
+    .input-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
+    .input-wrapper i { position: absolute; right: 12px; color: var(--primary-green); z-index: 2; pointer-events: none; }
 
-    /* حل مشكلة الأيقونات والمحاذاة */
-    .input-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
+    .input-wrapper input {
         width: 100%;
+        padding: 10px 35px 10px 10px;
+        border: 1px solid var(--accent-beige);
+        border-radius: 8px;
+        background: var(--light-beige);
+        font-size: 0.9rem;
+        height: 45px; 
+        outline: none;
+        transition: var(--transition);
     }
 
-        .input-wrapper i {
-            position: absolute;
-            right: 12px; /* تثبيت الأيقونة جهة اليمين */
-            color: var(--primary-green);
-            z-index: 2;
-            pointer-events: none;
-        }
+    .input-wrapper input:focus { border-color: var(--primary-green); background: #fff; }
 
-        .input-wrapper input,
-        .input-wrapper select {
-            width: 100%;
-            padding: 10px 35px 10px 10px;
-            border: 1px solid var(--accent-beige);
-            border-radius: 8px;
-            background: var(--light-beige);
-            font-size: 0.9rem;
-            height: 45px; 
-            outline: none;
-            transition: var(--transition);
-        }
-
-            .input-wrapper input:focus,
-            .input-wrapper select:focus {
-                border-color: var(--primary-green);
-                background: #fff;
-            }
-    .actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #eee;
+    /* تنسيق الجدول الجديد والموحد */
+    .management-container {
+        max-width: 850px;
+        margin: 0 auto 2rem;
+        padding: 0 20px;
+        direction: rtl;
+        font-family: var(--font-main);
     }
 
-        .actions button, .actions a {
-            flex: 1;
-            height: 48px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-        }
+    .table-responsive { width: 100%; overflow-x: auto; }
 
-        .actions .save {
-            background: var(--primary-green);
-            color: white;
-        }
-
-        .actions .cancel {
-            background: #f8f9fa;
-            color: #dc3545;
-        }
-
-    /* حل مشكلة الميديا كويري في Razor */
-    @@media (max-width: 768px) {
-        .grid-row, .grid-row:nth-of-type(4) {
-            grid-template-columns: 1fr !important;
-        }
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px; /* المسافة بين الصفوف */
     }
-    /* تنسيق زر إضافة ابن المخصص */
-.btn-add-son {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background-color: var(--primary-green); /* نفس لون النموذج */
-    color: white;
-    padding: 8px 20px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: var(--transition);
-    border: none;
-    margin: 1rem 0; /* مسافة بسيطة من الأعلى والأسفل */
-    width: fit-content; /* جعل الحجم على مقاس النص */
-}
 
-.btn-add-son:hover {
-    background-color: #123d32; /* درجة أغمق قليلاً عند الحوم */
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
+    .data-table th {
+        background-color: var(--light-beige);
+        color: var(--primary-green);
+        padding: 15px;
+        text-align: right;
+    }
+
+    .data-table tbody tr {
+        background-color: var(--white);
+        transition: 0.3s;
+    }
+
+    .data-table tbody tr td {
+        padding: 15px;
+        border-top: 1px solid var(--border-gray);
+        border-bottom: 1px solid var(--border-gray);
+    }
+
+    .data-table tbody tr:hover { background-color: var(--bg-row-hover); }
+
+    /* أزرار الإجراءات */
+    .actions-cell { text-align: center; }
+    
+    .btn-icon.delete {
+        background: none;
+        border: none;
+        color: var(--danger-red);
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .btn-icon.delete:hover { transform: scale(1.2); }
+
+    /* زر الحفظ والإلغاء */
+    .actions { display: flex; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #eee; }
+    .actions button, .actions a {
+        flex: 1; height: 48px; border-radius: 8px; text-decoration: none;
+        font-weight: bold; display: flex; align-items: center; justify-content: center;
+        gap: 8px; border: none; cursor: pointer; transition: var(--transition);
+    }
+    .actions .save { background: var(--primary-green); color: white; }
+    .actions .cancel { background: #f8f9fa; color: #dc3545; }
+
+    .btn-add-son {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        background-color: var(--primary-green); color: white; padding: 8px 20px;
+        border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.9rem;
+        transition: var(--transition); border: none; margin: 1rem 0; width: fit-content;
+    }
+    .btn-add-son:hover { background-color: var(--primary-green-dark); transform: translateY(-2px); }
+
+    @@media (max-width: 768px) { .grid-row { grid-template-columns: 1fr !important; } }
 </style>
+
 <div class="form-container">
     <div class="form-header">
         <h2><i class="bi bi-person-plus-fill"></i> إضافة / تعديل بيانات</h2>
@@ -199,40 +180,42 @@
 
         <div class="actions">
             <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ البيانات</button>
-            <a href="/owner/AccountManagement" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+            <a href="/parents" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
         </div>
     </form>
 </div>
+
 <section class="management-container">
     <div class="table-responsive">
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>اسم الابن</th>
-                <th class="text-center">الإجراء</th>
-            </tr>
-        </thead>
-        <tbody>
-                
-            <tr>
-                <td>عمر العلي</td>
-                <td class="actions-cell">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>اسم الابن</th>
+                    <th class="text-center">الإجراء</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>عمر العلي</td>
+                    <td class="actions-cell">
                         <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                </td>
-            </tr>
-            <tr>
-                <td>أحمد العلي</td>
-                <td class="actions-cell">
-                    <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
- <a href="owner/Form" class="btn btn-primary btn-add-son btn-add-son">
-            <i class="bi bi-plus-lg"></i> إضافة ابن
-        </a>
-    </section>
-@code {
+                    </td>
+                </tr>
+                <tr>
+                    <td>أحمد العلي</td>
+                    <td class="actions-cell">
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
+    <a href="/owner/Form" class="btn-add-son">
+        <i class="bi bi-plus-lg"></i> إضافة ابن
+    </a>
+</section>
+
+@code {
+    // منطق البرمجة هنا
 }
