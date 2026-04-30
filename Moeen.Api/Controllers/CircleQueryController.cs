@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.CircleQuery;
-using Moeen.Api.Shared.Responses;
-using System;
-using System.Threading.Tasks;
+using Moeen.Shared.Requests.CircleQuery;
+using Moeen.Shared.Responses;
 
 namespace Moeen.Api.Controllers
 {

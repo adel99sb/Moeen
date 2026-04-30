@@ -1,4 +1,6 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
+using Moeen.Api.Core.Contracts.infrastructure.Repositories;
+using Moeen.Api.Core.Entities;
 using Moeen.Shared.Requests.Circle;
 using Moeen.Shared.Responses.Circle;
 
