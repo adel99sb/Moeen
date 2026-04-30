@@ -1,6 +1,6 @@
-﻿using Moeen.Api.Core.Contracts.infrastructure.Providers;
+﻿using Moeen.Api.Application;
+using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.infrastructure.Configurations;
-using Moeen.Api.Shared;
 using System.Net;
 using System.Net.Mail;
 

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Moeen.Api.Core.Constants;
+using Moeen.Shared.Constants;
 
 namespace Moeen.Api.Controllers
 {

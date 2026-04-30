@@ -1,7 +1,7 @@
-﻿using Moeen.Api.Shared.Requests.Library;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
-using Moeen.Api.Shared.Responses.Library;
+﻿using Moeen.Shared.Requests.Library;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.CircleTeacherAssignment;
+using Moeen.Shared.Responses.Library;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

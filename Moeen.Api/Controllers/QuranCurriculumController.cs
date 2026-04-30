@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.QuranCurriculum;
-using Moeen.Api.Shared.Responses.QuranCurriculum;
+using Moeen.Shared.Requests.QuranCurriculum;
+using Moeen.Shared.Responses.QuranCurriculum;
 
 namespace Moeen.Api.Controllers
 {

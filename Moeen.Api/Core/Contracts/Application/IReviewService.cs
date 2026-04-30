@@ -1,6 +1,6 @@
-﻿using Moeen.Api.Shared.Requests.Review;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.Review;
+﻿using Moeen.Shared.Requests.Review;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.Review;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

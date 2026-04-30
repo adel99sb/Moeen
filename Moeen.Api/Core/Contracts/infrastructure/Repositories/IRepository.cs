@@ -1,6 +1,4 @@
-﻿using Moeen.Api.Core.Specifications;
-
-namespace Moeen.Api.Core.Contracts
+﻿namespace Moeen.Api.Core.Contracts.infrastructure.Repositories
 {
     public interface IRepository<T> where T : class
     {

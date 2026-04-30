@@ -1,5 +1,5 @@
-﻿using Moeen.Api.Shared.Requests.Circle;
-using Moeen.Api.Shared.Responses.Circle;
+﻿using Moeen.Shared.Requests.Circle;
+using Moeen.Shared.Responses.Circle;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application

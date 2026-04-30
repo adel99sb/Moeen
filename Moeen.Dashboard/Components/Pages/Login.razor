@@ -1,0 +1,95 @@
+﻿@page "/"
+
+@using Moeen.Dashboard.Services.Abstractions
+@using Moeen.Shared.Requests.Identity
+@inject IAuthService AuthService
+@inject NavigationManager Nav
+@inject ILogger<Login> Logger
+@rendermode InteractiveServer
+
+<PageTitle>Login</PageTitle>
+
+<h3 class="mb-4">Login</h3>
+
+<EditForm Model="_model">
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <!-- Email -->
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <InputText @bind-Value="_model.Email" class="form-control" />
+        <ValidationMessage For="@(() => _model.Email)" />
+    </div>
+
+    <!-- Password -->
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <InputText @bind-Value="_model.Password"
+                   type="password"
+                   class="form-control" />
+        <ValidationMessage For="@(() => _model.Password)" />
+    </div>
+
+    <!-- Error Message -->
+    @if (ShowMessage)
+    {
+        <div class="alert alert-danger">
+            @Message
+        </div>
+    }
+
+    <!-- Submit -->
+    <button class="btn btn-primary" type="button"
+            @onclick="HandleLogin"
+            disabled="@_isLoading">
+        @if (_isLoading)
+        {
+            <span class="spinner-border spinner-border-sm"></span>
+            <span class="ms-2">Logging in...</span>
+        }
+        else
+        {
+            <span>Login</span>
+        }
+    </button>
+
+</EditForm>
+
+@code {
+
+    private LoginRequest _model = new();
+
+    private bool _isLoading = false;
+    private bool ShowMessage;
+    private string Message;
+
+    private async Task HandleLogin()
+    {
+        ShowMessage = true;
+        try
+        {
+            _isLoading = true;
+            var result = await AuthService.Login(_model);
+            if (result != null)
+            {
+                Message = "Login successful";
+                Nav.NavigateTo("/counter");
+            }
+            else
+            {
+                Message = "Login failed. Please check your credentials.";
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Message = ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

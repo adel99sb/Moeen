@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.ExamGrading;
-using Moeen.Api.Shared.Responses.ExamGrading;
+using Moeen.Shared.Requests.ExamGrading;
+using Moeen.Shared.Responses.ExamGrading;
 using System;
 
 namespace Moeen.Api.Controllers

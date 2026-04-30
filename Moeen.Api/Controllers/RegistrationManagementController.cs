@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using Moeen.Api.Core.Constants;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.Registration;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
-using Moeen.Api.Shared.Responses.Registration;
-using System;
-using System.Threading.Tasks;
+using Moeen.Shared.Constants;
+using Moeen.Shared.Requests.Registration;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.CircleTeacherAssignment;
+using Moeen.Shared.Responses.Registration;
 
 namespace Moeen.Api.Controllers
 {
