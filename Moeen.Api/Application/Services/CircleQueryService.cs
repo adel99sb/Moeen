@@ -42,7 +42,8 @@ namespace Moeen.Api.Application.Services
                 FoujName = halqa.Fouj?.name,
                 TeacherId = halqa.TeacherId,
                 TeacherName = halqa.Teacher?.name,
-                Type = halqa.type,
+                Type = halqa.Type,
+
                 StudentsCount = studentsCount
             };
         }
@@ -99,7 +100,7 @@ namespace Moeen.Api.Application.Services
                     Theme = s.theme,
                     ProfileImageUrl = s.profile_imageUrl,
                     CreatedAt = s.created_at,
-                    JoinedAt = s.joinef_at,
+                    JoinedAt = s.JoinedAt,
                     Age = s.age,
                     EnrollmentDate = s.enrollmrnt_date,
                     Status = s.status,

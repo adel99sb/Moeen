@@ -1,114 +1,121 @@
-﻿using Moeen.Api.Core.Contracts.Application;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Moeen.Api.Core.Contracts.Application;
+using Moeen.Api.Core.Entities;
+using Moeen.Api.infrastructure.Data;
 using Moeen.Shared.Requests.Enrollment;
 using Moeen.Shared.Responses;
-using Moeen.Shared.Responses.CircleTeacherAssignment;
 using Moeen.Shared.Responses.Enrollment;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Moeen.Api.Application.Services
 {
     public class EnrollmentService : IEnrollmentService
     {
-        public Task<TeacherDto> AddTeacherAsync(AddTeacherRequest request)
+        public Task<GeneralResponse> AddTeacherAsync(AddTeacherRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> CancelMembershipAsync(CancelMembershipRequest request)
+        public Task<GeneralResponse> CancelMembershipAsync(CancelMembershipRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<OperationResponseDto> DeleteParentAsync(DeleteParentRequest request)
+        public Task<GeneralResponse> DeleteParentAsync(DeleteParentRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<OperationResponseDto> DeleteStudentAsync(DeleteStudentRequest request)
+        public Task<GeneralResponse> DeleteStudentAsync(DeleteStudentRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<OperationResponseDto> DeleteTeacherAsync(DeleteTeacherRequest request)
+        public Task<GeneralResponse> DeleteTeacherAsync(DeleteTeacherRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<byte[]> ExportMembersListAsync(ExportMembersRequest request)
+        public Task<GeneralResponse> ExportMembersListAsync(ExportMembersRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<PagedList<ParentDto>> GetAllParentsAsync(GetAllParentsRequest request)
+        public Task<GeneralResponse> GetAllParentsAsync(GetAllParentsRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<PagedList<StudentDto>> GetAllStudentsAsync(GetAllStudentsRequest request)
+        public Task<GeneralResponse> GetAllStudentsAsync(GetAllStudentsRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<PagedList<SupervisorDto>> GetAllSupervisorsAsync(GetAllSupervisorsRequest request)
+        public Task<GeneralResponse> GetAllSupervisorsAsync(GetAllSupervisorsRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<PagedList<TeacherDto>> GetAllTeachersAsync(GetAllTeachersRequest request)
+        public Task<GeneralResponse> GetAllTeachersAsync(GetAllTeachersRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<StudentDto>> GetChildrenByParentAsync(GetChildrenByParentRequest request)
+        public Task<GeneralResponse> GetChildrenByParentAsync(GetChildrenByParentRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<MemberProfileDto> GetMemberProfileAsync(GetMemberProfileRequest request)
+        public Task<GeneralResponse> GetMemberProfileAsync(GetMemberProfileRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<MemberStatisticsDto> GetMemberStatisticsAsync(GetMemberStatisticsRequest request)
+        public Task<GeneralResponse> GetMemberStatisticsAsync(GetMemberStatisticsRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ParentDto> RegisterParentAsync(RegisterParentRequest request)
+        public Task<GeneralResponse> RegisterParentAsync(RegisterParentRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<StudentDto> RegisterStudentAsync(RegisterStudentRequest request)
+        public Task<GeneralResponse> RegisterStudentAsync(RegisterStudentRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<SearchMembersResponse> SearchMembersAsync(SearchMembersRequest request)
+        public Task<GeneralResponse> SearchMembersAsync(SearchMembersRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<MemberDto> UpdateMemberInfoAsync(UpdateMemberInfoRequest request)
+        public Task<GeneralResponse> UpdateMemberInfoAsync(UpdateMemberInfoRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> UpdateMemberStatusAsync(UpdateMemberStatusRequest request)
+        public Task<GeneralResponse> UpdateMemberStatusAsync(UpdateMemberStatusRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ParentDto> UpdateParentInfoAsync(UpdateParentInfoRequest request)
+        public Task<GeneralResponse> UpdateParentInfoAsync(UpdateParentInfoRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<StudentDto> UpdateStudentInfoAsync(UpdateStudentInfoRequest request)
+        public Task<GeneralResponse> UpdateStudentInfoAsync(UpdateStudentInfoRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<TeacherDto> UpdateTeacherInfoAsync(UpdateTeacherInfoRequest request)
+        public Task<GeneralResponse> UpdateTeacherInfoAsync(UpdateTeacherInfoRequest request)
         {
             throw new NotImplementedException();
         }

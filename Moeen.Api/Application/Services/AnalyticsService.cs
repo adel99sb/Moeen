@@ -4,6 +4,7 @@ using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Repositories;
 using Moeen.Shared.Requests.Analytics;
+using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.Analytics;
 using System.Text.Json;
 using System.Threading;
@@ -534,7 +535,7 @@ namespace Moeen.Api.Application.Services
             {
                 CircleId = circle.Id,
                 CircleName = circle.Name ?? string.Empty,
-                CircleType = circle.type ?? string.Empty,
+                CircleType = circle.Type,
                 TeacherId = circle.TeacherId,
                 TeacherName = teacher?.name ?? string.Empty,
                 StudentsCount = studentIds.Count,

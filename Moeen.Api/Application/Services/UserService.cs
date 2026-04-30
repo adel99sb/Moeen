@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace Moeen.Api.Application.Services
 {
-    public class UserService : IUserService
+    public class: IUserService
     {
         private readonly UserManager<User> _userManager;
         private readonly IJwtService _jwtService;
@@ -36,7 +36,6 @@ namespace Moeen.Api.Application.Services
         {
             _userManager = userManager;
             _jwtService = jwtService;
-           // _verificationService = verificationService; // ensure no duplicate/incorrect field names remain
             _verificationService = verificationService;
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
@@ -133,7 +132,7 @@ namespace Moeen.Api.Application.Services
                     Email = userData.Email,
                     FontSize = userData.font_size,
                     Gender = userData.gender,
-                    JoinedAt = userData.joinef_at,
+                    JoinedAt = userData.JoinedAt,
                     Name = userData.name,
                     Phone = userData.PhoneNumber,
                 };
@@ -166,7 +165,7 @@ namespace Moeen.Api.Application.Services
                 Email = userData.Email,
                 FontSize = userData.font_size,
                 Gender = userData.gender,
-                JoinedAt = userData.joinef_at,
+                JoinedAt = userData.JoinedAt,
                 Name = userData.name,
                 Phone = userData.PhoneNumber,
             };
@@ -215,7 +214,7 @@ namespace Moeen.Api.Application.Services
                 gender = registerRequest.Gender,
                 PhoneNumber = registerRequest.Phone,
                 created_at = DateTime.UtcNow,
-                joinef_at = DateTime.UtcNow
+                JoinedAt = DateTime.UtcNow
             };
             try
             {
