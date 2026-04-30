@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared.Requests.Circle;
-using Moeen.Api.Shared.Responses.Circle;
+using Moeen.Api.Shared.Responses;
+using System;
 
 namespace Moeen.Api.Controllers
 {
@@ -20,35 +21,108 @@ namespace Moeen.Api.Controllers
         /// أمر: إنشاء حلقة جديدة.
         /// </summary>
         [HttpPost("create")]
-        public async Task<ActionResult<CircleDto>> CreateCircle([FromBody] CreateCircleRequest request)
-            => Ok(await _circleCommandService.CreateCircleAsync(request));
+        public async Task<ActionResult<GeneralResponse>> CreateCircle([FromBody] CreateCircleRequest request)
+        {
+            try
+            {
+                var result = await _circleCommandService.CreateCircleAsync(request);
+                return Ok(GeneralResponse.Ok("تم إنشاء الحلقة بنجاح.", result));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(GeneralResponse.BadRequest(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, GeneralResponse.InternalError($"فشل الإنشاء: {ex.Message}"));
+            }
+        }
 
         /// <summary>
         /// أمر: تحديث بيانات حلقة.
         /// </summary>
         [HttpPut("update")]
-        public async Task<ActionResult<CircleDto>> UpdateCircle([FromBody] UpdateCircleRequest request)
-            => Ok(await _circleCommandService.UpdateCircleAsync(request));
+        public async Task<ActionResult<GeneralResponse>> UpdateCircle([FromBody] UpdateCircleRequest request)
+        {
+            try
+            {
+                var result = await _circleCommandService.UpdateCircleAsync(request);
+                return Ok(GeneralResponse.Ok("تم تحديث الحلقة بنجاح.", result));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(GeneralResponse.BadRequest(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, GeneralResponse.InternalError($"فشل التحديث: {ex.Message}"));
+            }
+        }
 
         /// <summary>
         /// أمر: حذف حلقة.
         /// </summary>
         [HttpDelete("delete")]
-        public async Task<ActionResult<bool>> DeleteCircle([FromBody] DeleteCircleRequest request)
-            => Ok(await _circleCommandService.DeleteCircleAsync(request));
+        public async Task<ActionResult<GeneralResponse>> DeleteCircle([FromBody] DeleteCircleRequest request)
+        {
+            try
+            {
+                var deleted = await _circleCommandService.DeleteCircleAsync(request);
+                if (!deleted)
+                    return NotFound(GeneralResponse.NotFound("لم يتم العثور على الحلقة."));
+
+                return Ok(GeneralResponse.Ok("تم حذف الحلقة بنجاح.", deleted));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(GeneralResponse.BadRequest(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, GeneralResponse.InternalError($"فشل الحذف: {ex.Message}"));
+            }
+        }
 
         /// <summary>
         /// أمر: إعادة تعيين معلم للحلقة.
         /// </summary>
         [HttpPut("reassign-teacher")]
-        public async Task<ActionResult<CircleDto>> ReassignTeacher([FromBody] ReassignCircleTeacherRequest request)
-            => Ok(await _circleCommandService.ReassignTeacherAsync(request));
+        public async Task<ActionResult<GeneralResponse>> ReassignTeacher([FromBody] ReassignCircleTeacherRequest request)
+        {
+            try
+            {
+                var result = await _circleCommandService.ReassignTeacherAsync(request);
+                return Ok(GeneralResponse.Ok("تمت إعادة تعيين المعلم بنجاح.", result));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(GeneralResponse.BadRequest(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, GeneralResponse.InternalError($"فشل الإعادة: {ex.Message}"));
+            }
+        }
 
         /// <summary>
         /// أمر: نقل الحلقة إلى فوج آخر.
         /// </summary>
         [HttpPut("move-to-fouj")]
-        public async Task<ActionResult<CircleDto>> MoveToFouj([FromBody] MoveCircleToFoujRequest request)
-            => Ok(await _circleCommandService.MoveToFoujAsync(request));
+        public async Task<ActionResult<GeneralResponse>> MoveToFouj([FromBody] MoveCircleToFoujRequest request)
+        {
+            try
+            {
+                var result = await _circleCommandService.MoveToFoujAsync(request);
+                return Ok(GeneralResponse.Ok("تم نقل الحلقة بنجاح.", result));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(GeneralResponse.BadRequest(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, GeneralResponse.InternalError($"فشل النقل: {ex.Message}"));
+            }
+        }
     }
 }

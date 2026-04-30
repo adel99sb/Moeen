@@ -11,7 +11,8 @@
         public Fouj Fouj { get; set; }
         public ICollection<ProgressEntry> ProgressEntries { get; set; }
         public ICollection<HalqaSession> HalqeSessions { get; set; }
-
+        // علاقة One-to-Many مع الجدول الوسيط
+        public ICollection<ExamTeacherHalqa> ExamTeacherHalqas { get; set; }
 
     }
 }

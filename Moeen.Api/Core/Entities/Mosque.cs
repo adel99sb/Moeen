@@ -12,6 +12,8 @@
 
         public ICollection <Fouj> foujs { get; set; }
         public ICollection<Teacher> Teachers { get; set; }
+        public ICollection<TeacherExam> TeacherExams { get; set; }
+
         public ICollection<PdfFile> pdfFiles { get; set; }
         public ICollection<SaturdayLesson> SaturdayLessons { get; set; }
         public ICollection<Post> posts { get; set; }
