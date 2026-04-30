@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-namespace Moeen.Api.Core.Specifications
+namespace Moeen.Api.Core.Contracts.infrastructure.Repositories
 {
     public interface ISpecification<T>
         where T : class

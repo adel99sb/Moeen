@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace Moeen.App
+namespace Moeen.App.Platforms.MacCatalyst
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

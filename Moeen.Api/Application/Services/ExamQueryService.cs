@@ -1,8 +1,8 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.ExamQuery;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.ExamCommand;
-using Moeen.Api.Shared.Responses.ExamQuery;
+using Moeen.Shared.Requests.ExamQuery;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.ExamCommand;
+using Moeen.Shared.Responses.ExamQuery;
 
 namespace Moeen.Api.Application.Services
 {

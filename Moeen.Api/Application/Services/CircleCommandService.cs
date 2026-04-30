@@ -1,10 +1,8 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.Circle;
-using Moeen.Api.Shared.Responses.Circle;
+using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
-using Moeen.Api.Core.Contracts;
-using System;
-using System.Threading.Tasks;
+using Moeen.Shared.Requests.Circle;
+using Moeen.Shared.Responses.Circle;
 
 namespace Moeen.Api.Application.Services
 {

@@ -1,7 +1,7 @@
-﻿using Moeen.Api.Shared.Requests.Enrollment;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
-using Moeen.Api.Shared.Responses.Enrollment;
+﻿using Moeen.Shared.Requests.Enrollment;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.CircleTeacherAssignment;
+using Moeen.Shared.Responses.Enrollment;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

@@ -1,5 +1,5 @@
-﻿using Moeen.Api.Shared.Requests.CircleTeacherAssignment;
-using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
+﻿using Moeen.Shared.Requests.CircleTeacherAssignment;
+using Moeen.Shared.Responses.CircleTeacherAssignment;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

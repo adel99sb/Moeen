@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.Attendance;
-using Moeen.Api.Shared.Responses.Attendance;
+using Moeen.Shared.Requests.Attendance;
+using Moeen.Shared.Responses.Attendance;
 using System;
 
 namespace Moeen.Api.Controllers

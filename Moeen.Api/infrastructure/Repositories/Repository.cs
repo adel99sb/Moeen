@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Moeen.Api.Core.Contracts;
-using Moeen.Api.Core.Specifications;
+using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.infrastructure.Data;
 
 namespace Moeen.Api.infrastructure.Repositories

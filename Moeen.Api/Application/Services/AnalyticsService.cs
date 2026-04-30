@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using Moeen.Api.Core.Contracts;
 using Moeen.Api.Core.Contracts.Application;
+using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Repositories;
-using Moeen.Api.Shared.Requests.Analytics;
-using Moeen.Api.Shared.Responses.Analytics;
+using Moeen.Shared.Requests.Analytics;
+using Moeen.Shared.Responses.Analytics;
 using System.Text.Json;
 
 namespace Moeen.Api.Application.Services

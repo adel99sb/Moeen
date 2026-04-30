@@ -1,5 +1,5 @@
-﻿using Moeen.Api.Shared.Requests.QuranCurriculum;
-using Moeen.Api.Shared.Responses.QuranCurriculum;
+﻿using Moeen.Shared.Requests.QuranCurriculum;
+using Moeen.Shared.Responses.QuranCurriculum;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application

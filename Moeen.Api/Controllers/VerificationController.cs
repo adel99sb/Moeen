@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
-using Moeen.Api.Shared.Requests.Verification;
+using Moeen.Shared.Requests.Verification;
 
 namespace Moeen.Api.Controllers
 {

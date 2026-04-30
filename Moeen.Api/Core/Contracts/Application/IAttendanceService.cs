@@ -1,6 +1,6 @@
-﻿using Moeen.Api.Shared.Requests.Attendance;
-using Moeen.Api.Shared.Responses.Analytics;
-using Moeen.Api.Shared.Responses.Attendance;
+﻿using Moeen.Shared.Requests.Attendance;
+using Moeen.Shared.Responses.Analytics;
+using Moeen.Shared.Responses.Attendance;
 using System;
 
 namespace Moeen.Api.Core.Contracts.Application

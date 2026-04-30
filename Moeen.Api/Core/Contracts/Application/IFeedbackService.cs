@@ -1,5 +1,5 @@
-﻿using Moeen.Api.Shared.Requests.Feedback;
-using Moeen.Api.Shared.Responses.Feedback;
+﻿using Moeen.Shared.Requests.Feedback;
+using Moeen.Shared.Responses.Feedback;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using Moeen.Api.Core.Contracts;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
+using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Configurations;
 using System.IdentityModel.Tokens.Jwt;

@@ -1,6 +1,6 @@
-﻿using Moeen.Api.Shared.Requests;
-using Moeen.Api.Shared.Requests.Identity;
-using Moeen.Api.Shared.Responses;
+﻿using Moeen.Shared.Requests;
+using Moeen.Shared.Requests.Identity;
+using Moeen.Shared.Responses;
 
 namespace Moeen.Api.Core.Contracts.Application
 {

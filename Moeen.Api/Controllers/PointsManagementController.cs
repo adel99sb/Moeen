@@ -1,12 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.Points;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
-using Moeen.Api.Shared.Responses.Points;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Moeen.Shared.Requests.Points;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.CircleTeacherAssignment;
+using Moeen.Shared.Responses.Points;
 
 namespace Moeen.Api.Controllers
 {

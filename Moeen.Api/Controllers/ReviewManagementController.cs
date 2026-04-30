@@ -1,11 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.Review;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.Review;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Moeen.Shared.Requests.Review;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.Review;
 
 namespace Moeen.Api.Controllers
 {
