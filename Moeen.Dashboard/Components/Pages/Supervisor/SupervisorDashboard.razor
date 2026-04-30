@@ -1,4 +1,4 @@
-﻿@page "/Teacher/TeacherDashboard"
+﻿@page "/Supervisor/SupervisorDashboard"
 @rendermode InteractiveServer
 @inject IJSRuntime JS
 <style>
@@ -56,7 +56,7 @@
 
     .chart-wrap {
         position: relative;
-        height: 300px; /* زيادة الطول قليلاً للوضوح */
+        height: 300px; 
         width: 100%;
     }
 
@@ -104,7 +104,6 @@
 
     .toggle-arrow { transition: transform 0.3s ease; }
     details[open] .toggle-arrow { transform: rotate(180deg); }
-
 </style>
 
 <div class="dashboard-container">
@@ -114,76 +113,65 @@
         <div class="row g-4">
             <div class="col-xl-3 col-md-6">
                 <div class="stat-card">
-                    <div class="icon-box"><i class="bi bi-person-check"></i></div>
-                    <small class="text-muted">حضور اليوم</small>
-                    <h4 class="fw-bold m-0">92%</h4>
+                    <div class="icon-box"><i class="bi bi-people-fill"></i></div>
+                    <small class="text-muted">إجمالي الطلاب</small>
+                    <h4 class="fw-bold m-0">1,240</h4>
                 </div>
             </div>
             <div class="col-xl-3 col-md-6">
                 <div class="stat-card">
-                    <div class="icon-box"><i class="bi bi-book"></i></div>
-                    <small class="text-muted">إجمالي الحفظ</small>
-                    <h4 class="fw-bold m-0">1,420 ص</h4>
+                    <div class="icon-box"><i class="bi bi-person-video3"></i></div>
+                    <small class="text-muted">إجمالي المعلمين</small>
+                    <h4 class="fw-bold m-0">85</h4>
                 </div>
             </div>
             <div class="col-xl-3 col-md-6">
                 <div class="stat-card">
-                    <div class="icon-box"><i class="bi bi-gem"></i></div>
-                    <small class="text-muted">نقاط التميز</small>
-                    <h4 class="fw-bold m-0">3,850</h4>
+                    <div class="icon-box"><i class="bi bi-collection"></i></div>
+                    <small class="text-muted">إجمالي الحلقات</small>
+                    <h4 class="fw-bold m-0">42</h4>
                 </div>
             </div>
             <div class="col-xl-3 col-md-6">
                 <div class="stat-card">
-                    <div class="icon-box text-danger"><i class="bi bi-exclamation-triangle"></i></div>
-                    <small class="text-muted">تنبيهات المتابعة</small>
-                    <h4 class="fw-bold text-danger m-0">3 تنبيهات</h4>
+                    <div class="icon-box text-danger"><i class="bi bi-exclamation-octagon"></i></div>
+                    <small class="text-muted">التنبيهات والشكاوى</small>
+                    <h4 class="fw-bold text-danger m-0">7</h4>
                 </div>
             </div>
         </div>
     </section>
 
+
     <section class="mt-5">
-        <div class="section-title"><i class="bi bi-bar-chart-steps"></i> الإحصائيات الشهرية للحلقات</div>
-        <div class="row g-4">
-            <div class="col-lg-6">
-                <div class="chart-card">
-                    <h6 class="fw-bold mb-4 text-success"><i class="bi bi-circle-fill me-2"></i> حلقة التحفيظ الأولى</h6>
-                    <div class="chart-wrap">
-                        <canvas id="chartH1"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="chart-card">
-                    <h6 class="fw-bold mb-4 text-info"><i class="bi bi-circle-fill me-2"></i> حلقة التحفيظ الثانية</h6>
-                    <div class="chart-wrap">
-                        <canvas id="chartH2"></canvas>
-                    </div>
-                </div>
+        <div class="section-title"><i class="bi bi-bar-chart-steps"></i>اداء الحلقات شهريا </div>
+        <div class="chart-card">
+            <h6 class="fw-bold mb-4 text-success"><i class="bi bi-diagram-3 me-2"></i> الاختبارات، التسميعات، والحضور</h6>
+            <div class="chart-wrap">
+                <canvas id="chartAllCircles"></canvas>
             </div>
         </div>
     </section>
 
     <section class="row mt-4 g-4">
         <div class="col-md-6">
-            <div class="section-title"><i class="bi bi-graph-up text-success"></i> الطلاب الأكثر تقدماً</div>
+            <div class="section-title"><i class="bi bi-graph-up text-success"></i> الطلاب المتميزون</div>
             <div class="student-list-wrapper">
                 <details open>
                     <summary class="student-toggle">
-                        <span><i class="bi bi-trophy text-warning me-2"></i> عرض قائمة الأوائل</span>
+                        <span><i class="bi bi-trophy text-warning me-2"></i> عرض قائمة المتميزين</span>
                         <i class="bi bi-chevron-down toggle-arrow"></i>
                     </summary>
                     <div class="py-2">
                         <div class="student-item">
                             <i class="bi bi-person-circle fs-4 text-secondary"></i>
-                            <div class="flex-grow-1"><b>أحمد محمد</b> <br><small class="text-muted">حفظ 3 صفحات اليوم</small></div>
-                            <span class="badge bg-success-subtle text-success p-2">+15 نقطة</span>
+                            <div class="flex-grow-1"><b>أحمد محمد</b> <br><small class="text-muted">سبب التميز: حفظ 3 صفحات يوميًا مع دقة عالية</small></div>
+                            <span class="badge bg-success-subtle text-success p-2">ممتاز</span>
                         </div>
                         <div class="student-item">
                             <i class="bi bi-person-circle fs-4 text-secondary"></i>
-                            <div class="flex-grow-1"><b>عمر خالد</b> <br><small class="text-muted">أتم مراجعة جزء كامل</small></div>
-                            <span class="badge bg-success-subtle text-success p-2">+10 نقاط</span>
+                            <div class="flex-grow-1"><b>عمر خالد</b> <br><small class="text-muted">سبب التميز: إتمام مراجعة جزء كامل بدون أخطاء</small></div>
+                            <span class="badge bg-success-subtle text-success p-2">متميز</span>
                         </div>
                     </div>
                 </details>
@@ -191,7 +179,7 @@
         </div>
 
         <div class="col-md-6">
-            <div class="section-title"><i class="bi bi-graph-down text-danger"></i> الطلاب الأكثر تراجعاً</div>
+            <div class="section-title"><i class="bi bi-graph-down text-danger"></i> الطلاب المتراجعون</div>
             <div class="student-list-wrapper">
                 <details open>
                     <summary class="student-toggle">
@@ -201,12 +189,12 @@
                     <div class="py-2">
                         <div class="student-item">
                             <i class="bi bi-person-circle fs-4 text-secondary"></i>
-                            <div class="flex-grow-1"><b>ياسين علي</b> <br><small class="text-muted">غياب متكرر (3 أيام)</small></div>
+                            <div class="flex-grow-1"><b>ياسين علي</b> <br><small class="text-muted">سبب التراجع: غياب متكرر عن الحصص (3 أيام)</small></div>
                             <span class="badge bg-danger-subtle text-danger p-2">تنبيه غياب</span>
                         </div>
                         <div class="student-item">
                             <i class="bi bi-person-circle fs-4 text-secondary"></i>
-                            <div class="flex-grow-1"><b>براء حسن</b> <br><small class="text-muted">تأخر في برنامج التسميع</small></div>
+                            <div class="flex-grow-1"><b>براء حسن</b> <br><small class="text-muted">سبب التراجع: تأخر واضح في برنامج التسميع الأسبوعي</small></div>
                             <span class="badge bg-warning-subtle text-warning p-2">متابعة خطة</span>
                         </div>
                     </div>
@@ -215,66 +203,70 @@
         </div>
     </section>
 </div>
+
 <script>
     window.initTeacherCharts = () => {
-    const Config = {
-        fontFamily: "'Segoe UI', sans-serif",
-        colors: {
-            primary: '#195042',
-            accent1: '#2e7d6a',
-            accent2: '#5a9f8e',
-            accent3: '#8fc9b9'
-        },
-        weeks: ['أسبوع 1', 'أسبوع 2', 'أسبوع 3', 'أسبوع 4']
-    };
-
-    const metrics = [
-        { k: 'tests', l: 'اختبارات', c: Config.colors.primary },
-        { k: 'recite', l: 'تسميعات', c: Config.colors.accent1 },
-        { k: 'review', l: 'مراجعات', c: Config.colors.accent2 },
-        { k: 'attend', l: 'حضور', c: Config.colors.accent3 }
-    ];
-
-    function createTeacherChart(elementId, dataset) {
-        const ctx = document.getElementById(elementId);
-        if (!ctx) return;
-        if (ctx._chartInstance) { try { ctx._chartInstance.destroy(); } catch { } }
-
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: Config.weeks,
-                datasets: metrics.map(m => ({
-                    label: m.l,
-                    data: dataset.map(d => d[m.k]),
-                    backgroundColor: m.c,
-                    borderRadius: 6
-                }))
+        const Config = {
+            fontFamily: "'Segoe UI', sans-serif",
+            colors: {
+                primary: '#195042',
+                accent1: '#2e7d6a',
+                accent2: '#5a9f8e'
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
-                    x: { grid: { display: false } }
+            // تمثيل الحلقات الثمانية على محور السينات للمقارنة المباشرة
+            circles: ['الحلقة 1', 'الحلقة 2', 'الحلقة 3', 'الحلقة 4', 'الحلقة 5', 'الحلقة 6', 'الحلقة 7', 'الحلقة 8']
+        };
+        const metrics = [
+            { k: 'tests', l: 'اختبارات', c: Config.colors.primary },
+            { k: 'recite', l: 'تسميعات', c: Config.colors.accent1 },
+            { k: 'attend', l: 'حضور', c: Config.colors.accent2 }
+        ];
+
+        function createCircleChart(elementId, dataset) {
+            const ctx = document.getElementById(elementId);
+            if (!ctx) return;
+            if (ctx._chartInstance) { try { ctx._chartInstance.destroy(); } catch { } }
+
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Config.circles,
+                    datasets: metrics.map(m => ({
+                        label: m.l,
+                        data: dataset.map(d => d[m.k]),
+                        backgroundColor: m.c,
+                        borderRadius: 6
+                    }))
                 },
-                plugins: {
-                    legend: { labels: { font: { family: Config.fontFamily } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { labels: { font: { family: Config.fontFamily } } }
+                    }
                 }
-            }
-        });
+            });
 
-        ctx._chartInstance = chart;
-        return chart;
-    }
+            ctx._chartInstance = chart;
+            return chart;
+        }
 
-    const h1Data = [{ tests: 8, recite: 15, review: 12, attend: 28 }, { tests: 10, recite: 18, review: 14, attend: 30 }, { tests: 12, recite: 20, review: 16, attend: 29 }, { tests: 9, recite: 17, review: 15, attend: 30 }];
-    const h2Data = [{ tests: 6, recite: 12, review: 10, attend: 25 }, { tests: 7, recite: 14, review: 11, attend: 27 }, { tests: 8, recite: 16, review: 13, attend: 26 }, { tests: 7, recite: 15, review: 12, attend: 28 }];
+        // بيانات افتراضية لـ 8 حلقات (اختبارات، تسميعات، حضور)
+        const circlesData = [
+            { tests: 8, recite: 15, attend: 28 }, { tests: 10, recite: 18, attend: 30 },
+            { tests: 12, recite: 20, attend: 29 }, { tests: 9, recite: 17, attend: 30 },
+            { tests: 11, recite: 16, attend: 27 }, { tests: 7, recite: 14, attend: 25 },
+            { tests: 13, recite: 22, attend: 31 }, { tests: 8, recite: 15, attend: 26 }
+        ];
 
-    createTeacherChart('chartH1', h1Data);
-    createTeacherChart('chartH2', h2Data);
-};
+        createCircleChart('chartAllCircles', circlesData);
+    };
 </script>
+
 @code {
     private bool _chartsInitialized;
     protected override async Task OnAfterRenderAsync(bool firstRender)

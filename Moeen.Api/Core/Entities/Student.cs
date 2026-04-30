@@ -18,5 +18,6 @@
 
         public Student Parent { get; set; }
         public ICollection<Student> Children { get; set; }
+        public Guid? SaturdayHalqaId { get; internal set; }
     }
 }
