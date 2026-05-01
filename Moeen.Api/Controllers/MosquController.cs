@@ -12,7 +12,7 @@ namespace Moeen.Api.Controllers
     [ApiController]
     public class MosquController : ControllerBase
     {
-        private readonly IMosquService _mosquService;
+        private readonly IMosquService _mosquService;                                                                           
 
         public MosquController(IMosquService mosquService)
         {

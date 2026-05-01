@@ -129,7 +129,7 @@ namespace Moeen.Api.Application.Services
                 halqa.Name = request.Name;
 
             if (!string.IsNullOrWhiteSpace(request.Type))
-                halqa.type = request.Type;
+                halqa.Type = request.Type;
 
             if (request.FoujId.HasValue)
             {

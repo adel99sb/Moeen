@@ -27,14 +27,12 @@ namespace Moeen.Api.Core.Contracts.Application
         Task<GeneralResponse> UpdateMemberInfoAsync(UpdateMemberInfoRequest request);
 
         /// <summary>
-        /// إلغاء عضوية عضو (إنهاء العضوية)
-        /// </summary>
-        Task<GeneralResponse> CancelMembershipAsync(CancelMembershipRequest request);
-
-        /// <summary>
         /// البحث عن أعضاء بناءً على معايير محددة
         /// </summary>
         Task<GeneralResponse> SearchMembersAsync(SearchMembersRequest request);
+
+
+        Task<GeneralResponse> CancelMembershipAsync(CancelMembershipRequest request);
 
         /// <summary>
         /// الحصول على الملف الشخصي الكامل لعضو معين

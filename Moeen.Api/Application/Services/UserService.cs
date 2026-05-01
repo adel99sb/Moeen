@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace Moeen.Api.Application.Services
 {
-    public class: IUserService
+    public class UserService : IUserService
     {
         private readonly UserManager<User> _userManager;
         private readonly IJwtService _jwtService;

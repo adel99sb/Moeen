@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Moeen.Api.Application;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Shared.Requests.Analytics;
 using Moeen.Shared.Responses.Analytics;
