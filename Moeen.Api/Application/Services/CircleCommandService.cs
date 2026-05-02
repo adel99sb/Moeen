@@ -33,7 +33,7 @@ namespace Moeen.Api.Application.Services
                 FoujId = request.FoujId,
                 Name = request.Name,
                 TeacherId = request.TeacherId,
-               Type = request.Type
+                Type = request.Type
             };
 
             await _unitOfWork.Repository<Halqa>().AddAsync(halqa);

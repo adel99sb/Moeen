@@ -43,7 +43,6 @@ namespace Moeen.Api.Application.Services
                 TeacherId = halqa.TeacherId,
                 TeacherName = halqa.Teacher?.name,
                 Type = halqa.Type,
-
                 StudentsCount = studentsCount
             };
         }

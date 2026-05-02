@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Moeen.Shared.Requests.ContentSharing
+namespace Moeen.Api.Shared.Requests.ContentSharing
 {
     public class ArchiveOldContentRequest
     {

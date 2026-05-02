@@ -4,6 +4,8 @@
     {
         Student = 0,
         Admin = 1,
-        Owner = 2
+        Teacher= 2,
+        ParentSudent = 3,
+        Owner = 4
     }
 }
