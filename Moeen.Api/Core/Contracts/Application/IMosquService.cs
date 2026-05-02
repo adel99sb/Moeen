@@ -53,5 +53,6 @@ namespace Moeen.Api.Core.Contracts.Application
         /// [DELETE] إلغاء تعيين مدير من مسجد معين
         /// </summary>
         Task<GeneralResponse> UnassignMosqueAdminAsync(UnassignMosqueAdminRequest request);
+  
     }
 }

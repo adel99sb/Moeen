@@ -23,9 +23,9 @@ namespace Moeen.Api.Controllers
         public async Task<ActionResult<bool>> AddMosque([FromBody] AddMosquReq request)
             => Ok(await _mosquService.AddMosqu(request));
 
-        //[HttpGet]
-        //public async Task<ActionResult<GetAllMosqusResponse>> GetAllMosques()
-        //    => Ok(await _mosquService.GetAllMosqus();
+        [HttpGet]
+        public async Task<ActionResult<GetAllMosqusResponse>> GetAllMosques()
+            => Ok(await _mosquService.GetAllMosqus(new GetAllMosqusRequest()));
 
         [HttpGet("{mosqueId:guid}")]
         public async Task<ActionResult<MosqueDto>> GetMosqueById([FromRoute] Guid mosqueId)

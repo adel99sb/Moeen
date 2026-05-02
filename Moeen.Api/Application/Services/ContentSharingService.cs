@@ -318,7 +318,7 @@ namespace Moeen.Api.Application.Services
             if (!isAdmin)
             {
                 if (!currentUserId.HasValue)
-                    return new DeleteOldContentResponse { Success = false, Message = "Unauthorized", DeletedCount = 0 };
+                    return new Moeen.Shared.Responses.ContentSharing.DeleteOldContentResponse { Success = false, Message = "Unauthorized", DeletedCount = 0 };
 
                 var supervisor = await _unitOfWork.Repository<Supervisor>().GetByIdAsync(currentUserId.Value);
                 if (supervisor == null)
