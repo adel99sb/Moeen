@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Moeen.Api.Core.Entities;
+using Moeen.Api.infrastructure.Data;
 using Moeen.Shared.Constants;
 
 namespace Moeen.Api.Infrastructure.Data
@@ -63,10 +65,10 @@ namespace Moeen.Api.Infrastructure.Data
                 name = "الأستاذ أحمد",
                 gender = "Male",
                 MosqueId = mosqueId, // ✅ استخدام الـ ID الحقيقي
-                boi = "معلم قرآن كريم",
+                Bio = "معلم قرآن كريم",
                 assigned_at = DateTime.UtcNow.ToString(),
                 created_at = DateTime.UtcNow,
-                joinef_at = DateTime.UtcNow,
+                JoinedAt = DateTime.UtcNow,
                 // تهيئة القوائم لتجنب الأخطاء
                 halaqas = new List<Halqa>(),
                 ProgressEntrys = new List<ProgressEntry>(),
@@ -84,11 +86,11 @@ namespace Moeen.Api.Infrastructure.Data
                 age = 10,
                 MosqueId = mosqueId, // ✅ استخدام الـ ID الحقيقي
                 SaturdayHalqeId = halqaId, // ✅ استخدام الـ ID الحقيقي
-                enrollmrnt_date = DateTime.UtcNow,
+                EnrollmentDate = DateTime.UtcNow,
                 status = 1,
                 score = 85,
                 created_at = DateTime.UtcNow,
-                joinef_at = DateTime.UtcNow,
+                JoinedAt = DateTime.UtcNow,
                 progressEntrys = new List<ProgressEntry>(),
                 Exams = new List<Exam>(),
                 Attendances = new List<Attendance>(),
@@ -105,9 +107,9 @@ namespace Moeen.Api.Infrastructure.Data
                 gender = "Male",
                 MosqueId = mosqueId,
                 SaturdayHalqeId = halqaId,
-                enrollmrnt_date = DateTime.UtcNow,
+                EnrollmentDate = DateTime.UtcNow,
                 created_at = DateTime.UtcNow,
-                joinef_at = DateTime.UtcNow,
+                JoinedAt = DateTime.UtcNow,
                 status = 1,
                 age = 35,
                 score = 0,

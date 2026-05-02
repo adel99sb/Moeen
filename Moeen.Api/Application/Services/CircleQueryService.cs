@@ -101,7 +101,7 @@ namespace Moeen.Api.Application.Services
                     CreatedAt = s.created_at,
                     JoinedAt = s.JoinedAt,
                     Age = s.age,
-                    EnrollmentDate = s.enrollmrnt_date,
+                    EnrollmentDate = s.EnrollmentDate,
                     Status = s.status,
                     Score = s.score,
                     MosqueId = s.MosqueId,
