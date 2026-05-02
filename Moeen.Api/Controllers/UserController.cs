@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Moeen.Api.Application;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared;
-using Moeen.Api.Shared.Requests;
-using Moeen.Api.Shared.Requests.Identity;
+using Moeen.Shared;
+using Moeen.Shared.Requests;
+using Moeen.Shared.Requests.Identity;
 using System;
 using System.Threading.Tasks;
 
@@ -137,6 +138,7 @@ namespace Moeen.Api.Controllers
         /// <summary>
         /// تحقق من كود التفعيل (body: VerifyEmailRequest)
         /// </summary>
+        [AllowAnonymous]
         [HttpPost("verify-email")]
         public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request)
         {

@@ -1,13 +1,9 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.CircleTeacherAssignment;
-using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
+using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
-using Moeen.Api.Core.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Moeen.Api.infrastructure.Repositories;
+using Moeen.Shared.Requests.CircleTeacherAssignment;
+using Moeen.Shared.Responses.CircleTeacherAssignment;
 
 namespace Moeen.Api.Application.Services
 {

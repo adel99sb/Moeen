@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.Scheduling;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.Scheduling;
-using System;
-using System.Threading.Tasks;
+using Moeen.Shared.Requests.Scheduling;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.Scheduling;
 
 namespace Moeen.Api.Controllers
 {

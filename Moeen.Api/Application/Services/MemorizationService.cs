@@ -1,8 +1,8 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.Memorization;
-using Moeen.Api.Shared.Responses;
-using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
-using Moeen.Api.Shared.Responses.Memorization;
+using Moeen.Shared.Requests.Memorization;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.CircleTeacherAssignment;
+using Moeen.Shared.Responses.Memorization;
 
 namespace Moeen.Api.Application.Services
 {

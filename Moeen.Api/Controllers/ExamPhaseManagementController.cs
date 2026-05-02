@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.ExamPhase;
-using Moeen.Api.Shared.Responses.ExamPhase;
+using Moeen.Shared.Requests.ExamPhase;
+using Moeen.Shared.Responses.ExamPhase;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

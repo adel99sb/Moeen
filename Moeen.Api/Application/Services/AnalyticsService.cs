@@ -1,11 +1,14 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using Moeen.Api.Core.Contracts;
 using Moeen.Api.Core.Contracts.Application;
+using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Repositories;
-using Moeen.Api.Shared.Requests.Analytics;
-using Moeen.Api.Shared.Responses.Analytics;
+using Moeen.Shared.Requests.Analytics;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.Analytics;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Moeen.Api.Application.Services
 {
@@ -38,19 +41,202 @@ namespace Moeen.Api.Application.Services
             _unitOfWork = unitOfWork;
             _cache = cache;
         }
+
         // نقطة الدخول لتحليل بيانات الطالب (تعمل بشكل غير متزامن)
-        public Task<StudentAnalyticsDto> AnalyzeStudentDataAsync(AnalyzeStudentDataRequest request)
+        public async Task<GeneralResponse> AnalyzeStudentDataAsync(AnalyzeStudentDataRequest request)
         {
-            ValidateGuid(request?.Id ?? Guid.Empty, nameof(request.Id));
-            return AnalyzeStudentDataByIdAsync(request!.Id);
+            try
+            {
+                if (request == null || request.Id == Guid.Empty)
+                    return GeneralResponse.BadRequest("Invalid student id.");
+
+                var dto = await BuildStudentAnalyticsAsync(request.Id);
+                return GeneralResponse.Ok("Student analytics calculated.", dto);
+            }
+            catch
+            {
+                return GeneralResponse.InternalError("Analyze student failed.");
+            }
         }
 
-        // 📊 الدالة الرئيسية لتحليل أداء الطالب: تتحقق من الكاش أولاً، فإن لم تجد تجلب البيانات المصفاة (تقدم/امتحانات/حضور) من القاعدة، تعالجها شهرياً، تبني تقريراً شاملاً، تخزنه مؤقتاً لمدة 7 دقائق، وتُرجعه جاهزاً للعرض
-
-        public async Task<StudentAnalyticsDto> AnalyzeStudentDataByIdAsync(Guid studentId)
+        // تحليل مباشر لبيانات طالب عبر المعرف
+        public async Task<GeneralResponse> AnalyzeStudentDataByIdAsync(Guid studentId)
         {
-            ValidateGuid(studentId, nameof(studentId));
+            try
+            {
+                if (studentId == Guid.Empty)
+                    return GeneralResponse.BadRequest("Invalid student id.");
 
+                var dto = await BuildStudentAnalyticsAsync(studentId);
+                return GeneralResponse.Ok("Student analytics calculated.", dto);
+            }
+            catch
+            {
+                return GeneralResponse.InternalError("Analyze student by id failed.");
+            }
+        }
+
+        // نقطة الدخول لتحليل أداء المعلم
+        public async Task<GeneralResponse> AnalyzeTeacherPerformanceAsync(AnalyzeTeacherPerformanceRequest request)
+        {
+            try
+            {
+                if (request == null || request.Id == Guid.Empty)
+                    return GeneralResponse.BadRequest("Invalid teacher id.");
+
+                var dto = await BuildTeacherAnalyticsAsync(request.Id);
+                return GeneralResponse.Ok("Teacher analytics calculated.", dto);
+            }
+            catch
+            {
+                return GeneralResponse.InternalError("Analyze teacher failed.");
+            }
+        }
+
+        // تحليل مباشر لأداء معلم عبر المعرف
+        public async Task<GeneralResponse> AnalyzeTeacherPerformanceByIdAsync(Guid teacherId)
+        {
+            try
+            {
+                if (teacherId == Guid.Empty)
+                    return GeneralResponse.BadRequest("Invalid teacher id.");
+
+                var dto = await BuildTeacherAnalyticsAsync(teacherId);
+                return GeneralResponse.Ok("Teacher analytics calculated.", dto);
+            }
+            catch
+            {
+                return GeneralResponse.InternalError("Analyze teacher by id failed.");
+            }
+        }
+
+        // تحليل فعالية حلقة
+        public async Task<GeneralResponse> AnalyzeCircleEffectivenessAsync(AnalyzeCircleEffectivenessRequest request)
+        {
+            try
+            {
+                if (request == null || request.Id == Guid.Empty)
+                    return GeneralResponse.BadRequest("Invalid circle id.");
+
+                var dto = await BuildCircleAnalyticsAsync(request.Id);
+                return GeneralResponse.Ok("Circle analytics calculated.", dto);
+            }
+            catch
+            {
+                return GeneralResponse.InternalError("Analyze circle failed.");
+            }
+        }
+
+        // تحليل مباشر لفعالية حلقة عبر المعرف
+        public async Task<GeneralResponse> AnalyzeCircleEffectivenessByIdAsync(Guid circleId)
+        {
+            try
+            {
+                if (circleId == Guid.Empty)
+                    return GeneralResponse.BadRequest("Invalid circle id.");
+
+                var dto = await BuildCircleAnalyticsAsync(circleId);
+                return GeneralResponse.Ok("Circle analytics calculated.", dto);
+            }
+            catch
+            {
+                return GeneralResponse.InternalError("Analyze circle by id failed.");
+            }
+        }
+
+        // حفظ تقرير تحليلي
+        public async Task<GeneralResponse> SaveAnalyticsReportAsync(SaveAnalyticsReportRequest request)
+        {
+            try
+            {
+                var report = await SaveAnalyticsReportInternalAsync(request);
+                return GeneralResponse.Ok("Report saved successfully.", report);
+            }
+            catch (ArgumentException ex)
+            {
+                return GeneralResponse.BadRequest(ex.Message);
+            }
+            catch
+            {
+                return GeneralResponse.InternalError("Save analytics report failed.");
+            }
+        }
+
+        // جلب تقرير تحليلي بالمعرف
+        public async Task<GeneralResponse> GetAnalyticsReportByIdAsync(Guid reportId)
+        {
+            try
+            {
+                var report = await GetAnalyticsReportByIdInternalAsync(reportId);
+                return GeneralResponse.Ok("Report retrieved.", report);
+            }
+            catch (KeyNotFoundException)
+            {
+                return GeneralResponse.NotFound("Report not found.");
+            }
+            catch
+            {
+                return GeneralResponse.InternalError("Get analytics report failed.");
+            }
+        }
+
+        // جلب قائمة التقارير مع التصفية والتصفح
+        public async Task<GeneralResponse> GetAllAnalyticsReportsAsync(AnalyticsReportFilter filter)
+        {
+            try
+            {
+                var paged = await GetAllAnalyticsReportsInternalAsync(filter);
+                return GeneralResponse.Ok("Reports retrieved.", paged);
+            }
+            catch
+            {
+                return GeneralResponse.InternalError("Get analytics reports failed.");
+            }
+        }
+
+        // تحديث تقرير تحليلي
+        public async Task<GeneralResponse> UpdateAnalyticsReportAsync(Guid reportId, UpdateAnalyticsReportRequest request)
+        {
+            try
+            {
+                var report = await UpdateAnalyticsReportInternalAsync(reportId, request);
+                return GeneralResponse.Ok("Report updated.", report);
+            }
+            catch (KeyNotFoundException)
+            {
+                return GeneralResponse.NotFound("Report not found.");
+            }
+            catch (ArgumentException ex)
+            {
+                return GeneralResponse.BadRequest(ex.Message);
+            }
+            catch
+            {
+                return GeneralResponse.InternalError("Update analytics report failed.");
+            }
+        }
+
+        // حذف تقرير تحليلي
+        public async Task<GeneralResponse> DeleteAnalyticsReportAsync(Guid reportId)
+        {
+            try
+            {
+                var removed = await DeleteAnalyticsReportInternalAsync(reportId);
+                if (!removed)
+                    return GeneralResponse.NotFound("Report not found.");
+
+                return GeneralResponse.Ok("Report deleted.", removed);
+            }
+            catch
+            {
+                return GeneralResponse.InternalError("Delete analytics report failed.");
+            }
+        }
+
+        // ========================= Internal analytics builders =========================
+
+        private async Task<StudentAnalyticsDto> BuildStudentAnalyticsAsync(Guid studentId)
+        {
             var cacheKey = $"analytics:student:{studentId}";
             if (_cache.TryGetValue(cacheKey, out StudentAnalyticsDto cachedStudent))
                 return cachedStudent;
@@ -70,21 +256,17 @@ namespace Moeen.Api.Application.Services
 
             var fromDate = DateTime.UtcNow.AddDays(-DefaultAnalyticsWindowDays);
 
-            // جلب تقدم الطالب ضمن نافذة زمنية فقط (تحسين أداء)
             var progressSpec = Spec.For<ProgressEntry>(p => p.studentId == studentId && p.date >= fromDate);
             var progressEntries = (await _unitOfWork.Repository<ProgressEntry>().GetAllAsync(progressSpec))
                 .OrderBy(p => p.date)
                 .ToList();
 
-            // جلب اختبارات الطالب ضمن نافذة زمنية
             var examsSpec = Spec.For<Exam>(e => e.StudentId == studentId && e.date >= fromDate);
             var exams = (await _unitOfWork.Repository<Exam>().GetAllAsync(examsSpec)).ToList();
 
-            // الحضور (لا يوجد تاريخ مباشر على Attendance في النموذج الحالي)
             var attendanceSpec = Spec.For<Attendance>(a => a.StudentId == studentId);
             var attendances = (await _unitOfWork.Repository<Attendance>().GetAllAsync(attendanceSpec)).ToList();
 
-            // تجميع شهري
             var monthlyProgress = progressEntries
                 .GroupBy(p => new { p.date.Year, p.date.Month })
                 .Select(g =>
@@ -125,22 +307,8 @@ namespace Moeen.Api.Application.Services
             return result;
         }
 
-
-        // 👨‍🏫 نقطة الدخول لتحليل أداء المعلم: تتحقق من صحة المعرف، ثم تُفوض التنفيذ للمنطق الأساسي مع دعم التنفيذ غير المتزامن
-
-        public Task<TeacherAnalyticsDto> AnalyzeTeacherPerformanceAsync(AnalyzeTeacherPerformanceRequest request)
+        private async Task<TeacherAnalyticsDto> BuildTeacherAnalyticsAsync(Guid teacherId)
         {
-            ValidateGuid(request?.Id ?? Guid.Empty, nameof(request.Id));
-            return AnalyzeTeacherPerformanceByIdAsync(request!.Id);
-        }
-
-
-        // 👨‍🏫 يحلل أداء المعلم عبر تجميع بيانات حلقاته (طلاب، تقدم، حضور، جلسات، امتحانات) خلال آخر 180 يوم، مع معالجة مسبقة لتجنب استعلامات N+1، وتخزين النتيجة مؤقتاً لمدة 7 دقائق
-
-        public async Task<TeacherAnalyticsDto> AnalyzeTeacherPerformanceByIdAsync(Guid teacherId)
-        {
-            ValidateGuid(teacherId, nameof(teacherId));
-
             var cacheKey = $"analytics:teacher:{teacherId}";
             if (_cache.TryGetValue(cacheKey, out TeacherAnalyticsDto cachedTeacher))
                 return cachedTeacher;
@@ -158,7 +326,6 @@ namespace Moeen.Api.Application.Services
 
             var fromDate = DateTime.UtcNow.AddDays(-DefaultAnalyticsWindowDays);
 
-            // حلقات المعلم
             var halqaSpec = Spec.For<Halqa>(h => h.TeacherId == teacherId);
             var halqas = (await _unitOfWork.Repository<Halqa>().GetAllAsync(halqaSpec)).ToList();
             var halqaIds = halqas.Select(h => h.Id).ToHashSet();
@@ -182,24 +349,19 @@ namespace Moeen.Api.Application.Services
                 return emptyResult;
             }
 
-            // بيانات التقدم ضمن نافذة زمنية
             var progressSpec = Spec.For<ProgressEntry>(p => halqaIds.Contains(p.HalqaId) && p.date >= fromDate);
             var progressEntries = (await _unitOfWork.Repository<ProgressEntry>().GetAllAsync(progressSpec)).ToList();
 
-            // جلسات الحلقة ضمن نافذة زمنية
             var sessionSpec = Spec.For<HalqaSession>(s => halqaIds.Contains(s.HalqaId) && s.date >= fromDate);
             var sessions = (await _unitOfWork.Repository<HalqaSession>().GetAllAsync(sessionSpec)).ToList();
             var sessionIds = sessions.Select(s => s.Id).ToHashSet();
 
-            // حضور الجلسات
             var attendanceSpec = Spec.For<Attendance>(a => sessionIds.Contains(a.HalqeSessionId));
             var attendances = (await _unitOfWork.Repository<Attendance>().GetAllAsync(attendanceSpec)).ToList();
 
-            // اختبارات المعلم ضمن نافذة زمنية
             var examsSpec = Spec.For<Exam>(e => e.TeacherId == teacherId && e.date >= fromDate);
             var exams = (await _unitOfWork.Repository<Exam>().GetAllAsync(examsSpec)).ToList();
 
-            // تجميعات مسبقة لتجنب N+1
             var progressByHalqa = progressEntries
                 .GroupBy(p => p.HalqaId)
                 .ToDictionary(g => g.Key, g => g.ToList());
@@ -267,20 +429,8 @@ namespace Moeen.Api.Application.Services
             return result;
         }
 
-             public Task<CircleAnalyticsDto> AnalyzeCircleEffectivenessAsync(AnalyzeCircleEffectivenessRequest request)
-         {
-            ValidateGuid(request?.Id ?? Guid.Empty, nameof(request.Id));
-            return AnalyzeCircleEffectivenessByIdAsync(request!.Id);
-        }
-
-
-
-        // ⭕ يحلل فعالية الحلقة التعليمية: يجمع بيانات الطلاب (تقدم، حضور، امتحانات) خلال آخر 180 يوم، يحسب مؤشرات الأداء، يصنف الطلاب حسب الترتيب المرجح، ويحدد أفضل 5 وأضعف 5 طلاب، مع تخزين مؤقت للنتائج
-
-        public async Task<CircleAnalyticsDto> AnalyzeCircleEffectivenessByIdAsync(Guid circleId)
+        private async Task<CircleAnalyticsDto> BuildCircleAnalyticsAsync(Guid circleId)
         {
-            ValidateGuid(circleId, nameof(circleId));
-
             var cacheKey = $"analytics:circle:{circleId}";
             if (_cache.TryGetValue(cacheKey, out CircleAnalyticsDto cachedCircle))
                 return cachedCircle;
@@ -309,7 +459,6 @@ namespace Moeen.Api.Application.Services
             var attendanceSpec = Spec.For<Attendance>(a => sessionIds.Contains(a.HalqeSessionId));
             var attendances = (await _unitOfWork.Repository<Attendance>().GetAllAsync(attendanceSpec)).ToList();
 
-            // الطلاب من التقدم + الحضور لتغطية أوسع
             var studentIds = progressEntries.Select(p => p.studentId)
                 .Concat(attendances.Select(a => a.StudentId))
                 .Distinct()
@@ -342,7 +491,6 @@ namespace Moeen.Api.Application.Services
                 ? 0.0
                 : (double)activeStudentsCount / studentIds.Count * 100.0;
 
-            // تجميعات مسبقة
             var progressByStudent = progressEntries
                 .GroupBy(p => p.studentId)
                 .ToDictionary(g => g.Key, g => g.ToList());
@@ -387,7 +535,7 @@ namespace Moeen.Api.Application.Services
             {
                 CircleId = circle.Id,
                 CircleName = circle.Name ?? string.Empty,
-                CircleType = circle.Type ?? string.Empty,
+                CircleType = circle.Type,
                 TeacherId = circle.TeacherId,
                 TeacherName = teacher?.name ?? string.Empty,
                 StudentsCount = studentIds.Count,
@@ -404,9 +552,9 @@ namespace Moeen.Api.Application.Services
             return result;
         }
 
-        // 💾 يحفظ تقرير تحليلات جديد في ملف JSON: يتحقق من صحة الطلب، يولد معرفاً فريداً وتوقيتاً، يضيف التقرير للقائمة، ويحدث الملف مع ضمان التزامن عبر قفل
+        // ========================= Reports =========================
 
-        public async Task<AnalyticsReportDto> SaveAnalyticsReportAsync(SaveAnalyticsReportRequest request)
+        private async Task<AnalyticsReportDto> SaveAnalyticsReportInternalAsync(SaveAnalyticsReportRequest request)
         {
             if (request is null) throw new ArgumentNullException(nameof(request));
             if (string.IsNullOrWhiteSpace(request.ReportType))
@@ -434,8 +582,7 @@ namespace Moeen.Api.Application.Services
             return report;
         }
 
-        // 🔍 يجلب تقرير تحليلات محدد حسب المعرف: يتحقق من صحة المعرف، يحمّل التقارير من ملف JSON، يبحث عن التقرير المطلوب، ويرمِ خطأ إذا لم يُوجد
-        public async Task<AnalyticsReportDto> GetAnalyticsReportByIdAsync(Guid reportId)
+        private async Task<AnalyticsReportDto> GetAnalyticsReportByIdInternalAsync(Guid reportId)
         {
             ValidateGuid(reportId, nameof(reportId));
 
@@ -448,14 +595,12 @@ namespace Moeen.Api.Application.Services
             return report;
         }
 
-        // 📋 يجلب قائمة تقارير التحليلات مع دعم الفلترة (نوع، طالب، معلم، حلقة، تاريخ) والترتيب والتقسيم الصفحي، ويُرجع النتائج كموجزات خفيفة مع معلومات الصفحات
-        public async Task<PagedResult<AnalyticsReportSummaryDto>> GetAllAnalyticsReportsAsync(AnalyticsReportFilter filter)
+        private async Task<PagedResult<AnalyticsReportSummaryDto>> GetAllAnalyticsReportsInternalAsync(AnalyticsReportFilter filter)
         {
             filter ??= new AnalyticsReportFilter();
 
             var query = (await LoadReportsAsync()).AsEnumerable();
 
-            // فلترة
             if (!string.IsNullOrWhiteSpace(filter.ReportType))
                 query = query.Where(r => r.ReportType.Equals(filter.ReportType, StringComparison.OrdinalIgnoreCase));
 
@@ -504,8 +649,8 @@ namespace Moeen.Api.Application.Services
                 PageSize = pageSize
             };
         }
-        // ✏️ يحدّث تقرير تحليلات موجود: يتحقق من المعرف والطلب، يحمّل التقارير، يبحث عن التقرير، يحدّث حقوله (العنوان، المحتوى، وقت التحديث)، ويحفظ التغييرات في ملف JSON
-        public async Task<AnalyticsReportDto> UpdateAnalyticsReportAsync(Guid reportId, UpdateAnalyticsReportRequest request)
+
+        private async Task<AnalyticsReportDto> UpdateAnalyticsReportInternalAsync(Guid reportId, UpdateAnalyticsReportRequest request)
         {
             ValidateGuid(reportId, nameof(reportId));
             if (request is null) throw new ArgumentNullException(nameof(request));
@@ -525,8 +670,8 @@ namespace Moeen.Api.Application.Services
             await SaveReportsAsync(reports);
             return report;
         }
-        // 🗑️ يحذف تقرير تحليلات حسب المعرف: يتحقق من صحة المعرف، يحمّل التقارير، يزيل التقرير المطابق (إن وُجد)، ويحفظ القائمة المحدثة في ملف JSON
-        public async Task<bool> DeleteAnalyticsReportAsync(Guid reportId)
+
+        private async Task<bool> DeleteAnalyticsReportInternalAsync(Guid reportId)
         {
             ValidateGuid(reportId, nameof(reportId));
 
@@ -540,8 +685,7 @@ namespace Moeen.Api.Application.Services
         }
 
         // ========================= Helpers =========================
-        // 📈 يحسب اتجاه أداء الطالب بمقارنة متوسط درجاته في آخر 30 يوم مع الفترة السابقة (30-60 يوم)، ويرجع:
-        // "Improving" إذا تحسّن، "Declining" إذا تدهور، أو "Stable" إذا لم يتغير بشكل ملحوظ
+
         private static string CalculateStudentTrend(List<ProgressEntry> entries)
         {
             if (entries.Count < 2) return "Stable";
@@ -564,19 +708,19 @@ namespace Moeen.Api.Application.Services
             if (lastAvg < prevAvg - TrendThreshold) return "Declining";
             return "Stable";
         }
-        // 🔐 دالة مساعدة للتحقق من صحة المعرفات: ترمي استثناء إذا كانت القيمة فارغة (Guid.Empty) لمنع الأخطاء اللاحقة
+
         private static void ValidateGuid(Guid value, string paramName)
         {
             if (value == Guid.Empty)
                 throw new ArgumentException("Invalid Guid value.", paramName);
         }
-        // ⚙️ إعدادات موحدة لـ JSON: تجاهل حالة أحرف الخصائص + تنسيق الإخراج بقراءته (للتصحيح)
+
         private static JsonSerializerOptions JsonOptions => new()
         {
             PropertyNameCaseInsensitive = true,
             WriteIndented = true
         };
-        // 📂 يحمّل قائمة التقارير من ملف JSON بشكل غير متزامن وآمن: يتحقق من وجود الملف ومحتواه، يحول الـ JSON إلى كائنات، ويضمن إفلات القفل دائماً عبر finally
+
         private static async Task<List<AnalyticsReportDto>> LoadReportsAsync()
         {
             await ReportFileLock.WaitAsync();
@@ -597,7 +741,7 @@ namespace Moeen.Api.Application.Services
                 ReportFileLock.Release();
             }
         }
-        // 💾 يحفظ قائمة التقارير في ملف JSON بشكل غير متزامن وآمن: يحوّل البيانات لنص منسّق، يكتبها على القرص، ويضمن إفلات قفل التزامن دائماً عبر finally
+
         private static async Task SaveReportsAsync(List<AnalyticsReportDto> reports)
         {
             await ReportFileLock.WaitAsync();

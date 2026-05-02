@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.ExamCommand;
-using Moeen.Api.Shared.Responses.ExamCommand;
+using Moeen.Shared.Requests.ExamCommand;
+using Moeen.Shared.Responses.ExamCommand;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Controllers

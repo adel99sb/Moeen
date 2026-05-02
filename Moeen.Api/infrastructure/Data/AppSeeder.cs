@@ -1,9 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Moeen.Api.Core.Constants;
-using Moeen.Api.Core.Entities;
-using Moeen.Api.infrastructure.Data;
+using Moeen.Shared.Constants;
 
 namespace Moeen.Api.Infrastructure.Data
 {

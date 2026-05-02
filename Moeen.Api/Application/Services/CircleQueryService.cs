@@ -1,16 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Shared.Requests.CircleQuery;
-using Moeen.Api.Shared.Responses.Circle;
-using Moeen.Api.Shared.Responses.CircleQuery;
-using Moeen.Api.Shared.Responses.Enrollment;
-using Moeen.Api.Core.Entities;
-using Moeen.Api.Core.Contracts;
 using Moeen.Api.infrastructure.Data;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using Moeen.Shared.Requests.CircleQuery;
+using Moeen.Shared.Responses.Circle;
+using Moeen.Shared.Responses.CircleQuery;
+using Moeen.Shared.Responses.Enrollment;
 
 namespace Moeen.Api.Application.Services
 {
@@ -105,7 +99,7 @@ namespace Moeen.Api.Application.Services
                     Theme = s.theme,
                     ProfileImageUrl = s.profile_imageUrl,
                     CreatedAt = s.created_at,
-                    JoinedAt = s.joinef_at,
+                    JoinedAt = s.JoinedAt,
                     Age = s.age,
                     EnrollmentDate = s.enrollmrnt_date,
                     Status = s.status,

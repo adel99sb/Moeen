@@ -1,4 +1,4 @@
-﻿using Moeen.Api.Core.Specifications;
+﻿using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using System.Linq.Expressions;
 
 namespace Moeen.Api.infrastructure.Repositories
