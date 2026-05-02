@@ -293,7 +293,7 @@ namespace Moeen.Api.Application.Services
                 StudentName = student.name ?? string.Empty,
                 Age = student.age,
                 Gender = student.gender ?? string.Empty,
-                EnrollmentDate = student.enrollmrnt_date,
+                EnrollmentDate = student.EnrollmentDate,
                 TotalSessions = attendances.Count,
                 TotalMemorizedPages = progressEntries.Select(p => p.page_number).Distinct().Count(),
                 LastMemorizedPage = progressEntries.Select(p => (int?)p.page_number).Max() ?? 0,
