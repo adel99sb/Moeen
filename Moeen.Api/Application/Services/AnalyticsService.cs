@@ -387,7 +387,7 @@ namespace Moeen.Api.Application.Services
             {
                 CircleId = circle.Id,
                 CircleName = circle.Name ?? string.Empty,
-                CircleType = circle.type ?? string.Empty,
+                CircleType = circle.Type ?? string.Empty,
                 TeacherId = circle.TeacherId,
                 TeacherName = teacher?.name ?? string.Empty,
                 StudentsCount = studentIds.Count,

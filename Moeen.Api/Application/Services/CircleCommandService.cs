@@ -35,7 +35,7 @@ namespace Moeen.Api.Application.Services
                 FoujId = request.FoujId,
                 Name = request.Name,
                 TeacherId = request.TeacherId,
-                type = request.Type
+                Type = request.Type
             };
 
             await _unitOfWork.Repository<Halqa>().AddAsync(halqa);
@@ -49,7 +49,7 @@ namespace Moeen.Api.Application.Services
                 FoujName = fouj?.name,
                 TeacherId = halqa.TeacherId,
                 TeacherName = teacher?.name,
-                Type = halqa.type,
+                Type = halqa.Type,
                 StudentsCount = 0
             };
         }
@@ -89,7 +89,7 @@ namespace Moeen.Api.Application.Services
                 FoujName = targetFouj?.name,
                 TeacherId = halqa.TeacherId,
                 TeacherName = teacher?.name,
-                Type = halqa.type
+                Type = halqa.Type
             };
         }
 
@@ -117,7 +117,7 @@ namespace Moeen.Api.Application.Services
                 FoujName = fouj?.name,
                 TeacherId = halqa.TeacherId,
                 TeacherName = newTeacher?.name,
-                Type = halqa.type
+                Type = halqa.Type
             };
         }
 
@@ -131,7 +131,7 @@ namespace Moeen.Api.Application.Services
                 halqa.Name = request.Name;
 
             if (!string.IsNullOrWhiteSpace(request.Type))
-                halqa.type = request.Type;
+                halqa.Type = request.Type;
 
             if (request.FoujId.HasValue)
             {
@@ -163,7 +163,7 @@ namespace Moeen.Api.Application.Services
                 FoujName = resultFouj?.name,
                 TeacherId = halqa.TeacherId,
                 TeacherName = resultTeacher?.name,
-                Type = halqa.type
+                Type = halqa.Type
             };
         }
     }
