@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Moeen.Api.Core.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
+using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Repositories;
-using Moeen.Api.Shared.Requests;
-using Moeen.Api.Shared.Requests.ContentSharing;
-using Moeen.Api.Shared.Responses.CircleTeacherAssignment;
-using Moeen.Api.Shared.Responses.ContentSharing;
-
+using Moeen.Shared.Requests;
+using Moeen.Shared.Requests.ContentSharing;
+using Moeen.Shared.Responses.CircleTeacherAssignment;
+using Moeen.Shared.Responses.ContentSharing;
 namespace Moeen.Api.Application.Services
 {
     public class ContentSharingService : IContentSharingService 
@@ -71,7 +66,7 @@ namespace Moeen.Api.Application.Services
                     UserId = pi.UserId,
                     UserName = pi.User?.name ?? string.Empty,
                     CreatedAt = pi.date,
-                    Type = Core.Constants.InteractionType.Like // model lacks type; keep default
+                    Type = (Moeen.Shared.Constants.InteractionType) Core.Constants.InteractionType // model lacks type; keep default
                 }).ToList();
             }
 
@@ -243,7 +238,7 @@ namespace Moeen.Api.Application.Services
                 UserId = pi.UserId,
                 UserName = pi.User?.name ?? string.Empty,
                 CreatedAt = pi.date,
-                Type = Core.Constants.InteractionType.Like
+                Type = (Moeen.Shared.Constants.InteractionType)Core.Constants.InteractionType
             }).ToList();
         }
 
@@ -322,7 +317,7 @@ namespace Moeen.Api.Application.Services
             if (!isAdmin)
             {
                 if (!currentUserId.HasValue)
-                    return new DeleteOldContentResponse { Success = false, Message = "Unauthorized", DeletedCount = 0 };
+                    return new Moeen.Shared.Responses.ContentSharing.DeleteOldContentResponse { Success = false, Message = "Unauthorized", DeletedCount = 0 };
 
                 var supervisor = await _unitOfWork.Repository<Supervisor>().GetByIdAsync(currentUserId.Value);
                 if (supervisor == null)
