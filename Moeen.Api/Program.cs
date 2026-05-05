@@ -12,8 +12,10 @@ using Moeen.Api.infrastructure.Configurations;
 using Moeen.Api.infrastructure.Data;
 using Moeen.Api.infrastructure.Providers;
 using Moeen.Api.infrastructure.Repositories;
+using Moeen.Api.Infrastructure.Data;
 using System.Security.Claims;
 using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -157,4 +159,5 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.Run();
 app.Run();

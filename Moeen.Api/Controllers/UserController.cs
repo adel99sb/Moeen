@@ -138,6 +138,7 @@ namespace Moeen.Api.Controllers
         /// <summary>
         /// تحقق من كود التفعيل (body: VerifyEmailRequest)
         /// </summary>
+        [AllowAnonymous]
         [HttpPost("verify-email")]
         public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request)
         {

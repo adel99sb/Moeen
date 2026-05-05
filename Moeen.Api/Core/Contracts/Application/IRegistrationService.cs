@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Moeen.Api.Core.Contracts.Application
 {
     public interface IRegistrationService
-    {
+    {   
         /// <summary>
         /// تسجيل طالب في حلقة دراسية
         /// </summary>
