@@ -4,7 +4,6 @@
     {
         Present = 1,
         Absent,
-        Late,
-        Excused
+        Excused,
     }
 }
