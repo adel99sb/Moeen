@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿
+using Microsoft.Extensions.Caching.Memory;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;

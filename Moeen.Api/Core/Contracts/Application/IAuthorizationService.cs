@@ -1,67 +1,61 @@
 ﻿using Moeen.Shared.Requests.Authorization;
-using Moeen.Shared.Responses.Analytics;
-using Moeen.Shared.Responses.Authorization;
+using Moeen.Shared.Responses;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application
 {
     public interface IAuthorizationService
     {
-        /// <summary>
-        /// التحقق من صلاحية وصول المستخدم لإذن معين
-        /// </summary>
-        Task<CheckAccessResponse> CheckAccessAsync(CheckAccessRequest request);
+        // ========================= Account Management =========================
 
-        /// <summary>
-        /// إدارة الأدوار (إنشاء أو تحديث دور)
-        /// </summary>
-        Task<RoleDto> ManageRoleAsync(ManageRoleRequest request);
+        // جلب حسابات المستخدمين حسب النوع مع البحث والتصفية
+        Task<GeneralResponse> GetAccountsAsync(AccountFilterRequest request);
 
-        /// <summary>
-        /// تعيين دور لمستخدم
-        /// </summary>
-        Task<bool> AssignRoleToUserAsync(AssignRoleRequest request);
+        // جلب تفاصيل حساب محدد للتعديل
+        Task<GeneralResponse> GetAccountByIdAsync(Guid userId);
 
-        /// <summary>
-        /// إزالة دور من مستخدم
-        /// </summary>
-        Task<bool> RemoveRoleFromUserAsync(RemoveRoleRequest request);
+        // إنشاء أو تحديث حساب مستخدم
+        Task<GeneralResponse> UpsertAccountAsync(UpsertAccountRequest request);
 
-        /// <summary>
-        /// الحصول على قائمة أدوار المستخدم
-        /// </summary>
-        Task<UserRolesResponse> GetUserRolesAsync(UserRolesRequest request);
+        // تغيير حالة الحساب (نشط/متوقف)
+        Task<GeneralResponse> UpdateAccountStatusAsync(UpdateAccountStatusRequest request);
 
-        /// <summary>
-        /// الحصول على قائمة الأدوار مع الفلترة والترقيم
-        /// </summary>
-        Task<PagedResult<RoleDto>> GetAllRolesAsync(RoleFilter filter);
+        // حذف حساب مستخدم
+        Task<GeneralResponse> DeleteAccountAsync(Guid userId);
 
-        /// <summary>
-        /// الحصول على دور محدد بواسطة معرفه
-        /// </summary>
-        Task<RoleDto> GetRoleByIdAsync(Guid roleId);
+        // ========================= Authorization / Roles =========================
 
-        /// <summary>
-        /// الحصول على قائمة جميع الصلاحيات المتاحة في النظام
-        /// </summary>
-        Task<List<PermissionDto>> GetAllPermissionsAsync();
+        // التحقق من صلاحية الوصول لمورد أو إجراء معين
+        Task<GeneralResponse> CheckAccessAsync(CheckAccessRequest request);
 
-        /// <summary>
-        /// تحديث صلاحيات دور معين
-        /// </summary>
-        Task<RoleDto> UpdateRolePermissionsAsync(Guid roleId, UpdatePermissionsRequest request);
+        // إدارة الأدوار: إنشاء، تحديث، أو حذف دور في النظام
+        Task<GeneralResponse> ManageRoleAsync(ManageRoleRequest request);
 
-        /// <summary>
-        /// حذف دور من النظام
-        /// </summary>
-        Task<bool> DeleteRoleAsync(Guid roleId);
+        // تعيين دور لمستخدم معين لمنحه الصلاحيات المرتبطة بهذا الدور
+        Task<GeneralResponse> AssignRoleToUserAsync(AssignRoleRequest request);
 
-        /// <summary>
-        /// الحصول على قائمة صلاحيات مستخدم معين
-        /// </summary>
-        Task<List<PermissionDto>> GetUserPermissionsAsync(Guid userId);
+        // إزالة دور من مستخدم معين لسحب الصلاحيات المرتبطة بهذا الدور
+        Task<GeneralResponse> RemoveRoleFromUserAsync(RemoveRoleRequest request);
+
+        // جلب جميع الأدوار الممنوحة لمستخدم معين
+        Task<GeneralResponse> GetUserRolesAsync(UserRolesRequest request);
+
+        // جلب جميع الأدوار المتاحة في النظام مع دعم البحث والتصفية
+        Task<GeneralResponse> GetAllRolesAsync(RoleFilter filter);
+
+        // جلب تفاصيل دور محدد بناءً على معرفه
+        Task<GeneralResponse> GetRoleByIdAsync(Guid roleId);
+
+        // جلب جميع الصلاحيات المتاحة في النظام لتستخدم في تعيينها للأدوار
+        Task<GeneralResponse> GetAllPermissionsAsync();
+
+        // تحديث الصلاحيات الممنوحة لدور معين (إضافة أو إزالة صلاحيات)
+        Task<GeneralResponse> UpdateRolePermissionsAsync(Guid roleId, UpdatePermissionsRequest request);
+
+        // حذف دور من النظام (مع التحقق من عدم استخدامه من قبل المستخدمين)
+        Task<GeneralResponse> DeleteRoleAsync(Guid roleId);
+
+        // جلب جميع الصلاحيات الفعالة لمستخدم معين (مباشرة أو عبر الأدوار)
+        Task<GeneralResponse> GetUserPermissionsAsync(Guid userId);
     }
 }
