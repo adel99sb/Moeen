@@ -24,9 +24,9 @@ namespace Moeen.Api.Core.Contracts.Application
         Task<SearchContentResponse> SearchContentAsync(SearchContentRequest request);
 
         /// <summary>
-        /// أرشفة المحتوى القديم
+        /// حذف المحتوى القديم
         /// </summary>
-        Task<ArchiveOldContentResponse> ArchiveOldContentAsync(ArchiveOldContentRequest request);
+        Task<DeleteOldContentResponse> DeleteOldContentAsync(DeleteOldContentRequest request);
 
         /// <summary>
         /// إدارة الإعلانات (إنشاء/تحديث)

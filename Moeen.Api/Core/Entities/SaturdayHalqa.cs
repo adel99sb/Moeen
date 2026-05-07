@@ -10,5 +10,6 @@
         public int age_max { get; set; }
         public ICollection<SaturdayLesson> SaturdayLessons { get; set; }
         public ICollection<Student> Students { get; set; }
+        public Guid MosqueId { get; internal set; }
     }
 }

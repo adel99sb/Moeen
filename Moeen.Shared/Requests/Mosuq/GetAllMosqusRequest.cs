@@ -1,13 +1,9 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.Mosuq
 {
-    public class GetCirclesByMosqueRequest
+    public class GetAllMosqusRequest
     {
-        [Required(ErrorMessage = "Mosque ID is required")]
-        public Guid MosqueId { get; set; }
-
         [Range(1, int.MaxValue)]
         public int Page { get; set; } = 1;
 

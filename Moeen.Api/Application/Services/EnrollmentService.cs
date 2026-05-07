@@ -1,116 +1,1110 @@
-﻿using Moeen.Api.Core.Contracts.Application;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Moeen.Api.Core.Contracts.Application;
+using Moeen.Api.Core.Entities;
+using Moeen.Api.infrastructure.Data;
 using Moeen.Shared.Requests.Enrollment;
 using Moeen.Shared.Responses;
-using Moeen.Shared.Responses.CircleTeacherAssignment;
 using Moeen.Shared.Responses.Enrollment;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Moeen.Api.Application.Services
 {
     public class EnrollmentService : IEnrollmentService
     {
-        public Task<TeacherDto> AddTeacherAsync(AddTeacherRequest request)
+        private const int TeacherRole = 1;
+        private const int StudentRole = 2;
+        private const int ParentRole = 3;
+
+        private readonly AppDbContext _context;
+        private readonly UserManager<User> _userManager;
+
+        public EnrollmentService(AppDbContext context, UserManager<User> userManager)
         {
-            throw new NotImplementedException();
+            _context = context;
+            _userManager = userManager;
         }
 
-        public Task<bool> CancelMembershipAsync(CancelMembershipRequest request)
+        public async Task<GeneralResponse> RegisterStudentAsync(RegisterStudentRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            if (!string.Equals(request.Password, request.ConfirmPassword, StringComparison.Ordinal))
+                return GeneralResponse.BadRequest("تأكيد كلمة المرور غير مطابق.");
+
+            if (await _userManager.FindByEmailAsync(request.Email) != null)
+                return GeneralResponse.BadRequest("البريد الإلكتروني مستخدم بالفعل.");
+
+            var mosque = await _context.Mosques.FindAsync(request.MosqueId);
+            if (mosque == null)
+                return GeneralResponse.NotFound("المسجد غير موجود.");
+
+            SaturdayHalqa halqa = null;
+            if (request.SaturdayHalqeId.HasValue)
+            {
+                halqa = await _context.SaturdayHalqes.FindAsync(request.SaturdayHalqeId.Value);
+                if (halqa == null)
+                    return GeneralResponse.NotFound("الحلقة غير موجودة.");
+            }
+
+            var student = new Student
+            {
+                Id = Guid.NewGuid(),
+                name = request.Name,
+                Email = request.Email,
+                UserName = Guid.NewGuid().ToString(),
+                PhoneNumber = request.Phone,
+                gender = request.Gender,
+                font_size = 0,
+                role = StudentRole,
+                theme = null,
+                profile_imageUrl = null,
+                created_at = DateTime.UtcNow,
+                JoinedAt = DateTime.UtcNow,
+                age = request.Age,
+                EnrollmentDate = request.EnrollmentDate ?? DateTime.UtcNow,
+                status = request.Status,
+                score = request.Score,
+                MosqueId = request.MosqueId,
+                SaturdayHalqeId = request.SaturdayHalqeId ?? Guid.Empty
+            };
+
+            if (request.SaturdayHalqeId.HasValue)
+                student.SaturdayHalqaId = request.SaturdayHalqeId.Value;
+
+            var createResult = await _userManager.CreateAsync(student, request.Password);
+            if (!createResult.Succeeded)
+            {
+                var errors = string.Join("; ", createResult.Errors.Select(e => e.Description));
+                return GeneralResponse.BadRequest($"فشل تسجيل الطالب: {errors}");
+            }
+
+            student.Mosque = mosque;
+            student.SaturdayHalqa = halqa;
+
+            return GeneralResponse.Ok("تم تسجيل الطالب بنجاح.", MapStudentDto(student));
         }
 
-        public Task<OperationResponseDto> DeleteParentAsync(DeleteParentRequest request)
+        public async Task<GeneralResponse> AddTeacherAsync(AddTeacherRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            if (!string.Equals(request.Password, request.ConfirmPassword, StringComparison.Ordinal))
+                return GeneralResponse.BadRequest("تأكيد كلمة المرور غير مطابق.");
+
+            if (await _userManager.FindByEmailAsync(request.Email) != null)
+                return GeneralResponse.BadRequest("البريد الإلكتروني مستخدم بالفعل.");
+
+            var mosque = await _context.Mosques.FindAsync(request.MosqueId);
+            if (mosque == null)
+                return GeneralResponse.NotFound("المسجد غير موجود.");
+
+            var teacher = new Teacher
+            {
+                Id = Guid.NewGuid(),
+                name = request.Name,
+                Email = request.Email,
+                UserName = Guid.NewGuid().ToString(),
+                PhoneNumber = request.Phone,
+                gender = request.Gender,
+                font_size = 0,
+                role = TeacherRole,
+                theme = null,
+                profile_imageUrl = null,
+                created_at = DateTime.UtcNow,
+                JoinedAt = DateTime.UtcNow,
+                MosqueId = request.MosqueId,
+                Bio = request.Bio ?? string.Empty,
+                assigned_at = request.AssignedAt ?? string.Empty
+            };
+
+            var createResult = await _userManager.CreateAsync(teacher, request.Password);
+            if (!createResult.Succeeded)
+            {
+                var errors = string.Join("; ", createResult.Errors.Select(e => e.Description));
+                return GeneralResponse.BadRequest($"فشل إضافة المعلم: {errors}");
+            }
+
+            teacher.Mosque = mosque;
+            return GeneralResponse.Ok("تم إضافة المعلم بنجاح.", MapTeacherDto(teacher));
         }
 
-        public Task<OperationResponseDto> DeleteStudentAsync(DeleteStudentRequest request)
+        public async Task<GeneralResponse> RegisterParentAsync(RegisterParentRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            if (!string.Equals(request.Password, request.ConfirmPassword, StringComparison.Ordinal))
+                return GeneralResponse.BadRequest("تأكيد كلمة المرور غير مطابق.");
+
+            if (await _userManager.FindByEmailAsync(request.Email) != null)
+                return GeneralResponse.BadRequest("البريد الإلكتروني مستخدم بالفعل.");
+
+            var child = await _context.Students.FirstOrDefaultAsync(s => s.Id == request.StudentId);
+            if (child == null)
+                return GeneralResponse.NotFound("الطالب غير موجود.");
+
+            var parent = new Student
+            {
+                Id = Guid.NewGuid(),
+                name = request.Name,
+                Email = request.Email,
+                UserName = Guid.NewGuid().ToString(),
+                PhoneNumber = request.Phone,
+                gender = request.Gender,
+                font_size = 0,
+                role = ParentRole,
+                theme = request.Relationship ?? string.Empty,
+                profile_imageUrl = null,
+                created_at = DateTime.UtcNow,
+                JoinedAt = DateTime.UtcNow,
+                age = 0,
+                EnrollmentDate = DateTime.UtcNow,
+                status = 0,
+                score = 0,
+                MosqueId = child.MosqueId,
+                SaturdayHalqeId = child.SaturdayHalqeId
+            };
+
+            if (child.SaturdayHalqeId != Guid.Empty)
+                parent.SaturdayHalqaId = child.SaturdayHalqeId;
+
+            var createResult = await _userManager.CreateAsync(parent, request.Password);
+            if (!createResult.Succeeded)
+            {
+                var errors = string.Join("; ", createResult.Errors.Select(e => e.Description));
+                return GeneralResponse.BadRequest($"فشل تسجيل ولي الأمر: {errors}");
+            }
+
+            child.ParentId = parent.Id;
+            await _context.SaveChangesAsync();
+
+            var dto = MapParentDto(parent, child);
+            dto.Relationship = request.Relationship ?? string.Empty;
+
+            return GeneralResponse.Ok("تم تسجيل ولي الأمر بنجاح.", dto);
         }
 
-        public Task<OperationResponseDto> DeleteTeacherAsync(DeleteTeacherRequest request)
+        public async Task<GeneralResponse> UpdateMemberInfoAsync(UpdateMemberInfoRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null || !Guid.TryParse(request.MemberId, out var memberId))
+                return GeneralResponse.BadRequest("معرّف العضو غير صالح.");
+
+            var user = await _context.Users.FindAsync(memberId);
+            if (user == null)
+                return GeneralResponse.NotFound("العضو غير موجود.");
+
+            if (!string.IsNullOrWhiteSpace(request.Email) && !string.Equals(user.Email, request.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                if (await _userManager.FindByEmailAsync(request.Email) != null)
+                    return GeneralResponse.BadRequest("البريد الإلكتروني مستخدم بالفعل.");
+                user.Email = request.Email;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Name))
+                user.name = request.Name;
+
+            if (!string.IsNullOrWhiteSpace(request.Phone))
+                user.PhoneNumber = request.Phone;
+
+            if (!string.IsNullOrWhiteSpace(request.Gender))
+                user.gender = request.Gender;
+
+            if (request.FontSize.HasValue)
+                user.font_size = request.FontSize.Value;
+
+            if (!string.IsNullOrWhiteSpace(request.Theme))
+                user.theme = request.Theme;
+
+            if (!string.IsNullOrWhiteSpace(request.ProfileImageUrl))
+                user.profile_imageUrl = request.ProfileImageUrl;
+
+            var student = await _context.Students.FindAsync(memberId);
+            if (student != null)
+            {
+                if (request.Age.HasValue)
+                    student.age = request.Age.Value;
+
+                if (request.Status.HasValue)
+                    student.status = request.Status.Value;
+
+                if (request.Score.HasValue)
+                    student.score = request.Score.Value;
+
+                if (request.SaturdayHalqeId.HasValue)
+                    student.SaturdayHalqeId = request.SaturdayHalqeId.Value;
+            }
+
+            var teacher = await _context.Teachers.FindAsync(memberId);
+            if (teacher != null)
+            {
+                if (!string.IsNullOrWhiteSpace(request.Bio))
+                    teacher.Bio = request.Bio;
+
+                if (!string.IsNullOrWhiteSpace(request.AssignedAt))
+                    teacher.assigned_at = request.AssignedAt;
+            }
+
+            if (request.StudentId.HasValue)
+            {
+                var child = await _context.Students.FindAsync(request.StudentId.Value);
+                if (child == null)
+                    return GeneralResponse.NotFound("الطالب غير موجود.");
+
+                child.ParentId = memberId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Relationship))
+                user.theme = request.Relationship;
+
+            await _context.SaveChangesAsync();
+            return GeneralResponse.Ok("تم تحديث بيانات العضو بنجاح.");
         }
 
-        public Task<byte[]> ExportMembersListAsync(ExportMembersRequest request)
+        public async Task<GeneralResponse> UpdateMemberStatusAsync(UpdateMemberStatusRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null || !Guid.TryParse(request.MemberId, out var memberId))
+                return GeneralResponse.BadRequest("معرّف العضو غير صالح.");
+
+            var student = await _context.Students.FindAsync(memberId);
+            if (student == null)
+                return GeneralResponse.NotFound("الطالب غير موجود.");
+
+            student.status = request.Status;
+            await _context.SaveChangesAsync();
+
+            return GeneralResponse.Ok("تم تحديث حالة العضو بنجاح.");
         }
 
-        public Task<PagedList<ParentDto>> GetAllParentsAsync(GetAllParentsRequest request)
+        public async Task<GeneralResponse> GetAllStudentsAsync(GetAllStudentsRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            int page = Math.Max(1, request.PageNumber);
+            int pageSize = Math.Max(1, request.PageSize);
+
+            var query = _context.Students
+                .Include(s => s.Mosque)
+                .Include(s => s.SaturdayHalqa)
+                .Where(s => s.role == StudentRole);
+
+            if (!string.IsNullOrWhiteSpace(request.Name))
+                query = query.Where(s => EF.Functions.Like(s.name, $"%{request.Name}%"));
+
+            if (request.MosqueId.HasValue)
+                query = query.Where(s => s.MosqueId == request.MosqueId.Value);
+
+            if (request.Status.HasValue)
+                query = query.Where(s => s.status == request.Status.Value);
+
+            var totalCount = await query.CountAsync();
+
+            var students = await query
+                .OrderBy(s => s.name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var data = students.Select(MapStudentDto).ToList();
+            return GeneralResponse.Ok("تم جلب الطلاب بنجاح.", data, page, pageSize, totalCount);
         }
 
-        public Task<PagedList<StudentDto>> GetAllStudentsAsync(GetAllStudentsRequest request)
+        public async Task<GeneralResponse> GetAllTeachersAsync(GetAllTeachersRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            int page = Math.Max(1, request.PageNumber);
+            int pageSize = Math.Max(1, request.PageSize);
+
+            var query = _context.Teachers.Include(t => t.Mosque).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(request.Name))
+                query = query.Where(t => EF.Functions.Like(t.name, $"%{request.Name}%"));
+
+            if (request.MosqueId.HasValue)
+                query = query.Where(t => t.MosqueId == request.MosqueId.Value);
+
+            var totalCount = await query.CountAsync();
+
+            var teachers = await query
+                .OrderBy(t => t.name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var data = teachers.Select(MapTeacherDto).ToList();
+            return GeneralResponse.Ok("تم جلب المعلمين بنجاح.", data, page, pageSize, totalCount);
         }
 
-        public Task<PagedList<SupervisorDto>> GetAllSupervisorsAsync(GetAllSupervisorsRequest request)
+        public async Task<GeneralResponse> GetAllParentsAsync(GetAllParentsRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            int page = Math.Max(1, request.PageNumber);
+            int pageSize = Math.Max(1, request.PageSize);
+
+            var query = _context.Students
+                .Include(p => p.Children)
+                .Include(p => p.Mosque)
+                .Where(p => p.role == ParentRole);
+
+            if (!string.IsNullOrWhiteSpace(request.Name))
+                query = query.Where(p => EF.Functions.Like(p.name, $"%{request.Name}%"));
+
+            if (!string.IsNullOrWhiteSpace(request.Phone))
+                query = query.Where(p => EF.Functions.Like(p.PhoneNumber, $"%{request.Phone}%"));
+
+            var totalCount = await query.CountAsync();
+
+            var parents = await query
+                .OrderBy(p => p.name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var data = parents.Select(p =>
+            {
+                var child = p.Children?.OrderBy(c => c.name).FirstOrDefault();
+                return MapParentDto(p, child);
+            }).ToList();
+
+            return GeneralResponse.Ok("تم جلب أولياء الأمور بنجاح.", data, page, pageSize, totalCount);
         }
 
-        public Task<PagedList<TeacherDto>> GetAllTeachersAsync(GetAllTeachersRequest request)
+        public async Task<GeneralResponse> GetAllSupervisorsAsync(GetAllSupervisorsRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            int page = Math.Max(1, request.PageNumber);
+            int pageSize = Math.Max(1, request.PageSize);
+
+            var query = _context.Supervisors.Include(s => s.Mosque).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(request.Name))
+                query = query.Where(s => EF.Functions.Like(s.name, $"%{request.Name}%"));
+
+            var totalCount = await query.CountAsync();
+
+            var supervisors = await query
+                .OrderBy(s => s.name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var data = supervisors.Select(s => new MemberProfileDto
+            {
+                Id = s.Id,
+                Name = s.name,
+                Email = s.Email,
+                Phone = s.PhoneNumber,
+                Gender = s.gender,
+                MemberType = "Supervisor",
+                Role = s.role,
+                ProfileImageUrl = s.profile_imageUrl,
+                JoinedAt = s.JoinedAt,
+                Status = 0,
+                MosqueId = s.MosqueId,
+                MosqueName = s.Mosque?.name ?? string.Empty
+            }).ToList();
+
+            return GeneralResponse.Ok("تم جلب المشرفين بنجاح.", data, page, pageSize, totalCount);
         }
 
-        public Task<List<StudentDto>> GetChildrenByParentAsync(GetChildrenByParentRequest request)
+        public async Task<GeneralResponse> GetChildrenByParentAsync(GetChildrenByParentRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null || request.ParentId == Guid.Empty)
+                return GeneralResponse.BadRequest("معرّف ولي الأمر غير صالح.");
+
+            var children = await _context.Students
+                .Include(s => s.Mosque)
+                .Include(s => s.SaturdayHalqa)
+                .Where(s => s.ParentId == request.ParentId)
+                .OrderBy(s => s.name)
+                .ToListAsync();
+
+            var data = children.Select(MapStudentDto).ToList();
+            return GeneralResponse.Ok("تم جلب الأبناء بنجاح.", data);
         }
 
-        public Task<MemberProfileDto> GetMemberProfileAsync(GetMemberProfileRequest request)
+        public async Task<GeneralResponse> GetMemberProfileAsync(GetMemberProfileRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null || !Guid.TryParse(request.MemberId, out var memberId))
+                return GeneralResponse.BadRequest("معرّف العضو غير صالح.");
+
+            var student = await _context.Students
+                .Include(s => s.Mosque)
+                .Include(s => s.SaturdayHalqa)
+                .FirstOrDefaultAsync(s => s.Id == memberId);
+
+            if (student != null)
+            {
+                var progressCount = await _context.ProgressEntries.CountAsync(p => p.studentId == student.Id);
+                var examCount = await _context.Exams.CountAsync(e => e.StudentId == student.Id);
+
+                var dto = new MemberProfileDto
+                {
+                    Id = student.Id,
+                    Name = student.name,
+                    Email = student.Email,
+                    Phone = student.PhoneNumber,
+                    Gender = student.gender,
+                    MemberType = student.role == ParentRole ? "Parent" : "Student",
+                    Role = student.role,
+                    ProfileImageUrl = student.profile_imageUrl,
+                    JoinedAt = student.JoinedAt,
+                    Status = student.status,
+                    MosqueId = student.MosqueId,
+                    MosqueName = student.Mosque?.name ?? string.Empty,
+                    StudentDetails = student.role == ParentRole ? null : new StudentProfileDetails
+                    {
+                        Age = student.age,
+                        EnrollmentDate = student.EnrollmentDate,
+                        Score = student.score,
+                        SaturdayHalqeId = student.SaturdayHalqaId,
+                        SaturdayHalqeName = student.SaturdayHalqa?.name ?? string.Empty,
+                        ProgressCount = progressCount,
+                        ExamCount = examCount
+                    }
+                };
+
+                if (student.role == ParentRole)
+                {
+                    var child = await _context.Students.FirstOrDefaultAsync(s => s.ParentId == student.Id);
+                    dto.ParentDetails = new ParentProfileDetails
+                    {
+                        StudentId = child?.Id ?? Guid.Empty,
+                        StudentName = child?.name ?? string.Empty,
+                        Relationship = student.theme ?? string.Empty
+                    };
+                }
+
+                return GeneralResponse.Ok("تم جلب ملف العضو بنجاح.", dto);
+            }
+
+            var teacher = await _context.Teachers.Include(t => t.Mosque).FirstOrDefaultAsync(t => t.Id == memberId);
+            if (teacher != null)
+            {
+                var halaqasCount = await _context.Halqas.CountAsync(h => h.TeacherId == teacher.Id);
+
+                var dto = new MemberProfileDto
+                {
+                    Id = teacher.Id,
+                    Name = teacher.name,
+                    Email = teacher.Email,
+                    Phone = teacher.PhoneNumber,
+                    Gender = teacher.gender,
+                    MemberType = "Teacher",
+                    Role = teacher.role,
+                    ProfileImageUrl = teacher.profile_imageUrl,
+                    JoinedAt = teacher.JoinedAt,
+                    Status = 0,
+                    MosqueId = teacher.MosqueId,
+                    MosqueName = teacher.Mosque?.name ?? string.Empty,
+                    TeacherDetails = new TeacherProfileDetails
+                    {
+                        Bio = teacher.Bio,
+                        AssignedAt = teacher.assigned_at,
+                        HalaqasCount = halaqasCount
+                    }
+                };
+
+                return GeneralResponse.Ok("تم جلب ملف العضو بنجاح.", dto);
+            }
+
+            var supervisor = await _context.Supervisors.Include(s => s.Mosque).FirstOrDefaultAsync(s => s.Id == memberId);
+            if (supervisor != null)
+            {
+                var dto = new MemberProfileDto
+                {
+                    Id = supervisor.Id,
+                    Name = supervisor.name,
+                    Email = supervisor.Email,
+                    Phone = supervisor.PhoneNumber,
+                    Gender = supervisor.gender,
+                    MemberType = "Supervisor",
+                    Role = supervisor.role,
+                    ProfileImageUrl = supervisor.profile_imageUrl,
+                    JoinedAt = supervisor.JoinedAt,
+                    Status = 0,
+                    MosqueId = supervisor.MosqueId,
+                    MosqueName = supervisor.Mosque?.name ?? string.Empty
+                };
+
+                return GeneralResponse.Ok("تم جلب ملف العضو بنجاح.", dto);
+            }
+
+            return GeneralResponse.NotFound("العضو غير موجود.");
         }
 
-        public Task<MemberStatisticsDto> GetMemberStatisticsAsync(GetMemberStatisticsRequest request)
+        public async Task<GeneralResponse> SearchMembersAsync(SearchMembersRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            var (members, totalCount) = await SearchMembersInternalAsync(request, applyPaging: true);
+            var page = Math.Max(1, request.PageNumber);
+            var pageSize = Math.Max(1, request.PageSize);
+
+            return GeneralResponse.Ok("تم جلب الأعضاء بنجاح.", members, page, pageSize, totalCount);
         }
 
-        public Task<ParentDto> RegisterParentAsync(RegisterParentRequest request)
+        public async Task<GeneralResponse> GetMemberStatisticsAsync(GetMemberStatisticsRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            var studentsQuery = _context.Students.Where(s => s.role == StudentRole).AsQueryable();
+            var parentsQuery = _context.Students.Where(s => s.role == ParentRole).AsQueryable();
+            var teachersQuery = _context.Teachers.AsQueryable();
+            var supervisorsQuery = _context.Supervisors.AsQueryable();
+
+            if (request.MosqueId.HasValue)
+            {
+                studentsQuery = studentsQuery.Where(s => s.MosqueId == request.MosqueId.Value);
+                parentsQuery = parentsQuery.Where(s => s.MosqueId == request.MosqueId.Value);
+                teachersQuery = teachersQuery.Where(t => t.MosqueId == request.MosqueId.Value);
+                supervisorsQuery = supervisorsQuery.Where(s => s.MosqueId == request.MosqueId.Value);
+            }
+
+            if (request.Status.HasValue)
+                studentsQuery = studentsQuery.Where(s => s.status == request.Status.Value);
+
+            if (request.FromDate.HasValue)
+            {
+                studentsQuery = studentsQuery.Where(s => s.JoinedAt >= request.FromDate.Value);
+                parentsQuery = parentsQuery.Where(s => s.JoinedAt >= request.FromDate.Value);
+                teachersQuery = teachersQuery.Where(s => s.JoinedAt >= request.FromDate.Value);
+                supervisorsQuery = supervisorsQuery.Where(s => s.JoinedAt >= request.FromDate.Value);
+            }
+
+            if (request.ToDate.HasValue)
+            {
+                studentsQuery = studentsQuery.Where(s => s.JoinedAt <= request.ToDate.Value);
+                parentsQuery = parentsQuery.Where(s => s.JoinedAt <= request.ToDate.Value);
+                teachersQuery = teachersQuery.Where(s => s.JoinedAt <= request.ToDate.Value);
+                supervisorsQuery = supervisorsQuery.Where(s => s.JoinedAt <= request.ToDate.Value);
+            }
+
+            var studentsCount = await studentsQuery.CountAsync();
+            var parentsCount = await parentsQuery.CountAsync();
+            var teachersCount = await teachersQuery.CountAsync();
+            var supervisorsCount = await supervisorsQuery.CountAsync();
+
+            var activeCount = await studentsQuery.CountAsync(s => s.status == 0);
+            var inactiveCount = await studentsQuery.CountAsync(s => s.status == 1);
+            var graduatedCount = await studentsQuery.CountAsync(s => s.status == 2);
+
+            var data = new
+            {
+                StudentsCount = studentsCount,
+                TeachersCount = teachersCount,
+                ParentsCount = parentsCount,
+                SupervisorsCount = supervisorsCount,
+                ActiveStudents = activeCount,
+                InactiveStudents = inactiveCount,
+                GraduatedStudents = graduatedCount
+            };
+
+            return GeneralResponse.Ok("تم جلب إحصائيات الأعضاء بنجاح.", data);
         }
 
-        public Task<StudentDto> RegisterStudentAsync(RegisterStudentRequest request)
+        public async Task<GeneralResponse> UpdateStudentInfoAsync(UpdateStudentInfoRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null || request.StudentId == Guid.Empty)
+                return GeneralResponse.BadRequest("معرّف الطالب غير صالح.");
+
+            var student = await _context.Students.FindAsync(request.StudentId);
+            if (student == null)
+                return GeneralResponse.NotFound("الطالب غير موجود.");
+
+            if (request.Status.HasValue)
+                student.status = request.Status.Value;
+
+            if (request.Score.HasValue)
+                student.score = request.Score.Value;
+
+            await _context.SaveChangesAsync();
+            return GeneralResponse.Ok("تم تحديث بيانات الطالب بنجاح.");
         }
 
-        public Task<SearchMembersResponse> SearchMembersAsync(SearchMembersRequest request)
+        public async Task<GeneralResponse> UpdateTeacherInfoAsync(UpdateTeacherInfoRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null || request.TeacherId == Guid.Empty)
+                return GeneralResponse.BadRequest("معرّف المعلم غير صالح.");
+
+            var teacher = await _context.Teachers.FindAsync(request.TeacherId);
+            if (teacher == null)
+                return GeneralResponse.NotFound("المعلم غير موجود.");
+
+            if (!string.IsNullOrWhiteSpace(request.Bio))
+                teacher.Bio = request.Bio;
+
+            await _context.SaveChangesAsync();
+            return GeneralResponse.Ok("تم تحديث بيانات المعلم بنجاح.");
         }
 
-        public Task<MemberDto> UpdateMemberInfoAsync(UpdateMemberInfoRequest request)
+        public async Task<GeneralResponse> UpdateParentInfoAsync(UpdateParentInfoRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null || request.ParentId == Guid.Empty)
+                return GeneralResponse.BadRequest("معرّف ولي الأمر غير صالح.");
+
+            var parent = await _context.Students.FindAsync(request.ParentId);
+            if (parent == null)
+                return GeneralResponse.NotFound("ولي الأمر غير موجود.");
+
+            if (!string.IsNullOrWhiteSpace(request.Phone))
+                parent.PhoneNumber = request.Phone;
+
+            if (!string.IsNullOrWhiteSpace(request.Relationship))
+                parent.theme = request.Relationship;
+
+            await _context.SaveChangesAsync();
+            return GeneralResponse.Ok("تم تحديث بيانات ولي الأمر بنجاح.");
         }
 
-        public Task<bool> UpdateMemberStatusAsync(UpdateMemberStatusRequest request)
+        public async Task<GeneralResponse> DeleteStudentAsync(DeleteStudentRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null || request.StudentId == Guid.Empty)
+                return GeneralResponse.BadRequest("معرّف الطالب غير صالح.");
+
+            var student = await _context.Students.Include(s => s.Children).FirstOrDefaultAsync(s => s.Id == request.StudentId);
+            if (student == null)
+                return GeneralResponse.NotFound("الطالب غير موجود.");
+
+            if (student.Children != null)
+            {
+                foreach (var child in student.Children)
+                    child.ParentId = null;
+            }
+
+            var result = await _userManager.DeleteAsync(student);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                return GeneralResponse.BadRequest($"فشل حذف الطالب: {errors}");
+            }
+
+            await _context.SaveChangesAsync();
+            return GeneralResponse.Ok("تم حذف الطالب بنجاح.");
         }
 
-        public Task<ParentDto> UpdateParentInfoAsync(UpdateParentInfoRequest request)
+        public async Task<GeneralResponse> DeleteTeacherAsync(DeleteTeacherRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null || request.TeacherId == Guid.Empty)
+                return GeneralResponse.BadRequest("معرّف المعلم غير صالح.");
+
+            var teacher = await _context.Teachers.FindAsync(request.TeacherId);
+            if (teacher == null)
+                return GeneralResponse.NotFound("المعلم غير موجود.");
+
+            var hasHalaqas = await _context.Halqas.AnyAsync(h => h.TeacherId == teacher.Id);
+            if (hasHalaqas)
+                return GeneralResponse.BadRequest("لا يمكن حذف المعلم لارتباطه بحلقات.");
+
+            var result = await _userManager.DeleteAsync(teacher);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                return GeneralResponse.BadRequest($"فشل حذف المعلم: {errors}");
+            }
+
+            return GeneralResponse.Ok("تم حذف المعلم بنجاح.");
         }
 
-        public Task<StudentDto> UpdateStudentInfoAsync(UpdateStudentInfoRequest request)
+        public async Task<GeneralResponse> DeleteParentAsync(DeleteParentRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null || request.ParentId == Guid.Empty)
+                return GeneralResponse.BadRequest("معرّف ولي الأمر غير صالح.");
+
+            var parent = await _context.Students.Include(p => p.Children).FirstOrDefaultAsync(p => p.Id == request.ParentId);
+            if (parent == null)
+                return GeneralResponse.NotFound("ولي الأمر غير موجود.");
+
+            if (parent.Children != null)
+            {
+                foreach (var child in parent.Children)
+                    child.ParentId = null;
+            }
+
+            var result = await _userManager.DeleteAsync(parent);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                return GeneralResponse.BadRequest($"فشل حذف ولي الأمر: {errors}");
+            }
+
+            await _context.SaveChangesAsync();
+            return GeneralResponse.Ok("تم حذف ولي الأمر بنجاح.");
         }
 
-        public Task<TeacherDto> UpdateTeacherInfoAsync(UpdateTeacherInfoRequest request)
+        public async Task<GeneralResponse> CancelMembershipAsync(CancelMembershipRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null || !Guid.TryParse(request.MemberId, out var memberId))
+                return GeneralResponse.BadRequest("معرّف العضو غير صالح.");
+
+            var student = await _context.Students.FindAsync(memberId);
+            if (student == null)
+                return GeneralResponse.NotFound("العضو غير موجود.");
+
+            student.status = 1;
+            await _context.SaveChangesAsync();
+
+            return GeneralResponse.Ok("تم إلغاء العضوية بنجاح.");
+        }
+
+        public async Task<GeneralResponse> ExportMembersListAsync(ExportMembersRequest request)
+        {
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            var searchRequest = new SearchMembersRequest
+            {
+                MemberType = request.MemberType,
+                MosqueId = request.MosqueId,
+                PageNumber = 1,
+                PageSize = int.MaxValue,
+                SortBy = request.SortBy,
+                SortDescending = request.SortDescending
+            };
+
+            var (members, _) = await SearchMembersInternalAsync(searchRequest, applyPaging: false);
+            var fields = request.Fields?.Where(f => !string.IsNullOrWhiteSpace(f)).Select(f => f.Trim()).ToList()
+                         ?? new List<string>();
+
+            if (fields.Count == 0)
+            {
+                fields = new List<string>
+                {
+                    "Id", "Name", "Email", "Phone", "Gender", "MemberType", "MosqueName", "Status"
+                };
+            }
+
+            var data = new List<Dictionary<string, object>>();
+
+            foreach (var member in members)
+            {
+                var row = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                foreach (var field in fields)
+                {
+                    row[field] = field.ToLowerInvariant() switch
+                    {
+                        "id" => member.Id,
+                        "name" => member.Name,
+                        "email" => member.Email,
+                        "phone" => member.Phone,
+                        "gender" => member.Gender,
+                        "membertype" => member.MemberType,
+                        "mosqueid" => member.MosqueId,
+                        "mosquename" => member.MosqueName,
+                        "status" => member.Status,
+                        "role" => member.Role,
+                        "joinedat" => member.JoinedAt,
+                        _ => null
+                    };
+                }
+                data.Add(row);
+            }
+
+            return GeneralResponse.Ok("تم تجهيز بيانات التصدير بنجاح.", data);
+        }
+
+        private async Task<(List<MemberProfileDto> Members, int TotalCount)> SearchMembersInternalAsync(
+            SearchMembersRequest request,
+            bool applyPaging)
+        {
+            var members = new List<MemberProfileDto>();
+            var type = request.MemberType?.Trim();
+            var page = Math.Max(1, request.PageNumber);
+            var pageSize = Math.Max(1, request.PageSize);
+            var totalCount = 0;
+
+            if (string.IsNullOrWhiteSpace(type) || type.Equals("Student", StringComparison.OrdinalIgnoreCase))
+            {
+                var query = _context.Students.Include(s => s.Mosque).Where(s => s.role == StudentRole);
+
+                if (!string.IsNullOrWhiteSpace(request.Name))
+                    query = query.Where(s => EF.Functions.Like(s.name, $"%{request.Name}%"));
+                if (!string.IsNullOrWhiteSpace(request.Email))
+                    query = query.Where(s => EF.Functions.Like(s.Email, $"%{request.Email}%"));
+                if (!string.IsNullOrWhiteSpace(request.Phone))
+                    query = query.Where(s => EF.Functions.Like(s.PhoneNumber, $"%{request.Phone}%"));
+                if (request.MosqueId.HasValue)
+                    query = query.Where(s => s.MosqueId == request.MosqueId.Value);
+                if (request.Status.HasValue)
+                    query = query.Where(s => s.status == request.Status.Value);
+                if (request.Role.HasValue)
+                    query = query.Where(s => s.role == request.Role.Value);
+                if (request.JoinedFrom.HasValue)
+                    query = query.Where(s => s.JoinedAt >= request.JoinedFrom.Value);
+                if (request.JoinedTo.HasValue)
+                    query = query.Where(s => s.JoinedAt <= request.JoinedTo.Value);
+
+                var typeCount = await query.CountAsync();
+                totalCount += typeCount;
+
+                query = request.SortBy?.ToLowerInvariant() switch
+                {
+                    "email" => request.SortDescending ? query.OrderByDescending(s => s.Email) : query.OrderBy(s => s.Email),
+                    "joinedat" => request.SortDescending ? query.OrderByDescending(s => s.JoinedAt) : query.OrderBy(s => s.JoinedAt),
+                    _ => request.SortDescending ? query.OrderByDescending(s => s.name) : query.OrderBy(s => s.name)
+                };
+
+                if (applyPaging)
+                    query = query.Skip((page - 1) * pageSize).Take(pageSize);
+
+                var students = await query.ToListAsync();
+                members.AddRange(students.Select(s => new MemberProfileDto
+                {
+                    Id = s.Id,
+                    Name = s.name,
+                    Email = s.Email,
+                    Phone = s.PhoneNumber,
+                    Gender = s.gender,
+                    MemberType = "Student",
+                    Role = s.role,
+                    ProfileImageUrl = s.profile_imageUrl,
+                    JoinedAt = s.JoinedAt,
+                    Status = s.status,
+                    MosqueId = s.MosqueId,
+                    MosqueName = s.Mosque?.name ?? string.Empty
+                }));
+
+                if (!string.IsNullOrWhiteSpace(type))
+                    return (members, totalCount);
+            }
+
+            if (string.IsNullOrWhiteSpace(type) || type.Equals("Teacher", StringComparison.OrdinalIgnoreCase))
+            {
+                var query = _context.Teachers.Include(t => t.Mosque).AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(request.Name))
+                    query = query.Where(t => EF.Functions.Like(t.name, $"%{request.Name}%"));
+                if (!string.IsNullOrWhiteSpace(request.Email))
+                    query = query.Where(t => EF.Functions.Like(t.Email, $"%{request.Email}%"));
+                if (!string.IsNullOrWhiteSpace(request.Phone))
+                    query = query.Where(t => EF.Functions.Like(t.PhoneNumber, $"%{request.Phone}%"));
+                if (request.MosqueId.HasValue)
+                    query = query.Where(t => t.MosqueId == request.MosqueId.Value);
+                if (request.JoinedFrom.HasValue)
+                    query = query.Where(t => t.JoinedAt >= request.JoinedFrom.Value);
+                if (request.JoinedTo.HasValue)
+                    query = query.Where(t => t.JoinedAt <= request.JoinedTo.Value);
+
+                var typeCount = await query.CountAsync();
+                totalCount += typeCount;
+
+                query = request.SortBy?.ToLowerInvariant() switch
+                {
+                    "email" => request.SortDescending ? query.OrderByDescending(t => t.Email) : query.OrderBy(t => t.Email),
+                    "joinedat" => request.SortDescending ? query.OrderByDescending(t => t.JoinedAt) : query.OrderBy(t => t.JoinedAt),
+                    _ => request.SortDescending ? query.OrderByDescending(t => t.name) : query.OrderBy(t => t.name)
+                };
+
+                if (applyPaging)
+                    query = query.Skip((page - 1) * pageSize).Take(pageSize);
+
+                var teachers = await query.ToListAsync();
+                members.AddRange(teachers.Select(t => new MemberProfileDto
+                {
+                    Id = t.Id,
+                    Name = t.name,
+                    Email = t.Email,
+                    Phone = t.PhoneNumber,
+                    Gender = t.gender,
+                    MemberType = "Teacher",
+                    Role = t.role,
+                    ProfileImageUrl = t.profile_imageUrl,
+                    JoinedAt = t.JoinedAt,
+                    Status = 0,
+                    MosqueId = t.MosqueId,
+                    MosqueName = t.Mosque?.name ?? string.Empty
+                }));
+
+                if (!string.IsNullOrWhiteSpace(type))
+                    return (members, totalCount);
+            }
+
+            if (string.IsNullOrWhiteSpace(type) || type.Equals("Parent", StringComparison.OrdinalIgnoreCase))
+            {
+                var query = _context.Students.Include(p => p.Mosque).Where(p => p.role == ParentRole);
+
+                if (!string.IsNullOrWhiteSpace(request.Name))
+                    query = query.Where(p => EF.Functions.Like(p.name, $"%{request.Name}%"));
+                if (!string.IsNullOrWhiteSpace(request.Email))
+                    query = query.Where(p => EF.Functions.Like(p.Email, $"%{request.Email}%"));
+                if (!string.IsNullOrWhiteSpace(request.Phone))
+                    query = query.Where(p => EF.Functions.Like(p.PhoneNumber, $"%{request.Phone}%"));
+                if (request.MosqueId.HasValue)
+                    query = query.Where(p => p.MosqueId == request.MosqueId.Value);
+                if (request.JoinedFrom.HasValue)
+                    query = query.Where(p => p.JoinedAt >= request.JoinedFrom.Value);
+                if (request.JoinedTo.HasValue)
+                    query = query.Where(p => p.JoinedAt <= request.JoinedTo.Value);
+
+                var typeCount = await query.CountAsync();
+                totalCount += typeCount;
+
+                query = request.SortBy?.ToLowerInvariant() switch
+                {
+                    "email" => request.SortDescending ? query.OrderByDescending(p => p.Email) : query.OrderBy(p => p.Email),
+                    "joinedat" => request.SortDescending ? query.OrderByDescending(p => p.JoinedAt) : query.OrderBy(p => p.JoinedAt),
+                    _ => request.SortDescending ? query.OrderByDescending(p => p.name) : query.OrderBy(p => p.name)
+                };
+
+                if (applyPaging)
+                    query = query.Skip((page - 1) * pageSize).Take(pageSize);
+
+                var parents = await query.ToListAsync();
+                members.AddRange(parents.Select(p => new MemberProfileDto
+                {
+                    Id = p.Id,
+                    Name = p.name,
+                    Email = p.Email,
+                    Phone = p.PhoneNumber,
+                    Gender = p.gender,
+                    MemberType = "Parent",
+                    Role = p.role,
+                    ProfileImageUrl = p.profile_imageUrl,
+                    JoinedAt = p.JoinedAt,
+                    Status = p.status,
+                    MosqueId = p.MosqueId,
+                    MosqueName = p.Mosque?.name ?? string.Empty
+                }));
+
+                if (!string.IsNullOrWhiteSpace(type))
+                    return (members, totalCount);
+            }
+
+            if (string.IsNullOrWhiteSpace(type) || type.Equals("Supervisor", StringComparison.OrdinalIgnoreCase))
+            {
+                var query = _context.Supervisors.Include(s => s.Mosque).AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(request.Name))
+                    query = query.Where(s => EF.Functions.Like(s.name, $"%{request.Name}%"));
+                if (!string.IsNullOrWhiteSpace(request.Email))
+                    query = query.Where(s => EF.Functions.Like(s.Email, $"%{request.Email}%"));
+                if (!string.IsNullOrWhiteSpace(request.Phone))
+                    query = query.Where(s => EF.Functions.Like(s.PhoneNumber, $"%{request.Phone}%"));
+                if (request.MosqueId.HasValue)
+                    query = query.Where(s => s.MosqueId == request.MosqueId.Value);
+                if (request.JoinedFrom.HasValue)
+                    query = query.Where(s => s.JoinedAt >= request.JoinedFrom.Value);
+                if (request.JoinedTo.HasValue)
+                    query = query.Where(s => s.JoinedAt <= request.JoinedTo.Value);
+
+                var typeCount = await query.CountAsync();
+                totalCount += typeCount;
+
+                query = request.SortBy?.ToLowerInvariant() switch
+                {
+                    "email" => request.SortDescending ? query.OrderByDescending(s => s.Email) : query.OrderBy(s => s.Email),
+                    "joinedat" => request.SortDescending ? query.OrderByDescending(s => s.JoinedAt) : query.OrderBy(s => s.JoinedAt),
+                    _ => request.SortDescending ? query.OrderByDescending(s => s.name) : query.OrderBy(s => s.name)
+                };
+
+                if (applyPaging)
+                    query = query.Skip((page - 1) * pageSize).Take(pageSize);
+
+                var supervisors = await query.ToListAsync();
+                members.AddRange(supervisors.Select(s => new MemberProfileDto
+                {
+                    Id = s.Id,
+                    Name = s.name,
+                    Email = s.Email,
+                    Phone = s.PhoneNumber,
+                    Gender = s.gender,
+                    MemberType = "Supervisor",
+                    Role = s.role,
+                    ProfileImageUrl = s.profile_imageUrl,
+                    JoinedAt = s.JoinedAt,
+                    Status = 0,
+                    MosqueId = s.MosqueId,
+                    MosqueName = s.Mosque?.name ?? string.Empty
+                }));
+
+                if (!string.IsNullOrWhiteSpace(type))
+                    return (members, totalCount);
+            }
+
+            return (members, totalCount);
+        }
+
+        private static StudentDto MapStudentDto(Student student)
+        {
+            return new StudentDto
+            {
+                Id = student.Id,
+                Name = student.name,
+                Email = student.Email,
+                Phone = student.PhoneNumber,
+                Gender = student.gender,
+                FontSize = student.font_size,
+                Role = student.role,
+                Theme = student.theme,
+                ProfileImageUrl = student.profile_imageUrl,
+                CreatedAt = student.created_at,
+                JoinedAt = student.JoinedAt,
+                Age = student.age,
+                EnrollmentDate = student.EnrollmentDate,
+                Status = student.status,
+                Score = student.score,
+                MosqueId = student.MosqueId,
+                SaturdayHalqeId = student.SaturdayHalqeId,
+                MosqueName = student.Mosque?.name ?? string.Empty,
+                SaturdayHalqeName = student.SaturdayHalqa?.name ?? string.Empty
+            };
+        }
+
+        private static TeacherDto MapTeacherDto(Teacher teacher)
+        {
+            return new TeacherDto
+            {
+                Id = teacher.Id,
+                Name = teacher.name,
+                Email = teacher.Email,
+                Phone = teacher.PhoneNumber,
+                Gender = teacher.gender,
+                FontSize = teacher.font_size,
+                Role = teacher.role,
+                Theme = teacher.theme,
+                ProfileImageUrl = teacher.profile_imageUrl,
+                CreatedAt = teacher.created_at,
+                JoinedAt = teacher.JoinedAt,
+                MosqueId = teacher.MosqueId,
+                Bio = teacher.Bio,
+                AssignedAt = teacher.assigned_at,
+                MosqueName = teacher.Mosque?.name ?? string.Empty
+            };
+        }
+
+        private static ParentDto MapParentDto(Student parent, Student child)
+        {
+            return new ParentDto
+            {
+                Id = parent.Id,
+                Name = parent.name,
+                Email = parent.Email,
+                Phone = parent.PhoneNumber,
+                Gender = parent.gender,
+                FontSize = parent.font_size,
+                Role = parent.role,
+                Theme = parent.theme,
+                ProfileImageUrl = parent.profile_imageUrl,
+                CreatedAt = parent.created_at,
+                JoinedAt = parent.JoinedAt,
+                StudentId = child?.Id ?? Guid.Empty,
+                Relationship = parent.theme ?? string.Empty,
+                StudentName = child?.name ?? string.Empty
+            };
         }
     }
 }
