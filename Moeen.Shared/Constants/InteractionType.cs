@@ -2,10 +2,7 @@
 {
     public enum InteractionType
     {
-        Like = 1,
-        Love,
-        Support,
-        Wow,
-        Sad
+        Like = 1
+        
     }
 }
