@@ -1,8 +1,5 @@
 ﻿using Moeen.Shared.Requests.Points;
 using Moeen.Shared.Responses;
-using Moeen.Shared.Responses.CircleTeacherAssignment;
-using Moeen.Shared.Responses.Points;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application
@@ -10,58 +7,33 @@ namespace Moeen.Api.Core.Contracts.Application
     public interface IPointsService
     {
         /// <summary>
-        /// إعداد نظام النقاط بتعيين عدد النقاط لكل تقدير
+        /// إعداد نظام النقاط
         /// </summary>
-        Task<SetupPointsSystemResponse> SetupPointsSystemAsync(SetupPointsSystemRequest request);
+        Task<GeneralResponse> SetupPointsSystemAsync(SetupPointsSystemRequest request);
 
         /// <summary>
         /// الحصول على رصيد نقاط الطالب الحالي
         /// </summary>
-        Task<GetStudentPointsResponse> GetStudentPointsAsync(GetStudentPointsRequest request);
+        Task<GeneralResponse> GetStudentPointsAsync(GetStudentPointsRequest request);
 
         /// <summary>
-        /// الحصول على سجل النقاط المفصل للطالب
+        /// جلب لوحة الصدارة
         /// </summary>
-        Task<GetPointsHistoryResponse> GetPointsHistoryAsync(GetPointsHistoryRequest request);
+        Task<GeneralResponse> GetPointsLeaderboardAsync(GetLeaderboardRequest request);
 
         /// <summary>
-        /// [GET] جلب تفاصيل معاملة نقاط محددة بمعرفها
+        /// منح نقاط يدوياً لطالب
         /// </summary>
-        Task<PointsTransactionDto> GetTransactionByIdAsync(GetTransactionByIdRequest request);
+        Task<GeneralResponse> AwardPointsManuallyAsync(AwardPointsManualRequest request);
 
         /// <summary>
-        /// [GET] جلب قواعد نظام النقاط الحالية
+        /// خصم نقاط من طالب
         /// </summary>
-        Task<List<PointRuleDto>> GetPointRulesAsync(GetPointRulesRequest request);
+        Task<GeneralResponse> RemovePointsManuallyAsync(RemovePointsManualRequest request);
 
         /// <summary>
-        /// [GET] جلب لوحة الصدارة
+        /// إضافة النقاط التلقائية بناءً على القواعد الأسبوعية
         /// </summary>
-        Task<PagedList<StudentLeaderboardDto>> GetPointsLeaderboardAsync(GetLeaderboardRequest request);
-
-        /// <summary>
-        /// [GET] جلب أنواع النقاط المتاحة
-        /// </summary>
-        Task<List<PointTypeDto>> GetPointTypesAsync(GetPointTypesRequest request);
-
-        /// <summary>
-        /// [GET] جلب نقاط طلاب حلقة معينة
-        /// </summary>
-        Task<List<StudentPointsSummaryDto>> GetCirclePointsSummaryAsync(GetCirclePointsSummaryRequest request);
-
-        /// <summary>
-        /// [PUT] تحديث قاعدة نقاط معينة
-        /// </summary>
-        Task<PointRuleDto> UpdatePointRuleAsync(UpdatePointRuleRequest request);
-
-        /// <summary>
-        /// [DELETE] حذف قاعدة نقاط معينة
-        /// </summary>
-        Task<OperationResponseDto> DeletePointRuleAsync(DeletePointRuleRequest request);
-
-        /// <summary>
-        /// [POST] منح نقاط يدوياً لطالب
-        /// </summary>
-        Task<PointsTransactionDto> AwardPointsManuallyAsync(AwardPointsManualRequest request);
+        Task<GeneralResponse> EvaluateAutomaticPointsAsync(EvaluateAutomaticPointsRequest request);
     }
 }
