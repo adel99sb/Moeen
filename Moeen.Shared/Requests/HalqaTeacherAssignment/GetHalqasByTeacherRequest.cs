@@ -1,9 +1,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Moeen.Shared.Requests.CircleTeacherAssignment
+namespace Moeen.Shared.Requests.HalqaTeacherAssignment
 {
-    public class GetCirclesByTeacherRequest
+    public class GetHalqasByTeacherRequest
     {
         [Required(ErrorMessage = "Teacher ID is required")]
         public Guid TeacherId { get; set; }

@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.CircleTeacherAssignment
 {
-    public class GetTeachersByCircleRequest
+    public class GetTeachersByHalqaRequest
     {
-        [Required(ErrorMessage = "Circle ID is required")]
-        public Guid CircleId { get; set; }
+        [Required(ErrorMessage = "Halqa ID is required")]
+        public Guid HalqaId { get; set; }
 
         /// <summary>
         /// ÅĞÇ true íÑÌÚ ÇáãÚáãíä ÛíÑ ÇáäÔØíä ÃíÖğÇ
