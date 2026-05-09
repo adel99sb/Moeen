@@ -2,7 +2,10 @@
 {
     public class TeacherExam : User
     {
+        internal DateTime CreatedAt;
+
         public Guid Id { get; set; }
+        public string? Name { get; set; }
         public Guid MosquId { get; set; }
         public string? Bio { get; set; }
         public Mosque Mosque { get; set; }

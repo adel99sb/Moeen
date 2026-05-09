@@ -1,7 +1,11 @@
-﻿namespace Moeen.Api.Shared.Requests.Exam_Halqa
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace Moeen.Api.Shared.Requests.Exam_Halqa
 {
     public class GetExamTeacherByIdRequest
     {
-        public int Id { get; set; }
+        [Required(ErrorMessage = "معرف معلم الامتحان مطلوب")]
+        public Guid Id { get; set; }
     }
 }
