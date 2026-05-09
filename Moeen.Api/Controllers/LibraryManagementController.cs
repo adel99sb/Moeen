@@ -25,42 +25,42 @@ namespace Moeen.Api.Controllers
         /// GET: Ã·» Ã„Ì⁄ «·ﬂ » „⁄ «·›· —… Ê«· —ﬁÌ„.
         /// </summary>
         [HttpGet("books")]
-        public async Task<ActionResult<PagedList<BookResponseDto>>> GetAllBooks([FromQuery] GetAllBooksRequest request)
+        public async Task<ActionResult<GeneralResponse>> GetAllBooks([FromQuery] GetAllBooksRequest request)
             => Ok(await _libraryService.GetAllBooksAsync(request));
 
         /// <summary>
         /// GET: Ã·» ﬂ «» »«·„⁄—›.
         /// </summary>
         [HttpGet("books/{bookId:guid}")]
-        public async Task<ActionResult<BookResponseDto>> GetBookById([FromRoute] Guid bookId)
+        public async Task<ActionResult<GeneralResponse>> GetBookById([FromRoute] Guid bookId)
             => Ok(await _libraryService.GetBookByIdAsync(new GetBookByIdRequest { BookId = bookId }));
 
         /// <summary>
         /// GET: Ã·» «·ﬂ » Õ”» «· ’‰Ì›.
         /// </summary>
         [HttpGet("books/by-category")]
-        public async Task<ActionResult<List<BookResponseDto>>> GetBooksByCategory([FromQuery] string category)
+        public async Task<ActionResult<GeneralResponse>> GetBooksByCategory([FromQuery] string category)
             => Ok(await _libraryService.GetBooksByCategoryAsync(new GetBooksByCategoryRequest { Category = category }));
 
         /// <summary>
         /// POST: ≈÷«›… ﬂ «».
         /// </summary>
         [HttpPost("books")]
-        public async Task<ActionResult<AddBookResponse>> AddBook([FromBody] AddBookRequest request)
+        public async Task<ActionResult<GeneralResponse>> AddBook([FromBody] AddBookRequest request)
             => Ok(await _libraryService.AddBookAsync(request));
 
         /// <summary>
         /// PUT:  ÕœÌÀ »Ì«‰«  ﬂ «».
         /// </summary>
         [HttpPut("books")]
-        public async Task<ActionResult<UpdateBookResponse>> UpdateBook([FromBody] UpdateBookRequest request)
+        public async Task<ActionResult<GeneralResponse>> UpdateBook([FromBody] UpdateBookRequest request)
             => Ok(await _libraryService.UpdateBookInfoAsync(request));
 
         /// <summary>
         /// PUT:  ÕœÌÀ  ’‰Ì›«  ﬂ «».
         /// </summary>
         [HttpPut("books/{bookId:guid}/categories")]
-        public async Task<ActionResult<OperationResponseDto>> UpdateBookCategories(
+        public async Task<ActionResult<GeneralResponse>> UpdateBookCategories(
             [FromRoute] Guid bookId,
             [FromBody] UpdateBookCategoriesRequest request)
         {
@@ -72,14 +72,14 @@ namespace Moeen.Api.Controllers
         /// DELETE: Õ–› ﬂ «» ‰Â«∆Ì«.
         /// </summary>
         [HttpDelete("books/{bookId:guid}")]
-        public async Task<ActionResult<OperationResponseDto>> DeleteBook([FromRoute] Guid bookId)
+        public async Task<ActionResult<GeneralResponse>> DeleteBook([FromRoute] Guid bookId)
             => Ok(await _libraryService.DeleteBookAsync(new DeleteBookRequest { BookId = bookId }));
 
         /// <summary>
         /// POST („ Ê«›ﬁ): «·»ÕÀ ›Ì «·„ﬂ »….
         /// </summary>
         [HttpPost("search")]
-        public async Task<ActionResult<SearchLibraryResponse>> SearchLibrary([FromBody] SearchLibraryRequest request)
+        public async Task<ActionResult<GeneralResponse>> SearchLibrary([FromBody] SearchLibraryRequest request)
             => Ok(await _libraryService.SearchLibraryAsync(request));
     }
 }
