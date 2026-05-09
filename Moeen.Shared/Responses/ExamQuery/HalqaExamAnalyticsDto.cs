@@ -3,10 +3,11 @@ using System.Collections.Generic;
 
 namespace Moeen.Shared.Responses.ExamQuery
 {
-    public class CircleExamAnalyticsDto
+    public class HalqaExamAnalyticsDto
     {
-        public Guid CircleId { get; set; }
-        public string CircleName { get; set; } = string.Empty;
+        public Guid HalqaId { get; set; }
+        //public string Name { get; set; }
+        public string HalqaName { get; set; } = string.Empty; 
         public double AverageScore { get; set; }
         public double SuccessRate { get; set; }
         public List<StudentExamPerformanceDto> TopStudents { get; set; } = new();

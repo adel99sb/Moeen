@@ -17,5 +17,6 @@ namespace Moeen.Api.Core.Entities
         public ICollection<ProgressEntry> ProgressEntries { get; set; }
         public ICollection<HalqaSession> HalqeSessions { get; set; }
         public ICollection<ExamTeacherHalqa> ExamTeacherHalqas { get; set; }
+        public ICollection<Student> Students { get; set; }
     }
 }
