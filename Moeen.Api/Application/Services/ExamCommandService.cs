@@ -2,11 +2,12 @@
 using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
 using Moeen.Shared.Requests.ExamCommand;
+using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.ExamCommand;
 
 namespace Moeen.Api.Application.Services
 {
-    public class ExamCommandService : IExamCommandService
+   public class ExamCommandService : IExamCommandService
     {
         private readonly IUnitOfWork _unitOfWork;
         // ✅ Constructor Dependency Injection
@@ -15,54 +16,258 @@ namespace Moeen.Api.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-
-        public async Task<ExamFeedbackDto> AddExamFeedbackAsync(AddExamFeedbackRequest request)
+        public async Task<GeneralResponse> AddExamFeedbackAsync(AddExamFeedbackRequest request)
         {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
-            // 1. جلب الامتحان والتأكد من وجوده
-            var exam = await _unitOfWork.Repository<Exam>().GetByIdAsync(request.ExamId);
-            if (exam == null)
-                throw new ArgumentException("الامتحان غير موجود.", nameof(request.ExamId));
-
-            // 2. تحديث البيانات حسب الـ Schema الحالي
-            // ملاحظة: جدول Exam يحتوي حالياً على notes فقط، لذا نربط Feedback به مباشرة.
-            // Recommendations غير موجود كحقل في الجدول حالياً، لذا يُعاد في الـ DTO كما هو لحين تحديث المخطط مستقبلاً.
-            exam.notes = request.Feedback;
-
-            // 3. الحفظ
-            await _unitOfWork.Repository<Exam>().UpdateAsync(exam);
-            await _unitOfWork.CompleteAsync();
-
-            // 4. إرجاع الاستجابة موحّدة ومطابقة لـ ExamFeedbackDto
-            return new ExamFeedbackDto
+            try
             {
-                ExamId = exam.Id,
-                Feedback = exam.notes,
-                Recommendations = request.Recommendations,
-                UpdatedAt = DateTime.UtcNow
-            };
+                // 1. التحقق من الطلب
+                if (request == null)
+                    return GeneralResponse.BadRequest("طلب البيانات مطلوب.");
+
+                // 2. جلب الامتحان والتأكد من وجوده
+                var exam = await _unitOfWork.Repository<Exam>().GetByIdAsync(request.ExamId);
+                if (exam == null)
+                    return GeneralResponse.BadRequest("الامتحان غير موجود.");
+
+                // 3. تحديث البيانات
+                // ⚠️ ملاحظة معمارية: حقل Feedback يُخزن في عمود notes حالياً حسب الـ Schema الموجود لديك
+                exam.notes = request.Feedback;
+
+                // 4. الحفظ في قاعدة البيانات
+                await _unitOfWork.Repository<Exam>().UpdateAsync(exam);
+                await _unitOfWork.CompleteAsync();
+
+                // 5. بناء الـ DTO المطلوب
+                var dto = new ExamFeedbackDto
+                {
+                    ExamId = exam.Id,
+                    Feedback = exam.notes,
+                    Recommendations = request.Recommendations,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                // 6. إرجاع الاستجابة الموحدة
+                return GeneralResponse.Ok("تم إضافة ملاحظات وتوصيات الامتحان بنجاح.", dto);
+            }
+            catch (Exception)
+            {
+                // ✅ ضمان وجود return في جميع المسارات (يحل مشكلة CS0161 نهائياً)
+                return GeneralResponse.InternalError("حدث خطأ داخلي أثناء إضافة ملاحظات الامتحان.");
+            }
+        }
+        public async Task<GeneralResponse> DeleteExamResultAsync(DeleteExamResultRequest request)
+        {
+            try
+            {
+                // 1. التحقق من الطلب
+                if (request == null)
+                    return GeneralResponse.BadRequest("طلب البيانات مطلوب.");
+
+                // 2. جلب الامتحان والتأكد من وجوده
+                var exam = await _unitOfWork.Repository<Exam>().GetByIdAsync(request.ExamId);
+                if (exam == null)
+                    return GeneralResponse.BadRequest("الامتحان غير موجود.");
+
+                // 3. حذف السجل
+                await _unitOfWork.Repository<Exam>().DeleteAsync(exam);
+                await _unitOfWork.CompleteAsync();
+
+                // 4. بناء كائن الاستجابة الخاص (اختياري، يمكن الاستغناء عنه والاعتماد على GeneralResponse مباشرة)
+                var resultDto = new DeleteExamResultResponse
+                {
+                    Success = true,
+                    Message = "تم حذف نتيجة الامتحان بنجاح."
+                };
+
+                // 5. إرجاع الاستجابة الموحدة
+                return GeneralResponse.Ok("تم حذف نتيجة الامتحان بنجاح.", resultDto);
+            }
+            catch (Exception ex)
+            {
+                // ⚠️ يفضل تسجيل الخطأ هنا بـ ILogger في البيئة الحقيقية
+                return GeneralResponse.InternalError("حدث خطأ داخلي أثناء حذف نتيجة الامتحان.");
+            }
         }
 
-        public Task<DeleteExamResultResponse> DeleteExamResultAsync(DeleteExamResultRequest request)
+        public async Task<GeneralResponse> RegisterExamAsync(RegisterExamRequest request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // 1. التحقق من الطلب
+                if (request == null)
+                    return GeneralResponse.BadRequest("طلب البيانات مطلوب.");
+
+                // 2. قواعد أعمال (Business Rules)
+                if (request.JuzTo < request.JuzFrom)
+                    return GeneralResponse.BadRequest("الجزء 'إلى' يجب أن يكون أكبر من أو يساوي الجزء 'من'.");
+
+                // 3. التحقق من وجود الطالب والمعلم (منع أخطاء Foreign Key وجلب الأسماء)
+                var student = await _unitOfWork.Repository<Student>().GetByIdAsync(request.StudentId);
+                if (student == null)
+                    return GeneralResponse.BadRequest("الطالب المحدد غير موجود.");
+
+                var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(request.TeacherId);
+                if (teacher == null)
+                    return GeneralResponse.BadRequest("المعلم المحدد غير موجود.");
+
+                // 4. إنشاء كيان الامتحان وحفظه
+                var exam = new Exam
+                {
+                    Id = Guid.NewGuid(),
+                    StudentId = request.StudentId,
+                    TeacherId = request.TeacherId,
+                    juz_form = request.JuzFrom,       // مطابقة لأسماء الحقول في الـ Entity
+                    juz_to = request.JuzTo,
+                    score = request.Score,
+                    notes = request.Notes ?? string.Empty,
+                    mark = request.Mark,
+                    date = DateTime.UtcNow,
+                    TeacherExamId = Guid.NewGuid()    // يُنشأ تلقائياً إذا كان الجدول يتطلبه
+                };
+
+                await _unitOfWork.Repository<Exam>().AddAsync(exam);
+                await _unitOfWork.CompleteAsync();
+
+                // 5. بناء الـ DTO وإرجاع الاستجابة الموحدة
+                var dto = new ExamResultDto
+                {
+                    Id = exam.Id,
+                    StudentId = exam.StudentId,
+                    StudentName = student.name,       // افتراض أن خاصية الاسم هي 'name' في الـ User/Student
+                    TeacherId = exam.TeacherId,
+                    TeacherName = teacher.name,
+                    JuzFrom = exam.juz_form,
+                    JuzTo = exam.juz_to,
+                    Score = exam.score,
+                    Date = exam.date,
+                    Notes = exam.notes,
+                    Mark = exam.mark,
+                    Grade = CalculateGrade(exam.score) // دالة مساعدة للتقدير
+                };
+
+                return GeneralResponse.Ok("تم تسجيل الاختبار بنجاح.", dto);
+            }
+            catch (Exception ex)
+            {
+                // ⚠️ يُفضل تسجيل الـ ex باستخدام ILogger في الإنتاج
+                return GeneralResponse.InternalError("حدث خطأ داخلي أثناء تسجيل الاختبار.");
+            }
         }
 
-        public Task<ExamResultDto> RegisterExamAsync(RegisterExamRequest request)
+        // 🛠️ دالة مساعدة داخل الخدمة لتحويل العلامة التقديرية
+        private string CalculateGrade(int score)
         {
-            throw new NotImplementedException();
+            if (score >= 90) return "ممتاز";
+            if (score >= 80) return "جيد جداً";
+            if (score >= 70) return "جيد";
+            if (score >= 60) return "مقبول";
+            return "يحتاج تحسين";
         }
 
-        public Task<ExamResultDto> UpdateExamInfoAsync(UpdateExamInfoRequest request)
+        public async Task<GeneralResponse> UpdateExamInfoAsync(UpdateExamInfoRequest request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // 1. التحقق من الطلب
+                if (request == null)
+                    return GeneralResponse.BadRequest("طلب البيانات مطلوب.");
+
+                // 2. جلب الامتحان
+                var exam = await _unitOfWork.Repository<Exam>().GetByIdAsync(request.ExamId);
+                if (exam == null)
+                    return GeneralResponse.BadRequest("الامتحان غير موجود.");
+
+                // 3. تحديث الحقول الموجودة فعلياً في الـ Schema فقط
+                if (request.ExamDate.HasValue)
+                    exam.date = request.ExamDate.Value;
+
+                if (!string.IsNullOrWhiteSpace(request.Notes))
+                    exam.notes = request.Notes;
+
+                // 4. الحفظ
+                await _unitOfWork.Repository<Exam>().UpdateAsync(exam);
+                await _unitOfWork.CompleteAsync();
+
+                // 5. جلب البيانات المرتبطة لبناء الـ DTO
+                var student = await _unitOfWork.Repository<Student>().GetByIdAsync(exam.StudentId);
+                var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(exam.TeacherId);
+
+                // 6. بناء الاستجابة الموحدة
+                var dto = new ExamResultDto
+                {
+                    Id = exam.Id,
+                    StudentId = exam.StudentId,
+                    StudentName = student?.name ?? "غير معروف",
+                    TeacherId = exam.TeacherId,
+                    TeacherName = teacher?.name ?? "غير معروف",
+                    JuzFrom = exam.juz_form,
+                    JuzTo = exam.juz_to,
+                    Score = exam.score,
+                    Date = exam.date,
+                    Notes = exam.notes,
+                    Mark = exam.mark,
+                    Grade = CalculateGrade(exam.score) // الدالة المساعدة من الخطوة السابقة
+                };
+
+                return GeneralResponse.Ok("تم تحديث بيانات الامتحان بنجاح.", dto);
+            }
+            catch (Exception)
+            {
+                return GeneralResponse.InternalError("حدث خطأ داخلي أثناء تحديث بيانات الامتحان.");
+            }
         }
 
-        public Task<ExamResultDto> UpdateExamResultAsync(UpdateExamResultRequest request)
+        public async Task<GeneralResponse> UpdateExamResultAsync(UpdateExamResultRequest request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // 1. التحقق من الطلب
+                if (request == null)
+                    return GeneralResponse.BadRequest("طلب البيانات مطلوب.");
+
+                // 2. جلب الامتحان والتأكد من وجوده
+                var exam = await _unitOfWork.Repository<Exam>().GetByIdAsync(request.ExamId);
+                if (exam == null)
+                    return GeneralResponse.BadRequest("الامتحان غير موجود.");
+
+                // 3. تحديث النتيجة والملاحظات فقط
+                exam.score = request.NewScore;
+                if (!string.IsNullOrWhiteSpace(request.Notes))
+                    exam.notes = request.Notes;
+
+                // ️ ExamType غير موجود في قاعدة البيانات، يُستخدم للمنطق البرمجي فقط ولا يُحفظ هنا
+
+                // 4. الحفظ
+                await _unitOfWork.Repository<Exam>().UpdateAsync(exam);
+                await _unitOfWork.CompleteAsync();
+
+                // 5. جلب بيانات الطالب والمعلم لبناء الـ DTO
+                var student = await _unitOfWork.Repository<Student>().GetByIdAsync(exam.StudentId);
+                var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(exam.TeacherId);
+
+                // 6. بناء الـ DTO وإرجاع الاستجابة الموحدة
+                var dto = new ExamResultDto
+                {
+                    Id = exam.Id,
+                    StudentId = exam.StudentId,
+                    StudentName = student?.name ?? "غير معروف",
+                    TeacherId = exam.TeacherId,
+                    TeacherName = teacher?.name ?? "غير معروف",
+                    JuzFrom = exam.juz_form,
+                    JuzTo = exam.juz_to,
+                    Score = exam.score,
+                    Date = exam.date,
+                    Notes = exam.notes,
+                    Mark = exam.mark,
+                    Grade = CalculateGrade(exam.score) // الدالة المساعدة
+                };
+
+                return GeneralResponse.Ok("تم تحديث نتيجة الامتحان بنجاح.", dto);
+            }
+            catch (Exception)
+            {
+                return GeneralResponse.InternalError("حدث خطأ داخلي أثناء تحديث نتيجة الامتحان.");
+            }
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Moeen.Shared.Requests.ExamCommand;
-using Moeen.Shared.Responses.ExamCommand;
+using Moeen.Shared.Responses;
 using System.Threading.Tasks;
-
 namespace Moeen.Api.Core.Contracts.Application
 {
     public interface IExamCommandService
@@ -9,26 +8,26 @@ namespace Moeen.Api.Core.Contracts.Application
         /// <summary>
         /// تسجيل اختبار جديد مع حساب التقدير والنقاط تلقائياً
         /// </summary>
-        Task<ExamResultDto> RegisterExamAsync(RegisterExamRequest request);
+        Task<GeneralResponse> RegisterExamAsync(RegisterExamRequest request);
 
         /// <summary>
         /// تحديث نتيجة اختبار (إذا كان هناك خطأ)
         /// </summary>
-        Task<ExamResultDto> UpdateExamResultAsync(UpdateExamResultRequest request);
+        Task<GeneralResponse> UpdateExamResultAsync(UpdateExamResultRequest request);
             
         /// <summary>
         /// حذف نتيجة اختبار
         /// </summary>
-        Task<DeleteExamResultResponse> DeleteExamResultAsync(DeleteExamResultRequest request);
+        Task<GeneralResponse> DeleteExamResultAsync(DeleteExamResultRequest request);
 
         /// <summary>
         /// [PUT] تحديث البيانات الوصفية للاختبار (التاريخ، النوع، الملاحظات)
         /// </summary>
-        Task<ExamResultDto> UpdateExamInfoAsync(UpdateExamInfoRequest request);
+        Task<GeneralResponse> UpdateExamInfoAsync(UpdateExamInfoRequest request);
 
         /// <summary>
         /// [PUT] إضافة ملاحظات تقييمية أو توصيات للطالب بعد الاختبار
         /// </summary>
-        Task<ExamFeedbackDto> AddExamFeedbackAsync(AddExamFeedbackRequest request);
+        Task<GeneralResponse> AddExamFeedbackAsync(AddExamFeedbackRequest request);
     }
 }

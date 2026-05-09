@@ -1,6 +1,6 @@
 ﻿using Moeen.Shared.Requests.Feedback;
-using Moeen.Shared.Responses.Feedback;
-using System.Threading.Tasks;
+using Moeen.Shared.Responses;
+using Moeen.Shared.Requests;
 
 namespace Moeen.Api.Core.Contracts.Application
 {
@@ -9,21 +9,36 @@ namespace Moeen.Api.Core.Contracts.Application
         /// <summary>
         /// استقبال شكوى جديدة
         /// </summary>
-        Task<SubmitComplaintResponse> SubmitComplaintAsync(SubmitComplaintRequest request);
+        Task<GeneralResponse> SubmitComplaintAsync(SubmitComplaintRequest request);
 
         /// <summary>
         /// استقبال اقتراح جديد
         /// </summary>
-        Task<SubmitSuggestionResponse> SubmitSuggestionAsync(SubmitSuggestionRequest request);
+        Task<GeneralResponse> SubmitSuggestionAsync(SubmitSuggestionRequest request);
 
         /// <summary>
         /// إدارة الشكاوى والاقتراحات (الرد عليها)
         /// </summary>
-        Task<ManageFeedbackResponse> ManageFeedbacksAsync(ManageFeedbackRequest request);
+        Task<GeneralResponse> ManageFeedbacksAsync(ManageFeedbackRequest request);
 
         /// <summary>
         /// تحديث حالة الشكوى
         /// </summary>
-        Task<ManageFeedbackResponse> UpdateComplaintStatusAsync(UpdateComplaintStatusRequest request);
+        Task<GeneralResponse> UpdateComplaintStatusAsync(UpdateComplaintStatusRequest request);
+
+        /// <summary>
+        /// استرجاع قائمة الشكاوى مع ترقيم
+        /// </summary>
+        Task<GeneralResponse> GetComplaintsAsync(PaginationRequest request);
+
+        /// <summary>
+        /// استرجاع قائمة الاقتراحات مع ترقيم
+        /// </summary>
+        Task<GeneralResponse> GetSuggestionsAsync(PaginationRequest request);
+
+        /// <summary>
+        /// تحديث حالة الاقتراح
+        /// </summary>
+        Task<GeneralResponse> UpdateSuggestionStatusAsync(UpdateSuggestionStatusRequest request);
     }
 }

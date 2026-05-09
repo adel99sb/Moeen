@@ -1,11 +1,11 @@
 using System;
 
-namespace Moeen.Shared.Responses.CircleTeacherAssignment
+namespace Moeen.Shared.Responses.HalqaTeacherAssignment
 {
-    public class CircleAssignmentDto
+    public class HalqaAssignmentDto
     {
-        public Guid CircleId { get; set; }
-        public string CircleName { get; set; } = string.Empty;
+        public Guid HalqaId { get; set; }
+        public string HalqaName { get; set; } = string.Empty;
 
         public Guid TeacherId { get; set; }
         public string TeacherName { get; set; } = string.Empty;

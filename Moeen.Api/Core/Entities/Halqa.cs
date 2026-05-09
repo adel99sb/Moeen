@@ -7,7 +7,7 @@ namespace Moeen.Api.Core.Entities
         public Guid Id { get; set; }
         public Guid FoujId { get; set; }
         public string Name { get; set; }
-        public Guid TeacherId { get; set; }
+        public Guid? TeacherId { get; set; }
 
         [Column("type")]
         public string Type { get; set; }
@@ -17,5 +17,6 @@ namespace Moeen.Api.Core.Entities
         public ICollection<ProgressEntry> ProgressEntries { get; set; }
         public ICollection<HalqaSession> HalqeSessions { get; set; }
         public ICollection<ExamTeacherHalqa> ExamTeacherHalqas { get; set; }
+        public ICollection<Student> Students { get; set; }
     }
 }

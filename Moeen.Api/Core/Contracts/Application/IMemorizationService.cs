@@ -1,78 +1,35 @@
-﻿using Moeen.Shared.Requests.Memorization;
-using Moeen.Shared.Responses;
-using Moeen.Shared.Responses.CircleTeacherAssignment;
-using Moeen.Shared.Responses.Memorization;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
+﻿using Moeen.Shared.Requests.Memorization;   
+using Moeen.Shared.Responses;               
+using System.Threading.Tasks;               
 namespace Moeen.Api.Core.Contracts.Application
 {
     public interface IMemorizationService
     {
-        /// <summary>
-        /// تسجيل حفظ صفحة جديدة لطالب
-        /// </summary>
-        /// <param name="request">بيانات الصفحة المحفوظة</param>
-        /// <returns>عدد النقاط المكتسبة</returns>
-        Task<RecordPageMemorizationResponse> RecordNewPageMemorizationAsync(RecordPageMemorizationRequest request);
+        // تسجيل حفظ صفحة جديدة
+        Task<GeneralResponse> RecordNewPageMemorizationAsync(RecordPageMemorizationRequest request);
 
-        /// <summary>
-        /// تسجيل حفظ مجموعة صفحات دفعة واحدة
-        /// </summary>
-        /// <param name="request">معرف الطالب وقائمة الصفحات مع التقديرات</param>
-        /// <returns>نتيجة العملية مع تفاصيل كل صفحة</returns>
-        Task<BatchResult> RecordNewPagesBatchAsync(RecordPagesBatchRequest request);
+        // جلب آخر صفحة تم حفظها للطالب
+        Task<GeneralResponse> GetLastMemorizedPageAsync(GetLastMemorizedPageRequest request);
 
-        /// <summary>
-        /// الحصول على آخر صفحة حفظها الطالب
-        /// </summary>
-        /// <param name="request">معرف الطالب</param>
-        /// <returns>رقم آخر صفحة</returns>
-        Task<GetLastMemorizedPageResponse> GetLastMemorizedPageAsync(GetLastMemorizedPageRequest request);
+        // جلب تفاصيل سجل حفظ محدد
+        Task<GeneralResponse> GetMemorizationRecordAsync(GetMemorizationRecordRequest request);
 
-        /// <summary>
-        /// [GET] جلب تفاصيل حفظ صفحة معينة لطالب
-        /// </summary>
-        Task<MemorizationRecordDto> GetMemorizationRecordAsync(GetMemorizationRecordRequest request);
+        // جلب السجل التاريخي الكامل لحفظ الطالب
+        Task<GeneralResponse> GetStudentMemorizationHistoryAsync(GetStudentMemorizationHistoryRequest request);
 
-        /// <summary>
-        /// [GET] جلب تاريخ الحفظ لطالب مع التصفح والتصفية
-        /// </summary>
-        Task<PagedList<MemorizationRecordDto>> GetStudentMemorizationHistoryAsync(GetStudentMemorizationHistoryRequest request);
+        // جلب إحصائيات عامة عن عملية الحفظ
+        Task<GeneralResponse> GetMemorizationStatisticsAsync(GetMemorizationStatisticsRequest request);
 
-        /// <summary>
-        /// [GET] جلب إحصائيات حفظ الطالب
-        /// </summary>
-        Task<MemorizationStatisticsDto> GetMemorizationStatisticsAsync(GetMemorizationStatisticsRequest request);
+        // جلب تقدم الحفظ على مستوى الحلقة الدراسية
+        Task<GeneralResponse> GetCircleMemorizationProgressAsync(GetCircleProgressRequest request);
 
-        /// <summary>
-        /// [GET] جلب تقدم طلاب حلقة معينة في الحفظ
-        /// </summary>
-        Task<List<StudentMemorizationSummaryDto>> GetCircleMemorizationProgressAsync(GetCircleProgressRequest request);
+        // جلب تقرير مفصل وشامل عن تقدم الحفظ
+        Task<GeneralResponse> GetMemorizationProgressReportAsync(GetProgressReportRequest request);
 
-        /// <summary>
-        /// [GET] جلب تقرير تقدم الحفظ للطالب (للرسوم البيانية)
-        /// </summary>
-        Task<MemorizationProgressReportDto> GetMemorizationProgressReportAsync(GetProgressReportRequest request);
+        // تحديث تقدير/درجة سجل حفظ موجود
+        Task<GeneralResponse> UpdateMemorizationGradeAsync(UpdateMemorizationGradeRequest request);
 
-        /// <summary>
-        /// [PUT] تحديث تقدير صفحة محفوظة
-        /// </summary>
-        Task<MemorizationRecordDto> UpdateMemorizationGradeAsync(UpdateMemorizationGradeRequest request);
-
-        /// <summary>
-        /// [PUT] إعادة تعيين حالة سجل حفظ
-        /// </summary>
-        Task<OperationResponseDto> ResetMemorizationRecordAsync(ResetMemorizationRecordRequest request);
-
-        /// <summary>
-        /// [DELETE] حذف سجل حفظ
-        /// </summary>
-        Task<OperationResponseDto> DeleteMemorizationRecordAsync(DeleteMemorizationRecordRequest request);
-
-        /// <summary>
-        /// [POST] توليد شهادة حفظ إلكترونية
-        /// </summary>
-        Task<CertificateDto> GenerateMemorizationCertificateAsync(GenerateCertificateRequest request);
+        // حذف سجل حفظ من النظام
+        Task<GeneralResponse> DeleteMemorizationRecordAsync(DeleteMemorizationRecordRequest request);
     }
 }

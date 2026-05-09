@@ -25,5 +25,8 @@ namespace Moeen.Shared.Requests.LessonManagement
 
         [Required(ErrorMessage = "Status is required")]
         public AttendanceStatus Status { get; set; }
+
+        public int? Points { get; set; }
+        public string? Note { get; set; }
     }
 }

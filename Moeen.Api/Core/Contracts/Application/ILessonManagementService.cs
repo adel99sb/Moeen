@@ -1,8 +1,5 @@
 ﻿using Moeen.Shared.Requests.LessonManagement;
 using Moeen.Shared.Responses;
-using Moeen.Shared.Responses.CircleTeacherAssignment;
-using Moeen.Shared.Responses.LessonManagement;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application
@@ -12,91 +9,46 @@ namespace Moeen.Api.Core.Contracts.Application
         /// <summary>
         /// إنشاء درس جديد
         /// </summary>
-        Task<LessonDto> CreateLessonAsync(CreateLessonRequest request);
+        Task<GeneralResponse> CreateLessonAsync(CreateLessonRequest request);
 
         /// <summary>
         /// تحديث محتوى الدرس
         /// </summary>
-        Task<LessonDto> UpdateLessonAsync(UpdateLessonRequest request);
+        Task<GeneralResponse> UpdateLessonAsync(UpdateLessonRequest request);
 
         /// <summary>
         /// حذف درس
         /// </summary>
-        Task<DeleteLessonResponse> DeleteLessonAsync(DeleteLessonRequest request);
-
-        /// <summary>
-        /// تنظيم تسلسل الدروس
-        /// </summary>
-        Task<ReorderLessonsResponse> ReorderLessonsAsync(ReorderLessonsRequest request);
-
-        /// <summary>
-        /// إضافة مواد مساعدة (ملفات) لدرس
-        /// </summary>
-        Task<AddLessonMaterialsResponse> AddLessonMaterialsAsync(AddLessonMaterialsRequest request);
-
-        /// <summary>
-        /// إدارة وقت الدرس (قديم/متوافق)
-        /// </summary>
-        Task<ManageLessonTimeResponse> ManageLessonTimeAsync(ManageLessonTimeRequest request);
-
-        /// <summary>
-        /// نسخ الدروس بين الحلقات
-        /// </summary>
-        Task<CopyLessonsResponse> CopyLessonsAsync(CopyLessonsRequest request);
-
-        /// <summary>
-        /// [GET] جلب تفاصيل درس محدد بمعرفه مع جميع محتوياته ومواده
-        /// </summary>
-        Task<LessonDto> GetLessonByIdAsync(GetLessonByIdRequest request);
+        Task<GeneralResponse> DeleteLessonAsync(DeleteLessonRequest request);
 
         /// <summary>
         /// [GET] جلب جميع الدروس التابعة لحلقة معينة مع دعم التصفح والتصفية
         /// </summary>
-        Task<PagedList<LessonDto>> GetLessonsByCircleAsync(GetLessonsByCircleRequest request);
+        Task<GeneralResponse> GetLessonsByCircleAsync(GetLessonsByCircleRequest request);
 
         /// <summary>
-        /// [GET] جلب المواد والملفات المساعدة المرتبطة بدرس معين
+        /// [GET] جلب ملخص حول الدروس الأسبوعية
         /// </summary>
-        Task<List<LessonMaterialDto>> GetLessonMaterialsAsync(GetLessonMaterialsRequest request);
-
-        /// <summary>
-        /// [GET] جلب جدول مواعيد الدروس لحلقة معينة
-        /// </summary>
-        Task<LessonScheduleDto> GetLessonScheduleAsync(GetLessonScheduleRequest request);
-
-        /// <summary>
-        /// [PUT] تحديث جدول مواعيد الدرس
-        /// </summary>
-        Task<LessonScheduleDto> UpdateLessonScheduleAsync(UpdateLessonScheduleRequest request);
-
-        /// <summary>
-        /// [PUT] تعيين درس لحلقات محددة
-        /// </summary>
-        Task<OperationResponseDto> AssignLessonToCirclesAsync(AssignLessonToCirclesRequest request);
-
-        /// <summary>
-        /// [PUT] تعيين معلم مسؤول عن درس معين
-        /// </summary>
-        Task<OperationResponseDto> AssignTeacherToLessonAsync(AssignTeacherToLessonRequest request);
-
-        /// <summary>
-        /// [DELETE] حذف ناعم لدرس
-        /// </summary>
-        Task<OperationResponseDto> SoftDeleteLessonAsync(SoftDeleteLessonRequest request);
-
-        /// <summary>
-        /// [DELETE] إلغاء تعيين درس من حلقة معينة
-        /// </summary>
-        Task<OperationResponseDto> UnassignLessonFromCircleAsync(UnassignLessonFromCircleRequest request);
-
-        /// <summary>
-        /// [POST] تكرار درس موجود لإنشاء درس جديد
-        /// </summary>
-        Task<LessonDto> DuplicateLessonAsync(DuplicateLessonRequest request);
+        Task<GeneralResponse> GetWeeklyLessonDashboardAsync(GetWeeklyLessonDashboardRequest request);
 
         /// <summary>
         /// [POST] تسجيل حضور الطلاب في درس معين
         /// </summary>
-        Task<LessonAttendanceDto> RecordLessonAttendanceAsync(RecordAttendanceRequest request);
+        Task<GeneralResponse> RecordLessonAttendanceAsync(RecordAttendanceRequest request);
+
+        /// <summary>
+        /// [GET] جلب تاريخ الدروس لطلاب حلقة معينة
+        /// </summary>
+        Task<GeneralResponse> GetLessonHistoryAsync(GetLessonHistoryRequest request);
+
+        /// <summary>
+        /// [GET] الحصول على نظرة عامة عن الحلقات
+        /// </summary>
+        Task<GeneralResponse> GetCirclesOverviewAsync(GetCirclesOverviewRequest request);
+
+        /// <summary>
+        /// [GET] الحصول على الدروس اليومية لطالب معين
+        /// </summary>
+        Task<GeneralResponse> GetStudentDailyLessonsAsync(GetStudentDailyLessonsRequest request);
     }
 }
