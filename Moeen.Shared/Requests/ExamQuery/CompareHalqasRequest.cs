@@ -4,11 +4,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.ExamQuery
 {
-    public class CompareCirclesRequest
+    public class CompareHalqasRequest
     {
-        [Required(ErrorMessage = "At least two circle IDs are required")]
+        [Required(ErrorMessage = "At least two halqa IDs are required")]
         [MinLength(2)]
-        public List<Guid> CircleIds { get; set; } = new();
+        public List<Guid> HalqaId { get; set; } = new();
 
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
