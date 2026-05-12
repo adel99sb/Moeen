@@ -628,7 +628,7 @@ namespace Moeen.Api.Application.Services
                     .ToDictionary(m => m.Id, m => m.name);
 
                 var halqas = (await _unitOfWork.Repository<Halqa>().GetAllAsync())
-                    .Where(h => userIds.Contains(h.TeacherId))
+                    .Where(h => userIds.Contains((Guid)h.TeacherId))
                     .ToList();
 
                 var foujIds = halqas.Select(h => h.FoujId).Distinct().ToList();

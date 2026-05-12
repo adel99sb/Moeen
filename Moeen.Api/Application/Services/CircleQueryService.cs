@@ -40,7 +40,7 @@ namespace Moeen.Api.Application.Services
                 Name = halqa.Name,
                 FoujId = halqa.FoujId,
                 FoujName = halqa.Fouj?.name,
-                TeacherId = halqa.TeacherId,
+                TeacherId = (Guid)halqa.TeacherId,
                 TeacherName = halqa.Teacher?.name,
                 Type = halqa.Type,
                 StudentsCount = studentsCount
