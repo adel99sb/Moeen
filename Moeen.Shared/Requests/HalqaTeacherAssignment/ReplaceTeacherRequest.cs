@@ -1,12 +1,12 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Moeen.Shared.Requests.CircleTeacherAssignment
+namespace Moeen.Shared.Requests.HalqaTeacherAssignment
 {
     public class ReplaceTeacherRequest
     {
-        [Required(ErrorMessage = "Circle ID is required")]
-        public Guid CircleId { get; set; }
+        [Required(ErrorMessage = "Halqa ID is required")]
+        public Guid HalqaId { get; set; }
 
         [Required(ErrorMessage = "Old teacher ID is required")]
         public Guid OldTeacherId { get; set; }
