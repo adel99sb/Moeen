@@ -2,6 +2,7 @@
 @using Moeen.Dashboard.Services.Abstractions
 @using Moeen.Shared.Requests.Identity
 @using Moeen.Shared.Requests.Enrollment
+@using Moeen.Shared.Requests.CircleQuery
 @inject IAuthService AuthService
 @inject NavigationManager NavManager
 @rendermode InteractiveServer
@@ -248,16 +249,61 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 </header>
 <br />
 <div class="search-wrapper mb-3">
-	<i class="bi bi-search"></i>
   <EditForm Model="searchModel" OnValidSubmit="HandleSearch">
+	<i class="bi bi-search"></i>
+
 	<input type="text" class="search-input" @bind="searchModel.Name" placeholder="ابحث عن طالب...">
     <button type="submit" style="display: none;"></button>
     </EditForm>
 </div>
-    @if (searchResponse != null)
-    {  
-        @*اعرض النتائج هنا*@
-    } 
+    @if (isLoading)
+{
+    <div class="text-center my-3">
+        <span class="spinner-border text-success" role="status"></span>
+        <p>جاري البحث...</p>
+    </div>
+}
+
+<div class="table-wrapper">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="table th">اسم الطالب</th>
+                    <th class="table th">أداء الطالب</th>
+                    <th class="table th">حذف الطالب</th>
+                </tr>
+            </thead>
+            <tbody>
+                @* إذا كانت هناك نتائج بحث، نقوم بعمل Loop عليها *@
+                @if (searchResponse != null && searchResponse.Success && searchResponse.Data != null)
+                {
+                    @foreach (var student in studentsList)
+                    {
+                        <tr>
+                            <td class="table td">@student.Name</td>
+                            <td>
+                                <a @onclick="() => viewStudent1()"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
+                                <a @onclick="() => editStudent()"><button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                            </td>
+                            <td class="table td">
+                                <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3" class="text-center p-3">
+                            @(searchResponse == null ? "اكتب اسماً واضغط بحث لعرض الطلاب" : "لا يوجد طلاب يطابقون هذا البحث")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
 <div class="table-wrapper">
 <div class="table-responsive">
 <table class="table">
@@ -487,18 +533,30 @@ RegisterRequest studentModel = new RegisterRequest();
 
     // متغير لحالة التحميل (اختياري بس بيعطي شكل احترافي)
     private bool isLoading = false;
-    // استعاء الخدمة من s عبر is
+
+    // 👇 هنا السطر الجديد: ننشئ قائمة فارغة لتخزين الطلاب الذين سنجدهم
+    // (إذا كان اسم كلاس الطالب عندك يختلف عن "StudentDto" قومي بتغييره للاسم الصحيح عندك)
+    private List<StudentFilterDto> studentsList = new List<StudentFilterDto>();
+
     private async Task HandleSearch()
     {
         isLoading = true;
         try
         {
-            // استدعاء الخدمة (S) من خلال الجسر (IS)
+            // استدعاء خدمة البحث من الباك إند
             searchResponse = await AuthService.Search(searchModel);
             
             if (searchResponse != null && searchResponse.Success)
             {
-                StateHasChanged(); 
+                // 👇 هاد السطر هو السحر اللي كان ناقص!
+                // هنا بنأخذ البيانات القادمة من السيرفر وبنحطها بالقائمة ليقرأها الجدول فوراً
+                // تنبيه: تأكدي هل الحقل في الـ GeneralResponse اسمه Data أم شيئ آخر؟
+                studentsList = (List<Moeen.Shared.Requests.CircleQuery.StudentFilterDto>)searchResponse.Data; 
+            }
+            else
+            {
+                // إذا فشل البحث أو لم يجد نتائج، نفرغ القائمة القديمة
+                studentsList = new List<StudentFilterDto>();
             }
         }
         catch (Exception ex)
@@ -508,6 +566,7 @@ RegisterRequest studentModel = new RegisterRequest();
         finally
         {
             isLoading = false;
+            StateHasChanged(); // إجبار الصفحة على التحديث وعرض البيانات الجديدة
         }
-    }
+}
 }
