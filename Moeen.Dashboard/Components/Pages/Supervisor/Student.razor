@@ -1,6 +1,7 @@
 ﻿@page "/supervisor/student"
 @using Moeen.Dashboard.Services.Abstractions
 @using Moeen.Shared.Requests.Identity
+@using Moeen.Shared.Requests.Enrollment
 @inject IAuthService AuthService
 @inject NavigationManager NavManager
 @rendermode InteractiveServer
@@ -248,8 +249,15 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 <br />
 <div class="search-wrapper mb-3">
 	<i class="bi bi-search"></i>
-	<input type="text" class="search-input" placeholder="ابحث عن طالب...">
+  <EditForm Model="searchModel" OnValidSubmit="HandleSearch">
+	<input type="text" class="search-input" @bind="searchModel.Name" placeholder="ابحث عن طالب...">
+    <button type="submit" style="display: none;"></button>
+    </EditForm>
 </div>
+    @if (searchResponse != null)
+    {  
+        @*اعرض النتائج هنا*@
+    } 
 <div class="table-wrapper">
 <div class="table-responsive">
 <table class="table">
@@ -265,7 +273,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 			<td class="table td">آلاء قاسم </td>
 			<td >
 				<a @onclick="viewStudent1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-                <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+        <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
 				</td>
 			<td class="table td">
 				  <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
@@ -275,7 +283,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 			<td class="table td">ماريا العبد السلام </td>
 			<td>
 				<a @onclick="viewStudent1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-                <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>     
+        <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>     
 			</td>
 			<td class="table td">
 			 <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
@@ -285,7 +293,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 			<td class="table td">آية دعبول </td>
 			<td>
 				<a @onclick="viewStudent1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-                <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>     
+        <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>     
 			</td>
 			<td class="table td">
 			 <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
@@ -302,7 +310,8 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         <h2><i class="bi bi-person-plus-fill"></i> إضافة طالب</h2>
     </div>
   <EditForm Model="studentModel" OnValidSubmit="HandleSubmit">
-      <DataAnnotationsValidator /> @* هاد السطر ضروري جداً *@
+      <DataAnnotationsValidator /> 
+    @* هاد السطر ضروري جداً *@
     <ValidationSummary /> @* وهاد بيطبعلك الأخطاء إذا نسيتي حقل *@
         <div class="grid-row">
             <div class="input-group">
@@ -449,6 +458,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 		NavManager.NavigateTo("/supervisor/alaa_info");
 		// Logic to edit student information
 	}
+    //register
 RegisterRequest studentModel = new RegisterRequest();
 
   
@@ -468,5 +478,36 @@ RegisterRequest studentModel = new RegisterRequest();
             // كود لإظهار رسالة خطأ للمستخدم   
         }
     }
-	
+	//search
+    // كائن البحث اللي رح نربطه بحقول الإدخال (Input Fields)
+    private SearchMembersRequest searchModel = new SearchMembersRequest();
+    
+    // متغير لتخزين النتيجة القادمة من الباك إند
+    private GeneralResponse searchResponse;
+
+    // متغير لحالة التحميل (اختياري بس بيعطي شكل احترافي)
+    private bool isLoading = false;
+    // استعاء الخدمة من s عبر is
+    private async Task HandleSearch()
+    {
+        isLoading = true;
+        try
+        {
+            // استدعاء الخدمة (S) من خلال الجسر (IS)
+            searchResponse = await AuthService.Search(searchModel);
+            
+            if (searchResponse != null && searchResponse.Success)
+            {
+                StateHasChanged(); 
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
 }

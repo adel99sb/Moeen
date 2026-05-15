@@ -1,5 +1,6 @@
 ﻿using Moeen.Dashboard.Infrastructure.Http.Clients;
 using Moeen.Dashboard.Services.Abstractions;
+using Moeen.Shared.Requests.Enrollment;
 using Moeen.Shared.Requests.Identity;
 using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.Identity;
@@ -55,6 +56,20 @@ namespace Moeen.Dashboard.Services.Implementations
             var data = JsonSerializer.Deserialize<GeneralResponse>(json);
 
             return data;
+        }
+        public async Task<GeneralResponse> Search(SearchMembersRequest request)
+        {
+            // 1. منبعث الطلب عن طريق الـ client (ساعي البريد)
+            var res = await _client.Search(request);
+
+            // 2. التحقق إذا النتيجة رجعت فاضية أو فيها فشل
+            if (res == null || !res.Success)
+            {
+                // منطلع خطأ أو منرجع رسالة الفشل
+                throw new Exception(res?.Message ?? "Search failed");
+            }
+
+            return res;
         }
     }
 }

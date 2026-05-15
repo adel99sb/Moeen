@@ -1,4 +1,5 @@
-﻿using Moeen.Shared.Requests.Identity;
+﻿using Moeen.Shared.Requests.Enrollment;
+using Moeen.Shared.Requests.Identity;
 using Moeen.Shared.Responses;
 
 namespace Moeen.Dashboard.Infrastructure.Http.Clients
@@ -23,6 +24,19 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
         public async Task<GeneralResponse> Register(RegisterRequest request)
         {
             var response = await _http.PostAsJsonAsync(ApiRoutes.RegisterRoute, request);
+
+            var content = await response.Content.ReadFromJsonAsync<GeneralResponse>();
+
+            return content;
+        }
+        public async Task<GeneralResponse> Search(SearchMembersRequest request)
+        {
+            var response = await _http.PostAsJsonAsync(ApiRoutes.SearchRoute, request);
+            // التحقق إذا الطلب نجح على مستوى الـ HTTP
+            if (!response.IsSuccessStatusCode)
+            {
+                return new GeneralResponse { Success = false, Message = "مشكلة في الاتصال بالسيرفر" };
+            }
 
             var content = await response.Content.ReadFromJsonAsync<GeneralResponse>();
 

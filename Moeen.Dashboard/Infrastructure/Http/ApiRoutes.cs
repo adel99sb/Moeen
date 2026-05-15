@@ -5,6 +5,6 @@
         public static string BaseUrl { get; } = "https://localhost:7023/";
         public static string LoginRoute { get; } = "api/User/login";
         public static string RegisterRoute { get; } = "api/User/register";
-
+        public static string SearchRoute { get; } = "api/User/search";
     }
 }
