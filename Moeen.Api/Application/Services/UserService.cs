@@ -212,7 +212,7 @@ namespace Moeen.Api.Application.Services
                 name = registerRequest.Name,
                 UserName = Guid.NewGuid().ToString(),
                 gender = registerRequest.Gender,
-                PhoneNumber = registerRequest.Phone,
+                PhoneNumber = registerRequest.PhoneNumber ,
                 created_at = DateTime.UtcNow,
                 JoinedAt = DateTime.UtcNow
             };

@@ -20,5 +20,13 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
 
             return content;
         }
+        public async Task<GeneralResponse> Register(RegisterRequest request)
+        {
+            var response = await _http.PostAsJsonAsync(ApiRoutes.RegisterRoute, request);
+
+            var content = await response.Content.ReadFromJsonAsync<GeneralResponse>();
+
+            return content;
+        }
     }
 }

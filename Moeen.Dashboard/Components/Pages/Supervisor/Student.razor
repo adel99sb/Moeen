@@ -1,7 +1,10 @@
 ﻿@page "/supervisor/student"
+@using Moeen.Dashboard.Services.Abstractions
+@using Moeen.Shared.Requests.Identity
+@inject IAuthService AuthService
+@inject NavigationManager NavManager
 @rendermode InteractiveServer
 
-@inject NavigationManager NavManager
 <h3>Student</h3>
 <style>
 	:root {
@@ -298,20 +301,22 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
     <div class="form-header">
         <h2><i class="bi bi-person-plus-fill"></i> إضافة طالب</h2>
     </div>
-    <form>
+  <EditForm Model="studentModel" OnValidSubmit="HandleSubmit">
+      <DataAnnotationsValidator /> @* هاد السطر ضروري جداً *@
+    <ValidationSummary /> @* وهاد بيطبعلك الأخطاء إذا نسيتي حقل *@
         <div class="grid-row">
             <div class="input-group">
                 <label>الاسم الكامل</label>
                 <div class="input-wrapper">
                     <i class="bi bi-person"></i>
-                    <input type="text" placeholder="أدخل الاسم">
+                  <input type="text" @bind="studentModel.Name" placeholder="أدخل الاسم" />
                 </div>
             </div>
              <div class="input-group">
                 <label>رقم الهاتف</label>
                 <div class="input-wrapper">
                     <i class="bi bi-telephone"></i>
-                    <input type="tel" placeholder="أدخل رقم الهاتف">
+                    <input type="tel" @bind="studentModel.PhoneNumber" placeholder="أدخل رقم الهاتف">
                 </div>
             </div>
             </div>
@@ -320,14 +325,14 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 <label>تاريخ التسجيل</label>
                 <div class="input-wrapper">
                     <i class="bi bi-calendar-event"></i>
-                    <input type="date" placeholder="أدخل تاريخ التسجيل">
+                    <input type="date" @bind="studentModel.Date" placeholder="أدخل تاريخ التسجيل">
                 </div>
             </div>
                <div class="input-group">
                 <label>تاريخ الميلاد</label>
                 <div class="input-wrapper">
                     <i class="bi bi-calendar-event"></i>
-                    <input type="date" placeholder="أدخل تاريخ الميلاد">
+                    <input type="date" @bind="studentModel.Birthday" placeholder="أدخل تاريخ الميلاد">
                 </div>
             </div> 
         </div>
@@ -336,14 +341,14 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 <label>العنوان</label>
                 <div class="input-wrapper">
                     <i class="bi bi-alphabet"></i>
-                    <input type="text" placeholder="أدخل العنوان">
+                    <input type="text" @bind="studentModel.Address" placeholder="أدخل العنوان">
                 </div>
             </div>
              <div class="input-group">
                 <label>البريد الإلكتروني</label>
                 <div class="input-wrapper">
                     <i class="bi bi-envelope"></i>
-                    <input type="email" placeholder="أدخل البرييد الالكتروني">
+                    <input type="email" @bind="studentModel.Email" placeholder="أدخل البرييد الالكتروني">
                 </div>
             </div>
         </div>
@@ -352,14 +357,14 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 <label>الجامع التابع له</label>
                 <div class="input-wrapper">
                     <i class="bi bi-houses"></i>
-                    <input type="text" placeholder="أدخل الجامع">
+                    <input type="text" @bind="studentModel.Musqe" placeholder="أدخل الجامع">
                 </div>
             </div>
              <div class="input-group">
                 <label>الجنس</label>
                 <div class="input-wrapper">
                     <i class="bi bi-gender-ambiguous"></i>
-                    <select>
+                    <select @bind="studentModel.Gender">
                         <option value="" disabled selected>اختر الجنس</option>
                         <option value="male">ذكر</option>
                         <option value="female">أنثى</option>
@@ -372,14 +377,14 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 <label>اسم ولي الامر </label>
                 <div class="input-wrapper">
                     <i class="bi bi-person"></i>
-                    <input type="text" placeholder="أدخل الاسم">
+                    <input type="text" @bind="studentModel.NameParent" placeholder="أدخل الاسم">
                 </div>
             </div>
                   <div class="input-group">
                 <label>رقم ولي الامر</label>
                 <div class="input-wrapper">
                     <i class="bi bi-telephone"></i>
-                    <input type="tel" placeholder="أدخل الرقم">
+                    <input type="tel" @bind="studentModel.PhoneNumberParent" placeholder="أدخل الرقم">
                 </div>
             </div>
 		        </div>
@@ -388,7 +393,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 <label>الفوج</label>
                 <div class="input-wrapper">
                     <i class="bi bi-layers"></i>
-                    <select>
+                    <select @bind="studentModel.Fouj">
                         <option>الفوج الأول</option>
                         <option>الفوج الثاني</option>
                     </select>
@@ -398,7 +403,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 <label>الحلقة</label>
                 <div class="input-wrapper">
                     <i class="bi bi-layers"></i>
-                    <select>
+                    <select @bind="studentModel.Halaqa">
                         <option>الحلقة الاولى</option>
                         <option>الحلقة الثانية</option>
                     </select>
@@ -410,7 +415,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 <label>حالة الحساب</label>
                 <div class="input-wrapper">
                     <i class="bi bi-check-circle"></i>
-                    <select>
+                    <select @bind="studentModel.HaltHesab">
                         <option value="active">نشط</option>
                         <option value="inactive">متوقف</option>
                     </select>
@@ -420,7 +425,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 <label>كلمة المرور</label>
                 <div class="input-wrapper">
                     <i class="bi bi-lock"></i>
-                    <input type="password" placeholder="أدخل كلمة المرور">
+                    <input type="password" @bind="studentModel.Password" placeholder="أدخل كلمة المرور">
                 </div>
             </div>
         </div>
@@ -429,7 +434,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
             <button type="submit" class="parent"><i class="bi bi-check2-all"></i> ربط بولي الامر </button>
             <a href="/supervisor/student" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
         </div>
-		</form>
+		</EditForm>
                 </div>
 	</details>
 	</section>
@@ -444,7 +449,24 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 		NavManager.NavigateTo("/supervisor/alaa_info");
 		// Logic to edit student information
 	}
-	
+RegisterRequest studentModel = new RegisterRequest();
 
+  
+
+    // 2. وهون بنعمل الميثود اللي رح تنادي الـ Service لما نضغط الزر
+    private async Task HandleSubmit()
+    {
+        var response = await AuthService.Register(studentModel);
+        
+        if (response.Success) 
+        {
+            Console.WriteLine("تم تسجيل الطالب بنجاح!");
+            // كود للتوجيه لصفحة تانية أو إظهار رسالة نجاح
+        }else
+        {
+            Console.WriteLine("فشل تسجيل الطالب: " + response.Message);
+            // كود لإظهار رسالة خطأ للمستخدم   
+        }
+    }
 	
 }
