@@ -77,5 +77,9 @@ namespace Moeen.Dashboard.Services.Implementations
         {
             return await _client.SendVerifyEmailCode(request);
         }
+        public async Task<GeneralResponse> VerifyEmail(VerifyEmailRequest request)
+        {
+            return await _client.VerifyEmail(request);
+        }
     }
 }

@@ -47,5 +47,10 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             var response = await _http.PostAsJsonAsync(ApiRoutes.SendVerifyEmailRoute, request);
             return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
+        public async Task<GeneralResponse> VerifyEmail(VerifyEmailRequest request)
+        {
+            var response = await _http.PostAsJsonAsync(ApiRoutes.VerifyEmailRoute, request);
+            return await response.Content.ReadFromJsonAsync<GeneralResponse>();
+        }
     }
 }

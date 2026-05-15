@@ -63,6 +63,43 @@
         </button>
     </div>
 </EditForm>
+@if (IsVerificationSuccess)
+{
+    <div class="card mt-4 border-success">
+        <div class="card-body">
+            <h5 class="card-title text-success">تأكيد الحساب</h5>
+            <p class="small text-muted">يرجى إدخال الكود الذي وصلك على الإيميل:</p>
+            
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="000000" @bind="_verifyModel.Code" />
+                <button class="btn btn-success" type="button" @onclick="HandleVerifyEmail" disabled="_isVerifying">
+                    @if (_isVerifying)
+                    {
+                        <span class="spinner-border spinner-border-sm"></span>
+                    }
+                    else
+                    {
+                        <span>تأكيد الآن</span>
+                    }
+                </button>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(VerifyStatusMessage))
+            {
+                <div class="alert @(IsVerifyError ? "alert-danger" : "alert-success") py-1 small">
+                    @VerifyStatusMessage
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(VerificationMessage) && !IsVerificationSuccess)
+{
+    <div class="alert @(IsVerificationSuccess ? "alert-success" : "alert-warning") mt-3">
+        @VerificationMessage
+    </div>
+}
 
 @code {
 
@@ -138,6 +175,55 @@
         finally
         {
             _isSendingCode = false;
+        }
+    }
+
+    private VerifyEmailRequest _verifyModel = new();
+    private bool _isVerifying = false;
+    private string VerifyStatusMessage;
+    private bool IsVerifyError;
+
+    private async Task HandleVerifyEmail()
+    {
+        if (string.IsNullOrEmpty(_verifyModel.Code))
+        {
+            VerifyStatusMessage = "يرجى إدخال كود التحقق";
+            IsVerifyError = true;
+            return;
+        }
+
+        try
+        {
+            _isVerifying = true;
+            VerifyStatusMessage = "جاري التحقق...";
+            
+            // نأخذ الإيميل من حقل تسجيل الدخول نفسه
+            _verifyModel.Email = _model.Email;
+
+            var result = await AuthService.VerifyEmail(_verifyModel);
+
+            if (result.Success)
+            {
+                VerifyStatusMessage = "تم تفعيل حسابك بنجاح! يمكنك الآن تسجيل الدخول.";
+                IsVerifyError = false;
+                // إخفاء واجهة الكود بعد نجاح العملية بثوانٍ
+                await Task.Delay(3000);
+                IsVerificationSuccess = false;
+            }
+            else
+            {
+                VerifyStatusMessage = result.Message;
+                IsVerifyError = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            VerifyStatusMessage = "خطأ: " + ex.Message;
+            IsVerifyError = true;
+        }
+        finally
+        {
+            _isVerifying = false;
         }
     }
 }
