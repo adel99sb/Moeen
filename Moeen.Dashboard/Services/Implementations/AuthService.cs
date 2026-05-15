@@ -5,12 +5,14 @@ using Moeen.Shared.Requests.Identity;
 using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.Identity;
 using System.Text.Json;
-
+using System.Net.Http.Json;
 namespace Moeen.Dashboard.Services.Implementations
 {
     public class AuthService : IAuthService
     {
         private readonly AuthApiClient _client;
+        private object _Client;
+
         //private readonly ITokenService _token;
 
         public AuthService(AuthApiClient client/*, ITokenService token*/)
@@ -70,6 +72,10 @@ namespace Moeen.Dashboard.Services.Implementations
             }
 
             return res;
+        }
+        public async Task<GeneralResponse> SendVerifyEmailCode(SendVerifyEmailCodeRequest request)
+        {
+            return await _client.SendVerifyEmailCode(request);
         }
     }
 }

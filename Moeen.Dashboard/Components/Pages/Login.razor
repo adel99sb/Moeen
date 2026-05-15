@@ -41,20 +41,27 @@
     }
 
     <!-- Submit -->
-    <button class="btn btn-primary" type="button"
-            @onclick="HandleLogin"
-            disabled="@_isLoading">
-        @if (_isLoading)
-        {
-            <span class="spinner-border spinner-border-sm"></span>
-            <span class="ms-2">Logging in...</span>
-        }
-        else
-        {
-            <span>Login</span>
-        }
-    </button>
+    <div class="d-flex align-items-center mt-3">
+        <button class="btn btn-primary" type="button"
+                @onclick="HandleLogin"
+                disabled="@_isLoading">
+            @if (_isLoading)
+            {
+                <span class="spinner-border spinner-border-sm"></span>
+                <span class="ms-2">Logging in...</span>
+            }
+            else
+            {
+                <span>Login</span>
+            }
+        </button>
 
+        <button class="btn btn-link ms-3" type="button"
+                @onclick="HandleSendVerificationCode"
+                disabled="@(_isLoading || _isSendingCode)">
+            إرسال كود التفعيل؟
+        </button>
+    </div>
 </EditForm>
 
 @code {
@@ -90,6 +97,47 @@
         finally
         {
             _isLoading = false;
+        }
+    }
+    private string VerificationMessage;
+    private bool IsVerificationSuccess;
+    private bool _isSendingCode = false; // لمنع النقر المتكرر أثناء الإرسال
+    private async Task HandleSendVerificationCode()
+    {
+        if (string.IsNullOrEmpty(_model.Email))
+        {
+            VerificationMessage = "يرجى إدخال البريد الإلكتروني أولاً";
+            IsVerificationSuccess = false;
+            return;
+        }
+
+        try
+        {
+            _isSendingCode = true;
+            VerificationMessage = "جاري إرسال الكود...";
+
+            var sendRequest = new SendVerifyEmailCodeRequest { Email = _model.Email };
+            var result = await AuthService.SendVerifyEmailCode(sendRequest);
+
+            if (result.Success)
+            {
+                VerificationMessage = "تم إرسال كود التفعيل إلى بريدك الإلكتروني.";
+                IsVerificationSuccess = true;
+            }
+            else
+            {
+                VerificationMessage = "فشل الإرسال: " + result.Message;
+                IsVerificationSuccess = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            VerificationMessage = "حدث خطأ: " + ex.Message;
+            IsVerificationSuccess = false;
+        }
+        finally
+        {
+            _isSendingCode = false;
         }
     }
 }
