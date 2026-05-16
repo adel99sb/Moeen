@@ -231,15 +231,16 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                             <span>@interactionsResponse.Message</span>
                         }
                     </td>
-                    <td class="table td">
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
+                   <td class="table td">
+                                  @* ربطنا كبسة الحذف بالميثود الجديدة ومررنا الـ ID *@
+                        <button class="btn-icon delete" title="حذف" @onclick="() => DeletePost(targetPostId)"><i class="bi bi-trash"></i></button>
+                   </td>
                 </tr>
             }
             else
             {
                 <tr>
-                    <td colspan="4" class="table td" style="color: var(--danger-red);">فشل تحميل البيانات: @errorMessage</td>
+                    <td colspan="4" class="table td" style="color: var(--danger-red);">@errorMessage</td>
                 </tr>
             }
         </tbody>
@@ -257,7 +258,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                         <label>عنوان المنشور </label>
                         <div class="input-wrapper">
                             <i class="bi bi-fonts"></i>
-                            <input type="text" placeholder="أدخل العنوان">
+ <input type="text" placeholder="أدخل العنوان">
                         </div>
  </div>
                     <div class="input-group">
@@ -289,7 +290,8 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                     </div>
                 </div>
                 <div class="actions">
-                    <button type="submit" class="save"><i class="bi bi-check2-all"></i> نشر</button>
+
+<button type="submit" class="save"><i class="bi bi-check2-all"></i> نشر</button>
                     <a href="/supervisor/posts" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
                 </div>
             </form>
@@ -308,12 +310,24 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadPostData();
+    }
+
+    // عملنا ميثود منفصلة للتحميل عشان نقدر نناديها بعد الحذف لتحديث الشاشة
+    private async Task LoadPostData()
+    {
         try
         {
             isLoading = true;
+            errorMessage = "";
             
             // 1. استدعاء ميثود جلب المنشور
             postResponse = await AuthService.GetPostByIdAsync(targetPostId);
+
+            if (postResponse == null || !postResponse.Success)
+            {
+                errorMessage = postResponse?.Message ?? "فشل تحميل البيانات.";
+            }
 
             // 2. استدعاء ميثود جلب التفاعلات الجديدة
             interactionsResponse = await AuthService.GetPostInteractionsAsync(targetPostId);
@@ -328,6 +342,35 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         }
     }
 
+    // ميثود الحذف الجديدة
+    private async Task DeletePost(Guid id)
+    {
+        try
+        {
+            isLoading = true;
+            var response = await AuthService.DeletePostAsync(id);
+
+            if (response != null && response.Success)
+            {
+                // إذا انحذف بنجاح، بنخلي الـ postResponse يساوي null عشان يختفي من الجدول وتظهر رسالة نجاح
+                postResponse = null;
+                errorMessage = "تم حذف المنشور بنجاح!";
+            }
+            else
+            {
+                errorMessage = response?.Message ?? "فشل في حذف المنشور.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "حدث خطأ أثناء الحذف: " + ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
     private void editPost()
     {
         NavManager.NavigateTo("/supervisor/edit-post");
@@ -335,7 +378,6 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 
     private void viewPost1(Guid id)
     {
-        // نمرر الـ ID في الرابط لصفحة العرض التي سننشئها لاحقاً
         NavManager.NavigateTo($"/supervisor/post1/{id}");
     }
 }

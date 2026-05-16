@@ -109,6 +109,9 @@ namespace Moeen.Dashboard.Services.Implementations
             // لو كل شي تمام، منرجع التفاعلات للشاشة
             return res;
         }
-        
+        public async Task<GeneralResponse> DeletePostAsync(Guid postId)
+        {
+            return await _client.DeletePostAsync(postId);
+        }
     }
 }

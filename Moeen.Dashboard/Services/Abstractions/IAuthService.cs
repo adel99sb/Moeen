@@ -14,5 +14,6 @@ namespace Moeen.Dashboard.Services.Abstractions
         Task<GeneralResponse> VerifyEmail(VerifyEmailRequest request);
         Task<GeneralResponse> GetPostByIdAsync(Guid postId);
         Task<GeneralResponse> GetPostInteractionsAsync(Guid postId);
+        Task<GeneralResponse> DeletePostAsync(Guid postId);
     }
 }

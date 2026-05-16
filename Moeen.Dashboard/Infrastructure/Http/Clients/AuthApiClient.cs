@@ -81,5 +81,18 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             var content = await response.Content.ReadFromJsonAsync<GeneralResponse>();
             return content;
         }
+        public async Task<GeneralResponse> DeletePostAsync(Guid postId)
+        {
+            var url = ApiRoutes.DeletePostRoute.Replace("{postId}", postId.ToString());
+
+            var response = await _http.DeleteAsync(url);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<GeneralResponse>();
+            }
+
+            return new GeneralResponse { Success = false, Message = "فشل في حذف المنشور" };
+        }
     }
 }
