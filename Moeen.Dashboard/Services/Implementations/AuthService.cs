@@ -81,5 +81,34 @@ namespace Moeen.Dashboard.Services.Implementations
         {
             return await _client.VerifyEmail(request);
         }
+        public async Task<GeneralResponse> GetPostByIdAsync(Guid postId)
+        {
+            // 1. منبعث الطلب عن طريق الـ client (ساعي البريد)
+            var res = await _client.GetPostById(postId);
+
+            // 2. التحقق إذا النتيجة رجعت فاضية أو فيها فشل
+            if (res == null || !res.Success)
+            {
+                throw new Exception(res?.Message ?? "Failed to fetch post");
+            }
+
+            // 3. إرجاع النتيجة مباشرة متل ميثود الـ Search تماماً
+            return res;
+        }
+        public async Task<GeneralResponse> GetPostInteractionsAsync(Guid postId)
+        {
+            // مننادي ساعي البريد (الكلاينت) اللي جهزناه بالخطوة الأولى
+            var res = await _client.GetPostInteractionsAsync(postId);
+
+            // لو النتيجة رجعت فاضية أو فيها فشل، منرمي Exception يوضح المشكلة
+            if (res == null || !res.Success)
+            {
+                throw new Exception(res?.Message ?? "فشلت عملية جلب التفاعلات");
+            }
+
+            // لو كل شي تمام، منرجع التفاعلات للشاشة
+            return res;
+        }
+        
     }
 }

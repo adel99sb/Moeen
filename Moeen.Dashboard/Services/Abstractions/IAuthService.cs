@@ -12,6 +12,7 @@ namespace Moeen.Dashboard.Services.Abstractions
         Task<GeneralResponse> Search(SearchMembersRequest request);
         Task<GeneralResponse> SendVerifyEmailCode(SendVerifyEmailCodeRequest request);
         Task<GeneralResponse> VerifyEmail(VerifyEmailRequest request);
-
+        Task<GeneralResponse> GetPostByIdAsync(Guid postId);
+        Task<GeneralResponse> GetPostInteractionsAsync(Guid postId);
     }
 }

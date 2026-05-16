@@ -1,6 +1,9 @@
 ﻿@page "/supervisor/posts"
 @rendermode InteractiveServer
+@using Moeen.Shared.Responses
 @inject NavigationManager NavManager
+@inject Moeen.Dashboard.Services.Abstractions.IAuthService AuthService
+
 <style>
    :root {
 --primary-green: #195042;
@@ -56,7 +59,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         background-color: #fafafa;
         transform: scale(1.01);
     }
-        	.btn-pprimary {
+          .btn-pprimary {
     background-color: var(--primary-green);
     font-size: 15px;
     padding: 10px 20px;
@@ -100,7 +103,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         padding: 1.5rem;
     }
 
-    .grid-row {
+.grid-row {
         display: grid;
         grid-template-columns: repeat(2, 1fr); 
         gap: 1.5rem;
@@ -145,7 +148,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
             height: 45px; 
             outline: none;
             transition: var(--transition);
-        }
+             }
             .input-wrapper input:focus,
             .input-wrapper select:focus {
                 border-color: var(--primary-green);
@@ -188,113 +191,151 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         }
     }
 </style>
+
 <section class="management-container">
-<header class="page-header">
-    <h2 class="page-title">إدارة المنشوارات</h2>
-</header>
+    <header class="page-header">
+        <h2 class="page-title">إدارة المنشورات</h2>
+    </header>
+    
     <table class="table">
-        <tr>
-            <th class="table th">المنشور</th>
-            <th class="table th">معلومات المنشور </th>
-            <th class="table th">التفاعلات</th>
-            <th class="table th">حذف</th>
-        </tr>
-        <tr>
-            <td class="table td">إعلان بدء التسجيل  </td>
-        <td>
-            <a @onclick="viewPost1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-            <a @onclick="editPost"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-        </td>
-            <td>
-                25 إعجاب
-            </td>
-        <td class="table td">
-            <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i>
-                </button>
-        </td>
-        </tr>
-    <tr>
-        <td class="table td">حملات للتشجيع على حفظ القرآن الكريم  </td>
-        <td class="table td">
-            <a @onclick="viewPost1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-            <a @onclick="editPost"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-        </td>
-        <td class="table td">
-            15 إعجاب
-        </td>
-        <td class="table td"><button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i> </button></td>
-    </tr>
-    <tr>
-        <td class="table td">مبادرة تحفيزية للطلاب  </td>
-        <td class="table td">
-            <a @onclick="viewPost1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-            <a @onclick="editPost"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-        </td>
-        <td class="table td">
-            30 إعجاب
-        </td>
-        <td class="table td"><button class="" btn-icon delete" title="حذف"><i class="bi bi-trash"></i> </button></td>
-    </tr>
+        <thead>
+            <tr>
+                <th class="table th">المنشور</th>
+                <th class="table th">معلومات المنشور </th>
+                <th class="table th">التفاعلات</th>
+                <th class="table th">حذف</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (isLoading)
+            {
+                <tr>
+                    <td colspan="4" class="table td">جاري تحميل المنشور...</td>
+                </tr>
+            }
+            else if (postResponse != null && postResponse.Success)
+            {
+                <tr>
+                    <td class="table td">@postResponse.Message</td>
+                    <td class="table td">
+                        <a @onclick="() => viewPost1(targetPostId)"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
+                        <a @onclick="editPost"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                    </td>
+                    <td class="table td">
+                        @if (interactionsResponse == null)
+                        {
+                            <span style="font-size: 0.9rem; color: gray;">جاري تحميل التفاعلات...</span>
+                        }
+                        else
+                        {
+                            <span>@interactionsResponse.Message</span>
+                        }
+                    </td>
+                    <td class="table td">
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="table td" style="color: var(--danger-red);">فشل تحميل البيانات: @errorMessage</td>
+                </tr>
+            }
+        </tbody>
     </table>
+
     <details>
-    <summary class="btn-pprimary">إضافة منشور جديد</summary>
-		<div class="form-container">
-    <div class="form-header">
-        <h2><i class="bi bi-plus-circle-dotted"></i>  إضافة منشور</h2>
-    </div>
-    <form>
-        <div class="grid-row">
-            <div class="input-group">
-         <label>عنوان المنشور </label>
-                <div class="input-wrapper">
-                    <i class="bi bi-fonts"></i>
-                    <input type="text" placeholder="أدخل العنوان">
+        <summary class="btn-pprimary">إضافة منشور جديد</summary>
+        <div class="form-container">
+            <div class="form-header">
+                <h2><i class="bi bi-plus-circle-dotted"></i>  إضافة منشور</h2>
+            </div>
+            <form>
+                <div class="grid-row">
+                    <div class="input-group">
+                        <label>عنوان المنشور </label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-fonts"></i>
+                            <input type="text" placeholder="أدخل العنوان">
+                        </div>
+ </div>
+                    <div class="input-group">
+                        <label> محتوى المنشور</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-pencil"></i>
+                            <input type="text" placeholder="اكتب هنا...">
+ </div>
+                    </div>
                 </div>
-            </div>
-             <div class="input-group">
-                <label> محتوى المنشور</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-pencil"></i>
-                    <input type="text" placeholder="اكتب هنا...">
+                <div class="grid-row">
+                    <div class="input-group">
+                        <label>تاريخ النشر</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-calendar-event"></i>
+                            <input type="date">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>نوع المنشور</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-text-paragraph"></i>
+                            <select>
+                                <option value="" disabled selected>اختر النوع</option>
+                                <option value="public">عام</option>
+                                <option value="private">خاص</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            </div>
-        <div class="grid-row">
-            <div class="input-group">
-                <label>تاريخ النشر</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-calendar-event"></i>
-                    <input type="date">
+                <div class="actions">
+                    <button type="submit" class="save"><i class="bi bi-check2-all"></i> نشر</button>
+                    <a href="/supervisor/posts" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
                 </div>
-            </div>
-               <div class="input-group">
-                <label>نوع المنشور</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-text-paragraph"></i>
-                    <select>
-                        <option value="" disabled selected>اختر النوع</option>
-                        <option value="public">عام</option>
-                        <option value="private">خاص</option>
-                    </select>
-                </div>
-            </div>
-            </div>
-              <div class="actions">
-            <button type="submit" class="save"><i class="bi bi-check2-all"></i> نشر</button>
-            <a href="/supervisor/posts" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+            </form>
         </div>
-    </form>
-</div>
-             </details>
-             </section>
+    </details>
+</section>
+
 @code {
+    private GeneralResponse? postResponse;
+    private GeneralResponse? interactionsResponse; // المتغير الجديد للتفاعلات
+    private bool isLoading = true;
+    private string errorMessage = "";
+
+    // ضع هنا الـ ID التجريبي الخاص بالمنشور الموجود بقاعدة البيانات لديكِ حالياً
+    private Guid targetPostId = Guid.Parse("00000000-0000-0000-0000-000000000000"); 
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoading = true;
+            
+            // 1. استدعاء ميثود جلب المنشور
+            postResponse = await AuthService.GetPostByIdAsync(targetPostId);
+
+            // 2. استدعاء ميثود جلب التفاعلات الجديدة
+            interactionsResponse = await AuthService.GetPostInteractionsAsync(targetPostId);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
     private void editPost()
     {
         NavManager.NavigateTo("/supervisor/edit-post");
-        // Logic to edit student information
     }
-    private void viewPost1()
+
+    private void viewPost1(Guid id)
     {
-        NavManager.NavigateTo("/supervisor/post1");
+        // نمرر الـ ID في الرابط لصفحة العرض التي سننشئها لاحقاً
+        NavManager.NavigateTo($"/supervisor/post1/{id}");
     }
 }
