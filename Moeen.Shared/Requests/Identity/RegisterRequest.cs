@@ -18,10 +18,21 @@ namespace Moeen.Shared.Requests.Identity
         public string Password { get; set; }
 
         [Phone(ErrorMessage = "Invalid phone number")]
-        public string Phone { get; set; }
+        public string PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "Gender is required")]
         [RegularExpression("^(Male|Female)$", ErrorMessage = "Gender must be Male or Female")]
         public string Gender { get; set; }
-    }
+        // أضيفي هذه الحقول الجديدة لكي يتعرف عليها الفورم
+        public string Address { get; set; }
+        public string Musqe { get; set; }
+        public string Fouj { get; set; }
+        public string Halaqa { get; set; }
+        public string HaltHesab { get; set; }
+        public string NameParent { get; set; }
+        public string PhoneNumberParent { get; set; }
+        public DateTime? Date { get; set; }
+        public DateTime? Birthday { get; set; }
+    
+}
 }

@@ -48,7 +48,7 @@ namespace Moeen.Api.Application.Services
                 Name = halqa.Name,
                 FoujId = halqa.FoujId,
                 FoujName = fouj?.name,
-                TeacherId = halqa.TeacherId,
+                TeacherId = (Guid)halqa.TeacherId,
                 TeacherName = teacher?.name,
                 Type = halqa.Type,
                 StudentsCount = 0
@@ -80,7 +80,7 @@ namespace Moeen.Api.Application.Services
             await _unitOfWork.Repository<Halqa>().UpdateAsync(halqa);
             await _unitOfWork.CompleteAsync();
 
-            var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(halqa.TeacherId);
+            var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync((Guid)halqa.TeacherId);
 
             return new CircleDto
             {
@@ -88,7 +88,7 @@ namespace Moeen.Api.Application.Services
                 Name = halqa.Name,
                 FoujId = halqa.FoujId,
                 FoujName = targetFouj?.name,
-                TeacherId = halqa.TeacherId,
+                TeacherId = (Guid)  halqa.TeacherId,
                 TeacherName = teacher?.name,
                 Type = halqa.Type
             };
@@ -116,7 +116,7 @@ namespace Moeen.Api.Application.Services
                 Name = halqa.Name,
                 FoujId = halqa.FoujId,
                 FoujName = fouj?.name,
-                TeacherId = halqa.TeacherId,
+                TeacherId = (Guid)halqa.TeacherId,
                 TeacherName = newTeacher?.name,
                 Type = halqa.Type
             };
@@ -154,7 +154,7 @@ namespace Moeen.Api.Application.Services
             await _unitOfWork.CompleteAsync();
 
             var resultFouj = await _unitOfWork.Repository<Fouj>().GetByIdAsync(halqa.FoujId);
-            var resultTeacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(halqa.TeacherId);
+            var resultTeacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync((Guid)halqa.TeacherId);
 
             return new CircleDto
             {
@@ -162,7 +162,7 @@ namespace Moeen.Api.Application.Services
                 Name = halqa.Name,
                 FoujId = halqa.FoujId,
                 FoujName = resultFouj?.name,
-                TeacherId = halqa.TeacherId,
+                TeacherId = (Guid)halqa.TeacherId,
                 TeacherName = resultTeacher?.name,
                 Type = halqa.Type
             };

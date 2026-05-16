@@ -123,7 +123,7 @@ namespace Moeen.Api.Application.Services
                 Name = h.Name,
                 FoujId = h.FoujId,
                 FoujName = h.Fouj?.name ?? string.Empty,
-                TeacherId = h.TeacherId,
+                TeacherId = (Guid)h.TeacherId,
                 TeacherName = h.Teacher?.name ?? string.Empty,
                 Type = h.Type,
                 StudentsCount = countMap.TryGetValue(h.Id, out var c) ? c : 0
