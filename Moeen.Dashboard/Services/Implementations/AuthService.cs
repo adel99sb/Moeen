@@ -37,5 +37,13 @@ namespace Moeen.Dashboard.Services.Implementations
 
             return data;
         }
+        public async Task Register(RegisterRequest request)
+        {
+            var res = await _client.CreateUser(request);
+
+            if (res == null || !res.Success)
+                throw new Exception(res?.Message ?? "Unknown error");
+            //await _token.Save(data.AccessToken);
+        }
     }
 }

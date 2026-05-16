@@ -226,7 +226,7 @@ namespace Moeen.Api.Application.Services
                 }
 
                 await _userManager.AddToRoleAsync(user, Roles.Student.ToString());
-                 await _verificationService.SendVerificationCodeAsync(user.Id, user.Email, "Email Verification", "ar");
+                 //await _verificationService.SendVerificationCodeAsync(user.Id, user.Email, "Email Verification", "ar");
             }
             catch
             {

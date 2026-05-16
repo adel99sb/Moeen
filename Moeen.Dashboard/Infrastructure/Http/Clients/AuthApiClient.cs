@@ -20,5 +20,14 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
 
             return content;
         }
+        public async Task<GeneralResponse> CreateUser(RegisterRequest request)
+        {
+            var response = await _http.PostAsJsonAsync(ApiRoutes.registerRoute, request);
+
+            var content = await response.Content.ReadFromJsonAsync<GeneralResponse>();
+
+            return content;
+        }
+
     }
 }

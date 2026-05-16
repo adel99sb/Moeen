@@ -4,5 +4,6 @@
     {
         public static string BaseUrl { get; } = "https://localhost:7023/";
         public static string LoginRoute { get; } = "api/User/login";
+        public static string registerRoute { get; } = "api/User/register";
     }
 }

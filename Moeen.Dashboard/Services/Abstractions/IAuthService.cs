@@ -6,5 +6,6 @@ namespace Moeen.Dashboard.Services.Abstractions
     public interface IAuthService
     {
         Task<AuthResponse> Login(LoginRequest request);
+        Task Register(RegisterRequest request);
     }
 }
