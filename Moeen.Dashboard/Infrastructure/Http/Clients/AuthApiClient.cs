@@ -1,4 +1,4 @@
-﻿using Moeen.Shared.Requests.Enrollment;
+﻿using Moeen.Shared.Requests;
 using Moeen.Shared.Requests.Identity;
 using Moeen.Shared.Responses;
 
@@ -13,80 +13,99 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             _http = http;
         }
 
+        // ================= LOGIN =================
+
         public async Task<GeneralResponse> Login(LoginRequest request)
         {
             var response = await _http.PostAsJsonAsync(ApiRoutes.LoginRoute, request);
 
-            var content = await response.Content.ReadFromJsonAsync<GeneralResponse>();
-
-            return content;
-        }
-        public async Task<GeneralResponse> CreateUser(RegisterRequest request)
-        {
-            var response = await _http.PostAsJsonAsync(ApiRoutes.registerRoute, request);
-
-            var content = await response.Content.ReadFromJsonAsync<GeneralResponse>();
-
-            return content;
-        
-
-        }
-        public async Task<GeneralResponse> Search(SearchMembersRequest request)
-        {
-            var response = await _http.PostAsJsonAsync(ApiRoutes.SearchRoute, request);
             return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
-        public async Task<GeneralResponse> SendVerifyEmailCode(SendVerifyEmailCodeRequest request)
+
+        // ================= REGISTER =================
+
+        public async Task<GeneralResponse> Register(RegisterRequest request)
         {
-            var response = await _http.PostAsJsonAsync(ApiRoutes.SendVerifyEmailRoute, request);
+            var response = await _http.PostAsJsonAsync(ApiRoutes.RegisterRoute, request);
+
             return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
-        public async Task<GeneralResponse> VerifyEmail(VerifyEmailRequest request)
+
+        // ================= USERS =================
+
+        public async Task<GeneralResponse> SearchUsers(
+            PaginationRequest request,
+            string? keyword = null)
         {
-            var response = await _http.PostAsJsonAsync(ApiRoutes.VerifyEmailRoute, request);
+            string url = ApiRoutes.SearchUsersRoute;
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+                url += $"?keyword={Uri.EscapeDataString(keyword)}";
+
+            var response = await _http.PostAsJsonAsync(url, request);
+
             return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
-        public async Task<GeneralResponse> GetPostById(Guid postId)
+
+        public async Task<GeneralResponse> GetUserById(Guid id)
         {
-            var route = ApiRoutes.GetPostRoute.Replace("{postId}", postId.ToString());
-            var response = await _http.GetAsync(route);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return new GeneralResponse { Success = false, Message = "مشكلة في الاتصال بالسيرفر أو المنشور غير موجود" };
-            }
-
-            var content = await response.Content.ReadFromJsonAsync<GeneralResponse>();
-            return content;
+            return await _http.GetFromJsonAsync<GeneralResponse>(
+                ApiRoutes.GetUserById(id));
         }
-        public async Task<GeneralResponse> GetPostInteractionsAsync(Guid postId)
+
+        // ================= EMAIL =================
+
+        public async Task<GeneralResponse> ChangeEmail(string email)
         {
-            // هنا نادينا   (GetPostInterractionRoute) 
-            var route = ApiRoutes.GetPostInterractionRoute.Replace("{postId}", postId.ToString());
+            var response = await _http.PutAsJsonAsync(
+                ApiRoutes.ChangeEmailRoute,
+                email);
 
-            // منبعت طلب GET للسيرفر عشان نجيب التفاعلات
-            var response = await _http.GetAsync(route);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return new GeneralResponse { Success = false, Message = "تعذر جلب تفاعلات المنشور" };
-            }
-
-            var content = await response.Content.ReadFromJsonAsync<GeneralResponse>();
-            return content;
+            return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
-        public async Task<GeneralResponse> DeletePostAsync(Guid postId)
+
+        // ================= PASSWORD =================
+
+        public async Task<GeneralResponse> SendResetUrl(
+            SendPasswordResetUrlRequest request)
         {
-            var url = ApiRoutes.DeletePostRoute.Replace("{postId}", postId.ToString());
+            var response = await _http.PostAsJsonAsync(
+                ApiRoutes.SendResetUrlRoute,
+                request);
 
-            var response = await _http.DeleteAsync(url);
+            return await response.Content.ReadFromJsonAsync<GeneralResponse>();
+        }
 
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<GeneralResponse>();
-            }
+        public async Task<GeneralResponse> ResetPassword(
+            ChangePasswordRequest request)
+        {
+            var response = await _http.PostAsJsonAsync(
+                ApiRoutes.ResetPasswordRoute,
+                request);
 
-            return new GeneralResponse { Success = false, Message = "فشل في حذف المنشور" };
+            return await response.Content.ReadFromJsonAsync<GeneralResponse>();
+        }
+
+        // ================= VERIFICATION =================
+
+        public async Task<GeneralResponse> SendVerifyCode(
+            SendVerifyEmailCodeRequest request)
+        {
+            var response = await _http.PostAsJsonAsync(
+                ApiRoutes.SendVerifyCodeRoute,
+                request);
+
+            return await response.Content.ReadFromJsonAsync<GeneralResponse>();
+        }
+
+        public async Task<GeneralResponse> VerifyEmail(
+            VerifyEmailRequest request)
+        {
+            var response = await _http.PostAsJsonAsync(
+                ApiRoutes.VerifyEmailRoute,
+                request);
+
+            return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Moeen.Shared.Requests.Enrollment;
+﻿using Moeen.Shared.Requests;
 using Moeen.Shared.Requests.Identity;
 using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.Identity;
@@ -8,12 +8,15 @@ namespace Moeen.Dashboard.Services.Abstractions
     public interface IAuthService
     {
         Task<AuthResponse> Login(LoginRequest request);
-        Task<GeneralResponse> Register(RegisterRequest request); // خليناها نسخة واحدة نظيفة بترجع GeneralResponse
-        Task<GeneralResponse> Search(SearchMembersRequest request);
-        Task<GeneralResponse> SendVerifyEmailCode(SendVerifyEmailCodeRequest request);
-        Task<GeneralResponse> VerifyEmail(VerifyEmailRequest request);
-        Task<GeneralResponse> GetPostByIdAsync(Guid postId);
-        Task<GeneralResponse> GetPostInteractionsAsync(Guid postId);
-        Task<GeneralResponse> DeletePostAsync(Guid postId);
+
+        Task Register(RegisterRequest request);
+
+        Task SendResetUrl(SendPasswordResetUrlRequest request);
+
+        Task ResetPassword(ChangePasswordRequest request);
+
+        Task SendVerifyCode(SendVerifyEmailCodeRequest request);
+
+        Task VerifyEmail(VerifyEmailRequest request);
     }
 }

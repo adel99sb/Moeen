@@ -36,65 +36,44 @@ namespace Moeen.Dashboard.Services.Implementations
             return data;
         }
 
-        public async Task<GeneralResponse> Register(RegisterRequest request)
+        public async Task Register(RegisterRequest request)
         {
-            var res = await _client.CreateUser(request);
+            var res = await _client.Register(request);
 
             if (res == null || !res.Success)
-                throw new Exception(res?.Message ?? "Unknown error");
-
-            return res;
+                throw new Exception(res?.Message ?? "Registration failed");
         }
 
-        // تم إضافة ميثود السيرش ليتطابق مع الـ Interface
-        public async Task<GeneralResponse> Search(SearchMembersRequest request)
+        public async Task SendResetUrl(SendPasswordResetUrlRequest request)
         {
-            var res = await _client.Search(request);
-            if (res == null || !res.Success)
-                throw new Exception(res?.Message ?? "Unknown error");
-
-            return res;
-        }
-
-        // تم إضافة ميثود إرسال كود التفعيل
-        public async Task<GeneralResponse> SendVerifyEmailCode(SendVerifyEmailCodeRequest request)
-        {
-            return await _client.SendVerifyEmailCode(request);
-        }
-
-        // تم إضافة ميثود التحقق من الإيميل
-        public async Task<GeneralResponse> VerifyEmail(VerifyEmailRequest request)
-        {
-            return await _client.VerifyEmail(request);
-        }
-
-        public async Task<GeneralResponse> GetPostByIdAsync(Guid postId)
-        {
-            var res = await _client.GetPostById(postId);
+            var res = await _client.SendResetUrl(request);
 
             if (res == null || !res.Success)
-            {
-                throw new Exception(res?.Message ?? "Failed to fetch post");
-            }
-
-            return res;
+                throw new Exception(res?.Message ?? "Failed to send reset url");
         }
 
-        public async Task<GeneralResponse> GetPostInteractionsAsync(Guid postId)
+        public async Task ResetPassword(ChangePasswordRequest request)
         {
-            var res = await _client.GetPostInteractionsAsync(postId);
+            var res = await _client.ResetPassword(request);
 
             if (res == null || !res.Success)
-            {
-                throw new Exception(res?.Message ?? "فشلت عملية جلب التفاعلات");
-            }
-
-            return res;
+                throw new Exception(res?.Message ?? "Reset password failed");
         }
 
-        public async Task<GeneralResponse> DeletePostAsync(Guid postId)
+        public async Task SendVerifyCode(SendVerifyEmailCodeRequest request)
         {
-            return await _client.DeletePostAsync(postId);
+            var res = await _client.SendVerifyCode(request);
+
+            if (res == null || !res.Success)
+                throw new Exception(res?.Message ?? "Failed to send verify code");
+        }
+
+        public async Task VerifyEmail(VerifyEmailRequest request)
+        {
+            var res = await _client.VerifyEmail(request);
+
+            if (res == null || !res.Success)
+                throw new Exception(res?.Message ?? "Verify email failed");
         }
     }
 }

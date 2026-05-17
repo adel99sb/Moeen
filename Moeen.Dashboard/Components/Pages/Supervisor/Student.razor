@@ -249,7 +249,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 </header>
 <br />
 <div class="search-wrapper mb-3">
-  <EditForm Model="searchModel" OnValidSubmit="HandleSearch">
+  <EditForm Model="searchModel" @* OnValidSubmit="HandleSearch" *@>
 	<i class="bi bi-search"></i>
 
 	<input type="text" class="search-input" @bind="searchModel.Name" placeholder="ابحث عن طالب...">
@@ -275,7 +275,6 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 </tr>
             </thead>
             <tbody>
-                @* إذا كانت هناك نتائج بحث، نقوم بعمل Loop عليها *@
                 @if (searchResponse != null && searchResponse.Success && searchResponse.Data != null)
                 {
                     @foreach (var student in studentsList)
@@ -355,7 +354,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
     <div class="form-header">
         <h2><i class="bi bi-person-plus-fill"></i> إضافة طالب</h2>
     </div>
-  <EditForm Model="studentModel" OnValidSubmit="HandleSubmit">
+  <EditForm Model="studentModel" @* OnValidSubmit="HandleSubmit" *@>
       <DataAnnotationsValidator /> 
     @* هاد السطر ضروري جداً *@
     <ValidationSummary /> @* وهاد بيطبعلك الأخطاء إذا نسيتي حقل *@
@@ -510,20 +509,20 @@ RegisterRequest studentModel = new RegisterRequest();
   
 
     // 2. وهون بنعمل الميثود اللي رح تنادي الـ Service لما نضغط الزر
-    private async Task HandleSubmit()
-    {
-        var response = await AuthService.Register(studentModel);
+    // private async Task HandleSubmit()
+    // {
+    //     var response = await AuthService.Register(studentModel);
         
-        if (response.Success) 
-        {
-            Console.WriteLine("تم تسجيل الطالب بنجاح!");
-            // كود للتوجيه لصفحة تانية أو إظهار رسالة نجاح
-        }else
-        {
-            Console.WriteLine("فشل تسجيل الطالب: " + response.Message);
-            // كود لإظهار رسالة خطأ للمستخدم   
-        }
-    }
+    //     if (response.Success) 
+    //     {
+    //         Console.WriteLine("تم تسجيل الطالب بنجاح!");
+    //         // كود للتوجيه لصفحة تانية أو إظهار رسالة نجاح
+    //     }else
+    //     {
+    //         Console.WriteLine("فشل تسجيل الطالب: " + response.Message);
+    //         // كود لإظهار رسالة خطأ للمستخدم   
+    //     }
+    // }
 	//search
     // كائن البحث اللي رح نربطه بحقول الإدخال (Input Fields)
     private SearchMembersRequest searchModel = new SearchMembersRequest();
@@ -538,35 +537,35 @@ RegisterRequest studentModel = new RegisterRequest();
     // (إذا كان اسم كلاس الطالب عندك يختلف عن "StudentDto" قومي بتغييره للاسم الصحيح عندك)
     private List<StudentFilterDto> studentsList = new List<StudentFilterDto>();
 
-    private async Task HandleSearch()
-    {
-        isLoading = true;
-        try
-        {
-            // استدعاء خدمة البحث من الباك إند
-            searchResponse = await AuthService.Search(searchModel);
+//     private async Task HandleSearch()
+//     {
+//         isLoading = true;
+//         try
+//         {
+//             // استدعاء خدمة البحث من الباك إند
+//             searchResponse = await AuthService.Search(searchModel);
             
-            if (searchResponse != null && searchResponse.Success)
-            {
-                // 👇 هاد السطر هو السحر اللي كان ناقص!
-                // هنا بنأخذ البيانات القادمة من السيرفر وبنحطها بالقائمة ليقرأها الجدول فوراً
-                // تنبيه: تأكدي هل الحقل في الـ GeneralResponse اسمه Data أم شيئ آخر؟
-                studentsList = (List<Moeen.Shared.Requests.CircleQuery.StudentFilterDto>)searchResponse.Data; 
-            }
-            else
-            {
-                // إذا فشل البحث أو لم يجد نتائج، نفرغ القائمة القديمة
-                studentsList = new List<StudentFilterDto>();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged(); // إجبار الصفحة على التحديث وعرض البيانات الجديدة
-        }
-}
+//             if (searchResponse != null && searchResponse.Success)
+//             {
+//                 // 👇 هاد السطر هو السحر اللي كان ناقص!
+//                 // هنا بنأخذ البيانات القادمة من السيرفر وبنحطها بالقائمة ليقرأها الجدول فوراً
+//                 // تنبيه: تأكدي هل الحقل في الـ GeneralResponse اسمه Data أم شيئ آخر؟
+//                 studentsList = (List<Moeen.Shared.Requests.CircleQuery.StudentFilterDto>)searchResponse.Data; 
+//             }
+//             else
+//             {
+//                 // إذا فشل البحث أو لم يجد نتائج، نفرغ القائمة القديمة
+//                 studentsList = new List<StudentFilterDto>();
+//             }
+//         }
+//         catch (Exception ex)
+//         {
+//             Console.WriteLine($"Error: {ex.Message}");
+//         }
+//         finally
+//         {
+//             isLoading = false;
+//             StateHasChanged(); // إجبار الصفحة على التحديث وعرض البيانات الجديدة
+//         }
+// }
 }
