@@ -1,6 +1,8 @@
 ﻿using Moeen.Dashboard.Infrastructure.Http.Clients;
 using Moeen.Dashboard.Services.Abstractions;
+using Moeen.Shared.Requests.Enrollment;
 using Moeen.Shared.Requests.Identity;
+using Moeen.Shared.Responses; // تم إضافة هذا السطر لحل مشكلة الـ GeneralResponse
 using Moeen.Shared.Responses.Identity;
 using System.Text.Json;
 

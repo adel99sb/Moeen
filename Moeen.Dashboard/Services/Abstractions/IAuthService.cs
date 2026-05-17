@@ -1,5 +1,6 @@
 ﻿using Moeen.Shared.Requests;
 using Moeen.Shared.Requests.Identity;
+using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.Identity;
 
 namespace Moeen.Dashboard.Services.Abstractions
