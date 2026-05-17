@@ -29,5 +29,61 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             return content;
         }
 
+            var content = await response.Content.ReadFromJsonAsync<GeneralResponse>();
+
+            return content;
+        }
+        public async Task<GeneralResponse> SendVerifyEmailCode(SendVerifyEmailCodeRequest request)
+        {
+            var response = await _http.PostAsJsonAsync(ApiRoutes.SendVerifyEmailRoute, request);
+            return await response.Content.ReadFromJsonAsync<GeneralResponse>();
+        }
+        public async Task<GeneralResponse> VerifyEmail(VerifyEmailRequest request)
+        {
+            var response = await _http.PostAsJsonAsync(ApiRoutes.VerifyEmailRoute, request);
+            return await response.Content.ReadFromJsonAsync<GeneralResponse>();
+        }
+        public async Task<GeneralResponse> GetPostById(Guid postId)
+        {
+            var route = ApiRoutes.GetPostRoute.Replace("{postId}", postId.ToString());
+            var response = await _http.GetAsync(route);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new GeneralResponse { Success = false, Message = "مشكلة في الاتصال بالسيرفر أو المنشور غير موجود" };
+            }
+
+            var content = await response.Content.ReadFromJsonAsync<GeneralResponse>();
+            return content;
+        }
+        public async Task<GeneralResponse> GetPostInteractionsAsync(Guid postId)
+        {
+            // هنا نادينا   (GetPostInterractionRoute) 
+            var route = ApiRoutes.GetPostInterractionRoute.Replace("{postId}", postId.ToString());
+
+            // منبعت طلب GET للسيرفر عشان نجيب التفاعلات
+            var response = await _http.GetAsync(route);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new GeneralResponse { Success = false, Message = "تعذر جلب تفاعلات المنشور" };
+            }
+
+            var content = await response.Content.ReadFromJsonAsync<GeneralResponse>();
+            return content;
+        }
+        public async Task<GeneralResponse> DeletePostAsync(Guid postId)
+        {
+            var url = ApiRoutes.DeletePostRoute.Replace("{postId}", postId.ToString());
+
+            var response = await _http.DeleteAsync(url);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<GeneralResponse>();
+            }
+
+            return new GeneralResponse { Success = false, Message = "فشل في حذف المنشور" };
+        }
     }
 }
