@@ -9,12 +9,10 @@ namespace Moeen.Dashboard.Services.Implementations
     public class AuthService : IAuthService
     {
         private readonly AuthApiClient _client;
-        //private readonly ITokenService _token;
 
-        public AuthService(AuthApiClient client/*, ITokenService token*/)
+        public AuthService(AuthApiClient client)
         {
             _client = client;
-          //  _token = token;
         }
 
         public async Task<AuthResponse> Login(LoginRequest request)
@@ -33,49 +31,47 @@ namespace Moeen.Dashboard.Services.Implementations
                     PropertyNameCaseInsensitive = true
                 });
 
-            //await _token.Save(data.AccessToken);
-
             return data;
         }
+
         public async Task Register(RegisterRequest request)
         {
-            var res = await _client.CreateUser(request);
+            var res = await _client.Register(request);
 
             if (res == null || !res.Success)
-                throw new Exception(res?.Message ?? "Unknown error");
-            //await _token.Save(data.AccessToken);
+                throw new Exception(res?.Message ?? "Registration failed");
         }
-        public async Task<GeneralResponse> GetPostByIdAsync(Guid postId)
-        {
-            // 1. منبعث الطلب عن طريق الـ client (ساعي البريد)
-            var res = await _client.GetPostById(postId);
 
-            // 2. التحقق إذا النتيجة رجعت فاضية أو فيها فشل
+        public async Task SendResetUrl(SendPasswordResetUrlRequest request)
+        {
+            var res = await _client.SendResetUrl(request);
+
             if (res == null || !res.Success)
-            {
-                throw new Exception(res?.Message ?? "Failed to fetch post");
-            }
-
-            // 3. إرجاع النتيجة مباشرة متل ميثود الـ Search تماماً
-            return res;
+                throw new Exception(res?.Message ?? "Failed to send reset url");
         }
-        public async Task<GeneralResponse> GetPostInteractionsAsync(Guid postId)
-        {
-            // مننادي ساعي البريد (الكلاينت) اللي جهزناه بالخطوة الأولى
-            var res = await _client.GetPostInteractionsAsync(postId);
 
-            // لو النتيجة رجعت فاضية أو فيها فشل، منرمي Exception يوضح المشكلة
+        public async Task ResetPassword(ChangePasswordRequest request)
+        {
+            var res = await _client.ResetPassword(request);
+
             if (res == null || !res.Success)
-            {
-                throw new Exception(res?.Message ?? "فشلت عملية جلب التفاعلات");
-            }
-
-            // لو كل شي تمام، منرجع التفاعلات للشاشة
-            return res;
+                throw new Exception(res?.Message ?? "Reset password failed");
         }
-        public async Task<GeneralResponse> DeletePostAsync(Guid postId)
+
+        public async Task SendVerifyCode(SendVerifyEmailCodeRequest request)
         {
-            return await _client.DeletePostAsync(postId);
+            var res = await _client.SendVerifyCode(request);
+
+            if (res == null || !res.Success)
+                throw new Exception(res?.Message ?? "Failed to send verify code");
+        }
+
+        public async Task VerifyEmail(VerifyEmailRequest request)
+        {
+            var res = await _client.VerifyEmail(request);
+
+            if (res == null || !res.Success)
+                throw new Exception(res?.Message ?? "Verify email failed");
         }
     }
 }

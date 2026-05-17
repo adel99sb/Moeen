@@ -3,20 +3,25 @@
     public static class ApiRoutes
     {
         public static string BaseUrl { get; } = "https://localhost:7023/";
+
+        // Auth
         public static string LoginRoute { get; } = "api/User/login";
-        public static string registerRoute { get; } = "api/User/register";
-    }
-}
         public static string RegisterRoute { get; } = "api/User/register";
-        public static string SearchRoute { get; } = "api/User/search";
-        public static string SendVerifyEmailRoute { get; } = "api/User/send-verify-email-code";
+
+        // User
+        public static string SearchUsersRoute { get; } = "api/User/search";
+        public static string ChangeEmailRoute { get; } = "api/User/change-email";
+
+        // Password
+        public static string SendResetUrlRoute { get; } = "api/User/send-reset-url";
+        public static string ResetPasswordRoute { get; } = "api/User/reset-password";
+
+        // Verification
+        public static string SendVerifyCodeRoute { get; } = "api/User/send-verify-code";
         public static string VerifyEmailRoute { get; } = "api/User/verify-email";
-        public static string GetPostRoute { get; } = "api/ContentSharing/posts/{postId}";
-        public static string GetPostInterractionRoute { get; } = "api/ContentSharing/posts/{postId}/interactions";
-        public static string DeletePostRoute { get; } = "api/ContentSharing/posts/{postId}";
+
+        // Dynamic
+        public static string GetUserById(Guid id)
+            => $"api/User/{id}";
     }
 }
-
-
-
-

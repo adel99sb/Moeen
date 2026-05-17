@@ -154,18 +154,18 @@
             VerificationMessage = "جاري إرسال الكود...";
 
             var sendRequest = new SendVerifyEmailCodeRequest { Email = _model.Email };
-            var result = await AuthService.SendVerifyEmailCode(sendRequest);
+            //var result = await AuthService.SendVerifyEmailCode(sendRequest);
 
-            if (result.Success)
-            {
-                VerificationMessage = "تم إرسال كود التفعيل إلى بريدك الإلكتروني.";
-                IsVerificationSuccess = true;
-            }
-            else
-            {
-                VerificationMessage = "فشل الإرسال: " + result.Message;
-                IsVerificationSuccess = false;
-            }
+            // if (result.Success)
+            // {
+            //     VerificationMessage = "تم إرسال كود التفعيل إلى بريدك الإلكتروني.";
+            //     IsVerificationSuccess = true;
+            // }
+            // else
+            // {
+            //     VerificationMessage = "فشل الإرسال: " + result.Message;
+            //     IsVerificationSuccess = false;
+            // }
         }
         catch (Exception ex)
         {
@@ -200,21 +200,21 @@
             // نأخذ الإيميل من حقل تسجيل الدخول نفسه
             _verifyModel.Email = _model.Email;
 
-            var result = await AuthService.VerifyEmail(_verifyModel);
+            // var result = await AuthService.VerifyEmail(_verifyModel);
 
-            if (result.Success)
-            {
-                VerifyStatusMessage = "تم تفعيل حسابك بنجاح! يمكنك الآن تسجيل الدخول.";
-                IsVerifyError = false;
-                // إخفاء واجهة الكود بعد نجاح العملية بثوانٍ
-                await Task.Delay(3000);
-                IsVerificationSuccess = false;
-            }
-            else
-            {
-                VerifyStatusMessage = result.Message;
-                IsVerifyError = true;
-            }
+            // if (result.Success)
+            // {
+            //     VerifyStatusMessage = "تم تفعيل حسابك بنجاح! يمكنك الآن تسجيل الدخول.";
+            //     IsVerifyError = false;
+            //     // إخفاء واجهة الكود بعد نجاح العملية بثوانٍ
+            //     await Task.Delay(3000);
+            //     IsVerificationSuccess = false;
+            // }
+            // else
+            // {
+            //     VerifyStatusMessage = result.Message;
+            //     IsVerifyError = true;
+            // }
         }
         catch (Exception ex)
         {

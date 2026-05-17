@@ -1,4 +1,4 @@
-﻿@page "/supervisor/posts"
+﻿@* @page "/supervisor/posts"
 @rendermode InteractiveServer
 @using Moeen.Shared.Responses
 @inject NavigationManager NavManager
@@ -232,8 +232,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                         }
                     </td>
                    <td class="table td">
-                                  @* ربطنا كبسة الحذف بالميثود الجديدة ومررنا الـ ID *@
-                        <button class="btn-icon delete" title="حذف" @onclick="() => DeletePost(targetPostId)"><i class="bi bi-trash"></i></button>
+                      <button class="btn-icon delete" title="حذف" @onclick="() => DeletePost(targetPostId)"><i class="bi bi-trash"></i></button>
                    </td>
                 </tr>
             }
@@ -380,4 +379,4 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
     {
         NavManager.NavigateTo($"/supervisor/post1/{id}");
     }
-}
+} *@
