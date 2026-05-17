@@ -1,4 +1,5 @@
-﻿using Moeen.Shared.Requests.Identity;
+﻿using Moeen.Shared.Requests.Enrollment;
+using Moeen.Shared.Requests.Identity;
 using Moeen.Shared.Responses;
 
 namespace Moeen.Dashboard.Infrastructure.Http.Clients
@@ -27,11 +28,13 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             var content = await response.Content.ReadFromJsonAsync<GeneralResponse>();
 
             return content;
+        
+
         }
-
-            var content = await response.Content.ReadFromJsonAsync<GeneralResponse>();
-
-            return content;
+        public async Task<GeneralResponse> Search(SearchMembersRequest request)
+        {
+            var response = await _http.PostAsJsonAsync(ApiRoutes.SearchRoute, request);
+            return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
         public async Task<GeneralResponse> SendVerifyEmailCode(SendVerifyEmailCodeRequest request)
         {
