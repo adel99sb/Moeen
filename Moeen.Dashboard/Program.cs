@@ -23,6 +23,9 @@ builder.Services.AddHttpClient<AuthApiClient>(c =>
 /*.AddHttpMessageHandler<AuthHandler>()*/;
 builder.Services.AddScoped<IAuthService, AuthService>();
 var app = builder.Build();
+// تسجيل خدمات المنشورات والمحتوى الجديدة
+builder.Services.AddScoped<PostApiClient>();
+builder.Services.AddScoped<IPostService, PostService>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
