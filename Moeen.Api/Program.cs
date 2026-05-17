@@ -82,12 +82,12 @@ builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 builder.Services.AddScoped<ICircleCommandService, CircleCommandService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<ICircleQueryService, CircleQueryService>();
-builder.Services.AddScoped<ICircleTeacherAssignmentService, CircleTeacherAssignmentService>();
+builder.Services.AddScoped<IHalqaTeacherAssignmentService , HalqaTeacherAssignmentService>();
 builder.Services.AddScoped<IQuranCurriculumService, QuranCurriculumService>();
 builder.Services.AddScoped<IMemorizationService, MemorizationService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IPointsService, PointsService>();
-builder.Services.AddScoped<IExamGradingCriteriaService, ExamGradingCriteriaService>();
+
 builder.Services.AddScoped<IExamPhaseService, ExamPhaseService>();
 builder.Services.AddScoped<IExamCommandService, ExamCommandService>();
 builder.Services.AddScoped<IExamQueryService, ExamQueryService>();

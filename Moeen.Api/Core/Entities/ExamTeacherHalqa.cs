@@ -11,7 +11,7 @@
         // Navigation Properties
         public TeacherExam TeacherExams { get; set; }
         public Halqa Halqa { get; set; }
-        public Fouj Fouj { get; set; }
-
+        public Guid FoujId { get; set; }
+        public DateTime CreatedAt { get; internal set; }
     }
 }

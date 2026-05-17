@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Shared.Requests.Attendance;
-using Moeen.Shared.Responses.Attendance;
+using Moeen.Shared.Responses;
 using System;
 
 namespace Moeen.Api.Controllers
@@ -21,59 +21,80 @@ namespace Moeen.Api.Controllers
         /// تسجيل الحضور اليومي
         /// </summary>
         [HttpPost("record-daily")]
-        public async Task<ActionResult<RecordDailyAttendanceResponse>> RecordDailyAttendance(RecordDailyAttendanceRequest request)
-            => Ok(await _attendanceService.RecordDailyAttendanceAsync(request));
+        public async Task<ActionResult<GeneralResponse>> RecordDailyAttendance([FromBody] RecordDailyAttendanceRequest request)
+        {
+            var response = await _attendanceService.RecordDailyAttendanceAsync(request);
+            return StatusCode(response.StatusCode, response);
+        }
 
         /// <summary>
         /// تسجيل الغياب
         /// </summary>
         [HttpPost("record-absence")]
-        public async Task<ActionResult<RecordAbsenceResponse>> RecordAbsence(RecordAbsenceRequest request)
-            => Ok(await _attendanceService.RecordAbsenceAsync(request));
+        public async Task<ActionResult<GeneralResponse>> RecordAbsence([FromBody] RecordAbsenceRequest request)
+        {
+            var response = await _attendanceService.RecordAbsenceAsync(request);
+            return StatusCode(response.StatusCode, response);
+        }
 
         /// <summary>
         /// تعديل سجل حضور
         /// </summary>
         [HttpPut("modify-record")]
-        public async Task<ActionResult<ModifyAttendanceRecordResponse>> ModifyAttendanceRecord(ModifyAttendanceRecordRequest request)
-            => Ok(await _attendanceService.ModifyAttendanceRecordAsync(request));
+        public async Task<ActionResult<GeneralResponse>> ModifyAttendanceRecord([FromBody] ModifyAttendanceRecordRequest request)
+        {
+            var response = await _attendanceService.ModifyAttendanceRecordAsync(request);
+            return StatusCode(response.StatusCode, response);
+        }
 
         /// <summary>
         /// حساب نسبة الحضور لطالب
         /// </summary>
         [HttpPost("calculate-rate")]
-        public async Task<ActionResult<CalculateAttendanceRateResponse>> CalculateAttendanceRate(CalculateAttendanceRateRequest request)
-            => Ok(await _attendanceService.CalculateAttendanceRateAsync(request));
+        public async Task<ActionResult<GeneralResponse>> CalculateAttendanceRate([FromBody] CalculateAttendanceRateRequest request)
+        {
+            var response = await _attendanceService.CalculateAttendanceRateAsync(request);
+            return StatusCode(response.StatusCode, response);
+        }
 
         /// <summary>
         /// GET (جديد): نسبة حضور الطالب.
         /// </summary>
         [HttpGet("students/{studentId:guid}/rate")]
-        public async Task<ActionResult<CalculateAttendanceRateResponse>> CalculateAttendanceRateGet([FromRoute] Guid studentId)
-            => Ok(await _attendanceService.CalculateAttendanceRateAsync(new CalculateAttendanceRateRequest { StudentId = studentId }));
+        public async Task<ActionResult<GeneralResponse>> CalculateAttendanceRateGet([FromRoute] Guid studentId)
+        {
+            var response = await _attendanceService.CalculateAttendanceRateAsync(new CalculateAttendanceRateRequest { StudentId = studentId });
+            return StatusCode(response.StatusCode, response);
+        }
 
         /// <summary>
         /// مراقبة الغياب المتكرر
         /// </summary>
         [HttpPost("frequent-absences")]
-        public async Task<ActionResult<MonitorFrequentAbsencesResponse>> MonitorFrequentAbsences(MonitorFrequentAbsencesRequest request)
-            => Ok(await _attendanceService.MonitorFrequentAbsencesAsync(request));
+        public async Task<ActionResult<GeneralResponse>> MonitorFrequentAbsences([FromBody] MonitorFrequentAbsencesRequest request)
+        {
+            var response = await _attendanceService.MonitorFrequentAbsencesAsync(request);
+            return StatusCode(response.StatusCode, response);
+        }
 
         /// <summary>
         /// GET (جديد): مراقبة الغياب المتكرر بعتبة.
         /// </summary>
         [HttpGet("frequent-absences")]
-        public async Task<ActionResult<MonitorFrequentAbsencesResponse>> MonitorFrequentAbsencesGet([FromQuery] int threshold = 3)
-            => Ok(await _attendanceService.MonitorFrequentAbsencesAsync(new MonitorFrequentAbsencesRequest { Threshold = threshold }));
+        public async Task<ActionResult<GeneralResponse>> MonitorFrequentAbsencesGet([FromQuery] int threshold = 3)
+        {
+            var response = await _attendanceService.MonitorFrequentAbsencesAsync(new MonitorFrequentAbsencesRequest { Threshold = threshold });
+            return StatusCode(response.StatusCode, response);
+        }
 
         /// <summary>
         /// تصدير سجلات الحضور
         /// </summary>
         [HttpPost("export")]
-        public async Task<IActionResult> ExportAttendance(ExportAttendanceRequest request)
+        public async Task<ActionResult<GeneralResponse>> ExportAttendance([FromBody] ExportAttendanceRequest request)
         {
-            var result = await _attendanceService.ExportAttendanceAsync(request);
-            return File(result.FileContent, result.ContentType, result.FileName);
+            var response = await _attendanceService.ExportAttendanceAsync(request);
+            return StatusCode(response.StatusCode, response);
         }
     }
 }

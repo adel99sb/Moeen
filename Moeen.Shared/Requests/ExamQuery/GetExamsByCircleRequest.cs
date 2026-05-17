@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.ExamQuery
 {
-    public class GetExamsByCircleRequest
+    public class GetExamsByHalqaRequest
     {
-        [Required(ErrorMessage = "Circle ID is required")]
-        public Guid CircleId { get; set; }
+        [Required(ErrorMessage = "Halqa ID is required")]
+        public Guid HalqaId { get; set; }
 
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }

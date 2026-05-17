@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿
+using Microsoft.Extensions.Caching.Memory;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
@@ -473,7 +474,7 @@ namespace Moeen.Api.Application.Services
             var students = (await _unitOfWork.Repository<Student>().GetAllAsync(studentSpec))
                 .ToDictionary(s => s.Id, s => s);
 
-            var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(circle.TeacherId);
+            var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync((Guid)circle.TeacherId);
 
             var avgAttendanceRate = (studentIds.Count == 0 || sessionIds.Count == 0)
                 ? 0.0
@@ -536,7 +537,7 @@ namespace Moeen.Api.Application.Services
                 CircleId = circle.Id,
                 CircleName = circle.Name ?? string.Empty,
                 CircleType = circle.Type,
-                TeacherId = circle.TeacherId,
+                TeacherId = (Guid)circle.TeacherId,
                 TeacherName = teacher?.name ?? string.Empty,
                 StudentsCount = studentIds.Count,
                 ActiveStudentsCount = activeStudentsCount,
