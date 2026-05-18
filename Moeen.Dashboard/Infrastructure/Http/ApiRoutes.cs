@@ -75,6 +75,19 @@
         public static string GetExamPhasesByCircleAsyncRoute { get; } = "api/ExamPhase/by-circle/{circleId}";
         public static string UpdateExamPhaseInfoAsyncRoute { get; } = "api/ExamPhase/{phaseId}";
         public static string DeleteExamPhaseAsyncRoute { get; } = "api/ExamPhase/{phaseId}";
+        // exam query
+        public static string GetExamResultByIdAsyncRoute { get; } = "api/ExamQuery/get-by-id";
+        public static string SearchExamResultsAsyncRoute { get; } = "api/ExamQuery/search";
+        public static string GetStudentExamsAsyncRoute { get; } = "api/ExamQuery/student-exams";
+        public static string GetExamsByHalqaAsyncRoute { get; } = "api/ExamQuery/halqas/{halqaId}/exams";
+        public static string GetStudentExamsByDateRangeAsyncRoute { get; } = "api/ExamQuery/students/{studentId}/exams/by-date";
+        public static string GetExamsByTeacherAsyncRoute { get; } = "api/ExamQuery/teachers/{teacherId}/exams";
+        public static string GetExamsByPhaseAsyncRoute { get; } = "api/ExamQuery/phases/{phaseId}/exams";
+        public static string GetExamStatisticsAsyncRoute { get; } = "api/ExamQuery/statistics";
+        public static string GetHalqaExamAnalyticsAsyncRoute { get; } = "api/ExamQuery/Halqa/{HalqaId}/analytics";
+        public static string CompareHalqasPerformanceAsyncRoute { get; } = "api/ExamQuery/compare-Halqa";
+        public static string PrepareExamDataForExportAsyncRoute { get; } = "api/ExamQuery/prepare-export";
+
 
 
 

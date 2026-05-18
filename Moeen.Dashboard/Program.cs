@@ -40,6 +40,9 @@ builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 // تسجيل خدمة إدارة مراحل الاختبارات (ExamPhase) في حاوية حقن التبعية (Dependency Injection)
 builder.Services.AddScoped<ExamPhaseApiClient>();
 builder.Services.AddScoped<IExamPhaseService, ExamPhaseService>();
+//حقن exam query
+builder.Services.AddScoped<ExamQueryApiClient>();
+builder.Services.AddScoped<IExamQueryService, ExamQueryService>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
