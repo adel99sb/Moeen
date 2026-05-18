@@ -26,6 +26,9 @@ var app = builder.Build();
 // تسجيل خدمات المنشورات والمحتوى الجديدة
 builder.Services.AddScoped<PostApiClient>();
 builder.Services.AddScoped<IPostService, PostService>();
+//خدمة الاختبارات
+builder.Services.AddScoped<ExamCommandClient>();
+builder.Services.AddScoped<IExamCommandService, ExamCommandService>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

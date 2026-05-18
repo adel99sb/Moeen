@@ -9,7 +9,6 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
     public class PostApiClient
     {
         private readonly HttpClient _http;
-        private const string BaseRoute = "api/content-sharing"; // هاد اسم الـ Controller بالباك إند غالباً
 
         public PostApiClient(HttpClient http)
         {

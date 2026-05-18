@@ -36,6 +36,14 @@
         public static string AddMultiMediaRoute { get; } = "api/ContentSharing/add-multimedia";
         public static string SearchPostRoute { get; } = "api/ContentSharing/search";
         public static string GetSearchPostRoute { get; } = "api/ContentSharing/search";
+        //exam command
+        public static string RegisterExamRoute { get; } = "api/ExamCommand/register";
+        public static string AddFeedbackOnExamRoute { get; } = "api/ExamCommand/add-feedback";
+        public static string UpdateInfoExamRoute { get; } = "api/ExamCommand/update-info";
+        public static string UpdateResultExamRoute { get; } = "api/ExamCommand/update-result";
+        public static string DeleteResultExamRoute { get; } = "api/ExamCommand/delete";
+
+
 
 
 
