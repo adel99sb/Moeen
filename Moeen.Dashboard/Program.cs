@@ -47,6 +47,9 @@ builder.Services.AddScoped<IExamQueryService, ExamQueryService>();
 //حقن ادارة الشكاوي والافتراحات feedback
 builder.Services.AddScoped<FeedbackApiClient>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
+//goal trackingخدمة المتابعة اليومية
+builder.Services.AddScoped<GoalApiClient>();
+builder.Services.AddScoped<IGoalService, GoalService>();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

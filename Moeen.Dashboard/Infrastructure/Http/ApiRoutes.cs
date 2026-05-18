@@ -95,6 +95,13 @@
         public static string UpdateSuggestionStatusAsyncRoute { get; } = "api/Feedback/suggestion/status";
         public static string GetComplaintsAsyncRoute { get; } = "api/Feedback/complaints";
         public static string GetSuggestionsAsyncRoute { get; } = "api/Feedback/complaints";
+        //goal
+
+        public static string RecordDailyEntryAsyncRoute { get; } = "api/goal-tracking/daily-entry";
+        public static string UpdateProgressRecordAsyncRoute { get; } = "api/goal-tracking/records/{recordId}";
+        public static string GetStudentProgressSummaryAsyncRoute { get; } = "api/goal-tracking/students/{studentId}/summary";
+        public static string GetStudentProgressHistoryAsyncRoute { get; } = "api/goal-tracking/students/{studentId}/history";
+        public static string GetCirclePerformanceOverviewAsyncRoute { get; } = "api/goal-tracking/circle/overview";
 
 
 
