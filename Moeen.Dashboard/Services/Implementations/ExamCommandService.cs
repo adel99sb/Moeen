@@ -7,9 +7,9 @@ namespace Moeen.Dashboard.Services.Implementations
 {
     public class ExamCommandService : IExamCommandService
     {
-        private readonly ExamCommandClient _client;
+        private readonly ExamCommandApiClient _client;
 
-        public ExamCommandService(ExamCommandClient client)
+        public ExamCommandService(ExamCommandApiClient client)
         {
             _client = client;
         }

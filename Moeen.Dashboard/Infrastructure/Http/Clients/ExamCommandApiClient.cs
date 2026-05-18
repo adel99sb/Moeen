@@ -4,10 +4,10 @@ using System.Net.Http.Json;
 
 namespace Moeen.Dashboard.Infrastructure.Http.Clients
 {
-    public class ExamCommandClient
+    public class ExamCommandApiClient
     {
         private readonly HttpClient _http;
-        public ExamCommandClient(HttpClient http)
+        public ExamCommandApiClient(HttpClient http)
         {
             _http = http;
         }

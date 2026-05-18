@@ -27,8 +27,11 @@ var app = builder.Build();
 builder.Services.AddScoped<PostApiClient>();
 builder.Services.AddScoped<IPostService, PostService>();
 //خدمة الاختبارات
-builder.Services.AddScoped<ExamCommandClient>();
+builder.Services.AddScoped<ExamCommandApiClient>();
 builder.Services.AddScoped<IExamCommandService, ExamCommandService>();
+// --- Exam Halqa Services (خدمات امتحانات الحلقات) ---
+builder.Services.AddScoped<ExamHalqaApiClient>();
+builder.Services.AddScoped<IExamHalqaService, ExamHalqaService>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

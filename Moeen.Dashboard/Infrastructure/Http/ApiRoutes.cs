@@ -42,6 +42,12 @@
         public static string UpdateInfoExamRoute { get; } = "api/ExamCommand/update-info";
         public static string UpdateResultExamRoute { get; } = "api/ExamCommand/update-result";
         public static string DeleteResultExamRoute { get; } = "api/ExamCommand/delete";
+        //exam halaqa
+        public static string CreateExamTeacherRoute { get; } = "api/ExamHalqa/create";
+        public static string GetExamTeacherByIdRoute { get; } = "api/ExamHalqa/get-by-id/{id}";
+        public static string AssignHalqaToExamTeacherRoute { get; } = "api/ExamHalqa/assign-halqa";
+
+
 
 
 
