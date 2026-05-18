@@ -64,13 +64,19 @@ namespace Moeen.Dashboard.Services.Implementations
             return res;
         }
 
-        public async Task<GeneralResponse> SearchContentAsync(SearchContentRequest request)
+        public async Task<GeneralResponse> SearchContentPostAsync(SearchContentRequest request)
         {
-            var res = await _postApiClient.SearchContent(request);
-            if (res == null || !res.Success) throw new Exception(res?.Message ?? "فشلت عملية البحث عن المحتوى");
+            var res = await _postApiClient.SearchContentPost(request);
+            if (res == null || !res.Success) throw new Exception(res?.Message ?? "فشلت عملية البحث (POST)");
             return res;
         }
 
+        public async Task<GeneralResponse> SearchContentGetAsync(string query)
+        {
+            var res = await _postApiClient.SearchContentGet(query);
+            if (res == null || !res.Success) throw new Exception(res?.Message ?? "فشلت عملية البحث (GET)");
+            return res;
+        }
         public async Task<GeneralResponse> DeleteOldContentAsync(DeleteOldContentRequest request)
         {
             var res = await _postApiClient.DeleteOldContent(request);
