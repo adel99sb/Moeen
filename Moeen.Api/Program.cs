@@ -82,7 +82,7 @@ builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 builder.Services.AddScoped<ICircleCommandService, CircleCommandService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<ICircleQueryService, CircleQueryService>();
-builder.Services.AddScoped<IHalqaTeacherAssignmentService>();
+builder.Services.AddScoped<IHalqaTeacherAssignmentService, HalqaTeacherAssignmentService>();
 builder.Services.AddScoped<IQuranCurriculumService, QuranCurriculumService>();
 builder.Services.AddScoped<IMemorizationService, MemorizationService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
