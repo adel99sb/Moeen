@@ -1,4 +1,6 @@
-﻿using Moeen.Shared.Requests.Identity;
+﻿using Moeen.Shared.Requests;
+using Moeen.Shared.Requests.Identity;
+using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.Identity;
 
 namespace Moeen.Dashboard.Services.Abstractions
@@ -6,5 +8,15 @@ namespace Moeen.Dashboard.Services.Abstractions
     public interface IAuthService
     {
         Task<AuthResponse> Login(LoginRequest request);
+
+        Task Register(RegisterRequest request);
+
+        Task SendResetUrl(SendPasswordResetUrlRequest request);
+
+        Task ResetPassword(ChangePasswordRequest request);
+
+        Task SendVerifyCode(SendVerifyEmailCodeRequest request);
+
+        Task VerifyEmail(VerifyEmailRequest request);
     }
 }

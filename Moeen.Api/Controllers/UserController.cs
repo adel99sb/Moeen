@@ -2,11 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Application;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Shared;
 using Moeen.Shared.Requests;
 using Moeen.Shared.Requests.Identity;
-using System;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.Controllers
 {
