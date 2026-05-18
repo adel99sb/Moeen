@@ -37,6 +37,9 @@ builder.Services.AddScoped<IExamHalqaService, ExamHalqaService>();
 // EnrollmentApiClient: مسؤول عن خدمة التسجيل وادارة الاعضاء 
 builder.Services.AddScoped<EnrollmentApiClient>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+// تسجيل خدمة إدارة مراحل الاختبارات (ExamPhase) في حاوية حقن التبعية (Dependency Injection)
+builder.Services.AddScoped<ExamPhaseApiClient>();
+builder.Services.AddScoped<IExamPhaseService, ExamPhaseService>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

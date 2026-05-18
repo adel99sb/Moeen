@@ -68,7 +68,13 @@
         public static string DeleteTeacherAsyncRoute { get; } = "api/Enrollment/teachers/{teacherId}";
         public static string DeleteParentAsyncRoute { get; } = "api/Enrollment/parents/{parentId}";
         public static string ExportMembersListAsyncRoute { get; } = "api/Enrollment/export-members";
-        
+        //exam phase
+        public static string DefineExamPhaseAsyncRoute { get; } = "api/ExamPhase/define";
+        public static string GetAllExamPhasesAsyncRoute { get; } = "api/ExamPhase";
+        public static string GetExamPhaseByIdAsyncRoute { get; } = "api/ExamPhase/{phaseId}";
+        public static string GetExamPhasesByCircleAsyncRoute { get; } = "api/ExamPhase/by-circle/{circleId}";
+        public static string UpdateExamPhaseInfoAsyncRoute { get; } = "api/ExamPhase/{phaseId}";
+        public static string DeleteExamPhaseAsyncRoute { get; } = "api/ExamPhase/{phaseId}";
 
 
 
