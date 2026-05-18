@@ -6,6 +6,7 @@ using Moeen.Dashboard.Infrastructure.Http.Clients;
 using Moeen.Dashboard.Infrastructure.Http.Handlers;
 using Moeen.Dashboard.Services.Abstractions;
 using Moeen.Dashboard.Services.Implementations;
+using Moeen.Frontend.Services.Abstractions;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,7 +44,9 @@ builder.Services.AddScoped<IExamPhaseService, ExamPhaseService>();
 //حقن exam query
 builder.Services.AddScoped<ExamQueryApiClient>();
 builder.Services.AddScoped<IExamQueryService, ExamQueryService>();
-
+//حقن ادارة الشكاوي والافتراحات feedback
+builder.Services.AddScoped<FeedbackApiClient>();
+builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

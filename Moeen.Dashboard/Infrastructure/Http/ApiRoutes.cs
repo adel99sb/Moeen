@@ -87,7 +87,14 @@
         public static string GetHalqaExamAnalyticsAsyncRoute { get; } = "api/ExamQuery/Halqa/{HalqaId}/analytics";
         public static string CompareHalqasPerformanceAsyncRoute { get; } = "api/ExamQuery/compare-Halqa";
         public static string PrepareExamDataForExportAsyncRoute { get; } = "api/ExamQuery/prepare-export";
-
+        //feedback
+        public static string SubmitComplaintAsyncRoute { get; } = "api/Feedback/complaint";
+        public static string SubmitSuggestionAsyncRoute { get; } = "api/Feedback/suggestion";
+        public static string ManageFeedbackAsyncRoute { get; } = "api/Feedback/manage";
+        public static string UpdateComplaintStatusAsyncRoute { get; } = "api/Feedback/complaint/status";
+        public static string UpdateSuggestionStatusAsyncRoute { get; } = "api/Feedback/suggestion/status";
+        public static string GetComplaintsAsyncRoute { get; } = "api/Feedback/complaints";
+        public static string GetSuggestionsAsyncRoute { get; } = "api/Feedback/complaints";
 
 
 
