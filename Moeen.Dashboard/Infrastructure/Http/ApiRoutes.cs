@@ -46,7 +46,29 @@
         public static string CreateExamTeacherRoute { get; } = "api/ExamHalqa/create";
         public static string GetExamTeacherByIdRoute { get; } = "api/ExamHalqa/get-by-id/{id}";
         public static string AssignHalqaToExamTeacherRoute { get; } = "api/ExamHalqa/assign-halqa";
-
+        //enrollment
+        public static string RegisterStudentAsyncRoute { get; } = "api/Enrollment/register-student";
+        public static string AddTeacherAsyncRoute { get; } = "api/Enrollment/add-teacher";
+        public static string RegisterParentAsyncRoute { get; } = "api/Enrollment/register-parent";
+        public static string UpdateMemberInfoAsyncRoute { get; } = "api/Enrollment/update-member";
+        public static string UpdateStudentInfoAsyncRoute { get; } = "api/Enrollment/students/update-info";
+        public static string UpdateTeacherInfoAsyncRoute { get; } = "api/Enrollment/teachers/update-info";
+        public static string UpdateParentInfoAsyncrRoute { get; } = "api/Enrollment/parents/update-info";
+        public static string CancelMembershipAsyncRoute { get; } = "api/Enrollment/cancel-membership";
+        public static string SearchMembersAsyncRoute { get; } = "api/Enrollment/search-members";
+        public static string GetMemberProfileAsyncRoute { get; } = "api/Enrollment/member-profile";
+        public static string UpdateMemberStatusAsyncRoute { get; } = "api/Enrollment/update-member-status";
+        public static string GetAllStudentsAsyncRoute { get; } = "api/Enrollment/students";
+        public static string GetAllTeachersAsyncRoute { get; } = "api/Enrollment/teachers";
+        public static string GetAllParentsAsyncRoute { get; } = "api/Enrollment/parents";
+        public static string GetAllSupervisorsAsyncRoute { get; } = "api/Enrollment/supervisors";
+        public static string GetChildrenByParentAsyncRoute { get; } = "api/Enrollment/parents/{parentId}/children";
+        public static string GetMemberStatisticsAsyncRoute { get; } = "api/Enrollment/statistics";
+        public static string DeleteStudentAsyncRoute { get; } = "api/Enrollment/students/{studentId}";
+        public static string DeleteTeacherAsyncRoute { get; } = "api/Enrollment/teachers/{teacherId}";
+        public static string DeleteParentAsyncRoute { get; } = "api/Enrollment/parents/{parentId}";
+        public static string ExportMembersListAsyncRoute { get; } = "api/Enrollment/export-members";
+        
 
 
 

@@ -1,3 +1,5 @@
+using Moeen.Dashboard.Application.Services.Abstractions;
+using Moeen.Dashboard.Application.Services.Implementations;
 using Moeen.Dashboard.Components;
 using Moeen.Dashboard.Infrastructure.Http;
 using Moeen.Dashboard.Infrastructure.Http.Clients;
@@ -32,6 +34,9 @@ builder.Services.AddScoped<IExamCommandService, ExamCommandService>();
 // --- Exam Halqa Services (خدمات امتحانات الحلقات) ---
 builder.Services.AddScoped<ExamHalqaApiClient>();
 builder.Services.AddScoped<IExamHalqaService, ExamHalqaService>();
+// EnrollmentApiClient: مسؤول عن خدمة التسجيل وادارة الاعضاء 
+builder.Services.AddScoped<EnrollmentApiClient>();
+builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
