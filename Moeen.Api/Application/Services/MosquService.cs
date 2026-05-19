@@ -112,7 +112,7 @@ namespace Moeen.Api.Application.Services
             var studentsCounts = await _context.ProgressEntries
                 .Where(pe => halqaIds.Contains(pe.HalqaId))
                 .GroupBy(pe => pe.HalqaId)
-                .Select(g => new { HalqaId = g.Key, Count = g.Select(x => x.studentId).Distinct().Count() })
+                .Select(g => new { HalqaId = g.Key, Count = g.Select(x => x.StudentId).Distinct().Count() })
                 .ToListAsync();
 
             var countMap = studentsCounts.ToDictionary(x => x.HalqaId, x => x.Count);

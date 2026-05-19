@@ -50,15 +50,15 @@ namespace Moeen.Api.Application.Services
             var entry = new ProgressEntry
             {
                 Id = Guid.NewGuid(),
-                studentId = request.StudentId,
+                StudentId = request.StudentId,
                 TeacherId = teacherId.Value,
                 HalqaId = halqaId,
-                date = DateTime.UtcNow,
-                page_number = request.PageNumber,
-                memorized_until = request.PageNumber,
-                next_target = request.PageNumber + 1,
-                juz_number = CalculateJuzNumber(request.PageNumber),
-                level_score = points
+                Date = DateTime.UtcNow,
+                PageNumber = request.PageNumber,
+                MemorizedUntil = request.PageNumber,
+                NextTarget = request.PageNumber + 1,
+                JuzNumber = CalculateJuzNumber(request.PageNumber),
+                LevelScore = points
             };
 
             await _context.ProgressEntries.AddAsync(entry);
@@ -77,8 +77,8 @@ namespace Moeen.Api.Application.Services
 
             var lastPage = await _context.ProgressEntries
                 .AsNoTracking()
-                .Where(p => p.studentId == request.StudentId)
-                .MaxAsync(p => (int?)p.page_number) ?? 0;
+                .Where(p => p.StudentId == request.StudentId)
+                .MaxAsync(p => (int?)p.PageNumber) ?? 0;
 
             return GeneralResponse.Ok("تم جلب آخر صفحة محفوظة.", new GetLastMemorizedPageResponse
             {
@@ -93,8 +93,8 @@ namespace Moeen.Api.Application.Services
 
             var record = await _context.ProgressEntries
                 .AsNoTracking()
-                .Where(p => p.studentId == request.StudentId && p.page_number == request.PageNumber)
-                .OrderByDescending(p => p.date)
+                .Where(p => p.StudentId == request.StudentId && p.PageNumber == request.PageNumber)
+                .OrderByDescending(p => p.Date)
                 .FirstOrDefaultAsync();
 
             if (record == null)
@@ -112,8 +112,8 @@ namespace Moeen.Api.Application.Services
             var toDate = (request.ToDate ?? DateTime.UtcNow).Date;
 
             var query = _context.ProgressEntries.AsNoTracking()
-                .Where(p => p.studentId == request.StudentId && p.date >= fromDate && p.date <= toDate)
-                .OrderByDescending(p => p.date);
+                .Where(p => p.StudentId == request.StudentId && p.Date >= fromDate && p.Date <= toDate)
+                .OrderByDescending(p => p.Date);
 
             var totalCount = await query.CountAsync();
             var pageNumber = request.PageNumber > 0 ? request.PageNumber : 1;
@@ -137,11 +137,11 @@ namespace Moeen.Api.Application.Services
 
             var entries = await _context.ProgressEntries
                 .AsNoTracking()
-                .Where(p => p.studentId == request.StudentId && p.date >= fromDate && p.date <= toDate)
+                .Where(p => p.StudentId == request.StudentId && p.Date >= fromDate && p.Date <= toDate)
                 .ToListAsync();
 
-            var totalPages = entries.Select(e => e.page_number).Distinct().Count();
-            var maxPage = entries.Count == 0 ? 0 : entries.Max(e => e.page_number);
+            var totalPages = entries.Select(e => e.PageNumber).Distinct().Count();
+            var maxPage = entries.Count == 0 ? 0 : entries.Max(e => e.PageNumber);
             var totalJuz = maxPage / PagesPerJuz;
 
             var weeks = Math.Max(1, (toDate - fromDate).TotalDays / 7d);
@@ -149,7 +149,7 @@ namespace Moeen.Api.Application.Services
 
             var masteryRate = entries.Count == 0
                 ? 0
-                : (entries.Average(e => e.level_score) / 5d) * 100d;
+                : (entries.Average(e => e.LevelScore) / 5d) * 100d;
 
             return GeneralResponse.Ok("تم جلب الإحصائيات.", new MemorizationStatisticsDto
             {
@@ -172,15 +172,15 @@ namespace Moeen.Api.Application.Services
 
             var entries = await _context.ProgressEntries
                 .AsNoTracking()
-                .Where(p => studentIds.Contains(p.studentId))
+                .Where(p => studentIds.Contains(p.StudentId))
                 .ToListAsync();
 
             var grouped = entries
-                .GroupBy(e => e.studentId)
+                .GroupBy(e => e.StudentId)
                 .ToDictionary(g => g.Key, g => new
                 {
-                    LastPage = g.Max(x => x.page_number),
-                    TotalPages = g.Select(x => x.page_number).Distinct().Count()
+                    LastPage = g.Max(x => x.PageNumber),
+                    TotalPages = g.Select(x => x.PageNumber).Distinct().Count()
                 });
 
             var students = await _context.Students
@@ -213,12 +213,12 @@ namespace Moeen.Api.Application.Services
 
             var entries = await _context.ProgressEntries
                 .AsNoTracking()
-                .Where(p => p.studentId == request.StudentId && p.date >= request.FromDate && p.date <= request.ToDate)
-                .OrderBy(p => p.date)
+                .Where(p => p.StudentId == request.StudentId && p.Date >= request.FromDate && p.Date <= request.ToDate)
+                .OrderBy(p => p.Date)
                 .ToListAsync();
 
             var grouped = entries
-                .GroupBy(e => e.date.Date)
+                .GroupBy(e => e.Date.Date)
                 .OrderBy(g => g.Key)
                 .Select(g => new { Date = g.Key, Count = g.Count() })
                 .ToList();
@@ -250,7 +250,7 @@ namespace Moeen.Api.Application.Services
             if (entry == null)
                 return GeneralResponse.NotFound("السجل غير موجود.");
 
-            entry.level_score = MapGradeToPoints(request.Grade);
+            entry.LevelScore = MapGradeToPoints(request.Grade);
             await _context.SaveChangesAsync();
 
             return GeneralResponse.Ok("تم تحديث التقدير.", MapRecord(entry));
@@ -309,11 +309,11 @@ namespace Moeen.Api.Application.Services
             return new MemorizationRecordDto
             {
                 RecordId = entry.Id,
-                StudentId = entry.studentId,
-                PageNumber = entry.page_number,
-                Grade = ResolveGrade(entry.level_score),
+                StudentId = entry.StudentId ,
+                PageNumber = entry.PageNumber,
+                Grade = ResolveGrade(entry.LevelScore),
                 Notes = null,
-                MemorizedAt = entry.date
+                MemorizedAt = entry.Date
             };
         }
     }

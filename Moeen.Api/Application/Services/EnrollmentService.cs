@@ -447,7 +447,7 @@ namespace Moeen.Api.Application.Services
 
             if (student != null)
             {
-                var progressCount = await _context.ProgressEntries.CountAsync(p => p.studentId == student.Id);
+                var progressCount = await _context.ProgressEntries.CountAsync(p => p.StudentId == student.Id);
                 var examCount = await _context.Exams.CountAsync(e => e.StudentId == student.Id);
 
                 var dto = new MemberProfileDto
