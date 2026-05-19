@@ -3,7 +3,6 @@ using Moeen.Dashboard.Application.Services.Implementations;
 using Moeen.Dashboard.Components;
 using Moeen.Dashboard.Infrastructure.Http;
 using Moeen.Dashboard.Infrastructure.Http.Clients;
-using Moeen.Dashboard.Infrastructure.Http.Handlers;
 using Moeen.Dashboard.Services.Abstractions;
 using Moeen.Dashboard.Services.Implementations;
 using Moeen.Frontend.Services.Abstractions;
@@ -25,7 +24,6 @@ builder.Services.AddHttpClient<AuthApiClient>(c =>
 })
 /*.AddHttpMessageHandler<AuthHandler>()*/;
 builder.Services.AddScoped<IAuthService, AuthService>();
-var app = builder.Build();
 // تسجيل خدمات المنشورات والمحتوى الجديدة
 builder.Services.AddScoped<PostApiClient>();
 builder.Services.AddScoped<IPostService, PostService>();
@@ -50,6 +48,8 @@ builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 //goal trackingخدمة المتابعة اليومية
 builder.Services.AddScoped<GoalApiClient>();
 builder.Services.AddScoped<IGoalService, GoalService>();
+
+var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
