@@ -102,6 +102,28 @@
         public static string GetStudentProgressSummaryAsyncRoute { get; } = "api/goal-tracking/students/{studentId}/summary";
         public static string GetStudentProgressHistoryAsyncRoute { get; } = "api/goal-tracking/students/{studentId}/history";
         public static string GetCirclePerformanceOverviewAsyncRoute { get; } = "api/goal-tracking/circle/overview";
+        //mosqu
+        public static string AddMosquAsyncRoute { get; } = "api/Mosqu/add";
+        public static string GetAllMosqusAsyncRoute { get; } = "api/Mosqu/all";
+        public static string GetMosqueByIdAsyncRoute { get; } = "api/Mosqu/{mosqueId}";
+        public static string GetCirclesByMosqueAsyncRoute { get; } = "api/Mosqu/circles";
+        public static string GetTeachersByMosqueAsyncRoute { get; } = "api/Mosqu/teachers";
+        public static string GetMosqueStatisticsAsyncRoute { get; } = "api/Mosqu/statistics";
+        public static string UpdateMosqueInfoAsyncRoute { get; } = "api/Mosqu/update";
+        public static string AssignMosqueAdminAsyncRoute { get; } = "api/Mosqu/assign-admin";
+        public static string DeleteMosqueAsyncRoute { get; } = "api/Mosqu/delete";
+        public static string UnassignMosqueAdminAsyncRoute { get; } = "api/Mosqu/unassign-admin";
+        //point
+        public static string SetupPointsSystemAsyncRoute { get; } = "api/Points/setup";
+        public static string GetStudentPointsAsyncRoute { get; } = "api/Points/students/{studentId}/points";
+        public static string GetPointsLeaderboardAsyncRoute { get; } = "api/Points/leaderboard";
+        public static string AwardPointsManuallyAsyncRoute { get; } = "api/Points/award";
+        public static string RemovePointsManuallyAsyncRoute { get; } = "api/Points/remove";
+        public static string EvaluateAutomaticPointsAsyncRoute { get; } = "api/Points/automatic-award";
+
+
+
+
 
 
 

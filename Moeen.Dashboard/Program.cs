@@ -48,6 +48,12 @@ builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 //goal trackingخدمة المتابعة اليومية
 builder.Services.AddScoped<GoalApiClient>();
 builder.Services.AddScoped<IGoalService, GoalService>();
+//Mosqu حقن خدمة المساجد
+builder.Services.AddScoped<MosquApiClient>();
+builder.Services.AddScoped<IMosquService, MosquService>();
+//point حقن خدمة النقاط
+builder.Services.AddScoped<PointsApiClient>();
+builder.Services.AddScoped<IPointsService, PointsService>();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
