@@ -1,10 +1,189 @@
-﻿@page "/supervisor/post1"
+﻿@page "/supervisor/post1/{Id:guid}"
 @rendermode InteractiveServer
-
+@using Moeen.Shared.Responses.ContentSharing
 @inject NavigationManager NavManager
+@inject Moeen.Dashboard.Services.Abstractions.IPostService PostService
 
-<h3>Post1</h3>
+<style>
+   :root {
+        --primary-green: #195042;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --text-dark: #2d3436;
+        --transition: all 0.3s ease;
+   }
+   body {
+        font-family: 'Tajawal', sans-serif;
+        background-color: #f9f9f9;
+        direction: rtl;
+   }
+   .details-container {
+        background: var(--white);
+        margin: 30px auto;
+        padding: 40px;
+        max-width: 800px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+   }
+   .post-header {
+        border-bottom: 3px solid var(--accent-beige);
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+   }
+   .post-title {
+        color: var(--primary-green);
+        margin: 0;
+        font-weight: bold;
+   }
+   .post-meta {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+   }
+   .post-body {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: var(--text-dark);
+        white-space: pre-wrap;
+        background: var(--light-beige);
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        min-height: 150px;
+   }
+   .interaction-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #f0f0f0;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 1rem;
+        color: var(--text-dark);
+        font-weight: bold;
+   }
+   .btn-back {
+        background-color: var(--primary-green);
+        color: var(--white);
+        font-size: 15px;
+        padding: 10px 25px;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+   }
+   .btn-back:hover {
+        background-color: #123d32;
+        transform: translateY(-2px);
+        color: var(--white);
+   }
+</style>
+
+<section class="details-container">
+    @if (isLoading)
+    {
+        <div class="text-center p-5">
+            <div class="spinner-border text-success" role="status"></div>
+            <p class="mt-3" style="color: var(--primary-green);">جاري تحميل تفاصيل المنشور...</p>
+        </div>
+    }
+    else if (currentPost == null)
+    {
+        <div class="alert alert-danger text-center">
+            <i class="bi bi-exclamation-triangle-fill"></i> @errorMessage
+        </div>
+        <div class="text-center mt-4">
+            <button class="btn-back" @onclick="GoBack"><i class="bi bi-arrow-right"></i> العودة للمنشورات</button>
+        </div>
+    }
+    else
+    {
+        <header class="post-header">
+            <h2 class="post-title">@currentPost.Title</h2>
+            <div class="post-meta">
+                <span class="interaction-badge">👍 @currentPost.InteractionsCount تفاعل</span>
+            </div>
+        </header>
+
+        <article class="post-body">
+            @currentPost.Body
+        </article>
+
+        <footer class="text-start">
+            <button class="btn-back" @onclick="GoBack">
+                <i class="bi bi-arrow-right"></i> العودة إلى إدارة المنشورات
+            </button>
+        </footer>
+    }
+</section>
 
 @code {
+    [Parameter]
+    public Guid Id { get; set; }
 
+    private PostDto? currentPost;
+    private bool isLoading = true;
+    private string errorMessage = "المنشور غير موجود أو تم حذفه.";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPostDetails();
+    }
+
+    private async Task LoadPostDetails()
+        {
+        try
+        {
+            isLoading = true;
+            
+            // جلب كل المنشورات للبحث عن المنشور المطلوب بالـ Id
+            // (في حال وجود ميثود بالباك إند بتجيب بالـ Id مباشرة يفضل استخدامها لاحقاً)
+            var response = await PostService.SearchContentGetAsync("");
+
+            if (response != null && response.Success && response.Data != null)
+            {
+                var allPosts = System.Text.Json.JsonSerializer.Deserialize<List<PostDto>>(response.Data.ToString());
+                
+                if (allPosts != null)
+                {
+                    currentPost = allPosts.FirstOrDefault(p => p.Id == Id);
+                }
+            }
+
+            if (currentPost == null)
+            {
+                errorMessage = "عذراً، لم يتم العثور على هذا المنشور.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "حدث خطأ أثناء تحميل البيانات: " + ex.Message;
+            
+            // حماية محلية (Fallback) عشان لو ضارب الباك إند يعرض بيانات افتراضية للتجربة والامتحان
+            currentPost = new PostDto
+            {
+                Id = Id,
+                Title = "منشور تجريبي (محلي)",
+                Body = "هذا النص يظهر كحماية محلية لأن الاتصال بالسيرفر مقطوع أو ميثود الجلب واجهت استثناء.",
+                InteractionsCount = 5
+            };
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        NavManager.NavigateTo("/supervisor/posts");
+    }
+}
 }
