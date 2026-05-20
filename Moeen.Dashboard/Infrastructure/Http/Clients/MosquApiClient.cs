@@ -25,14 +25,17 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
 
         public async Task<GeneralResponse> GetAllMosqusAsync(GetAllMosqusRequest request)
         {
-            var response = await _httpClient.PostAsJsonAsync(ApiRoutes.GetAllMosqusAsyncRoute, request);
+            string quryString = $"?Page={request.Page}&PageSize={request.PageSize}";
+            var response = await _httpClient.GetAsync(ApiRoutes.GetAllMosqusAsyncRoute+quryString);
             return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
 
         public async Task<GeneralResponse> GetMosqueByIdAsync(Guid mosqueId)
         {
-            var response = await _httpClient.GetAsync(ApiRoutes.GetMosqueByIdAsyncRoute);
-            return await response.Content.ReadFromJsonAsync<GeneralResponse>();
+            string quryString = $"?mosqueId={mosqueId}";
+            var response = await _httpClient.GetAsync(ApiRoutes.GetMosqueByIdAsyncRoute+quryString);
+            var res = await response.Content.ReadFromJsonAsync<GeneralResponse>();
+            return res;
         }
 
         public async Task<GeneralResponse> GetCirclesByMosqueAsync(GetCirclesByMosqueRequest request)
@@ -67,15 +70,9 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
 
         public async Task<GeneralResponse> DeleteMosqueAsync(DeleteMosqueRequest request)
         {
-            // بما أن الـ Controller يتوقع طلب بـ Body للحذف، نستخدم SendAsync لتمرير الـ Json مع الـ Delete
-            var requestMessage = new HttpRequestMessage
-            {
-                Method = HttpMethod.Delete,
-                RequestUri = new Uri(_httpClient.BaseAddress + ApiRoutes.DeleteMosqueAsyncRoute),
-                Content = JsonContent.Create(request)
-            };
+           var quryString = $"?MosqueId={request.MosqueId}";
 
-            var response = await _httpClient.SendAsync(requestMessage);
+            var response = await _httpClient.DeleteAsync(ApiRoutes.DeleteMosqueAsyncRoute+quryString);
             return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
 

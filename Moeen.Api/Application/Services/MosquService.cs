@@ -62,9 +62,10 @@ namespace Moeen.Api.Application.Services
                 .Take(pageSize)
                 .Select(m => new MosquDto
                 {
+                    Id = m.Id,
                     name = m.name,
                     address = m.address,
-                    contact_phone = m.contact_phone,
+                    contactPhone = m.contact_phone,
                     Description = m.Description,
                     Latitude = m.Latitude,
                     Longitude = m.Longitude

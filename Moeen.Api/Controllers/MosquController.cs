@@ -4,6 +4,7 @@ using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Shared;
 using Moeen.Shared.Requests.Mosuq;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Controllers
@@ -27,16 +28,16 @@ namespace Moeen.Api.Controllers
             return result.ToActionResult();
         }
 
-        [HttpPost("all")]
-        public async Task<IActionResult> GetAll([FromBody] GetAllMosqusRequest request)
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAll([FromQuery] GetAllMosqusRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await _mosquService.GetAllMosqus(request);
             return result.ToActionResult();
         }
 
-        [HttpGet("{mosqueId:guid}")]
-        public async Task<IActionResult> GetById([FromRoute] Guid mosqueId)
+        [HttpGet("ById")]
+        public async Task<IActionResult> GetById([Required][FromQuery] Guid mosqueId)
         {
             var result = await _mosquService.GetMosqueByIdAsync(new GetMosqueByIdRequest { MosqueId = mosqueId });
             return result.ToActionResult();
@@ -91,7 +92,7 @@ namespace Moeen.Api.Controllers
         }
 
         [HttpDelete("delete")]
-        public async Task<IActionResult> Delete([FromBody] DeleteMosqueRequest request)
+        public async Task<IActionResult> Delete([FromQuery] DeleteMosqueRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await _mosquService.DeleteMosqueAsync(request);
