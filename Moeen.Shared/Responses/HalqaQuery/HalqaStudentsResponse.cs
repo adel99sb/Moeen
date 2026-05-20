@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using Moeen.Shared.Responses.Enrollment; // لاستخدام StudentDto
 
-namespace Moeen.Shared.Responses.CircleQuery
+namespace Moeen.Shared.Responses.HalqaQuery
 {
-    public class CircleStudentsResponse
+    public class HalqaStudentsResponse
     {
         public List<StudentDto> Students { get; set; }
         public int TotalCount { get; set; }

@@ -1,6 +1,6 @@
-﻿namespace Moeen.Shared.Responses.Circle
+﻿namespace Moeen.Shared.Responses.Halqa
 {
-    public class DeleteCircleResponse
+    public class DeleteHalqaResponse
     {
         public bool Success { get; set; }
         public string Message { get; set; }

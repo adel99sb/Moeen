@@ -4,7 +4,7 @@ using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Data;
 using Moeen.Shared.Requests.Mosuq;
 using Moeen.Shared.Responses;
-using Moeen.Shared.Responses.Circle;
+using Moeen.Shared.Responses.Halqa;
 using Moeen.Shared.Responses.Enrollment;
 using Moeen.Shared.Responses.Mosuq;
 using System;
@@ -117,7 +117,7 @@ namespace Moeen.Api.Application.Services
 
             var countMap = studentsCounts.ToDictionary(x => x.HalqaId, x => x.Count);
 
-            var result = halqas.Select(h => new CircleDto
+            var result = halqas.Select(h => new HalqaDto
             {
                 Id = h.Id,
                 Name = h.Name,

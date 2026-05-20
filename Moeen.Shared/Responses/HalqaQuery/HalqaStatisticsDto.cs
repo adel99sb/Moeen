@@ -1,11 +1,11 @@
 using System;
 
-namespace Moeen.Shared.Responses.CircleQuery
+namespace Moeen.Shared.Responses.HalqaQuery
 {
-    public class CircleStatisticsDto
+    public class HalqaStatisticsDto
     {
-        public Guid CircleId { get; set; }
-        public string CircleName { get; set; } = string.Empty;
+        public Guid HalqaId { get; set; }
+        public string HalqaName { get; set; } = string.Empty;
 
         public int StudentsCount { get; set; }
         public int ActiveStudentsCount { get; set; }

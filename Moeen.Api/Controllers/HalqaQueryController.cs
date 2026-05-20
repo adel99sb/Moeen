@@ -1,30 +1,30 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Shared.Requests.CircleQuery;
+using Moeen.Shared.Requests.HalqaQuery;
 using Moeen.Shared.Responses;
 
 namespace Moeen.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CircleQueryController : ControllerBase
+    public class HalqaQueryController : ControllerBase
     {
-        private readonly ICircleQueryService _circleQueryService;
+        private readonly IHalqaQueryService _HalqaQueryService;
 
-        public CircleQueryController(ICircleQueryService circleQueryService)
+        public HalqaQueryController(IHalqaQueryService HalqaQueryService)
         {
-            _circleQueryService = circleQueryService;
+            _HalqaQueryService = HalqaQueryService;
         }
 
         /// <summary>
         /// POST (قديم/متوافق): جلب تفاصيل حلقة عبر Body.
         /// </summary>
         [HttpPost("get-by-id")]
-        public async Task<ActionResult<GeneralResponse>> GetCircleById([FromBody] GetCircleByIdRequest request)
+        public async Task<ActionResult<GeneralResponse>> GetHalqaById([FromBody] GetHalqaByIdRequest request)
         {
             try
             {
-                var result = await _circleQueryService.GetCircleByIdAsync(request);
+                var result = await _HalqaQueryService.GetHalqaByIdAsync(request);
                 return Ok(GeneralResponse.Ok("تم جلب بيانات الحلقة بنجاح.", result));
             }
             catch (ArgumentException ex)
@@ -40,12 +40,12 @@ namespace Moeen.Api.Controllers
         /// <summary>
         /// GET (جديد): جلب تفاصيل حلقة عبر Route.
         /// </summary>
-        [HttpGet("{circleId:guid}")]
-        public async Task<ActionResult<GeneralResponse>> GetCircleByIdGet([FromRoute] Guid circleId)
+        [HttpGet("{HalqaId:guid}")]
+        public async Task<ActionResult<GeneralResponse>> GetHalqaByIdGet([FromRoute] Guid HalqaId)
         {
             try
             {
-                var result = await _circleQueryService.GetCircleByIdAsync(new GetCircleByIdRequest { CircleId = circleId });
+                var result = await _HalqaQueryService.GetHalqaByIdAsync(new GetHalqaByIdRequest { HalqaId = HalqaId });
                 return Ok(GeneralResponse.Ok("تم جلب بيانات الحلقة بنجاح.", result));
             }
             catch (ArgumentException ex)
@@ -62,11 +62,11 @@ namespace Moeen.Api.Controllers
         /// POST (قديم/متوافق): جلب طلاب الحلقة مع التصفية.
         /// </summary>
         [HttpPost("get-students")]
-        public async Task<ActionResult<GeneralResponse>> GetCircleStudents([FromBody] GetCircleStudentsRequest request)
+        public async Task<ActionResult<GeneralResponse>> GetHalqaStudents([FromBody] GetHalqaStudentsRequest request)
         {
             try
             {
-                var result = await _circleQueryService.GetCircleStudentsAsync(request);
+                var result = await _HalqaQueryService.GetHalqaStudentsAsync(request);
                 return Ok(GeneralResponse.Ok("تم جلب الطلاب بنجاح.", result));
             }
             catch (ArgumentException ex)
@@ -82,12 +82,12 @@ namespace Moeen.Api.Controllers
         /// <summary>
         /// GET (جديد): جلب طلاب الحلقة (بدون فلترة معقدة).
         /// </summary>
-        [HttpGet("{circleId:guid}/students")]
-        public async Task<ActionResult<GeneralResponse>> GetCircleStudentsGet([FromRoute] Guid circleId)
+        [HttpGet("{HalqaId:guid}/students")]
+        public async Task<ActionResult<GeneralResponse>> GetHalqaStudentsGet([FromRoute] Guid HalqaId)
         {
             try
             {
-                var result = await _circleQueryService.GetCircleStudentsAsync(new GetCircleStudentsRequest { CircleId = circleId });
+                var result = await _HalqaQueryService.GetHalqaStudentsAsync(new GetHalqaStudentsRequest { HalqaId = HalqaId });
                 return Ok(GeneralResponse.Ok("تم جلب الطلاب بنجاح.", result));
             }
             catch (ArgumentException ex)
@@ -104,11 +104,11 @@ namespace Moeen.Api.Controllers
         /// POST (قديم/متوافق): جلب عدد طلاب الحلقة.
         /// </summary>
         [HttpPost("get-students-count")]
-        public async Task<ActionResult<GeneralResponse>> GetCircleStudentsCount(GetCircleStudentsCountRequest request)
+        public async Task<ActionResult<GeneralResponse>> GetHalqaStudentsCount(GetHalqaStudentsCountRequest request)
         {
             try
             {
-                var result = await _circleQueryService.GetCircleStudentsCountAsync(request);
+                var result = await _HalqaQueryService.GetHalqaStudentsCountAsync(request);
                 return Ok(GeneralResponse.Ok("تم جلب عدد الطلاب بنجاح.", result));
             }
             catch (ArgumentException ex)
@@ -124,12 +124,12 @@ namespace Moeen.Api.Controllers
         /// <summary>
         /// GET (جديد): جلب عدد طلاب الحلقة عبر Route.
         /// </summary>
-        [HttpGet("{circleId:guid}/students/count")]
-        public async Task<ActionResult<GeneralResponse>> GetCircleStudentsCountGet([FromRoute] Guid circleId)
+        [HttpGet("{HalqaId:guid}/students/count")]
+        public async Task<ActionResult<GeneralResponse>> GetHalqaStudentsCountGet([FromRoute] Guid HalqaId)
         {
             try
             {
-                var result = await _circleQueryService.GetCircleStudentsCountAsync(new GetCircleStudentsCountRequest { CircleId = circleId });
+                var result = await _HalqaQueryService.GetHalqaStudentsCountAsync(new GetHalqaStudentsCountRequest { HalqaId = HalqaId });
                 return Ok(GeneralResponse.Ok("تم جلب عدد الطلاب بنجاح.", result));
             }
             catch (ArgumentException ex)
@@ -146,11 +146,11 @@ namespace Moeen.Api.Controllers
         /// POST (جديد): جلب إحصائيات وتقدم الحلقة.
         /// </summary>
         [HttpPost("statistics")]
-        public async Task<ActionResult<GeneralResponse>> GetCircleStatistics([FromBody] GetCircleStatisticsRequest request)
+        public async Task<ActionResult<GeneralResponse>> GetHalqaStatistics([FromBody] GetHalqaStatisticsRequest request)
         {
             try
             {
-                var result = await _circleQueryService.GetCircleStatisticsAsync(request);
+                var result = await _HalqaQueryService.GetHalqaStatisticsAsync(request);
                 return Ok(GeneralResponse.Ok("تم جلب إحصائيات الحلقة بنجاح.", result));
             }
             catch (ArgumentException ex)
@@ -166,17 +166,17 @@ namespace Moeen.Api.Controllers
         /// <summary>
         /// GET (جديد): جلب إحصائيات الحلقة عبر Route + Query.
         /// </summary>
-        [HttpGet("{circleId:guid}/statistics")]
-        public async Task<ActionResult<GeneralResponse>> GetCircleStatisticsGet(
-            [FromRoute] Guid circleId,
+        [HttpGet("{HalqaId:guid}/statistics")]
+        public async Task<ActionResult<GeneralResponse>> GetHalqaStatisticsGet(
+            [FromRoute] Guid HalqaId,
             [FromQuery] DateTime? fromDate,
             [FromQuery] DateTime? toDate)
         {
             try
             {
-                var result = await _circleQueryService.GetCircleStatisticsAsync(new GetCircleStatisticsRequest
+                var result = await _HalqaQueryService.GetHalqaStatisticsAsync(new GetHalqaStatisticsRequest
                 {
-                    CircleId = circleId,
+                    HalqaId = HalqaId,
                     FromDate = fromDate,
                     ToDate = toDate
                 });
@@ -196,11 +196,11 @@ namespace Moeen.Api.Controllers
         /// POST (جديد): جلب تقرير حضور الحلقة خلال فترة.
         /// </summary>
         [HttpPost("attendance-report")]
-        public async Task<ActionResult<GeneralResponse>> GetCircleAttendanceReport([FromBody] GetCircleAttendanceReportRequest request)
+        public async Task<ActionResult<GeneralResponse>> GetHalqaAttendanceReport([FromBody] GetHalqaAttendanceReportRequest request)
         {
             try
             {
-                var result = await _circleQueryService.GetCircleAttendanceReportAsync(request);
+                var result = await _HalqaQueryService.GetHalqaAttendanceReportAsync(request);
                 return Ok(GeneralResponse.Ok("تم جلب تقرير الحضور بنجاح.", result));
             }
             catch (ArgumentException ex)
@@ -216,17 +216,17 @@ namespace Moeen.Api.Controllers
         /// <summary>
         /// GET (جديد): جلب تقرير حضور الحلقة عبر Route + Query.
         /// </summary>
-        [HttpGet("{circleId:guid}/attendance-report")]
-        public async Task<ActionResult<GeneralResponse>> GetCircleAttendanceReportGet(
-            [FromRoute] Guid circleId,
+        [HttpGet("{HalqaId:guid}/attendance-report")]
+        public async Task<ActionResult<GeneralResponse>> GetHalqaAttendanceReportGet(
+            [FromRoute] Guid HalqaId,
             [FromQuery] DateTime fromDate,
             [FromQuery] DateTime toDate)
         {
             try
             {
-                var result = await _circleQueryService.GetCircleAttendanceReportAsync(new GetCircleAttendanceReportRequest
+                var result = await _HalqaQueryService.GetHalqaAttendanceReportAsync(new GetHalqaAttendanceReportRequest
                 {
-                    CircleId = circleId,
+                    HalqaId = HalqaId,
                     FromDate = fromDate,
                     ToDate = toDate
                 });

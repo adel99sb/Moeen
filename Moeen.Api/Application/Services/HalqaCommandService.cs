@@ -1,7 +1,7 @@
 ﻿using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Entities;
-using Moeen.Shared.Requests.Circle;
-using Moeen.Shared.Responses.Circle;
+using Moeen.Shared.Requests.Halqa;
+using Moeen.Shared.Responses.Halqa;
 using Moeen.Shared.Responses; // ✅ استيراد GeneralResponse
 using System;
 using System.Threading.Tasks;
@@ -9,16 +9,16 @@ using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 
 namespace Moeen.Api.Application.Services
 {
-    public class CircleCommandService : ICircleCommandService
+    public class HalqaCommandService : IHalqaCommandService
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public CircleCommandService(IUnitOfWork unitOfWork)
+        public HalqaCommandService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<CircleDto> CreateCircleAsync(CreateCircleRequest request)
+        public async Task<HalqaDto> CreateHalqaAsync(CreateHalqaRequest request)
         {
             // تحقق من وجود الفوج
             var fouj = await _unitOfWork.Repository<Fouj>().GetByIdAsync(request.FoujId);
@@ -42,7 +42,7 @@ namespace Moeen.Api.Application.Services
             await _unitOfWork.Repository<Halqa>().AddAsync(halqa);
             await _unitOfWork.CompleteAsync();
 
-            return new CircleDto
+            return new HalqaDto
             {
                 Id = halqa.Id,
                 Name = halqa.Name,
@@ -55,9 +55,9 @@ namespace Moeen.Api.Application.Services
             };
         }
 
-        public async Task<bool> DeleteCircleAsync(DeleteCircleRequest request)
+        public async Task<bool> DeleteHalqaAsync(DeleteHalqaRequest request)
         {
-            var halqa = await _unitOfWork.Repository<Halqa>().GetByIdAsync(request.CircleId);
+            var halqa = await _unitOfWork.Repository<Halqa>().GetByIdAsync(request.HalqaId);
             if (halqa == null)
                 return false;
 
@@ -66,11 +66,11 @@ namespace Moeen.Api.Application.Services
             return true;
         }
 
-        public async Task<CircleDto> MoveToFoujAsync(MoveCircleToFoujRequest request)
+        public async Task<HalqaDto> MoveToFoujAsync(MoveHalqaToFoujRequest request)
         {
-            var halqa = await _unitOfWork.Repository<Halqa>().GetByIdAsync(request.CircleId);
+            var halqa = await _unitOfWork.Repository<Halqa>().GetByIdAsync(request.HalqaId);
             if (halqa == null)
-                throw new ArgumentException("Circle not found.", nameof(request.CircleId));
+                throw new ArgumentException("Circle not found.", nameof(request.HalqaId));
 
             var targetFouj = await _unitOfWork.Repository<Fouj>().GetByIdAsync(request.TargetFoujId);
             if (targetFouj == null)
@@ -82,7 +82,7 @@ namespace Moeen.Api.Application.Services
 
             var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync((Guid)halqa.TeacherId);
 
-            return new CircleDto
+            return new HalqaDto
             {
                 Id = halqa.Id,
                 Name = halqa.Name,
@@ -94,11 +94,11 @@ namespace Moeen.Api.Application.Services
             };
         }
 
-        public async Task<CircleDto> ReassignTeacherAsync(ReassignCircleTeacherRequest request)
+        public async Task<HalqaDto> ReassignTeacherAsync(ReassignHalqaTeacherRequest request)
         {
-            var halqa = await _unitOfWork.Repository<Halqa>().GetByIdAsync(request.CircleId);
+            var halqa = await _unitOfWork.Repository<Halqa>().GetByIdAsync(request.HalqaId);
             if (halqa == null)
-                throw new ArgumentException("Circle not found.", nameof(request.CircleId));
+                throw new ArgumentException("Circle not found.", nameof(request.HalqaId));
 
             var newTeacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(request.NewTeacherId);
             if (newTeacher == null)
@@ -110,7 +110,7 @@ namespace Moeen.Api.Application.Services
 
             var fouj = await _unitOfWork.Repository<Fouj>().GetByIdAsync(halqa.FoujId);
 
-            return new CircleDto
+            return new HalqaDto
             {
                 Id = halqa.Id,
                 Name = halqa.Name,
@@ -122,11 +122,11 @@ namespace Moeen.Api.Application.Services
             };
         }
 
-        public async Task<CircleDto> UpdateCircleAsync(UpdateCircleRequest request)
+        public async Task<HalqaDto> UpdateHalqaAsync(UpdateHalqaRequest request)
         {
-            var halqa = await _unitOfWork.Repository<Halqa>().GetByIdAsync(request.CircleId);
+            var halqa = await _unitOfWork.Repository<Halqa>().GetByIdAsync(request.HalqaId);
             if (halqa == null)
-                throw new ArgumentException("Circle not found.", nameof(request.CircleId));
+                throw new ArgumentException("Circle not found.", nameof(request.HalqaId));
 
             if (!string.IsNullOrWhiteSpace(request.Name))
                 halqa.Name = request.Name;
@@ -156,7 +156,7 @@ namespace Moeen.Api.Application.Services
             var resultFouj = await _unitOfWork.Repository<Fouj>().GetByIdAsync(halqa.FoujId);
             var resultTeacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync((Guid)halqa.TeacherId);
 
-            return new CircleDto
+            return new HalqaDto
             {
                 Id = halqa.Id,
                 Name = halqa.Name,

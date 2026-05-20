@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Moeen.Shared.Responses.Circle
+namespace Moeen.Shared.Responses.Halqa
 {
-    public class CircleDto
+    public class HalqaDto
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

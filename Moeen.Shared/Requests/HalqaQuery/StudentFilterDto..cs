@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Moeen.Shared.Requests.CircleQuery
+namespace Moeen.Shared.Requests.HalqaQuery
 {
     public class StudentFilterDto
     {

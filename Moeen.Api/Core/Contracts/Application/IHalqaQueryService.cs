@@ -1,35 +1,35 @@
-﻿using Moeen.Shared.Requests.CircleQuery;
-using Moeen.Shared.Responses.Circle;
-using Moeen.Shared.Responses.CircleQuery;
+﻿using Moeen.Shared.Requests.HalqaQuery;
+using Moeen.Shared.Responses.Halqa;
+using Moeen.Shared.Responses.HalqaQuery;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application
 {
-    public interface ICircleQueryService
+    public interface IHalqaQueryService
     {
         /// <summary>
         /// الحصول على تفاصيل حلقة محددة
         /// </summary>
-        Task<CircleDto> GetCircleByIdAsync(GetCircleByIdRequest request);
+        Task<HalqaDto> GetHalqaByIdAsync(GetHalqaByIdRequest request);
 
         /// <summary>
         /// الحصول على قائمة الطلاب المسجلين في الحلقة مع إمكانية التصفية والتصفح
         /// </summary>
-        Task<CircleStudentsResponse> GetCircleStudentsAsync(GetCircleStudentsRequest request);
+        Task<HalqaStudentsResponse> GetHalqaStudentsAsync(GetHalqaStudentsRequest request);
 
         /// <summary>
         /// الحصول على عدد الطلاب المسجلين في الحلقة
         /// </summary>
-        Task<CircleStudentsCountResponse> GetCircleStudentsCountAsync(GetCircleStudentsCountRequest request);
+        Task<HalqaStudentsCountResponse> GetHalqaStudentsCountAsync(GetHalqaStudentsCountRequest request);
 
         /// <summary>
         /// [GET] جلب إحصائيات وتقدم الحلقة (متوسط الحفظ، نسبة الحضور، التقييم)
         /// </summary>
-        Task<CircleStatisticsDto> GetCircleStatisticsAsync(GetCircleStatisticsRequest request);
+        Task<HalqaStatisticsDto> GetHalqaStatisticsAsync(GetHalqaStatisticsRequest request);
 
         /// <summary>
         /// [GET] جلب جدول الحضور والغياب للحلقة خلال فترة زمنية محددة
         /// </summary>
-        Task<CircleAttendanceReportResponse> GetCircleAttendanceReportAsync(GetCircleAttendanceReportRequest request);
+        Task<HalqaAttendanceReportResponse> GetHalqaAttendanceReportAsync(GetHalqaAttendanceReportRequest request);
     }
 }

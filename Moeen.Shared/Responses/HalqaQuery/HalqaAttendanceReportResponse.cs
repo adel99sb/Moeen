@@ -1,20 +1,20 @@
 using System;
 using System.Collections.Generic;
 
-namespace Moeen.Shared.Responses.CircleQuery
+namespace Moeen.Shared.Responses.HalqaQuery
 {
-    public class CircleAttendanceReportResponse
+    public class HalqaAttendanceReportResponse
     {
-        public Guid CircleId { get; set; }
-        public string CircleName { get; set; } = string.Empty;
+        public Guid HalqaId { get; set; }
+        public string HalqaName { get; set; } = string.Empty;
 
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
 
-        public List<CircleAttendanceDailyRecordDto> DailyRecords { get; set; } = new();
+        public List<HalqaAttendanceDailyRecordDto> DailyRecords { get; set; } = new();
     }
 
-    public class CircleAttendanceDailyRecordDto
+    public class HalqaAttendanceDailyRecordDto
     {
         public DateTime Date { get; set; }
 

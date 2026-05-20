@@ -1,40 +1,40 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.infrastructure.Data;
-using Moeen.Shared.Requests.CircleQuery;
-using Moeen.Shared.Responses.Circle;
-using Moeen.Shared.Responses.CircleQuery;
+using Moeen.Shared.Requests.HalqaQuery;
+using Moeen.Shared.Responses.Halqa;
+using Moeen.Shared.Responses.HalqaQuery;
 using Moeen.Shared.Responses.Enrollment;
 
 namespace Moeen.Api.Application.Services
 {
-    public class CircleQueryService : ICircleQueryService
+    public class HalqaQueryService : IHalqaQueryService
     {
         private readonly AppDbContext _context;
 
-        public CircleQueryService(AppDbContext context)
+        public HalqaQueryService(AppDbContext context)
         {
             _context = context;
         }
 
-        public async Task<CircleDto> GetCircleByIdAsync(GetCircleByIdRequest request)
+        public async Task<HalqaDto> GetHalqaByIdAsync(GetHalqaByIdRequest request)
         {
             var halqa = await _context.Halqas
                 .Include(h => h.Fouj)
                 .Include(h => h.Teacher)
-                .FirstOrDefaultAsync(h => h.Id == request.CircleId);
+                .FirstOrDefaultAsync(h => h.Id == request.HalqaId);
 
             if (halqa == null)
-                throw new ArgumentException("Circle not found.", nameof(request.CircleId));
+                throw new ArgumentException("Circle not found.", nameof(request.HalqaId));
 
             // Students count computed in DB (using ProgressEntry relation)
             var studentsCount = await _context.ProgressEntries
-                .Where(pe => pe.HalqaId == request.CircleId)
+                .Where(pe => pe.HalqaId == request.HalqaId)
                 .Select(pe => pe.studentId)
                 .Distinct()
                 .CountAsync();
 
-            return new CircleDto
+            return new HalqaDto
             {
                 Id = halqa.Id,
                 Name = halqa.Name,
@@ -47,13 +47,13 @@ namespace Moeen.Api.Application.Services
             };
         }
 
-        public async Task<CircleStudentsResponse> GetCircleStudentsAsync(GetCircleStudentsRequest request)
+        public async Task<HalqaStudentsResponse> GetHalqaStudentsAsync(GetHalqaStudentsRequest request)
         {
             var filter = request.Filter ?? new StudentFilterDto();
 
             // Build base query: students that have progress entries for this halqa
             var baseQuery = _context.Students
-                .Where(s => s.progressEntrys.Any(pe => pe.HalqaId == request.CircleId));
+                .Where(s => s.progressEntrys.Any(pe => pe.HalqaId == request.HalqaId));
 
             // Apply filters (will be translated to SQL)
             if (!string.IsNullOrWhiteSpace(filter.Name))
@@ -109,7 +109,7 @@ namespace Moeen.Api.Application.Services
                 })
                 .ToListAsync();
 
-            return new CircleStudentsResponse
+            return new HalqaStudentsResponse
             {
                 Students = students,
                 TotalCount = totalCount,
@@ -118,21 +118,21 @@ namespace Moeen.Api.Application.Services
             };
         }
 
-        public async Task<CircleStudentsCountResponse> GetCircleStudentsCountAsync(GetCircleStudentsCountRequest request)
+        public async Task<HalqaStudentsCountResponse> GetHalqaStudentsCountAsync(GetHalqaStudentsCountRequest request)
         {
             // Count distinct students who have progress entries for the halqa
             var count = await _context.ProgressEntries
-                .Where(pe => pe.HalqaId == request.CircleId)
+                .Where(pe => pe.HalqaId == request.HalqaId)
                 .Select(pe => pe.studentId)
                 .Distinct()
                 .CountAsync();
 
-            return new CircleStudentsCountResponse { Count = count };
+            return new HalqaStudentsCountResponse { Count = count };
         }
 
-        public async Task<CircleStatisticsDto> GetCircleStatisticsAsync(GetCircleStatisticsRequest request)
+        public async Task<HalqaStatisticsDto> GetHalqaStatisticsAsync(GetHalqaStatisticsRequest request)
         {
-            var circleId = request.CircleId;
+            var circleId = request.HalqaId;
 
             // 1) students count and active students count (two counts, executed in DB)
             var studentsCountTask = _context.ProgressEntries
@@ -183,10 +183,10 @@ namespace Moeen.Api.Application.Services
 
             var halqa = await _context.Halqas.FindAsync(circleId);
 
-            return new CircleStatisticsDto
+            return new HalqaStatisticsDto
             {
-                CircleId = circleId,
-                CircleName = halqa?.Name ?? string.Empty,
+                HalqaId = circleId,
+                HalqaName = halqa?.Name ?? string.Empty,
                 StudentsCount = studentsCount,
                 ActiveStudentsCount = activeCount,
                 AverageMemorizationProgress = Math.Round(avgMem, 2),
@@ -195,11 +195,11 @@ namespace Moeen.Api.Application.Services
             };
         }
 
-        public async Task<CircleAttendanceReportResponse> GetCircleAttendanceReportAsync(GetCircleAttendanceReportRequest request)
+        public async Task<HalqaAttendanceReportResponse> GetHalqaAttendanceReportAsync(GetHalqaAttendanceReportRequest request)
         {
             // 1) جلب الجلسات ضمن الفترة
             var sessions = await _context.HalqaSessions
-                .Where(hs => hs.HalqaId == request.CircleId && hs.date >= request.FromDate && hs.date <= request.ToDate)
+                .Where(hs => hs.HalqaId == request.HalqaId && hs.date >= request.FromDate && hs.date <= request.ToDate)
                 .OrderBy(hs => hs.date)
                 .Select(hs => new { hs.Id, hs.date })
                 .ToListAsync();
@@ -219,22 +219,22 @@ namespace Moeen.Api.Application.Services
                 attendanceGroups = groups.ToDictionary(g => g.SessionId, g => g.Count);
             }
 
-            var halqa = await _context.Halqas.FindAsync(request.CircleId);
+            var halqa = await _context.Halqas.FindAsync(request.HalqaId);
 
-            var result = new CircleAttendanceReportResponse
+            var result = new HalqaAttendanceReportResponse
             {
-                CircleId = request.CircleId,
-                CircleName = halqa?.Name ?? string.Empty,
+                HalqaId = request.HalqaId,
+                HalqaName = halqa?.Name ?? string.Empty,
                 FromDate = request.FromDate,
                 ToDate = request.ToDate,
-                DailyRecords = new List<CircleAttendanceDailyRecordDto>()
+                DailyRecords = new List<HalqaAttendanceDailyRecordDto>()
             };
 
             foreach (var s in sessions)
             {
                 attendanceGroups.TryGetValue(s.Id, out int presentCount);
 
-                result.DailyRecords.Add(new CircleAttendanceDailyRecordDto
+                result.DailyRecords.Add(new HalqaAttendanceDailyRecordDto
                 {
                     Date = s.date.Date,
                     PresentCount = presentCount,

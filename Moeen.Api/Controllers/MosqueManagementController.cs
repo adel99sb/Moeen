@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Shared.Requests.Mosuq;
-using Moeen.Shared.Responses.Circle;
+using Moeen.Shared.Responses.Halqa;
 using Moeen.Shared.Responses.CircleTeacherAssignment;
 using Moeen.Shared.Responses.Enrollment;
 using Moeen.Shared.Responses.Mosuq;
@@ -32,7 +32,7 @@ namespace Moeen.Api.Controllers
             => Ok(await _mosquService.GetMosqueByIdAsync(new GetMosqueByIdRequest { MosqueId = mosqueId }));
 
         [HttpGet("{mosqueId:guid}/circles")]
-        public async Task<ActionResult<List<CircleDto>>> GetCirclesByMosque([FromRoute] Guid mosqueId)
+        public async Task<ActionResult<List<HalqaDto>>> GetCirclesByMosque([FromRoute] Guid mosqueId)
             => Ok(await _mosquService.GetCirclesByMosqueAsync(new GetCirclesByMosqueRequest { MosqueId = mosqueId }));
 
         [HttpGet("{mosqueId:guid}/teachers")]

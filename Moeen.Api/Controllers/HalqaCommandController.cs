@@ -1,30 +1,30 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Shared.Requests.Circle;
+using Moeen.Shared.Requests.Halqa;
 using Moeen.Shared.Responses;
 
 namespace Moeen.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CircleCommandController : ControllerBase
+    public class HalqaCommandController : ControllerBase
     {
-        private readonly ICircleCommandService _circleCommandService;
+        private readonly IHalqaCommandService _HalqaCommandService;
 
-        public CircleCommandController(ICircleCommandService circleCommandService)
+        public HalqaCommandController(IHalqaCommandService HalqaCommandService)
         {
-            _circleCommandService = circleCommandService;
+            _HalqaCommandService = HalqaCommandService;
         }
 
         /// <summary>
         /// أمر: إنشاء حلقة جديدة.
         /// </summary>
         [HttpPost("create")]
-        public async Task<ActionResult<GeneralResponse>> CreateCircle([FromBody] CreateCircleRequest request)
+        public async Task<ActionResult<GeneralResponse>> CreateHalqa([FromBody] CreateHalqaRequest request)
         {
             try
             {
-                var result = await _circleCommandService.CreateCircleAsync(request);
+                var result = await _HalqaCommandService.CreateHalqaAsync(request);
                 return Ok(GeneralResponse.Ok("تم إنشاء الحلقة بنجاح.", result));
             }
             catch (ArgumentException ex)
@@ -41,11 +41,11 @@ namespace Moeen.Api.Controllers
         /// أمر: تحديث بيانات حلقة.
         /// </summary>
         [HttpPut("update")]
-        public async Task<ActionResult<GeneralResponse>> UpdateCircle([FromBody] UpdateCircleRequest request)
+        public async Task<ActionResult<GeneralResponse>> UpdateHalqa([FromBody] UpdateHalqaRequest request)
         {
             try
             {
-                var result = await _circleCommandService.UpdateCircleAsync(request);
+                var result = await _HalqaCommandService.UpdateHalqaAsync(request);
                 return Ok(GeneralResponse.Ok("تم تحديث الحلقة بنجاح.", result));
             }
             catch (ArgumentException ex)
@@ -62,11 +62,11 @@ namespace Moeen.Api.Controllers
         /// أمر: حذف حلقة.
         /// </summary>
         [HttpDelete("delete")]
-        public async Task<ActionResult<GeneralResponse>> DeleteCircle([FromBody] DeleteCircleRequest request)
+        public async Task<ActionResult<GeneralResponse>> DeleteHalqa([FromBody] DeleteHalqaRequest request)
         {
             try
             {
-                var deleted = await _circleCommandService.DeleteCircleAsync(request);
+                var deleted = await _HalqaCommandService.DeleteHalqaAsync(request);
                 if (!deleted)
                     return NotFound(GeneralResponse.NotFound("لم يتم العثور على الحلقة."));
 
@@ -86,11 +86,11 @@ namespace Moeen.Api.Controllers
         /// أمر: إعادة تعيين معلم للحلقة.
         /// </summary>
         [HttpPut("reassign-teacher")]
-        public async Task<ActionResult<GeneralResponse>> ReassignTeacher([FromBody] ReassignCircleTeacherRequest request)
+        public async Task<ActionResult<GeneralResponse>> ReassignTeacher([FromBody] ReassignHalqaTeacherRequest request)
         {
             try
             {
-                var result = await _circleCommandService.ReassignTeacherAsync(request);
+                var result = await _HalqaCommandService.ReassignTeacherAsync(request);
                 return Ok(GeneralResponse.Ok("تمت إعادة تعيين المعلم بنجاح.", result));
             }
             catch (ArgumentException ex)
@@ -107,11 +107,11 @@ namespace Moeen.Api.Controllers
         /// أمر: نقل الحلقة إلى فوج آخر.
         /// </summary>
         [HttpPut("move-to-fouj")]
-        public async Task<ActionResult<GeneralResponse>> MoveToFouj([FromBody] MoveCircleToFoujRequest request)
+        public async Task<ActionResult<GeneralResponse>> MoveToFouj([FromBody] MoveHalqaToFoujRequest request)
         {
             try
             {
-                var result = await _circleCommandService.MoveToFoujAsync(request);
+                var result = await _HalqaCommandService.MoveToFoujAsync(request);
                 return Ok(GeneralResponse.Ok("تم نقل الحلقة بنجاح.", result));
             }
             catch (ArgumentException ex)

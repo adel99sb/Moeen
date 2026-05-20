@@ -1,12 +1,12 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Moeen.Shared.Requests.CircleQuery
+namespace Moeen.Shared.Requests.HalqaQuery
 {
-    public class GetCircleAttendanceReportRequest
+    public class GetHalqaAttendanceReportRequest
     {
-        [Required(ErrorMessage = "Circle ID is required")]
-        public Guid CircleId { get; set; }
+        [Required(ErrorMessage = "Halqa ID is required")]
+        public Guid HalqaId { get; set; }
 
         [Required(ErrorMessage = "From date is required")]
         public DateTime FromDate { get; set; }

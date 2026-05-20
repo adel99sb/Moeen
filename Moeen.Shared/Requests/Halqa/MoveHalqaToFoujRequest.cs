@@ -1,12 +1,12 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Moeen.Shared.Requests.Circle
+namespace Moeen.Shared.Requests.Halqa
 {
-    public class MoveCircleToFoujRequest
+    public class MoveHalqaToFoujRequest
     {
-        [Required(ErrorMessage = "Circle ID is required")]
-        public Guid CircleId { get; set; }
+        [Required(ErrorMessage = "Halqa ID is required")]
+        public Guid HalqaId { get; set; }
 
         [Required(ErrorMessage = "Target fouj ID is required")]
         public Guid TargetFoujId { get; set; }
