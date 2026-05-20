@@ -9,6 +9,6 @@ namespace Moeen.Shared.Requests.Registration
         public Guid StudentId { get; set; }
 
         [Required(ErrorMessage = "Circle ID is required")]
-        public Guid CircleId { get; set; }
+        public Guid HalqaId { get; set; }
     }
 }

@@ -29,7 +29,7 @@ namespace Moeen.Api.Application.Services
 
             // Students count computed in DB (using ProgressEntry relation)
             var studentsCount = await _context.ProgressEntries
-                .Where(pe => pe.HalqaId == request.CircleId)
+                .Where(pe => pe.HalqaId == request.HalqaId)
                 .Select(pe => pe.StudentId)
                 .Distinct()
                 .CountAsync();
@@ -122,8 +122,8 @@ namespace Moeen.Api.Application.Services
         {
             // Count distinct students who have progress entries for the halqa
             var count = await _context.ProgressEntries
-                .Where(pe => pe.HalqaId == request.CircleId)
-                .Select(pe => pe.studentId)
+                .Where(pe => pe.HalqaId == request.HalqaId)
+                .Select(pe => pe.StudentId)
                 .Distinct()
                 .CountAsync();
 
