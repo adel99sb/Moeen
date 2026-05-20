@@ -1,14 +1,13 @@
 ﻿using Moeen.Shared.Requests.Mosuq;
 using Moeen.Shared.Responses;
-using System;
-using System.Threading.Tasks;
+using Moeen.Shared.Responses.Mosuq;
 namespace Moeen.Dashboard.Services.Abstractions
 {
     public interface IMosquService
     {
         Task<GeneralResponse> AddMosqu(AddMosquReq req);
-        Task<GeneralResponse> GetAllMosqus(GetAllMosqusRequest request);
-        Task<GeneralResponse> GetMosqueByIdAsync(Guid mosqueId);
+        Task<List<MosquDto>> GetAllMosqus(GetAllMosqusRequest request);
+        Task<MosquDto> GetMosqueByIdAsync(Guid mosqueId);
         Task<GeneralResponse> GetCirclesByMosqueAsync(GetCirclesByMosqueRequest request);
         Task<GeneralResponse> GetTeachersByMosqueAsync(GetTeachersByMosqueRequest request);
         Task<GeneralResponse> GetMosqueStatisticsAsync(GetMosqueStatisticsRequest request);
