@@ -1,7 +1,6 @@
 ﻿@page "/Teacher/Progress"
 
 <style>
-    
     :root {
         /* الألوان الأساسية */
         --primary: #195042;
@@ -9,19 +8,16 @@
         --bg-light: #f9f7f5;
         --white: #ffffff;
         --text-muted: #6c757d;
-        
         /* حالات النظام */
         --success: #28a745;
         --warning: #ffc107;
         --danger: #dc3545;
         --info: #17a2b8;
-        
         /* الظلال والحدود */
         --shadow-soft: 0 2px 8px rgba(0,0,0,.04);
         --shadow-card: 0 10px 30px rgba(0,0,0,.08);
         --border-soft: 1px solid rgba(214,202,188,.4);
         --focus-ring: rgba(25,80,66,.25);
-        
         /* الأبعاد والمسافات */
         --radius: 8px;
         --radius-lg: 20px;
@@ -29,7 +25,6 @@
         --space-2: 8px;
         --space-3: 15px;
         --space-4: 25px;
-        
         /* الخطوط */
         --font: 'Segoe UI', Tahoma, Geneva, sans-serif;
         --text-sm: .8rem;
@@ -38,8 +33,8 @@
     }
 
     /* ═══════════════════════════════════════════════════════
-       📐 Base Layout - التخطيط الأساسي
-       ═══════════════════════════════════════════════════════ */
+                   📐 Base Layout - التخطيط الأساسي
+                   ═══════════════════════════════════════════════════════ */
     .progress-container {
         background: var(--bg-light);
         font-family: var(--font);
@@ -80,9 +75,11 @@
     }
 
     /* ═══════════════════════════════════════════════════════
-       🗂️ Tabs - التبويبات
-       ═══════════════════════════════════════════════════════ */
-    .tabs-wrapper { margin-bottom: var(--space-4); }
+                   🗂️ Tabs - التبويبات
+                   ═══════════════════════════════════════════════════════ */
+    .tabs-wrapper {
+        margin-bottom: var(--space-4);
+    }
 
     .tabs-container {
         display: flex;
@@ -114,13 +111,23 @@
         font-size: var(--text-base);
     }
 
-    .tab-item.active { background: var(--primary); color: var(--beige); }
-    .tab-item:not(.active):hover { background: var(--bg-light); border-color: var(--beige); }
-    .tab-item i { font-size: 1.1rem; }
+        .tab-item.active {
+            background: var(--primary);
+            color: var(--beige);
+        }
+
+        .tab-item:not(.active):hover {
+            background: var(--bg-light);
+            border-color: var(--beige);
+        }
+
+        .tab-item i {
+            font-size: 1.1rem;
+        }
 
     /* ═══════════════════════════════════════════════════════
-       📊 Statistics - الإحصائيات
-       ═══════════════════════════════════════════════════════ */
+                   📊 Statistics - الإحصائيات
+                   ═══════════════════════════════════════════════════════ */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -145,12 +152,19 @@
         margin-top: var(--space-1);
     }
 
-    .stat-label { font-size: var(--text-sm); color: var(--text-muted); }
-    .stat-icon { font-size: 1.5rem; color: var(--beige); }
+    .stat-label {
+        font-size: var(--text-sm);
+        color: var(--text-muted);
+    }
+
+    .stat-icon {
+        font-size: 1.5rem;
+        color: var(--beige);
+    }
 
     /* ═══════════════════════════════════════════════════════
-       🔍 Filter Bar - شريط التصفية
-       ═══════════════════════════════════════════════════════ */
+                   🔍 Filter Bar - شريط التصفية
+                   ═══════════════════════════════════════════════════════ */
     .filter-bar {
         background: var(--white);
         border: var(--border-soft);
@@ -169,7 +183,10 @@
         gap: var(--space-1);
     }
 
-    .filter-label { font-size: var(--text-sm); color: var(--text-muted); }
+    .filter-label {
+        font-size: var(--text-sm);
+        color: var(--text-muted);
+    }
 
     .input, .select {
         border: 1px solid #e0e0e0;
@@ -181,13 +198,12 @@
         min-width: 120px;
     }
 
-    .input:focus, .select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 .2rem var(--focus-ring);
-        outline: 0;
-    }
+        .input:focus, .select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 .2rem var(--focus-ring);
+            outline: 0;
+        }
 
-   
     .btn {
         background: var(--primary);
         color: var(--beige);
@@ -205,9 +221,21 @@
         text-decoration: none;
     }
 
-    .btn:hover { background: var(--beige); color: var(--primary); }
-    .btn.outline { background: transparent; border-color: var(--primary); color: var(--primary); }
-    .btn.outline:hover { background: var(--primary); color: var(--beige); }
+        .btn:hover {
+            background: var(--beige);
+            color: var(--primary);
+        }
+
+        .btn.outline {
+            background: transparent;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+            .btn.outline:hover {
+                background: var(--primary);
+                color: var(--beige);
+            }
 
     .btn-edit-record {
         background: transparent;
@@ -225,7 +253,10 @@
         flex-shrink: 0;
     }
 
-    .btn-edit-record:hover { background: var(--beige); color: var(--primary); }
+        .btn-edit-record:hover {
+            background: var(--beige);
+            color: var(--primary);
+        }
 
     .progress-card {
         border: var(--border-soft);
@@ -248,7 +279,9 @@
         justify-content: space-between;
     }
 
-    .card-body-custom { padding: var(--space-3); }
+    .card-body-custom {
+        padding: var(--space-3);
+    }
 
     .timeline {
         position: relative;
@@ -256,15 +289,15 @@
         padding-left: 0;
     }
 
-    .timeline::before {
-        content: '';
-        position: absolute;
-        right: 14px;
-        top: 10px;
-        bottom: 10px;
-        width: 2px;
-        background: var(--beige);
-    }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            right: 14px;
+            top: 10px;
+            bottom: 10px;
+            width: 2px;
+            background: var(--beige);
+        }
 
     .timeline-item {
         position: relative;
@@ -277,23 +310,23 @@
         transition: transform .2s;
     }
 
-    .timeline-item:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-card);
-    }
+        .timeline-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-card);
+        }
 
-    .timeline-item::before {
-        content: '';
-        position: absolute;
-        right: -37px;
-        top: 26px;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: var(--primary);
-        border: 3px solid var(--beige);
-        z-index: 1;
-    }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            right: -37px;
+            top: 26px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 3px solid var(--beige);
+            z-index: 1;
+        }
 
     .timeline-header {
         display: flex;
@@ -303,7 +336,9 @@
         gap: var(--space-2);
     }
 
-    .timeline-header-content { flex: 1; }
+    .timeline-header-content {
+        flex: 1;
+    }
 
     .timeline-date {
         font-size: var(--text-sm);
@@ -333,15 +368,32 @@
         display: flex;
         flex-direction: column;
         gap: 2px;
-        align-items: flex-start; /* ✅ إصلاح محاذاة الجوال */
+        align-items: flex-start;
     }
 
-    .record-label { font-size: var(--text-sm); color: var(--text-muted); font-weight: 500; }
-    .record-value { font-weight: 600; color: var(--primary); font-size: var(--text-lg); }
+    .record-label {
+        font-size: var(--text-sm);
+        color: var(--text-muted);
+        font-weight: 500;
+    }
 
-    .record-value.success { color: var(--success); }
-    .record-value.warning { color: #856404; }
-    .record-value.danger { color: var(--danger); }
+    .record-value {
+        font-weight: 600;
+        color: var(--primary);
+        font-size: var(--text-lg);
+    }
+
+        .record-value.success {
+            color: var(--success);
+        }
+
+        .record-value.warning {
+            color: #856404;
+        }
+
+        .record-value.danger {
+            color: var(--danger);
+        }
 
     .badge {
         display: inline-block;
@@ -351,10 +403,25 @@
         font-weight: 500;
     }
 
-    .badge.excellent { background: rgba(40,167,69,.15); color: var(--success); }
-    .badge.verygood { background: rgba(23,162,184,.15); color: var(--info); }
-    .badge.good { background: rgba(255,193,7,.15); color: #856404; }
-    .badge.repeat { background: rgba(220,53,69,.15); color: var(--danger); }
+        .badge.excellent {
+            background: rgba(40,167,69,.15);
+            color: var(--success);
+        }
+
+        .badge.verygood {
+            background: rgba(23,162,184,.15);
+            color: var(--info);
+        }
+
+        .badge.good {
+            background: rgba(255,193,7,.15);
+            color: #856404;
+        }
+
+        .badge.repeat {
+            background: rgba(220,53,69,.15);
+            color: var(--danger);
+        }
 
     .teacher-note {
         margin-top: var(--space-3);
@@ -381,12 +448,12 @@
         border-bottom: 1px solid var(--bg-light);
     }
 
-    .progress-section-header h5 {
-        font-size: var(--text-base);
-        font-weight: 600;
-        color: var(--primary);
-        margin: 0;
-    }
+        .progress-section-header h5 {
+            font-size: var(--text-base);
+            font-weight: 600;
+            color: var(--primary);
+            margin: 0;
+        }
 
     .progress-grid {
         display: grid;
@@ -422,9 +489,17 @@
         white-space: nowrap;
     }
 
-    .progress-row-value.success { color: var(--success); }
-    .progress-row-value.warning { color: var(--warning); }
-    .progress-row-value.info { color: var(--info); }
+        .progress-row-value.success {
+            color: var(--success);
+        }
+
+        .progress-row-value.warning {
+            color: var(--warning);
+        }
+
+        .progress-row-value.info {
+            color: var(--info);
+        }
 
     .progress-row-bar {
         width: 100%;
@@ -441,66 +516,228 @@
         display: block;
     }
 
-    .text-center { text-align: center; }
-    .text-muted { color: var(--text-muted); }
-    .text-success { color: var(--success); }
-    .fw-bold { font-weight: 700; }
-    .opacity-75 { opacity: .75; }
+    /* ═══════════════════════════════════════════════════════
+                   🎨 Utility Classes - فئات مساعدة (بديلة للأنماط المضمنة)
+                   ═══════════════════════════════════════════════════════ */
 
-    .mt-2 { margin-top: var(--space-2); }
-    .mt-3 { margin-top: var(--space-3); }
-    .mt-4 { margin-top: var(--space-4); }
-    .mb-0 { margin-bottom: 0; }
-    .mb-3 { margin-bottom: var(--space-3); }
-    .mb-5 { margin-bottom: var(--space-4); }
+    /* فئات عرض شريط التقدم */
+    .progress-fill-85 {
+        width: 85%;
+        background: var(--primary);
+    }
 
-    .ms-1 { margin-right: 4px; }
-    .ms-auto { margin-right: auto; }
-    .mx-2 { margin: 0 8px; }
+    .progress-fill-92 {
+        width: 92%;
+        background: var(--primary);
+    }
 
-    .d-flex { display: flex; }
-    .flex-wrap { flex-wrap: wrap; }
-    .justify-content-between { justify-content: space-between; }
-    .align-items-center { align-items: center; }
+    .progress-fill-95 {
+        width: 95%;
+        background: var(--success);
+    }
 
-    
+    .progress-fill-68 {
+        width: 68%;
+        background: var(--warning);
+    }
+
+    /* فئات النصوص والهوامش */
+    .text-center {
+        text-align: center;
+    }
+
+    .text-muted {
+        color: var(--text-muted);
+    }
+
+    .text-success {
+        color: var(--success);
+    }
+
+    .fw-bold {
+        font-weight: 700;
+    }
+
+    .opacity-75 {
+        opacity: .75;
+    }
+
+    .mt-2 {
+        margin-top: var(--space-2);
+    }
+
+    .mt-3 {
+        margin-top: var(--space-3);
+    }
+
+    .mt-4 {
+        margin-top: var(--space-4);
+    }
+
+    .mb-0 {
+        margin-bottom: 0;
+    }
+
+    .mb-1 {
+        margin-bottom: var(--space-1);
+    }
+
+    .mb-3 {
+        margin-bottom: var(--space-3);
+    }
+
+    .mb-5 {
+        margin-bottom: var(--space-4);
+    }
+
+    .ms-1 {
+        margin-right: 4px;
+    }
+
+    .ms-auto {
+        margin-right: auto;
+    }
+
+    .mx-2 {
+        margin: 0 8px;
+    }
+
+    /* فئات العرض والمرونة */
+    .d-flex {
+        display: flex;
+    }
+
+    .flex-wrap {
+        flex-wrap: wrap;
+    }
+
+    .justify-content-between {
+        justify-content: space-between;
+    }
+
+    .align-items-center {
+        align-items: center;
+    }
+
+    /* فئة حجم الخط الصغير للنص التوضيحي */
+    .text-note {
+        font-size: var(--text-sm);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+                   📱 Responsive - التجاوب مع الشاشات
+                   ═══════════════════════════════════════════════════════ */
     @@media (max-width: 768px) {
-        .timeline { padding-right: 35px; }
-        .timeline::before { right: 8px; }
-        .timeline-item::before { right: -33px; }
-        
-        .filter-bar { flex-direction: column; align-items: stretch; }
-        .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        .timeline-header { flex-direction: column; align-items: flex-start; }
-        
-        .record-grid { grid-template-columns: repeat(2, 1fr); }
-        .record-item { align-items: flex-start; text-align: right; } /* ✅ ضمان المحاذاة */
-        
-        .col-md-6 { flex: 0 0 100%; max-width: 100%; }
-        
-        .progress-grid { display: flex; flex-direction: column; gap: var(--space-4); }
-        .progress-row { width: 100%; gap: var(--space-2); }
-        .progress-row-header { margin-bottom: var(--space-1); }
-        .progress-row-label { font-size: var(--text-base); }
-        .progress-row-value { font-size: var(--text-lg); }
-        .progress-row-bar { height: 12px; }
-        
-        .tabs-container { flex-direction: column; }
-        .tab-item { width: 100%; }
+        .timeline {
+            padding-right: 35px;
+        }
+
+            .timeline::before {
+                right: 8px;
+            }
+
+        .timeline-item::before {
+            right: -33px;
+        }
+
+        .filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .timeline-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .record-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .record-item {
+            align-items: flex-start;
+            text-align: right;
+        }
+
+        .col-md-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+
+        .progress-grid {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+
+        .progress-row {
+            width: 100%;
+            gap: var(--space-2);
+        }
+
+        .progress-row-header {
+            margin-bottom: var(--space-1);
+        }
+
+        .progress-row-label {
+            font-size: var(--text-base);
+        }
+
+        .progress-row-value {
+            font-size: var(--text-lg);
+        }
+
+        .progress-row-bar {
+            height: 12px;
+        }
+
+        .tabs-container {
+            flex-direction: column;
+        }
+
+        .tab-item {
+            width: 100%;
+        }
     }
 
     @@media (max-width: 480px) {
-        .stats-grid, .record-grid { grid-template-columns: 1fr; }
-        .record-item { align-items: flex-start; text-align: right; } /* ✅ ضمان المحاذاة */
-        
-        .student-info { flex-direction: column; text-align: center; }
-        .progress-section { padding: var(--space-2); }
-        .progress-row-bar { height: 10px; }
+        .stats-grid, .record-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .record-item {
+            align-items: flex-start;
+            text-align: right;
+        }
+
+        .student-info {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .progress-section {
+            padding: var(--space-2);
+        }
+
+        .progress-row-bar {
+            height: 10px;
+        }
     }
 
     @@media print {
-        .filter-bar, .btn, .btn-edit-record, .tabs-wrapper { display: none !important; }
-        .progress-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+        .filter-bar, .btn, .btn-edit-record, .tabs-wrapper {
+            display: none !important;
+        }
+
+        .progress-card {
+            break-inside: avoid;
+            box-shadow: none;
+            border: 1px solid #ddd;
+        }
     }
 </style>
 
@@ -509,7 +746,7 @@
    ═══════════════════════════════════════════════════════ *@
 
 <div class="progress-container">
-    
+
     @* Header: Student Info *@
     <header class="header-custom">
         <div class="student-info">
@@ -524,18 +761,6 @@
             </div>
         </div>
     </header>
-
-    @* Navigation Tabs *@
-    <div class="tabs-wrapper">
-        <div class="tabs-container">
-            <NavLink class="tab-item" href="/Teacher/Halaka">
-                <i class="bi bi-pencil-square"></i> إدخال بيانات اليوم
-            </NavLink>
-            <NavLink class="tab-item active" href="/Teacher/progress">
-                <i class="bi bi-clock-history"></i> السجل السابق
-            </NavLink>
-        </div>
-    </div>
 
     @* Statistics Cards *@
     <div class="stats-grid">
@@ -592,7 +817,7 @@
         </div>
         <div class="card-body-custom">
             <div class="timeline">
-                
+
                 @* Record: Test *@
                 <div class="timeline-item" data-type="test" data-date="2024-12-10">
                     <div class="timeline-header">
@@ -633,7 +858,7 @@
                     </div>
                     <div class="teacher-note">
                         <small class="text-muted">
-                            <i class="bi bi-chat-square-text ms-1"></i> 
+                            <i class="bi bi-chat-square-text ms-1"></i>
                             ملاحظة المعلم: يحتاج لمراجعة مخارج الحروف في الصفحة 538
                         </small>
                     </div>
@@ -678,7 +903,7 @@
                     <span class="progress-row-value">85%</span>
                 </div>
                 <div class="progress-row-bar">
-                    <div class="progress-row-bar-fill" style="width:85%;background:var(--primary)"></div>
+                    <div class="progress-row-bar-fill progress-fill-85"></div>
                 </div>
             </div>
             <div class="progress-row">
@@ -687,7 +912,7 @@
                     <span class="progress-row-value">92%</span>
                 </div>
                 <div class="progress-row-bar">
-                    <div class="progress-row-bar-fill" style="width:92%;background:var(--primary)"></div>
+                    <div class="progress-row-bar-fill progress-fill-92"></div>
                 </div>
             </div>
             <div class="progress-row">
@@ -696,7 +921,7 @@
                     <span class="progress-row-value success">ممتاز</span>
                 </div>
                 <div class="progress-row-bar">
-                    <div class="progress-row-bar-fill" style="width:95%;background:var(--success)"></div>
+                    <div class="progress-row-bar-fill progress-fill-95"></div>
                 </div>
             </div>
             <div class="progress-row">
@@ -705,17 +930,15 @@
                     <span class="progress-row-value warning">68 نقطة</span>
                 </div>
                 <div class="progress-row-bar">
-                    <div class="progress-row-bar-fill" style="width:68%;background:var(--warning)"></div>
+                    <div class="progress-row-bar-fill progress-fill-68"></div>
                 </div>
             </div>
         </div>
     </div>
 
-   
     <div class="text-center mt-4 mb-5">
-       
-        <p class="text-muted mt-2" style="font-size:var(--text-sm)">
-            <i class="bi bi-info-circle ms-1"></i> 
+        <p class="text-muted mt-2 text-note">
+            <i class="bi bi-info-circle ms-1"></i>
             يتم تحديث هذا السجل تلقائياً عند حفظ أي تقدم جديد للطالب
         </p>
     </div>
@@ -723,4 +946,5 @@
 </div>
 
 @code {
+    // يمكن إضافة منطق التصفية والتحديث الديناميكي هنا
 }

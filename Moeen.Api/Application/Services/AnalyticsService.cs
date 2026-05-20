@@ -257,9 +257,9 @@ namespace Moeen.Api.Application.Services
 
             var fromDate = DateTime.UtcNow.AddDays(-DefaultAnalyticsWindowDays);
 
-            var progressSpec = Spec.For<ProgressEntry>(p => p.studentId == studentId && p.date >= fromDate);
+            var progressSpec = Spec.For<ProgressEntry>(p => p.StudentId == studentId && p.Date >= fromDate);
             var progressEntries = (await _unitOfWork.Repository<ProgressEntry>().GetAllAsync(progressSpec))
-                .OrderBy(p => p.date)
+                .OrderBy(p => p.Date)
                 .ToList();
 
             var examsSpec = Spec.For<Exam>(e => e.StudentId == studentId && e.date >= fromDate);
@@ -269,7 +269,7 @@ namespace Moeen.Api.Application.Services
             var attendances = (await _unitOfWork.Repository<Attendance>().GetAllAsync(attendanceSpec)).ToList();
 
             var monthlyProgress = progressEntries
-                .GroupBy(p => new { p.date.Year, p.date.Month })
+                .GroupBy(p => new { p.Date.Year, p.Date.Month })
                 .Select(g =>
                 {
                     var monthStart = new DateTime(g.Key.Year, g.Key.Month, 1);
@@ -281,7 +281,7 @@ namespace Moeen.Api.Application.Services
                     return new MonthlyProgress
                     {
                         Month = monthStart,
-                        PagesMemorized = g.Select(x => x.page_number).Distinct().Count(),
+                        PagesMemorized = g.Select(x => x.PageNumber).Distinct().Count(),
                         AverageScore = Math.Round(monthAvgScore, 2)
                     };
                 })
@@ -296,8 +296,8 @@ namespace Moeen.Api.Application.Services
                 Gender = student.gender ?? string.Empty,
                 EnrollmentDate = student.EnrollmentDate,
                 TotalSessions = attendances.Count,
-                TotalMemorizedPages = progressEntries.Select(p => p.page_number).Distinct().Count(),
-                LastMemorizedPage = progressEntries.Select(p => (int?)p.page_number).Max() ?? 0,
+                TotalMemorizedPages = progressEntries.Select(p => p.PageNumber).Distinct().Count(),
+                LastMemorizedPage = progressEntries.Select(p => (int?)p.PageNumber).Max() ?? 0,
                 AverageExamScore = Math.Round(exams.Select(e => (double?)e.mark).Average() ?? 0.0, 2),
                 TotalPoints = exams.Sum(e => e.mark),
                 MonthlyProgress = monthlyProgress,
@@ -350,7 +350,7 @@ namespace Moeen.Api.Application.Services
                 return emptyResult;
             }
 
-            var progressSpec = Spec.For<ProgressEntry>(p => halqaIds.Contains(p.HalqaId) && p.date >= fromDate);
+            var progressSpec = Spec.For<ProgressEntry>(p => halqaIds.Contains(p.HalqaId) && p.Date >= fromDate);
             var progressEntries = (await _unitOfWork.Repository<ProgressEntry>().GetAllAsync(progressSpec)).ToList();
 
             var sessionSpec = Spec.For<HalqaSession>(s => halqaIds.Contains(s.HalqaId) && s.date >= fromDate);
@@ -375,20 +375,20 @@ namespace Moeen.Api.Application.Services
                 .GroupBy(a => a.HalqeSessionId)
                 .ToDictionary(g => g.Key, g => g.Count());
 
-            var studentIds = progressEntries.Select(p => p.studentId).Distinct().ToList();
+            var studentIds = progressEntries.Select(p => p.StudentId).Distinct().ToList();
 
             var avgAttendance = (studentIds.Count == 0 || sessions.Count == 0)
                 ? 0.0
                 : (double)attendances.Count / (studentIds.Count * sessions.Count) * 100.0;
 
-            var avgProgress = progressEntries.Select(p => (double?)p.page_number).Average() ?? 0.0;
+            var avgProgress = progressEntries.Select(p => (double?)p.PageNumber).Average() ?? 0.0;
 
             var halqasPerformance = new List<HalaqaPerformance>();
 
             foreach (var halqa in halqas)
             {
                 var hProgress = progressByHalqa.TryGetValue(halqa.Id, out var p) ? p : new List<ProgressEntry>();
-                var hStudents = hProgress.Select(x => x.studentId).Distinct().ToList();
+                var hStudents = hProgress.Select(x => x.StudentId).Distinct().ToList();
 
                 var hSessionIds = sessionsByHalqa.TryGetValue(halqa.Id, out var hs)
                     ? hs
@@ -401,7 +401,7 @@ namespace Moeen.Api.Application.Services
                     ? 0.0
                     : (double)hAttendanceCount / (hStudents.Count * hSessionIds.Count) * 100.0;
 
-                var hAvgProgress = hProgress.Select(x => (double?)x.page_number).Average() ?? 0.0;
+                var hAvgProgress = hProgress.Select(x => (double?)x.PageNumber).Average() ?? 0.0;
 
                 halqasPerformance.Add(new HalaqaPerformance
                 {
@@ -450,7 +450,7 @@ namespace Moeen.Api.Application.Services
 
             var fromDate = DateTime.UtcNow.AddDays(-DefaultAnalyticsWindowDays);
 
-            var progressSpec = Spec.For<ProgressEntry>(p => p.HalqaId == circleId && p.date >= fromDate);
+            var progressSpec = Spec.For<ProgressEntry>(p => p.HalqaId == circleId && p.Date >= fromDate);
             var progressEntries = (await _unitOfWork.Repository<ProgressEntry>().GetAllAsync(progressSpec)).ToList();
 
             var sessionSpec = Spec.For<HalqaSession>(s => s.HalqaId == circleId && s.date >= fromDate);
@@ -460,7 +460,7 @@ namespace Moeen.Api.Application.Services
             var attendanceSpec = Spec.For<Attendance>(a => sessionIds.Contains(a.HalqeSessionId));
             var attendances = (await _unitOfWork.Repository<Attendance>().GetAllAsync(attendanceSpec)).ToList();
 
-            var studentIds = progressEntries.Select(p => p.studentId)
+            var studentIds = progressEntries.Select(p => p.StudentId)
                 .Concat(attendances.Select(a => a.StudentId))
                 .Distinct()
                 .ToList();
@@ -480,11 +480,11 @@ namespace Moeen.Api.Application.Services
                 ? 0.0
                 : (double)attendances.Count / (studentIds.Count * sessionIds.Count) * 100.0;
 
-            var avgProgress = progressEntries.Select(p => (double?)p.page_number).Average() ?? 0.0;
+            var avgProgress = progressEntries.Select(p => (double?)p.PageNumber).Average() ?? 0.0;
 
             var activeStudentsCount = progressEntries
-                .Where(p => p.date >= DateTime.UtcNow.AddDays(-TrendLastDays))
-                .Select(p => p.studentId)
+                .Where(p => p.Date >= DateTime.UtcNow.AddDays(-TrendLastDays))
+                .Select(p => p.StudentId)
                 .Distinct()
                 .Count();
 
@@ -493,7 +493,7 @@ namespace Moeen.Api.Application.Services
                 : (double)activeStudentsCount / studentIds.Count * 100.0;
 
             var progressByStudent = progressEntries
-                .GroupBy(p => p.studentId)
+                .GroupBy(p => p.StudentId)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
             var examsByStudent = exams
@@ -514,7 +514,7 @@ namespace Moeen.Api.Application.Services
 
                 var avgScore = se.Select(x => (double?)x.mark).Average() ?? 0.0;
                 var attRate = sessionIds.Count == 0 ? 0.0 : (double)sa / sessionIds.Count * 100.0;
-                var pages = sp.Select(x => x.page_number).Distinct().Count();
+                var pages = sp.Select(x => x.PageNumber).Distinct().Count();
 
                 var dto = new StudentPerformance
                 {
@@ -694,14 +694,14 @@ namespace Moeen.Api.Application.Services
             var now = DateTime.UtcNow;
 
             var lastAvg = entries
-                .Where(p => p.date >= now.AddDays(-TrendLastDays))
-                .Select(p => (double)p.level_score)
+                .Where(p => p.Date >= now.AddDays(-TrendLastDays))
+                .Select(p => (double)p.LevelScore)
                 .DefaultIfEmpty(0)
                 .Average();
 
             var prevAvg = entries
-                .Where(p => p.date >= now.AddDays(-TrendPreviousDays) && p.date < now.AddDays(-TrendLastDays))
-                .Select(p => (double)p.level_score)
+                .Where(p => p.Date >= now.AddDays(-TrendPreviousDays) && p.Date < now.AddDays(-TrendLastDays))
+                .Select(p => (double)p.LevelScore)
                 .DefaultIfEmpty(0)
                 .Average();
 

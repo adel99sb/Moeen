@@ -217,11 +217,11 @@ namespace Moeen.Api.Application.Services
             var excellentJuzCount = await _context.ProgressEntries
                 .AsNoTracking()
                 .Where(p =>
-                    p.studentId == studentId &&
-                    p.date.Date >= startDate.Date &&
-                    p.date.Date <= endDate.Date &&
-                    p.level_score >= 5)
-                .Select(p => p.juz_number)
+                    p.StudentId == studentId &&
+                    p.Date.Date >= startDate.Date &&
+                    p.Date.Date <= endDate.Date &&
+                    p.LevelScore >= 5)
+                .Select(p => p.JuzNumber)
                 .Distinct()
                 .CountAsync();
 
@@ -233,10 +233,10 @@ namespace Moeen.Api.Application.Services
             var pageCount = await _context.ProgressEntries
                 .AsNoTracking()
                 .Where(p =>
-                    p.studentId == studentId &&
-                    p.date.Date >= startDate.Date &&
-                    p.date.Date <= endDate.Date)
-                .Select(p => p.page_number)
+                    p.StudentId == studentId &&
+                    p.Date.Date >= startDate.Date &&
+                    p.Date.Date <= endDate.Date)
+                .Select(p => p.PageNumber)
                 .Distinct()
                 .CountAsync();
 

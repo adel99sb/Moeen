@@ -176,15 +176,15 @@ namespace Moeen.Api.Application.Services
                         if (entry == null)
                             return GeneralResponse.NotFound("سجل التقدّم غير موجود.");
 
-                        entry.juz_number = request.JuzNumber ?? entry.juz_number;
-                        entry.page_number = request.FromPage ?? entry.page_number;
-                        entry.memorized_until = request.ToPage ?? entry.memorized_until;
+                        entry.JuzNumber = request.JuzNumber ?? entry.JuzNumber;
+                        entry.PageNumber = request.FromPage ?? entry.PageNumber;
+                        entry.MemorizedUntil = request.ToPage ?? entry.MemorizedUntil;
 
                         if (request.Grade.HasValue)
-                            entry.level_score = MapGradeToPoints(request.Grade.Value);
+                            entry.LevelScore = MapGradeToPoints(request.Grade.Value);
 
-                        entry.next_target = request.RecordType == ProgressRecordType.Review ? 0 : Math.Max(entry.memorized_until + 1, 0);
-                        entry.date = request.Date?.Date ?? entry.date;
+                        entry.NextTarget = request.RecordType == ProgressRecordType.Review ? 0 : Math.Max(entry.MemorizedUntil + 1, 0);
+                        entry.Date = request.Date?.Date ?? entry.Date;
 
                         await _context.SaveChangesAsync();
                         return GeneralResponse.Ok("تم تحديث السجل.");
@@ -205,7 +205,7 @@ namespace Moeen.Api.Application.Services
 
             var entries = await _context.ProgressEntries
                 .AsNoTracking()
-                .Where(p => p.studentId == request.StudentId && p.date >= fromDate && p.date <= toDate && p.level_score > 0)
+                .Where(p => p.StudentId == request.StudentId && p.Date >= fromDate && p.Date <= toDate && p.LevelScore > 0)
                 .ToListAsync();
 
             var exams = await _context.Exams
@@ -218,10 +218,10 @@ namespace Moeen.Api.Application.Services
                 StudentId = request.StudentId,
                 FromDate = fromDate,
                 ToDate = toDate,
-                Points = entries.Sum(e => e.level_score) + exams.Sum(e => e.score),
+                Points = entries.Sum(e => e.LevelScore) + exams.Sum(e => e.score),
                 ExamsCount = exams.Count,
-                ReviewCount = entries.Count(e => e.next_target == 0),
-                MemorizationCount = entries.Count(e => e.next_target > 0),
+                ReviewCount = entries.Count(e => e.NextTarget == 0),
+                MemorizationCount = entries.Count(e => e.NextTarget > 0),
                 SessionsCount = entries.Count
             };
 
@@ -238,7 +238,7 @@ namespace Moeen.Api.Application.Services
 
             var entries = await _context.ProgressEntries
                 .AsNoTracking()
-                .Where(p => p.studentId == request.StudentId && p.date >= fromDate && p.date <= toDate && p.level_score > 0)
+                .Where(p => p.StudentId == request.StudentId && p.Date >= fromDate && p.Date <= toDate && p.LevelScore > 0)
                 .ToListAsync();
 
             var exams = await _context.Exams
@@ -274,7 +274,7 @@ namespace Moeen.Api.Application.Services
             var toDate = (request?.ToDate ?? DateTime.UtcNow).Date;
 
             var progressQuery = _context.ProgressEntries.AsNoTracking()
-                .Where(p => p.date >= fromDate && p.date <= toDate && p.level_score > 0);
+                .Where(p => p.Date >= fromDate && p.Date <= toDate && p.LevelScore > 0);
 
             var examQuery = _context.Exams.AsNoTracking()
                 .Where(e => e.date >= fromDate && e.date <= toDate);
@@ -311,7 +311,7 @@ namespace Moeen.Api.Application.Services
 
             var pointsByStudent = new Dictionary<Guid, int>();
             foreach (var entry in progressEntries)
-                pointsByStudent[entry.studentId] = pointsByStudent.GetValueOrDefault(entry.studentId) + entry.level_score;
+                pointsByStudent[entry.StudentId] = pointsByStudent.GetValueOrDefault(entry.StudentId) + entry.LevelScore;
 
             foreach (var exam in exams)
                 pointsByStudent[exam.StudentId] = pointsByStudent.GetValueOrDefault(exam.StudentId) + exam.score;
@@ -404,15 +404,15 @@ namespace Moeen.Api.Application.Services
             return new ProgressEntry
             {
                 Id = Guid.NewGuid(),
-                studentId = studentId,
+                StudentId = studentId,
                 TeacherId = teacherId,
                 HalqaId = halqaId,
-                date = date,
-                juz_number = dto.JuzNumber,
-                page_number = dto.FromPage,
-                memorized_until = dto.ToPage,
-                next_target = isReview ? 0 : Math.Max(dto.ToPage + 1, 0),
-                level_score = planned ? 0 : MapGradeToPoints(dto.Grade)
+                Date = date,
+                JuzNumber = dto.JuzNumber,
+                PageNumber = dto.FromPage,
+                MemorizedUntil = dto.ToPage,
+                NextTarget = isReview ? 0 : Math.Max(dto.ToPage + 1, 0),
+                LevelScore = planned ? 0 : MapGradeToPoints(dto.Grade)
             };
         }
 
@@ -430,34 +430,34 @@ namespace Moeen.Api.Application.Services
             return new ProgressEntry
             {
                 Id = Guid.NewGuid(),
-                studentId = studentId,
+                StudentId = studentId,
                 TeacherId = teacherId,
                 HalqaId = halqaId,
-                date = date,
-                juz_number = dto.JuzNumber,
-                page_number = dto.FromPage,
-                memorized_until = dto.ToPage,
-                next_target = 0,
-                level_score = 0
+                Date = date,
+                JuzNumber = dto.JuzNumber,
+                PageNumber = dto.FromPage,
+                MemorizedUntil = dto.ToPage,
+                NextTarget = 0,
+                LevelScore = 0
             };
         }
 
         private static StudentProgressRecordDto MapProgressEntry(ProgressEntry entry)
         {
-            var isReview = entry.next_target == 0;
+            var isReview = entry.NextTarget == 0;
             var type = isReview ? ProgressRecordType.Review : ProgressRecordType.Memorization;
 
             return new StudentProgressRecordDto
             {
                 RecordId = entry.Id,
                 RecordType = type,
-                Date = entry.date,
+                Date = entry.Date,
                 Title = isReview ? "مراجعة يومية" : "تسميع جديد",
-                JuzNumber = entry.juz_number,
-                FromPage = entry.page_number,
-                ToPage = entry.memorized_until,
-                Points = entry.level_score,
-                GradeLabel = ResolveGradeLabel(entry.level_score)
+                JuzNumber = entry.JuzNumber,
+                FromPage = entry.PageNumber,
+                ToPage = entry.MemorizedUntil,
+                Points = entry.LevelScore,
+                GradeLabel = ResolveGradeLabel(entry.LevelScore)
             };
         }
 
@@ -483,7 +483,7 @@ namespace Moeen.Api.Application.Services
             List<Exam> exams,
             List<Attendance> attendances)
         {
-            var dates = progressEntries.Select(e => e.date.Date)
+            var dates = progressEntries.Select(e => e.Date.Date)
                 .Concat(exams.Select(e => e.date.Date))
                 .Concat(attendances.Select(a => a.HalqeSession.date.Date))
                 .Distinct()
@@ -493,7 +493,7 @@ namespace Moeen.Api.Application.Services
             return dates.Select(date => new CirclePerformancePointDto
             {
                 Date = date,
-                MemorizationCount = progressEntries.Count(e => e.date.Date == date && e.next_target > 0),
+                MemorizationCount = progressEntries.Count(e => e.Date.Date == date && e.NextTarget > 0),
                 ExamsCount = exams.Count(e => e.date.Date == date),
                 AttendanceCount = attendances.Count(a => a.HalqeSession.date.Date == date)
             }).ToList();

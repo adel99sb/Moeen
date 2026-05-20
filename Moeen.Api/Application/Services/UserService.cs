@@ -212,7 +212,7 @@ namespace Moeen.Api.Application.Services
                 name = registerRequest.Name,
                 UserName = Guid.NewGuid().ToString(),
                 gender = registerRequest.Gender,
-                PhoneNumber = registerRequest.Phone,
+                PhoneNumber = registerRequest.PhoneNumber ,
                 created_at = DateTime.UtcNow,
                 JoinedAt = DateTime.UtcNow
             };
@@ -226,7 +226,7 @@ namespace Moeen.Api.Application.Services
                 }
 
                 await _userManager.AddToRoleAsync(user, Roles.Student.ToString());
-                 await _verificationService.SendVerificationCodeAsync(user.Id, user.Email, "Email Verification", "ar");
+                 //await _verificationService.SendVerificationCodeAsync(user.Id, user.Email, "Email Verification", "ar");
             }
             catch
             {

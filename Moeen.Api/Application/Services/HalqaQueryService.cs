@@ -29,8 +29,8 @@ namespace Moeen.Api.Application.Services
 
             // Students count computed in DB (using ProgressEntry relation)
             var studentsCount = await _context.ProgressEntries
-                .Where(pe => pe.HalqaId == request.HalqaId)
-                .Select(pe => pe.studentId)
+                .Where(pe => pe.HalqaId == request.CircleId)
+                .Select(pe => pe.StudentId)
                 .Distinct()
                 .CountAsync();
 
@@ -122,7 +122,7 @@ namespace Moeen.Api.Application.Services
         {
             // Count distinct students who have progress entries for the halqa
             var count = await _context.ProgressEntries
-                .Where(pe => pe.HalqaId == request.HalqaId)
+                .Where(pe => pe.HalqaId == request.CircleId)
                 .Select(pe => pe.studentId)
                 .Distinct()
                 .CountAsync();
@@ -137,7 +137,7 @@ namespace Moeen.Api.Application.Services
             // 1) students count and active students count (two counts, executed in DB)
             var studentsCountTask = _context.ProgressEntries
                 .Where(pe => pe.HalqaId == circleId)
-                .Select(pe => pe.studentId)
+                .Select(pe => pe.StudentId)
                 .Distinct()
                 .CountAsync();
 
@@ -150,7 +150,7 @@ namespace Moeen.Api.Application.Services
             // 2) average memorization progress (single query)
             var avgMemTask = _context.ProgressEntries
                 .Where(pe => pe.HalqaId == circleId)
-                .Select(pe => (double?)pe.memorized_until)
+                .Select(pe => (double?)pe.MemorizedUntil)
                 .AverageAsync();
 
             // 3) sessions in optional range and attendance counts (fetch sessions ids then count attendances)
