@@ -4,7 +4,7 @@ using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Data;
 using Moeen.Shared.Requests.Mosuq;
 using Moeen.Shared.Responses;
-using Moeen.Shared.Responses.Circle;
+using Moeen.Shared.Responses.Halqa;
 using Moeen.Shared.Responses.Enrollment;
 using Moeen.Shared.Responses.Mosuq;
 using System;
@@ -62,9 +62,10 @@ namespace Moeen.Api.Application.Services
                 .Take(pageSize)
                 .Select(m => new MosquDto
                 {
+                    Id = m.Id,
                     name = m.name,
                     address = m.address,
-                    contact_phone = m.contact_phone,
+                    contactPhone = m.contact_phone,
                     Description = m.Description,
                     Latitude = m.Latitude,
                     Longitude = m.Longitude
@@ -117,7 +118,7 @@ namespace Moeen.Api.Application.Services
 
             var countMap = studentsCounts.ToDictionary(x => x.HalqaId, x => x.Count);
 
-            var result = halqas.Select(h => new CircleDto
+            var result = halqas.Select(h => new HalqaDto
             {
                 Id = h.Id,
                 Name = h.Name,

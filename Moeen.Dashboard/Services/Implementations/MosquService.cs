@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using Moeen.Dashboard.Infrastructure.Http.Clients;
+﻿using Moeen.Dashboard.Infrastructure.Http.Clients;
 using Moeen.Dashboard.Services.Abstractions;
 using Moeen.Shared.Requests.Mosuq;
 using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.Mosuq;
+using System.Text.Json;
 
 namespace Moeen.Dashboard.Services.Implementations
 
@@ -22,14 +22,21 @@ namespace Moeen.Dashboard.Services.Implementations
             return await _apiClient.AddMosquAsync(req);
         }
 
-        public async Task<GeneralResponse> GetAllMosqus(GetAllMosqusRequest request)
+        public async Task<List<MosquDto>> GetAllMosqus(GetAllMosqusRequest request)
         {
-            return await _apiClient.GetAllMosqusAsync(request);
-        }
+            var res = await _apiClient.GetAllMosqusAsync(request);
+            if (res == null || !res.Success)
+                throw new Exception(res?.Message ?? "Unknown error");
 
-        public async Task<GeneralResponse> GetMosqueByIdAsync(Guid mosqueId)
-        {
-            return await _apiClient.GetMosqueByIdAsync(mosqueId);
+            var json = JsonSerializer.Serialize(res.Data);
+
+            var data = JsonSerializer.Deserialize<List<MosquDto>>(
+                json,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            return data;
         }
 
         public async Task<GeneralResponse> GetCirclesByMosqueAsync(GetCirclesByMosqueRequest request)
@@ -65,6 +72,23 @@ namespace Moeen.Dashboard.Services.Implementations
         public async Task<GeneralResponse> UnassignMosqueAdminAsync(UnassignMosqueAdminRequest request)
         {
             return await _apiClient.UnassignMosqueAdminAsync(request);
+        }
+
+        public async Task<MosquDto> GetMosqueByIdAsync(Guid mosqueId)
+        {
+            var res = await _apiClient.GetMosqueByIdAsync(mosqueId);
+            if (res == null || !res.Success)
+                throw new Exception(res?.Message ?? "Unknown error");
+
+            var json = JsonSerializer.Serialize(res.Data);
+
+            var data = JsonSerializer.Deserialize<MosquDto>(
+                json,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            return data;
         }
     }
 }
