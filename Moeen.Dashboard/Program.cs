@@ -29,7 +29,12 @@ builder.Services.AddHttpClient<MosquApiClient>(c =>
 });
 builder.Services.AddScoped<IAuthService, AuthService>();
 // تسجيل خدمات المنشورات والمحتوى الجديدة
-builder.Services.AddScoped<PostApiClient>();
+//builder.Services.AddScoped<PostApiClient>();
+builder.Services.AddHttpClient<PostApiClient>(client =>
+{
+    // هنا بنخليه ياخذ نفس الرابط الأساسي المتخزن بملف الإعدادات عندكِ
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7220/");
+});
 builder.Services.AddScoped<IPostService, PostService>();
 //خدمة الاختبارات
 builder.Services.AddScoped<ExamCommandApiClient>();
