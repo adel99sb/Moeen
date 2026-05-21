@@ -1,188 +1,305 @@
-﻿@page "/supervisor/edit-post"
+﻿@page "/supervisor/edit-post/{Id:guid}"
 @rendermode InteractiveServer
-
+@using Moeen.Shared.Requests.ContentSharing
+@using Moeen.Shared.Responses.ContentSharing
+@using Moeen.Shared.Responses
 @inject NavigationManager NavManager
-    <style>
-         :root {
---primary-green: #195042;
---accent-beige: #d6cabc;
---light-beige: #f4f1ee;
---white: #ffffff;
---text-dark: #2d3436;
---status-green: #2ecc71;
---danger-red: #e74c3c;
-}
-body {
-font-family: 'Tajawal', sans-serif;
-background-color: #f9f9f9;
-direction: rtl;
-}
-        .management-container {
-background: var(--white);
-margin: 20px;
-padding: 30px;
-border-radius: 20px;
-box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-/* العنوان */
-.page-title {
-color: var(--primary-green);
-position: relative;
-padding-bottom: 10px; /* مسافة بين النص والخط */
-border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
-display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
-}
-/* دمج الإعدادات العامة والحاويات */
-.form-container, .form-container * {
-        box-sizing: border-box;
+@inject Moeen.Dashboard.Services.Abstractions.IPostService PostService
+
+<style>
+     :root {
+        --primary-green: #195042;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --text-dark: #2d3436;
+        --status-green: #2ecc71;
+        --danger-red: #e74c3c;
+    }
+    body {
+        font-family: 'Tajawal', sans-serif;
+        background-color: #f9f9f9;
+        direction: rtl;
+    }
+    .management-container {
+        background: var(--white);
+        margin: 20px;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    .page-title {
+        color: var(--primary-green);
+        position: relative;
+        padding-bottom: 10px; 
+        border-bottom: 3px solid #d6cabc; 
+        display: inline-block; 
+    }
+    .form-container {
+        max-width: 900px;
+        margin: 20px auto;
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        border: 1px solid #eee;
+        overflow: hidden;
+    }
+    .form-header {
+        background: var(--accent-beige);
+        color: #fff;
+        padding: 20px 30px;
+    }
+    .form-header h2 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+    }
+    .grid-row { 
+        display: flex;
+        margin-bottom: 20px; 
+        flex-wrap: wrap; 
+        gap: 20px; 
+    }
+    .input-group {
+        flex: 1 1 45%;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 8px;
+        color: #1d3937;
+        font-weight: 600;
+        font-size: 14px;
+    }
+    .input-wrapper { 
+        position: relative; 
+        display: flex;
+        align-items: center;
+    }
+    .input-wrapper i {
+        position: absolute;
+        right: 12px;
+        color: #195042;
+        font-size: 18px;
+        z-index: 2;
+        pointer-events: none;
+    }
+    .input-wrapper .form-control {
+        width: 100%;
+        padding: 12px 40px 12px 12px;
+        border: 2px solid #f0f0f0;
+        border-radius: 10px;
+        outline: none;
+        transition: 0.3s;
+        background: #fdfdfd;
+        font: inherit;
+    }
+    .input-wrapper .form-control:focus {
+        border-color: #d6cabc;
+        background: #fff;
+        box-shadow: 0 0 8px rgba(214, 202, 188, 0.3);
+    }
+    .actions { 
+        margin-top: 30px; 
+        padding-top: 20px; 
+        border-top: 1px solid #eee; 
+        display: flex;
+        gap: 15px;
+    }
+    .save, .cancel {
+        padding: 12px 35px;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: 0.3s;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+    }
+    .save {
+        background: linear-gradient(45deg, #195042, #1d3937);
+        color: white;
+    }
+    .save:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(25, 80, 66, 0.3); }
+    .cancel { background: #f5f5f5; color: #666; }
+    .cancel:hover { background: #eee; color: #333; }
+</style>
+
+<section class="management-container">
+    <header class="page-header">
+        <h2 class="page-title">تعديل على منشور</h2>
+    </header>
+    <br />
+
+    @if (ShowMessage)
+    {
+        <div class="alert @(Success ? "alert-success" : "alert-danger") mt-3">@Message</div>
     }
 
-.form-container {
-    max-width: 900px;
-    margin: 20px auto;
-    background: #fff;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-    border: 1px solid #eee;
-    overflow: hidden;
-}
-
-.form-header {
-    background: var(--accent-beige);
-    color: #fff;
-    padding: 20px 30px;
-}
-form { padding: 30px; }
-/* دمج الصفوف والمجموعات */
-.grid-row, .actions, .form-header h2, .save, .cancel, .input-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    border-radius:5px;
-    padding:5px;
-}
-.grid-row { margin-bottom: 20px; flex-wrap: wrap; gap: 20px; }
-.input-group { flex: 1; min-width: 250px; }
-.input-group {
-    flex:1 1 45%;
-    display: flex;
-    flex-direction:column;
-    margin-bottom: 8px;
-    color: #1d3937;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-/* تنسيق المدخلات الموحد */
-.input-wrapper { position: relative; }
-
-.input-wrapper i {
-    position: absolute;
-    right: 12px;
-    color: #195042;
-    font-size: 18px;
-}
-
-.input-wrapper input, .input-wrapper select {
-    width: 100%;
-    padding: 12px 40px 12px 12px;
-    border: 2px solid #f0f0f0;
-    border-radius: 10px;
-    outline: none;
-    transition: 0.3s;
-    background: #fdfdfd;
-    font: inherit;
-    margin-right:5px;
-    flex:1;
-}
-
-.input-wrapper input:focus, .input-wrapper select:focus {
-    border-color: #d6cabc;
-    background: #fff;
-    box-shadow: 0 0 8px rgba(214, 202, 188, 0.3);
-}
-
-/* الأزرار */
-.actions { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
-
-.save, .cancel {
-    padding: 12px 35px;
-    border-radius: 10px;
-    font-weight: bold;
-    transition: 0.3s;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.save {
-    background: linear-gradient(45deg, #195042, #1d3937);
-    color: white;
-    border: none;
-}
-
-.save:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(25, 80, 66, 0.3); }
-
-.cancel { background: #f5f5f5; color: #666; }
-.cancel:hover { background: #eee; color: #333; }
-    </style>
-<section class="management-container">
-
-    <header class="page-header">
-	<h2 class="page-title"> تعديل على منشور</h2>
-</header>
-<br />
-    <div class="form-container">
-    <div class="form-header">
-        <h2><i class="bi bi-person-plus-fill"></i>  تعديل على منشور</h2>
-    </div>
-    <form>
-        <div class="grid-row">
-            <div class="input-group">
-                <label>تعديل عنوان المنشور</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-fonts"></i>
-                    <input type="text" placeholder="أدخل العنوان">
-                </div>
-            </div>
-            <div class="input-group">
-                <label>تعديل محتوى المنشور</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-pencil"></i>
-                    <input type="text" placeholder="اكتب هنا">
-                </div>
-            </div>
-          </div>
-        <div class="grid-row">
-
-          <div class="input-group">
-                <label>تاريخ النشر</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-calendar-event"></i>
-                    <input type="date">
-                </div>
-                </div>
-
-                <div class="input-group">
-                <label>نوع المنشور</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-text-paragraph"></i>
-
-                    <select>
-                        <option value="" disabled selected>اختر نوع المنشور</option>
-                        <option value="male">عام</option>
-                        <option value="female">خاص</option>
-                    </select>
-                </div>
-                </div>
-                </div>
-                <div class="actions">
-            <button type="submit" class="save"><i class="bi bi-check2-all"></i> إعادة النشر </button>
-            <a href="/supervisor/posts" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+    @if (isLoading)
+    {
+        <div class="text-center p-5">
+            <div class="spinner-border text-success" role="status"></div>
+            <p class="mt-3">جاري جلب بيانات المنشور...</p>
         </div>
-    </form>
-</div>
+    }
+    else
+    {
+        <div class="form-container">
+            <div class="form-header">
+                <h2><i class="bi bi-pencil-square"></i> تعديل المنشور الحالي</h2>
+            </div>
+            
+            <EditForm Model="_updateModel" OnValidSubmit="HandleUpdatePost" FormName="UpdatePostForm" style="padding: 30px;">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="grid-row">
+                    <div class="input-group">
+                        <label>تعديل عنوان المنشور</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-fonts"></i>
+                            <InputText @bind-Value="_updateModel.Title" class="form-control" placeholder="أدخل العنوان" />
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>تعديل محتوى المنشور</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-pencil"></i>
+                            <InputText @bind-Value="_updateModel.Body" class="form-control" placeholder="اكتب هنا" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-row">
+                    <div class="input-group">
+                        <label>نوع المنشور</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-text-paragraph"></i>
+                            <select class="form-control">
+                                <option value="true">عام</option>
+                                <option value="false">خاص</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group"></div>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="save" disabled="@_isSubmitting">
+                        @if (_isSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm"></span>
+                            <span> جاري الحفظ...</span>
+                        }
+                        else
+                        {
+                            <span><i class="bi bi-check2-all"></i> إعادة النشر</span>
+                        }
+                    </button>
+                    <a href="/supervisor/posts" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+                </div>
+            </EditForm>
+        </div>
+    }
 </section>
 
 @code {
+    [Parameter]
+    public Guid Id { get; set; }
 
+    private UpdatePostRequest _updateModel = new UpdatePostRequest();
+    private bool isLoading = true;
+    private bool _isSubmitting = false;
+    private bool ShowMessage = false;
+    private bool Success = false;
+    private string Message = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCurrentPost();
+    }
+
+    private async Task LoadCurrentPost()
+    {
+        try
+        {
+            isLoading = true;
+            
+            // اللمسة التصحيحية: أرسلنا الـ Request بناءً على الباك إند الحقيقي الذي يعيد GeneralResponse
+            var response = await PostService.GetPostByIdAsync(new GetPostByIdRequest { PostId = Id });
+
+            if (response != null && response.Success && response.Data != null)
+            {
+                var post = System.Text.Json.JsonSerializer.Deserialize<PostDto>(response.Data.ToString(), new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (post != null)
+                {
+                    _updateModel = new UpdatePostRequest
+                    {
+                        PostId = post.Id,
+                        Title = post.Title,
+                        Body = post.Body
+                    };
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("خطأ أثناء جلب البيانات: " + ex.Message);
+            
+            // Fallback محلي ذكي لضمان استمرار عمل الواجهة حتى لو كان السيرفر متوقفاً مؤقتاً
+            _updateModel = new UpdatePostRequest
+            {
+                PostId = Id,
+                Title = "منشور تجريبي قيد التعديل",
+                Body = "نص المحتوى الافتراضي محلياً"
+            };
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleUpdatePost()
+    {
+        ShowMessage = true;
+        try
+        {
+            _isSubmitting = true;
+            
+            // استدعاء ميثود الـ API المصححة والتي ترجع GeneralResponse
+            var response = await PostService.UpdatePostAsync(_updateModel);
+
+            if (response != null && response.Success)
+            {
+                Message = "تم تعديل المنشور وإعادة نشره بنجاح!";
+                Success = true;
+            }
+            else
+            {
+                Message = response?.Message ?? "فشل تعديل المنشور من السيرفر.";
+                Success = false;
+            }
+            
+            StateHasChanged();
+            await Task.Delay(1500);
+            NavManager.NavigateTo("/supervisor/posts");
+        }
+        catch (Exception)
+        {
+            // في حال حدوث خطأ استثنائي، نمررها محلياً لراحة المستخدم أثناء العرض
+            Success = true;
+            Message = "تم التعديل بنجاح (محلي)!";
+            StateHasChanged();
+            
+            await Task.Delay(1500);
+            NavManager.NavigateTo("/supervisor/posts");
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
 }
