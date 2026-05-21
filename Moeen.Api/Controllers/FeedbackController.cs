@@ -65,5 +65,12 @@ namespace Moeen.Api.Controllers
         [HttpPut("suggestion/status")]
         public async Task<ActionResult<GeneralResponse>> UpdateSuggestionStatus([FromBody] UpdateSuggestionStatusRequest request)
             => Ok(await _feedbackService.UpdateSuggestionStatusAsync(request));
+
+        /// <summary>
+        /// DELETE: حذف شكوى أو اقتراح بشكل دائم.
+        /// </summary>
+        [HttpDelete("{complaintId:guid}")]
+        public async Task<ActionResult<GeneralResponse>> DeleteComplaint([FromRoute] Guid complaintId)
+            => Ok(await _feedbackService.DeleteComplaintAsync(complaintId));
     }
 }

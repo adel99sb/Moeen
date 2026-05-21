@@ -1,6 +1,7 @@
 ﻿using Moeen.Shared.Requests.Feedback;
 using Moeen.Shared.Responses;
 using Moeen.Shared.Requests;
+using System;
 
 namespace Moeen.Api.Core.Contracts.Application
 {
@@ -40,5 +41,10 @@ namespace Moeen.Api.Core.Contracts.Application
         /// تحديث حالة الاقتراح
         /// </summary>
         Task<GeneralResponse> UpdateSuggestionStatusAsync(UpdateSuggestionStatusRequest request);
+
+        /// <summary>
+        /// حذف شكوى أو اقتراح بشكل دائم
+        /// </summary>
+        Task<GeneralResponse> DeleteComplaintAsync(Guid complaintId);
     }
 }
