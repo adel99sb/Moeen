@@ -112,14 +112,14 @@ namespace Moeen.Api.Application.Services
         }
 
         // تحليل فعالية حلقة
-        public async Task<GeneralResponse> AnalyzeCircleEffectivenessAsync(AnalyzeCircleEffectivenessRequest request)
+        public async Task<GeneralResponse> AnalyzeHalqaEffectivenessAsync(AnalyzeHalqaEffectivenessRequest request)
         {
             try
             {
                 if (request == null || request.Id == Guid.Empty)
                     return GeneralResponse.BadRequest("Invalid circle id.");
 
-                var dto = await BuildCircleAnalyticsAsync(request.Id);
+                var dto = await BuildHalqaAnalyticsAsync(request.Id);
                 return GeneralResponse.Ok("Circle analytics calculated.", dto);
             }
             catch
@@ -129,19 +129,19 @@ namespace Moeen.Api.Application.Services
         }
 
         // تحليل مباشر لفعالية حلقة عبر المعرف
-        public async Task<GeneralResponse> AnalyzeCircleEffectivenessByIdAsync(Guid circleId)
+        public async Task<GeneralResponse> AnalyzeHalqaEffectivenessByIdAsync(Guid HalqaId)
         {
             try
             {
-                if (circleId == Guid.Empty)
-                    return GeneralResponse.BadRequest("Invalid circle id.");
+                if (HalqaId == Guid.Empty)
+                    return GeneralResponse.BadRequest("Invalid halqa id.");
 
-                var dto = await BuildCircleAnalyticsAsync(circleId);
-                return GeneralResponse.Ok("Circle analytics calculated.", dto);
+                var dto = await BuildHalqaAnalyticsAsync(HalqaId);
+                return GeneralResponse.Ok("Halqa analytics calculated.", dto);
             }
             catch
             {
-                return GeneralResponse.InternalError("Analyze circle by id failed.");
+                return GeneralResponse.InternalError("Analyze halqa by id failed.");
             }
         }
 
@@ -430,19 +430,19 @@ namespace Moeen.Api.Application.Services
             return result;
         }
 
-        private async Task<CircleAnalyticsDto> BuildCircleAnalyticsAsync(Guid circleId)
+        private async Task<HalqaAnalyticsDto> BuildHalqaAnalyticsAsync(Guid HalqaId)
         {
-            var cacheKey = $"analytics:circle:{circleId}";
-            if (_cache.TryGetValue(cacheKey, out CircleAnalyticsDto cachedCircle))
-                return cachedCircle;
+            var cacheKey = $"analytics:halqa:{HalqaId}";
+            if (_cache.TryGetValue(cacheKey, out HalqaAnalyticsDto cachedHalqa))
+                return cachedHalqa;
 
-            var circle = await _unitOfWork.Repository<Halqa>().GetByIdAsync(circleId);
-            if (circle is null)
+            var Halqa = await _unitOfWork.Repository<Halqa>().GetByIdAsync(HalqaId);
+            if (Halqa is null)
             {
-                return new CircleAnalyticsDto
+                return new HalqaAnalyticsDto
                 {
-                    CircleId = circleId,
-                    CircleName = "Unknown",
+                    HalqaId = HalqaId,
+                    HalqaName = "Unknown",
                     TopPerformers = new List<StudentPerformance>(),
                     StrugglingStudents = new List<StudentPerformance>()
                 };
@@ -450,10 +450,10 @@ namespace Moeen.Api.Application.Services
 
             var fromDate = DateTime.UtcNow.AddDays(-DefaultAnalyticsWindowDays);
 
-            var progressSpec = Spec.For<ProgressEntry>(p => p.HalqaId == circleId && p.Date >= fromDate);
+            var progressSpec = Spec.For<ProgressEntry>(p => p.HalqaId == HalqaId && p.Date >= fromDate);
             var progressEntries = (await _unitOfWork.Repository<ProgressEntry>().GetAllAsync(progressSpec)).ToList();
 
-            var sessionSpec = Spec.For<HalqaSession>(s => s.HalqaId == circleId && s.date >= fromDate);
+            var sessionSpec = Spec.For<HalqaSession>(s => s.HalqaId == HalqaId && s.date >= fromDate);
             var sessions = (await _unitOfWork.Repository<HalqaSession>().GetAllAsync(sessionSpec)).ToList();
             var sessionIds = sessions.Select(s => s.Id).ToHashSet();
 
@@ -474,7 +474,7 @@ namespace Moeen.Api.Application.Services
             var students = (await _unitOfWork.Repository<Student>().GetAllAsync(studentSpec))
                 .ToDictionary(s => s.Id, s => s);
 
-            var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync((Guid)circle.TeacherId);
+            var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync((Guid)Halqa.TeacherId);
 
             var avgAttendanceRate = (studentIds.Count == 0 || sessionIds.Count == 0)
                 ? 0.0
@@ -532,12 +532,12 @@ namespace Moeen.Api.Application.Services
                 ranked.Add((dto, rankScore));
             }
 
-            var result = new CircleAnalyticsDto
+            var result = new HalqaAnalyticsDto
             {
-                CircleId = circle.Id,
-                CircleName = circle.Name ?? string.Empty,
-                CircleType = circle.Type,
-                TeacherId = (Guid)circle.TeacherId,
+                HalqaId = Halqa.Id,
+                HalqaName = Halqa.Name ?? string.Empty,
+                HalqaType = Halqa.Type,
+                TeacherId = (Guid)Halqa.TeacherId,
                 TeacherName = teacher?.name ?? string.Empty,
                 StudentsCount = studentIds.Count,
                 ActiveStudentsCount = activeStudentsCount,
@@ -573,7 +573,7 @@ namespace Moeen.Api.Application.Services
                 PayloadJson = request.PayloadJson,
                 StudentId = request.StudentId,
                 TeacherId = request.TeacherId,
-                CircleId = request.CircleId,
+                HalqId = request.HalqaId,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -611,8 +611,8 @@ namespace Moeen.Api.Application.Services
             if (filter.TeacherId.HasValue)
                 query = query.Where(r => r.TeacherId == filter.TeacherId);
 
-            if (filter.CircleId.HasValue)
-                query = query.Where(r => r.CircleId == filter.CircleId);
+            if (filter.HalqId.HasValue)
+                query = query.Where(r => r.HalqId == filter.HalqId);
 
             if (filter.From.HasValue)
                 query = query.Where(r => r.CreatedAt >= filter.From.Value);
@@ -637,7 +637,7 @@ namespace Moeen.Api.Application.Services
                     Title = r.Title,
                     StudentId = r.StudentId,
                     TeacherId = r.TeacherId,
-                    CircleId = r.CircleId,
+                    HalqId = r.HalqId,
                     CreatedAt = r.CreatedAt
                 })
                 .ToList();

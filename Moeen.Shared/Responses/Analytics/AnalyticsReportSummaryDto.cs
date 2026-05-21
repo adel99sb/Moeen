@@ -10,7 +10,7 @@ namespace Moeen.Shared.Responses.Analytics
 
         public Guid? StudentId { get; set; }
         public Guid? TeacherId { get; set; }
-        public Guid? CircleId { get; set; }
+        public Guid? HalqId { get; set; }
 
         public DateTime CreatedAt { get; set; }
     }

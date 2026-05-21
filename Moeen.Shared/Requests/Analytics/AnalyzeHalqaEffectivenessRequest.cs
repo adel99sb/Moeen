@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.Analytics
 {
-    public class AnalyzeCircleEffectivenessRequest
+    public class AnalyzeHalqaEffectivenessRequest
     {
-        [Required(ErrorMessage = "Circle ID is required")]
+        [Required(ErrorMessage = "Halqa ID is required")]
         public Guid Id { get; set; }
     }
 }

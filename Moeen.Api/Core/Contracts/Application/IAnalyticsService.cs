@@ -22,7 +22,7 @@ namespace Moeen.Api.Core.Contracts.Application
         /// <summary>
         /// تحليل فعالية حلقة معينة
         /// </summary>
-        Task<GeneralResponse> AnalyzeCircleEffectivenessAsync(AnalyzeCircleEffectivenessRequest request);
+        Task<GeneralResponse> AnalyzeHalqaEffectivenessAsync(AnalyzeHalqaEffectivenessRequest request);
 
         /// <summary>
         /// تحليل مباشر لبيانات طالب عبر المعرف
@@ -37,7 +37,7 @@ namespace Moeen.Api.Core.Contracts.Application
         /// <summary>
         /// تحليل مباشر لفعالية حلقة عبر المعرف
         /// </summary>
-        Task<GeneralResponse> AnalyzeCircleEffectivenessByIdAsync(Guid circleId);
+        Task<GeneralResponse> AnalyzeHalqaEffectivenessByIdAsync(Guid HalqaId);
 
         /// <summary>
         /// حفظ تقرير تحليلي لاستخدامه لاحقاً

@@ -62,21 +62,21 @@ namespace Moeen.Api.Controllers
         /// <summary>
         /// POST (قديم/متوافق): تحليل فعالية حلقة عبر Body.
         /// </summary>
-        [HttpPost("circle")]
-        public async Task<IActionResult> AnalyzeCircle([FromBody] AnalyzeCircleEffectivenessRequest request)
+        [HttpPost("halqa")]
+        public async Task<IActionResult> AnalyzeHalqa([FromBody] AnalyzeHalqaEffectivenessRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var result = await _analyticsService.AnalyzeCircleEffectivenessAsync(request);
+            var result = await _analyticsService.AnalyzeHalqaEffectivenessAsync(request);
             return result.ToActionResult();
         }
 
         /// <summary>
         /// GET (جديد): تحليل مباشر لفعالية حلقة عبر المعرف.
         /// </summary>
-        [HttpGet("circle/{circleId:guid}")]
-        public async Task<IActionResult> AnalyzeCircleGet([FromRoute] Guid circleId)
+        [HttpGet("halqa/{halqaId:guid}")]
+        public async Task<IActionResult> AnalyzeCircleGet([FromRoute] Guid HalqaId)
         {
-            var result = await _analyticsService.AnalyzeCircleEffectivenessByIdAsync(circleId);
+            var result = await _analyticsService.AnalyzeHalqaEffectivenessByIdAsync(HalqaId);
             return result.ToActionResult();
         }
 

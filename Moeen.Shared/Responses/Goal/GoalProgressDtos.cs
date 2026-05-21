@@ -47,17 +47,17 @@ namespace Moeen.Shared.Responses.Goal
         public string? Notes { get; set; }
     }
 
-    public class CirclePerformanceOverviewDto
+    public class HalqaPerformanceOverviewDto
     {
-        public Guid? CircleId { get; set; }
+        public Guid? HalqaId { get; set; }
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
-        public List<CirclePerformancePointDto> Chart { get; set; } = new();
+        public List<HalqaPerformancePointDto> Chart { get; set; } = new();
         public List<StudentProgressRankDto> TopStudents { get; set; } = new();
         public List<StudentProgressRankDto> LaggingStudents { get; set; } = new();
     }
 
-    public class CirclePerformancePointDto
+    public class HalqaPerformancePointDto
     {
         public DateTime Date { get; set; }
         public int AttendanceCount { get; set; }

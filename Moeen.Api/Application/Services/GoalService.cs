@@ -264,7 +264,7 @@ namespace Moeen.Api.Application.Services
             return GeneralResponse.Ok("تم جلب السجل التفصيلي.", paged, pageNumber, pageSize, totalCount);
         }
 
-        public async Task<GeneralResponse> GetCirclePerformanceOverviewAsync(GetCirclePerformanceOverviewRequest request)
+        public async Task<GeneralResponse> GetHalqaPerformanceOverviewAsync(GetHalqaPerformanceOverviewRequest request)
         {
             var teacherId = _currentUserService.CurrentUserId;
             if (!teacherId.HasValue)
@@ -283,14 +283,14 @@ namespace Moeen.Api.Application.Services
                 .Include(a => a.HalqeSession)
                 .Where(a => a.HalqeSession.date >= fromDate && a.HalqeSession.date <= toDate);
 
-            if (request?.CircleId.HasValue == true && request.CircleId != Guid.Empty)
+            if (request?.HalqaId.HasValue == true && request.HalqaId != Guid.Empty)
             {
-                var circleId = request.CircleId.Value;
-                progressQuery = progressQuery.Where(p => p.HalqaId == circleId);
-                attendanceQuery = attendanceQuery.Where(a => a.HalqeSession.HalqaId == circleId);
+                var HalqaId = request.HalqaId.Value;
+                progressQuery = progressQuery.Where(p => p.HalqaId == HalqaId);
+                attendanceQuery = attendanceQuery.Where(a => a.HalqeSession.HalqaId == HalqaId);
 
                 var studentIds = await _context.Students
-                    .Where(s => s.SaturdayHalqeId == circleId)
+                    .Where(s => s.SaturdayHalqeId == HalqaId)
                     .Select(s => s.Id)
                     .ToListAsync();
 
@@ -334,9 +334,9 @@ namespace Moeen.Api.Application.Services
                 .OrderByDescending(r => r.Points)
                 .ToList();
 
-            var overview = new CirclePerformanceOverviewDto
+            var overview = new HalqaPerformanceOverviewDto
             {
-                CircleId = request?.CircleId,
+                HalqaId = request?.HalqaId,
                 FromDate = fromDate,
                 ToDate = toDate,
                 Chart = chart,
@@ -478,7 +478,7 @@ namespace Moeen.Api.Application.Services
             };
         }
 
-        private static List<CirclePerformancePointDto> BuildChart(
+        private static List<HalqaPerformancePointDto> BuildChart(
             List<ProgressEntry> progressEntries,
             List<Exam> exams,
             List<Attendance> attendances)
@@ -490,7 +490,7 @@ namespace Moeen.Api.Application.Services
                 .OrderBy(d => d)
                 .ToList();
 
-            return dates.Select(date => new CirclePerformancePointDto
+            return dates.Select(date => new HalqaPerformancePointDto
             {
                 Date = date,
                 MemorizationCount = progressEntries.Count(e => e.Date.Date == date && e.NextTarget > 0),

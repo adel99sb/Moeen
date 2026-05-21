@@ -10,6 +10,6 @@ namespace Moeen.Dashboard.Services.Abstractions
         Task<GeneralResponse> UpdateProgressRecordAsync(UpdateProgressRecordRequest request);
         Task<GeneralResponse> GetStudentProgressSummaryAsync(GetStudentProgressSummaryRequest request);
         Task<GeneralResponse> GetStudentProgressHistoryAsync(GetStudentProgressHistoryRequest request);
-        Task<GeneralResponse> GetCirclePerformanceOverviewAsync(GetCirclePerformanceOverviewRequest request);
+        Task<GeneralResponse> GetCirclePerformanceOverviewAsync(GetHalqaPerformanceOverviewRequest request);
     }
 }

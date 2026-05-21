@@ -35,7 +35,7 @@ namespace Moeen.Dashboard.Services.Implementations
             return await _apiClient.GetStudentProgressHistoryAsync(request);
         }
 
-        public async Task<GeneralResponse> GetCirclePerformanceOverviewAsync(GetCirclePerformanceOverviewRequest request)
+        public async Task<GeneralResponse> GetCirclePerformanceOverviewAsync(GetHalqaPerformanceOverviewRequest request)
         {
             return await _apiClient.GetCirclePerformanceOverviewAsync(request);
         }
