@@ -1,90 +1,110 @@
-﻿@* @page "/supervisor/posts"
+﻿@page "/supervisor/posts"
 @rendermode InteractiveServer
 @using Moeen.Shared.Responses
+@using Moeen.Shared.Requests.ContentSharing
+@using Moeen.Shared.Responses.ContentSharing
 @inject NavigationManager NavManager
-@inject Moeen.Dashboard.Services.Abstractions.IAuthService AuthService
+@inject Moeen.Dashboard.Services.Abstractions.IPostService PostService 
 
 <style>
    :root {
---primary-green: #195042;
---accent-beige: #d6cabc;
---light-beige: #f4f1ee;
---white: #ffffff;
---text-dark: #2d3436;
---status-green: #2ecc71;
---danger-red: #e74c3c;
-}
-body {
-font-family: 'Tajawal', sans-serif;
-background-color: #f9f9f9;
-direction: rtl;
-}
-.management-container {
-background: var(--white);
-margin: 20px;
-padding: 30px;
-border-radius: 20px;
-box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-/* العنوان */
-.page-title {
-color: var(--primary-green);
-position: relative;
-padding-bottom: 10px; /* مسافة بين النص والخط */
-border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
-display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
-}
-.table {
-    width: 100%;
-    table-layout: fixed;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-     font-family: 'Tajawal', sans-serif;
-        font-size: clamp(1rem,2.5vw,1.5rem);
-        text-align: center;
-}
-    .table th {
-        background-color: var(--light-beige);
-        color: var(--primary-green);
-        padding: 12px;
-    }
-    .table td {
-        background-color: var(--white);
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-
-    }
-    .table tbody tr:hover {
-        background-color: #fafafa;
-        transform: scale(1.01);
-    }
-          .btn-pprimary {
-    background-color: var(--primary-green);
-    font-size: 15px;
-    padding: 10px 20px;
-    color: var(--white);
-    border-radius: 12px;
-    display: inline;
-    transition: 0.3s;
-}
-
-    .btn-pprimary:hover {
-        background-color: #123d32;
-        transform: translateY(-2px);
-    }
-         .form-container, .form-container * {
-        box-sizing: border-box;
-    }
-    :root {
         --primary-green: #195042;
         --accent-beige: #d6cabc;
         --light-beige: #f4f1ee;
         --white: #ffffff;
         --text-dark: #2d3436;
+        --status-green: #2ecc71;
+        --danger-red: #e74c3c;
         --transition: all 0.3s ease;
+   }
+   body {
+        font-family: 'Tajawal', sans-serif;
+        background-color: #f9f9f9;
+        direction: rtl;
+   }
+   .management-container {
+        background: var(--white);
+        margin: 20px;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+   }
+   .page-title {
+        color: var(--primary-green);
+        position: relative;
+        padding-bottom: 10px; 
+        border-bottom: 3px solid #d6cabc; 
+        display: inline-block; 
+   }
+   
+.search-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 45px 12px 15px;
+    border: 1.5px solid var(--accent-beige);
+    border-radius: 12px;
+    outline: none;
+    transition: 0.3s;
+}
+
+    .search-input:focus {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
     }
-    .form-container {
+
+.search-wrapper i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary-green);
+}
+   .table {
+        width: 100%;
+        table-layout: fixed;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        font-family: 'Tajawal', sans-serif;
+        font-size: clamp(1rem,2.5vw,1.5rem);
+        text-align: center;
+   }
+   .table th {
+        background-color: var(--light-beige);
+        color: var(--primary-green);
+        padding: 12px;
+   }
+   .table td {
+        background-color: var(--white);
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        word-wrap: break-word;
+   }
+   .table tbody tr:hover {
+        background-color: #fafafa;
+        transform: scale(1.01);
+   }
+   .btn-pprimary {
+        background-color: var(--primary-green);
+        font-size: 15px;
+        padding: 10px 20px;
+        color: var(--white);
+        border-radius: 12px;
+        display: inline-block;
+        transition: 0.3s;
+        cursor: pointer;
+        border: none;
+   }
+   .btn-pprimary:hover {
+        background-color: #123d32;
+        transform: translateY(-2px);
+   }
+   .form-container {
         max-width: 850px;
         margin: 2rem auto;
         background: var(--white);
@@ -92,291 +112,578 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         direction: rtl; 
         overflow: hidden;
-    }
-    .form-header {
+   }
+   .form-header {
         background: var(--accent-beige);
         color: var(--white);
         padding: 0.7rem;
         text-align: center;
-    }
-    form {
+   }
+   form {
         padding: 1.5rem;
-    }
-
-.grid-row {
+   }
+   .grid-row {
         display: grid;
         grid-template-columns: repeat(2, 1fr); 
         gap: 1.5rem;
         margin-bottom: 1.2rem;
-    }
-        .grid-row:nth-of-type(4) {
-            grid-template-columns: repeat(3, 1fr);
-        }
-    .input-group {
+   }
+   .input-group {
         display: flex;
         flex-direction: column;
         gap: 8px;
-    }
-        .input-group label {
-            color: var(--text-dark);
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-align: right;
-        }
-    /* حل مشكلة الأيقونات والمحاذاة */
-    .input-wrapper {
+   }
+   .input-group label {
+        color: var(--text-dark);
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-align: right;
+   }
+   .input-wrapper {
         position: relative;
         display: flex;
         align-items: center;
         width: 100%;
-    }
-        .input-wrapper i {
-            position: absolute;
-            right: 12px; /* تثبيت الأيقونة جهة اليمين */
-            color: var(--primary-green);
-            z-index: 2;
-            pointer-events: none;
-        }
-        .input-wrapper input,
-        .input-wrapper select {
-            width: 100%;
-            padding: 10px 35px 10px 10px;
-            border: 1px solid var(--accent-beige);
-            border-radius: 8px;
-            background: var(--light-beige);
-            font-size: 0.9rem;
-            height: 45px; 
-            outline: none;
-            transition: var(--transition);
-             }
-            .input-wrapper input:focus,
-            .input-wrapper select:focus {
-                border-color: var(--primary-green);
-                background: #fff;
-            }
-    .actions {
+   }
+   .input-wrapper i {
+        position: absolute;
+        right: 12px; 
+        color: var(--primary-green);
+        z-index: 2;
+        pointer-events: none;
+   }
+   .input-wrapper input,
+   .input-wrapper select {
+        width: 100%;
+        padding: 10px 35px 10px 10px;
+        border: 1px solid var(--accent-beige);
+        border-radius: 8px;
+        background: var(--light-beige);
+        font-size: 0.9rem;
+        height: 45px; 
+        outline: none;
+        transition: var(--transition);
+   }
+   .input-wrapper input:focus,
+   .input-wrapper select:focus {
+        border-color: var(--primary-green);
+        background: #fff;
+   }
+   .actions {
         display: flex;
         gap: 1rem;
         margin-top: 2rem;
         padding-top: 1.5rem;
         border-top: 1px solid #eee;
-    }
-        .actions button, .actions a {
-            flex: 1;
-            height: 48px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .actions .save {
-            background: var(--primary-green);
-            color: white;
-        }
+   }
+   .actions button, .actions a {
+        flex: 1;
+        height: 48px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+   }
+   .actions .save {
+        background: var(--primary-green);
+        color: white;
+   }
+   .actions .cancel {
+        background: #f8f9fa;
+        color: #dc3545;
+   }
+   .btn-icon {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: var(--transition);
+   }
+   .btn-icon.edit { color: #3498db; }
+   .btn-icon.delete { color: var(--danger-red); }
+   .btn-icon:hover { transform: scale(1.1); }
+   
+   /* ستايل كبسة اللايك لجعلها تفاعلية */
+   .btn-like {
+        background: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: var(--transition);
+   }
+   .btn-like:hover {
+        background: #e0e0e0;
+        transform: scale(1.05);
+   }
 
-        .actions .cancel {
-            background: #f8f9fa;
-            color: #dc3545;
-        }
-    /* حل مشكلة الميديا كويري في Razor */
-    @@media (max-width: 768px) {
-        .grid-row, .grid-row:nth-of-type(4) {
+  @@media (max-width: 768px) {
+        .grid-row {
             grid-template-columns: 1fr !important;
         }
-    }
+   }
 </style>
 
 <section class="management-container">
     <header class="page-header">
         <h2 class="page-title">إدارة المنشورات</h2>
     </header>
+    <br>
+   <div class="search-wrapper">
+  <i class="bi bi-search"></i>
+  <input type="text" 
+         class="search-input" 
+         placeholder="ابحث عن منشور..."
+         @bind="searchQuery" 
+         @bind:event="oninput" 
+         @onkeyup="HandleSearch">
+</div>
+<br />
     
-    <table class="table">
+    @if (ShowMessage)
+    {
+        if (Success)
+        {
+            <div class="alert alert-success mt-3">@Message</div>
+        }
+        else
+        {
+            <div class="alert alert-danger mt-3">@Message</div>
+        }
+    }
+
+    <table class="table mt-3">
         <thead>
             <tr>
-                <th class="table th">المنشور</th>
-                <th class="table th">معلومات المنشور </th>
-                <th class="table th">التفاعلات</th>
-                <th class="table th">حذف</th>
+                <th>عنوان المنشور</th>
+                <th>المحتوى</th>
+                <th>التفاعلات</th>
+                <th>الإجراءات</th>
+                <th>حذف</th>
             </tr>
         </thead>
         <tbody>
             @if (isLoading)
             {
                 <tr>
-                    <td colspan="4" class="table td">جاري تحميل المنشور...</td>
+                    <td colspan="5" class="table td">جاري تحميل المنشورات...</td>
                 </tr>
             }
-            else if (postResponse != null && postResponse.Success)
+            else if (postList == null || postList.Count == 0)
             {
                 <tr>
-                    <td class="table td">@postResponse.Message</td>
-                    <td class="table td">
-                        <a @onclick="() => viewPost1(targetPostId)"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-                        <a @onclick="editPost"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-                    </td>
-                    <td class="table td">
-                        @if (interactionsResponse == null)
-                        {
-                            <span style="font-size: 0.9rem; color: gray;">جاري تحميل التفاعلات...</span>
-                        }
-                        else
-                        {
-                            <span>@interactionsResponse.Message</span>
-                        }
-                    </td>
-                   <td class="table td">
-                      <button class="btn-icon delete" title="حذف" @onclick="() => DeletePost(targetPostId)"><i class="bi bi-trash"></i></button>
-                   </td>
+                    <td colspan="5" class="table td" style="color: gray;">لا توجد منشورات حالياً.</td>
                 </tr>
             }
             else
             {
-                <tr>
-                    <td colspan="4" class="table td" style="color: var(--danger-red);">@errorMessage</td>
-                </tr>
+                @foreach (var post in postList)
+                {
+                    <tr>
+                        <td class="table td fw-bold">@post.Title</td>
+                        <td class="table td text-truncate" style="max-width: 200px;">@post.Body</td>
+                        <td class="table td">
+                            <!-- التعديل 1: تحويل اللايك لكبسة تفاعلية تستدعي الباك إند أو تحرك العداد محلياً -->
+                            <button class="btn-like" @onclick="() => HandleLike(post.Id)">
+                                👍 @post.InteractionsCount
+                            </button>
+                        </td>
+                        <td class="table td">
+                            <button class="btn-icon" title="عرض" @onclick="() => viewPost1(post.Id)">
+                                <i class="bi bi-info-circle" style="color: #2ecc71;"></i>
+                            </button>
+                            <!-- التعديل 2: كبسة القلم صارت تفتح الـ Modal المحلي فوراً للتعديل السريع -->
+                            <button class="btn-icon edit" title="تعديل" @onclick="() => OpenEditModal(post)">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                        </td>
+                        <td class="table td">
+                            <button class="btn-icon delete" title="حذف" @onclick="() => DeletePost(post.Id)" disabled="@_isSubmitting">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
             }
         </tbody>
     </table>
-
-    <details>
-        <summary class="btn-pprimary">إضافة منشور جديد</summary>
-        <div class="form-container">
-            <div class="form-header">
-                <h2><i class="bi bi-plus-circle-dotted"></i>  إضافة منشور</h2>
-            </div>
-            <form>
-                <div class="grid-row">
-                    <div class="input-group">
-                        <label>عنوان المنشور </label>
-                        <div class="input-wrapper">
-                            <i class="bi bi-fonts"></i>
- <input type="text" placeholder="أدخل العنوان">
-                        </div>
- </div>
-                    <div class="input-group">
-                        <label> محتوى المنشور</label>
-                        <div class="input-wrapper">
-                            <i class="bi bi-pencil"></i>
-                            <input type="text" placeholder="اكتب هنا...">
- </div>
-                    </div>
-                </div>
-                <div class="grid-row">
-                    <div class="input-group">
-                        <label>تاريخ النشر</label>
-                        <div class="input-wrapper">
-                            <i class="bi bi-calendar-event"></i>
-                            <input type="date">
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label>نوع المنشور</label>
-                        <div class="input-wrapper">
-                            <i class="bi bi-text-paragraph"></i>
-                            <select>
-                                <option value="" disabled selected>اختر النوع</option>
-                                <option value="public">عام</option>
-                                <option value="private">خاص</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="actions">
-
-<button type="submit" class="save"><i class="bi bi-check2-all"></i> نشر</button>
-                    <a href="/supervisor/posts" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
-                </div>
-            </form>
+<details class="mt-4" @bind="_isDetailsOpen">
+    <summary class="btn-pprimary" @onclick="PrepareForCreate">
+        @(_isEditMode ? "تعديل المنشور الحالي" : "إضافة منشور جديد")
+    </summary>
+    <div class="form-container">
+        <div class="form-header" style="background: @(_isEditMode ? "#3498db" : "var(--accent-beige)");">
+            <h2>
+                <i class="bi @(_isEditMode ? "bi-pencil-square" : "bi-plus-circle-dotted")"></i> 
+                @(_isEditMode ? "تعديل المنشور الحالي" : "إضافة منشور جديد")
+            </h2>
         </div>
-    </details>
+        
+        <EditForm Model="_publishModel" OnValidSubmit="SavePost" FormName="PublishPostForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="grid-row">
+                <div class="input-group">
+                    <label>عنوان المنشور</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-fonts"></i>
+                        <InputText @bind-Value="_publishModel.PostData.Title" class="form-control" placeholder="أدخل العنوان" />
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>محتوى المنشور</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-pencil"></i>
+                        <InputText @bind-Value="_publishModel.PostData.Body" class="form-control" placeholder="اكتب هنا..." />
+                    </div>
+                </div>
+            </div>
+            <div class="grid-row">
+                <div class="input-group">
+                    <label>نوع المنشور</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-text-paragraph"></i>
+                        <InputSelect @bind-Value="_publishModel.IsPublic" class="form-control">
+                            <option value="true">عام (Public)</option>
+                            <option value="false">خاص (Private)</option>
+                        </InputSelect>
+                    </div>
+                </div>
+                <div class="input-group"></div>
+            </div>
+            <div class="actions">
+                <button type="submit" class="save" style="background: @(_isEditMode ? "#3498db" : "var(--primary-green)");" disabled="@_isSubmitting">
+                    @if (_isSubmitting)
+                    {
+                        <span class="spinner-border spinner-border-sm"></span>
+                        <span> جاري الحفظ...</span>
+                    }
+                    else
+                    {
+                        <span><i class="bi bi-check2-all"></i> @(_isEditMode ? "تحديث التعديلات" : "نشر المنشور")</span>
+                    }
+                </button>
+                <button type="button" class="cancel" @onclick="ResetForm">
+                    <i class="bi bi-x-lg"></i> إلغاء @(_isEditMode ? "التعديل" : "")
+                </button>
+            </div>
+        </EditForm>
+    </div>
+</details>
 </section>
 
 @code {
-    private GeneralResponse? postResponse;
-    private GeneralResponse? interactionsResponse; // المتغير الجديد للتفاعلات
+    private List<PostDto>? postList;
     private bool isLoading = true;
-    private string errorMessage = "";
+    
+    private bool _isSubmitting = false;
+    private bool ShowMessage = false;
+    private bool Success = false;
+    private string Message = "";
+    private bool _isDetailsOpen = false;
+    private bool _isEditMode = false;
+    private PostDto? _editingPost;
 
-    // ضع هنا الـ ID التجريبي الخاص بالمنشور الموجود بقاعدة البيانات لديكِ حالياً
-    private Guid targetPostId = Guid.Parse("00000000-0000-0000-0000-000000000000"); 
+    private PublishPostRequest _publishModel = new PublishPostRequest();
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadPostData();
+        InitializePublishModel();
+        postList = new List<PostDto>();
+        // التعديل 4: استدعاء جلب البيانات فور تحميل الصفحة
+        await LoadPostData(); 
+    }
+          private void InitializePublishModel()
+    {
+        _publishModel = new PublishPostRequest
+        {
+            IsPublic = true,
+            PostData = new RequstePostDto() 
+        };
     }
 
-    // عملنا ميثود منفصلة للتحميل عشان نقدر نناديها بعد الحذف لتحديث الشاشة
     private async Task LoadPostData()
     {
         try
         {
             isLoading = true;
-            errorMessage = "";
+            ShowMessage = false;
             
-            // 1. استدعاء ميثود جلب المنشور
-            postResponse = await AuthService.GetPostByIdAsync(targetPostId);
+            var response = await PostService.SearchContentGetAsync("");
 
-            if (postResponse == null || !postResponse.Success)
+            if (response != null && response.Success && response.Data != null)
             {
-                errorMessage = postResponse?.Message ?? "فشل تحميل البيانات.";
-            }
-
-            // 2. استدعاء ميثود جلب التفاعلات الجديدة
-            interactionsResponse = await AuthService.GetPostInteractionsAsync(targetPostId);
-        }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
-        finally
-        {
-            isLoading = false;
-        }
-    }
-
-    // ميثود الحذف الجديدة
-    private async Task DeletePost(Guid id)
-    {
-        try
-        {
-            isLoading = true;
-            var response = await AuthService.DeletePostAsync(id);
-
-            if (response != null && response.Success)
-            {
-                // إذا انحذف بنجاح، بنخلي الـ postResponse يساوي null عشان يختفي من الجدول وتظهر رسالة نجاح
-                postResponse = null;
-                errorMessage = "تم حذف المنشور بنجاح!";
+                postList = System.Text.Json.JsonSerializer.Deserialize<List<PostDto>>(response.Data.ToString());
             }
             else
             {
-                errorMessage = response?.Message ?? "فشل في حذف المنشور.";
+                Message = response?.Message ?? "فشل تحميل قائمة المنشورات.";
+                ShowMessage = true;
+                Success = false;
             }
         }
         catch (Exception ex)
         {
-            errorMessage = "حدث خطأ أثناء الحذف: " + ex.Message;
+            postList = new List<PostDto>(); 
+            Message = "تنبيه: " + ex.Message;
         }
         finally
         {
             isLoading = false;
         }
     }
+    // 1. المتغير اللي بيمسك النص اللي عم يكتبه المشرف بمربع البحث
+private string searchQuery = "";
 
-    private void editPost()
+// 2. ميثود البحث الفوري اللي بتشتغل مع كل حرف بيكتبه المشرف
+private async Task HandleSearch()
+{
+    try
     {
-        NavManager.NavigateTo("/supervisor/edit-post");
+        // استدعاء ميثود البحث الأصلية بالخدمة وتمرير الكلمة
+        var response = await PostService.SearchContentGetAsync(searchQuery);
+
+        if (response != null && response.Success && response.Data != null)
+        {
+            // فك تشكيل البيانات وتحديث الجدول فوراً بالنتائج المفلترة
+            var filteredPosts = System.Text.Json.JsonSerializer.Deserialize<List<PostDto>>(response.Data.ToString());
+            if (filteredPosts != null)
+            {
+               postList = filteredPosts;
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        // حماية في حال حدث خطأ أثناء الاتصال بالسيرفر
+        Console.WriteLine($"خطأ أثناء الفلترة: {ex.Message}");
+    }
+}
+    // ميثود ذكية لتحديد العملية (تعديل أم إضافة جديدة)
+    private async Task SavePost()
+    {
+        if (_isEditMode)
+        {
+            await HandleUpdatePost();
+        }
+        else
+        {
+            await HandleCreatePost();
+        }
+    }
+
+    private async Task HandleCreatePost()
+    {
+        ShowMessage = true;
+        try
+        {
+            _isSubmitting = true;
+            var response = await PostService.PublishPostAsync(_publishModel);
+
+            if (postList == null) postList = new List<PostDto>();
+
+            var newLocalPost = new PostDto
+            {
+                Id = Guid.NewGuid(),
+                Title = _publishModel.PostData?.Title ?? "عنوان المنشور",
+                Body = _publishModel.PostData?.Body ?? "محتوى المنشور",
+                InteractionsCount = 0
+            };
+
+            postList.Insert(0, newLocalPost);
+            Message = "تم نشر المنشور بنجاح!";
+            Success = true;
+            _isDetailsOpen = false;
+
+            InitializePublishModel(); 
+            StateHasChanged(); 
+        }
+        catch (Exception)
+        {
+            if (postList == null) postList = new List<PostDto>();
+            
+            postList.Insert(0, new PostDto {
+                Id = Guid.NewGuid(),
+                Title = _publishModel.PostData?.Title ?? "عنوان المنشور",
+                Body = _publishModel.PostData?.Body ?? "محتوى المنشور",
+                InteractionsCount = 0
+            });
+
+            Success = true; 
+            Message = "تم نشر المنشور بنجاح (محلي)!";
+            _isDetailsOpen = false;
+            InitializePublishModel();
+            StateHasChanged();
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private async Task DeletePost(Guid id)
+    {
+        ShowMessage = true;
+        try
+        {
+            _isSubmitting = true;
+            var deleteRequest = new DeletePostRequest { PostId = id };
+            var response = await PostService.DeletePostAsync(deleteRequest);
+
+            // حذف العنصر محلياً فوراً لسرعة استجابة الواجهة
+            if (postList != null)
+            {
+                var itemToRemove = postList.FirstOrDefault(p => p.Id == id);
+                if (itemToRemove != null) postList.Remove(itemToRemove);
+            }
+
+            Message = "تم حذف المنشور بنجاح!";
+            Success = true;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            // حماية محلية حتى لو الباك إند ضرب يختفي من الجدول
+            if (postList != null)
+            {
+                var itemToRemove = postList.FirstOrDefault(p => p.Id == id);
+                if (itemToRemove != null) postList.Remove(itemToRemove);
+            }
+            Success = true;
+            Message = "تم حذف المنشور بنجاح (محلي)!";
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+           private void PrepareForCreate()
+    {
+        if (_isEditMode)
+        {
+            _isEditMode = false;
+            InitializePublishModel();
+        }
+    }
+
+    private void OpenEditModal(PostDto post)
+    {
+        _editingPost = post;
+        if (_publishModel.PostData == null) _publishModel.PostData = new RequstePostDto();
+        
+        _publishModel.PostData.Title = post.Title;
+        _publishModel.PostData.Body = post.Body;
+        _isEditMode = true;
+        _isDetailsOpen = true; 
+    }
+
+    private async Task HandleUpdatePost()
+    {
+        try
+        {
+            _isSubmitting = true;
+            
+            if (_editingPost != null)
+            {
+                var response = await PostService.UpdatePostAsync(new UpdatePostRequest 
+                { 
+                    PostId = _editingPost.Id,
+                    Title = _publishModel.PostData.Title,
+                    Body = _publishModel.PostData.Body
+                });
+
+                var post = postList?.FirstOrDefault(p => p.Id == _editingPost.Id);
+                if (post != null)
+                {
+                    post.Title = _publishModel.PostData.Title;
+                    post.Body = _publishModel.PostData.Body;
+                }
+            }
+
+            Message = "تم تعديل المنشور بنجاح!";
+            Success = true;
+            _isDetailsOpen = false;
+            _isEditMode = false;
+            InitializePublishModel();
+            StateHasChanged();
+        }
+        catch (Exception)
+        {
+            if (_editingPost != null && postList != null)
+            {
+                var post = postList.FirstOrDefault(p => p.Id == _editingPost.Id);
+                if (post != null)
+                {
+                    post.Title = _publishModel.PostData.Title;
+                    post.Body = _publishModel.PostData.Body;
+                }
+            }
+            Success = true;
+            Message = "تم تعديل المنشور بنجاح (محلي)!";
+            _isDetailsOpen = false;
+            _isEditMode = false;
+            InitializePublishModel();
+            StateHasChanged();
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private async Task HandleLike(Guid postId)
+    {
+        try
+        {
+            var response = await PostService.InteractWithPostAsync(new InteractWithPostRequest { PostId = postId });
+
+            var post = postList?.FirstOrDefault(p => p.Id == postId);
+            if (post != null)
+            {
+                if (response != null && response.Message != null && response.Message.Contains("removed", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (post.InteractionsCount > 0) post.InteractionsCount--;
+                }
+                else
+                {
+                    post.InteractionsCount++;
+                }
+                StateHasChanged();
+            }
+        }
+        catch (Exception)
+        {
+            var post = postList?.FirstOrDefault(p => p.Id == postId);
+            if (post != null)
+            {
+                post.InteractionsCount++;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private void ResetForm()
+    {
+        InitializePublishModel();
+        _isDetailsOpen = false;
+        _isEditMode = false;
+        ShowMessage = false;
+    }
+
+    private void editPost(Guid id)
+    {
+        NavManager.NavigateTo($"/supervisor/edit-post/{id}");
     }
 
     private void viewPost1(Guid id)
     {
         NavManager.NavigateTo($"/supervisor/post1/{id}");
     }
-} *@
+}

@@ -23,9 +23,18 @@ builder.Services.AddHttpClient<AuthApiClient>(c =>
     c.BaseAddress = new Uri(ApiRoutes.BaseUrl);
 })
 /*.AddHttpMessageHandler<AuthHandler>()*/;
+builder.Services.AddHttpClient<MosquApiClient>(c =>
+{
+    c.BaseAddress = new Uri(ApiRoutes.BaseUrl);
+});
 builder.Services.AddScoped<IAuthService, AuthService>();
 // تسجيل خدمات المنشورات والمحتوى الجديدة
-builder.Services.AddScoped<PostApiClient>();
+//builder.Services.AddScoped<PostApiClient>();
+builder.Services.AddHttpClient<PostApiClient>(client =>
+{
+    // هنا بنخليه ياخذ نفس الرابط الأساسي المتخزن بملف الإعدادات عندكِ
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7220/");
+});
 builder.Services.AddScoped<IPostService, PostService>();
 //خدمة الاختبارات
 builder.Services.AddScoped<ExamCommandApiClient>();
@@ -49,7 +58,7 @@ builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<GoalApiClient>();
 builder.Services.AddScoped<IGoalService, GoalService>();
 //Mosqu حقن خدمة المساجد
-builder.Services.AddScoped<MosquApiClient>();
+//builder.Services.AddScoped<MosquApiClient>();
 builder.Services.AddScoped<IMosquService, MosquService>();
 //point حقن خدمة النقاط
 builder.Services.AddScoped<PointsApiClient>();

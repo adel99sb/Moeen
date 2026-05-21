@@ -105,7 +105,7 @@
         //mosqu
         public static string AddMosquAsyncRoute { get; } = "api/Mosqu/add";
         public static string GetAllMosqusAsyncRoute { get; } = "api/Mosqu/all";
-        public static string GetMosqueByIdAsyncRoute { get; } = "api/Mosqu/{mosqueId}";
+        public static string GetMosqueByIdAsyncRoute { get; } = "api/Mosqu/ById";
         public static string GetCirclesByMosqueAsyncRoute { get; } = "api/Mosqu/circles";
         public static string GetTeachersByMosqueAsyncRoute { get; } = "api/Mosqu/teachers";
         public static string GetMosqueStatisticsAsyncRoute { get; } = "api/Mosqu/statistics";
