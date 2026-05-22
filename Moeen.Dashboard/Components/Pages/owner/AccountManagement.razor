@@ -1,4 +1,10 @@
 ﻿@page "/owner/AccountManagement"
+@using Moeen.Shared.Requests.Enrollment
+@using Moeen.Shared.Responses.Enrollment
+@using Moeen.Dashboard.Infrastructure.Http.Clients
+@inject EnrollmentApiClient ApiClient
+@inject NavigationManager NavManager
+@using System.Text.Json
 <style>
     /*AccountManagement style*/
     :root {
@@ -417,45 +423,74 @@
             <i class="bi bi-plus-lg"></i> إضافة مشرف
         </a>
     </div>
-
     <div class="table-responsive">
         <table class="data-table">
             <thead>
                 <tr>
                     <th>الاسم</th>
                     <th>الجامع</th>
-                    <th>الفوج</th>
                     <th>الحالة</th>
                     <th class="text-center">الإجراءات</th>
                 </tr>
             </thead>
             <tbody>
-                
-                <tr>
-                    <td>أحمد العلي</td>
-                    <td>جامع التوبة</td>
-                    <td>الفوج الأول</td>
-                    <td><span class="status-badge active">نشط</span></td>
-                    <td class="actions-cell">
-                        <a href="/owner/Form"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>محمد العلي</td>
-                    <td>جامع ابي حنيفة</td>
-                    <td> الفوج الأول</td>
-                    <td><span class="status-badge active">نشط</span></td>
-                    <td class="actions-cell">
-                        <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button>
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
+                @if (supervisors == null)
+                {
+                    <tr><td colspan="4">جاري التحميل...</td></tr>
+                }
+                else
+                {
+                    @foreach (var sup in supervisors)
+                    {
+                        <tr>
+                            <td>@sup.Name</td>
+                            <td>@sup.MosqueName</td>
+                            <td>
+                                <span class="status-badge @(sup.Status == 0 ? "active" : "inactive")">
+                                    @(sup.Status == 0 ? "نشط" : "غير نشط")
+                                </span>
+                            </td>
+                            <td class="actions-cell">
+                                <button class="btn-icon delete" title="حذف" @onclick="() => Delete(sup.Id)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
             </tbody>
         </table>
     </div>
 </section>
 @code {
+    private List<MemberDto> supervisors = new(); // نستخدم MemberDto لأن هذا ما يرجعه النظام عادةً
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        var request = new GetAllSupervisorsRequest { PageNumber = 1, PageSize = 20 };
+        var response = await ApiClient.GetAllSupervisorsAsync(request);
+
+        if (response.Success && response.Data != null)
+        {
+            // فك الـ Data من الـ GeneralResponse
+            var json = response.Data.ToString();
+            supervisors = JsonSerializer.Deserialize<List<MemberDto>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+    }
+
+    private async Task Delete(Guid id)
+    {
+        var request = new CancelMembershipRequest { MemberId = id.ToString(), Reason = "حذف من الإدارة" };
+        var response = await ApiClient.CancelMembershipAsync(request);
+        
+        if (response.Success)
+        {
+            await LoadData(); // تحديث الجدول بعد الحذف
+        }
+    }
 }

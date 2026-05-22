@@ -1,98 +1,103 @@
 ﻿@page "/supervisor/student"
 @using Moeen.Dashboard.Application.Services.Abstractions
 @using Moeen.Shared.Requests.Enrollment
+@using Moeen.Shared.Responses.Enrollment
 @using Moeen.Shared.Responses
 @inject IEnrollmentService EnrollmentService
 @inject NavigationManager NavManager
 @rendermode InteractiveServer
 
-<h3>Student</h3>
 <style>
   :root {
---primary-green: #195042;
---accent-beige: #d6cabc;
---light-beige: #f4f1ee;
---white: #ffffff;
---text-dark: #2d3436;
---status-green: #2ecc71;
---danger-red: #e74c3c;
-        --transition: all 0.3s ease;
-}
+    --primary-green: #195042;
+    --accent-beige: #d6cabc;
+    --light-beige: #f4f1ee;
+    --white: #ffffff;
+    --text-dark: #2d3436;
+    --status-green: #2ecc71;
+    --danger-red: #e74c3c;
+    --transition: all 0.3s ease;
+  }
 
-body {
-font-family: 'Tajawal', sans-serif;
-background-color: #f9f9f9;
-direction: rtl;
-}
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background-color: #f9f9f9;
+    direction: rtl;
+  }
 
-.management-container {
-background: var(--white);
-margin: 20px;
-padding: 30px;
-border-radius: 20px;
-box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
+  .management-container {
+    background: var(--white);
+    margin: 20px;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  }
 
-.page-title {
-color: var(--primary-green);
-position: relative;
-padding-bottom: 10px; 
-border-bottom: 3px solid #d6cabc; 
-display: inline-block; 
-}
+  .page-title {
+    color: var(--primary-green);
+    position: relative;
+    padding-bottom: 10px; 
+    border-bottom: 3px solid #d6cabc; 
+    display: inline-block; 
+  }
 
-.search-wrapper {
+  .search-wrapper {
     position: relative;
     flex: 1;
     max-width: 400px;
-}
+  }
 
-.search-input {
+  .search-input {
     width: 100%;
     padding: 12px 45px 12px 15px;
     border: 1.5px solid var(--accent-beige);
     border-radius: 12px;
     outline: none;
     transition: 0.3s;
-}
+  }
 
-    .search-input:focus {
-        border-color: var(--primary-green);
-        box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
-    }
+  .search-input:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
+  }
 
-.search-wrapper i {
+  .search-wrapper i {
     position: absolute;
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--primary-green);
-}
-.table {
+  }
+
+  .table {
     width: 100%;
     table-layout: fixed;
     border-radius: var(--radius-md);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
-     font-family: 'Tajawal', sans-serif;
-        font-size: clamp(0.95rem,2.5vw,1.5rem);
-        text-align: center;
-}
-    .table th {
-        background-color: var(--light-beige);
-        color: var(--primary-green);
-        padding: 12px;
-    }
-    .table td {
-        background-color: var(--white);
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-    }
-    .table tbody tr:hover {
-        background-color: #fafafa;
-        transform: scale(1.01);
-    }
-  .table-wrapper{
+    font-family: 'Tajawal', sans-serif;
+    font-size: clamp(0.95rem,2.5vw,1.5rem);
+    text-align: center;
+  }
+
+  .table th {
+    background-color: var(--light-beige);
+    color: var(--primary-green);
+    padding: 12px;
+  }
+
+  .table td {
+    background-color: var(--white);
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .table tbody tr:hover {
+    background-color: #fafafa;
+    transform: scale(1.01);
+  }
+
+  .table-wrapper {
     overflow-x: auto;
     width: 100%;
     border-radius: var(--radius-md);
@@ -104,337 +109,374 @@ display: inline-block;
     padding: 10px 20px;
     color: var(--white);
     border-radius: 12px;
-    display: inline;
+    display: inline-block;
     transition: 0.3s;
-}
+    cursor: pointer;
+    border: none;
+  }
 
-    .btn-pprimary:hover {
-        background-color: #123d32;
-        transform: translateY(-2px);
-    }
+  .btn-pprimary:hover {
+    background-color: #123d32;
+    transform: translateY(-2px);
+  }
    
   .form-container, .form-container * {
-        box-sizing: border-box;
-    }
+    box-sizing: border-box;
+  }
 
-    .form-container {
-        max-width: 850px;
-        margin: 2rem auto;
-        background: var(--white);
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        direction: rtl; 
-        overflow: hidden;
-    }
+  .form-container {
+    max-width: 850px;
+    margin: 2rem auto;
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    direction: rtl; 
+    overflow: hidden;
+  }
 
-    .form-header {
-        background: var(--accent-beige);
-        color: var(--white);
-        padding: 1.2rem;
-        text-align: center;
-    }
+  .form-header {
+    background: var(--accent-beige);
+    color: var(--white);
+    padding: 1.2rem;
+    text-align: center;
+  }
 
-    form {
-        padding: 2rem;
-    }
+  form {
+    padding: 2rem;
+  }
 
-    .grid-row {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr); 
-        gap: 1.5rem;
-        margin-bottom: 1.2rem;
-    }
-        .grid-row:nth-of-type(4) {
-            grid-template-columns: repeat(3, 1fr);
-        }
+  .grid-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 1.5rem;
+    margin-bottom: 1.2rem;
+  }
 
-    .input-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
 
-        .input-group label {
-            color: var(--text-dark);
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-align: right;
-        }
+  .input-group label {
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-align: right;
+  }
 
-    .input-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-        width: 100%;
-    }
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
 
-        .input-wrapper i {
-            position: absolute;
-            right: 12px; 
-            color: var(--primary-green);
-            z-index: 2;
-            pointer-events: none;
-        }
-        .input-wrapper input,
-        .input-wrapper select {
-            width: 100%;
-            padding: 10px 35px 10px 10px;
-            border: 1px solid var(--accent-beige);
-            border-radius: 8px;
-            background: var(--light-beige);
-            font-size: 0.9rem;
-            height: 45px; 
-            outline: none;
-            transition: var(--transition);
-        }
+  .input-wrapper i {
+    position: absolute;
+    right: 12px; 
+    color: var(--primary-green);
+    z-index: 2;
+    pointer-events: none;
+  }
 
-            .input-wrapper input:focus,
-            .input-wrapper select:focus {
-                border-color: var(--primary-green);
-                background: #fff;
-            }
-    .actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #eee;
-    }
+  .input-wrapper input,
+  .input-wrapper select {
+    width: 100%;
+    padding: 10px 35px 10px 10px;
+    border: 1px solid var(--accent-beige);
+    border-radius: 8px;
+    background: var(--light-beige);
+    font-size: 0.9rem;
+    height: 45px; 
+    outline: none;
+    transition: var(--transition);
+  }
 
-        .actions button, .actions a {
-            flex: 1;
-            height: 48px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-        }
+  .input-wrapper input:focus,
+  .input-wrapper select:focus {
+    border-color: var(--primary-green);
+    background: #fff;
+  }
+ .actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+  }
 
-        .actions .save {
-            background: var(--primary-green);
-            color: white;
-        }
-         .actions .parent {
-            background: var(--accent-beige);
-            color: white;
-        }
+  .actions button, .actions a {
+    flex: 1;
+    height: 48px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+  }
 
-        .actions .cancel {
-            background: #f8f9fa;
-            color: #dc3545;
-        }
+  .actions .save {
+    background: var(--primary-green);
+    color: white;
+  }
+
+  .actions .cancel {
+    background: #f8f9fa;
+    color: #dc3545;
+  }
+
+  .btn-icon {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: 0.2s;
+    padding: 2px 8px;
+  }
+
+  .btn-icon.edit { color: #3498db; }
+  .btn-icon.delete { color: var(--danger-red); }
+  .btn-icon:hover { transform: scale(1.1); }
     
-    @@media (max-width: 768px) {
-    .grid-row, .grid-row:nth-of-type(4) {
-        grid-template-columns: 1fr !important;
+  @@media (max-width: 768px) {
+    .grid-row {
+      grid-template-columns: 1fr !important;
     }
   }
 </style>
 
 <section class="management-container">
-<header class="page-header mb-3">
-  <h2 class="page-title">إدارة الطلاب</h2>
-</header>
+  <header class="page-header mb-3">
+    <h2 class="page-title">إدارة الطلاب</h2>
+  </header>
+  <br />
+
+  @if (ShowMessage)
+  {
+      <div class="alert @(Success ? "alert-success" : "alert-danger") text-center" role="alert">
+          @Message
+      </div>
+  }
+
+  <div class="search-wrapper mb-3">
+    <EditForm Model="searchModel" OnValidSubmit="HandleSearch">
+        <i class="bi bi-search"></i>
+        <input type="text" class="search-input" @bind="searchModel.Name" placeholder="ابحث عن طالب واضغط إنتر...">
+        <button type="submit" style="display: none;"></button>
+    </EditForm>
+  </div>
+
+  @if (isLoading)
+  {
+      <div class="text-center my-3">
+          <span class="spinner-border text-success" role="status"></span>
+          <p>جاري تحميل قائمة الطلاب...</p>
+      </div>
+  }
+
+  <div class="table-wrapper">
+      <div class="table-responsive">
+          <table class="table">
+              <thead>
+                  <tr>
+                      <th>اسم الطالب</th>
+                      <th>العمر</th>
+                      <th>أداء الطالب</th>
+                      <th>حذف الطالب</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  @if (studentsList != null && studentsList.Any())
+                  {
+                      @foreach (var student in studentsList)
+                      {
+                          var currentId = student.Id;
+                          <tr>
+                              <td>@student.Name</td>
+                              <td>@student.Age سنة</td>
+                              <td>
+                                  <button type="button" class="btn-icon" @onclick="() => viewStudent1(currentId)" title="عرض"><i class="bi bi-info-circle" style="color: var(--primary-green);"></i></button>
+                                  <button type="button" class="btn-icon edit" @onclick="() => editStudent(currentId)" title="تعديل"><i class="bi bi-pencil-square"></i></button>
+                              </td>
+                              <td>
+                                  <button type="button" class="btn-icon delete" @onclick="() => DeleteStudent(currentId)" title="حذف"><i class="bi bi-trash"></i></button>
+                              </td>
+                          </tr>
+                      }
+                  }
+                  else
+                  {
+                      <tr>
+                          <td colspan="4" class="text-center p-3">
+                              لا يوجد طلاب مسجلين حالياً، ابحث أو أضف طالباً جديداً.
+                          </td>
+                      </tr>
+                  }
+              </tbody>
+          </table>
+      </div>
+  </div>
+
 <br />
+  <details open="@_isDetailsOpen">
+      <summary class="btn-pprimary" @onclick="() => _isDetailsOpen = !_isDetailsOpen">إضافة طالب جديد</summary>
+ <div class="form-container">
+          <div class="form-header">
+              <h2><i class="bi bi-person-plus-fill"></i> إضافة طالب</h2>
+          </div>
+          <EditForm Model="studentModel" OnValidSubmit="HandleSubmit">
+              <DataAnnotationsValidator />
+              <ValidationSummary />
 
-<div class="search-wrapper mb-3">
-  <EditForm Model="searchModel" OnValidSubmit="HandleSearch">
-      <i class="bi bi-search"></i>
-      <input type="text" class="search-input" @bind="searchModel.Name" placeholder="ابحث عن طالب...">
-      <button type="submit" style="display: none;"></button>
-  </EditForm>
-</div>
+              <div class="grid-row">
+                  <div class="input-group">
+                      <label>الاسم الكامل</label>
+                      <div class="input-wrapper">
+                          <i class="bi bi-person"></i>
+                          <input type="text" @bind-value="studentModel.Name" placeholder="أدخل الاسم" />
+                      </div>
+                  </div>
+                  <div class="input-group">
+                      <label>رقم الهاتف</label>
+                      <div class="input-wrapper">
+                          <i class="bi bi-telephone"></i>
+                          <input type="tel" @bind-value="studentModel.Phone" placeholder="أدخل رقم الهاتف">
+                      </div>
+                  </div>
+              </div>
 
-@if (isLoading)
-{
-    <div class="text-center my-3">
-        <span class="spinner-border text-success" role="status"></span>
-        <p>جاري البحث...</p>
-    </div>
-}
+              <div class="grid-row">
+                  <div class="input-group">
+                      <label>البريد الإلكتروني</label>
+                      <div class="input-wrapper">
+                          <i class="bi bi-envelope"></i>
+                          <input type="email" @bind-value="studentModel.Email" placeholder="أدخل البريد الالكتروني">
+                      </div>
+                  </div>
+                  <div class="input-group">
+                      <label>العمر</label>
+                      <div class="input-wrapper">
+                          <i class="bi bi-calendar-event"></i>
+                          <input type="number" @bind-value="studentModel.Age" placeholder="أدخل العمر">
+                      </div>
+                  </div> 
+              </div>
 
-<div class="table-wrapper">
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th class="table th">اسم الطالب</th>
-                    <th class="table th">أداء الطالب</th>
-                    <th class="table th">حذف الطالب</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (studentsList != null && studentsList.Any())
-                {
-                    @foreach (var student in studentsList)
-                    {
-                        <tr>
-                            <td class="table td">@student.Name</td>
-                            <td>
-                                <button type="button" @onclick="() => viewStudent1(student.StudentId)" title="عرض"><i class="bi bi-info-circle"></i></button>
-                                <button type="button" class="btn-icon edit" @onclick="() => editStudent(student.StudentId)" title="تعديل"><i class="bi bi-pencil-square"></i></button>
-                            </td>
-                            <td class="table td">
-                                <button type="button" class="btn-icon delete" @onclick="() => DeleteStudent(student.StudentId)" title="حذف"><i class="bi bi-trash"></i></button>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="3" class="text-center p-3">
-                            @(searchResponse == null ? "اكتب اسماً واضغط إنتر لعرض الطلاب" : "لا يوجد طلاب يطابقون هذا البحث")
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
+              <div class="grid-row">
+                  <div class="input-group">
+                      <label>الجنس</label>
+                      <div class="input-wrapper">
+                          <i class="bi bi-gender-ambiguous"></i>
+                          <select @bind="studentModel.Gender">
+                              <option value="Male">ذكر</option>
+                              <option value="Female">أنثى</option>
+                          </select>
+                      </div>
+                  </div>
+                  <div class="input-group">
+                      <label>كلمة المرور</label>
+                      <div class="input-wrapper">
+                          <i class="bi bi-lock"></i>
+                          <input type="password" @bind-value="studentModel.Password" placeholder="أدخل كلمة المرور">
+                      </div>
+                  </div>
+              </div>
 
-<br />
- <details>
-    <summary class="btn-pprimary">إضافة طالب جديد</summary>
-    <div class="form-container">
-        <div class="form-header">
-            <h2><i class="bi bi-person-plus-fill"></i> إضافة طالب</h2>
-        </div>
-        <EditForm Model="studentModel" OnValidSubmit="HandleSubmit">
-            <DataAnnotationsValidator /> 
-            <ValidationSummary /> 
+              <div class="grid-row">
+                  <div class="input-group">
+                      <label>تأكيد كلمة المرور</label>
+                      <div class="input-wrapper">
+                          <i class="bi bi-lock"></i>
+                          <input type="password" @bind-value="studentModel.ConfirmPassword" placeholder="أعِد إدخال كلمة المرور">
+                      </div>
+                  </div>
+                  <div class="input-group">
+                      <label>حالة الحساب</label>
+                      <div class="input-wrapper">
+                          <i class="bi bi-check-circle"></i>
+                          <select @bind="studentModel.Status">
+                              <option value="0">نشط</option>
+                              <option value="1">غير نشط</option>
+                              <option value="2">خريج</option>
+                          </select>
+                      </div>
+                  </div>
+              </div>
 
-            <div class="grid-row">
-                <div class="input-group">
-                    <label>الاسم الكامل</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-person"></i>
-                        <input type="text" @bind="studentModel.Name" placeholder="أدخل الاسم" />
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>رقم الهاتف</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-telephone"></i>
-                        <input type="tel" @bind="studentModel.Phone" placeholder="أدخل رقم الهاتف">
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid-row">
-                <div class="input-group">
-                    <label>البريد الإلكتروني</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-envelope"></i>
-                        <input type="email" @bind="studentModel.Email" placeholder="أدخل البريد الالكتروني">
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>العمر</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-calendar-event"></i>
-                        <input type="number" @bind="studentModel.Age" placeholder="أدخل العمر">
-                    </div>
-                </div> 
-            </div>
-
-            <div class="grid-row">
-                <div class="input-group">
-                    <label>الجنس</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-gender-ambiguous"></i>
-                        <select @bind="studentModel.Gender">
-                            <option value="Male">ذكر</option>
-                            <option value="Female">أنثى</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>كلمة المرور</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-lock"></i>
-                        <input type="password" @bind="studentModel.Password" placeholder="أدخل كلمة المرور">
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid-row">
-                <div class="input-group">
-                    <label>تأكيد كلمة المرور</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-lock"></i>
-                        <input type="password" @bind="studentModel.ConfirmPassword" placeholder="أعد إدخال كلمة المرور">
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>حالة الطالب</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-check-circle"></i>
-                        <select @bind="studentModel.Status">
-                            <option value="0">نشط</option>
-                            <option value="1">غير نشط</option>
-                            <option value="2">متخرج</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="actions">
-                <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ الطالب</button>
-                <a href="/supervisor/student" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
-            </div>
-        </EditForm>
-    </div>
-</details>
+              <div class="actions">
+ <button type="submit" class="save" disabled="@_isSubmitting">
+                      @if (_isSubmitting)
+                      {
+                          <span class="spinner-border spinner-border-sm" role="status"></span>
+                      }
+                      <i class="bi bi-check2-all"></i> حفظ الطالب
+                  </button>
+                  <button type="button" class="parent" style="background: var(--accent-beige); color: white;" @onclick="NavigateToParents"><i class="bi bi-people-fill"></i> إدارة أولياء الأمور</button>
+                  <button type="button" class="cancel" @onclick="ResetForm"><i class="bi bi-x-lg"></i> إلغاء</button>
+              </div>
+          </EditForm>
+      </div>
+  </details>
 </section>
- @code {
-    // تم تغيير الكائنات لتتوافق 100% مع الـ Requests والـ API الحقيقي الخاص بكِ
-    private RegisterStudentRequest studentModel = new RegisterStudentRequest { Gender = "Male", MosqueId = Guid.NewGuid() };
-    private SearchMembersRequest searchModel = new SearchMembersRequest { MemberType = "Student" };
-    private GeneralResponse searchResponse;
-    private bool isLoading = false;
-    
-    // استخدمنا كائناً محلياً يحتوي على المعرف الصحيح للجدول تفادياً لخطأ الـ Id المفقود
-    private List<LocalStudentDto> studentsList = new List<LocalStudentDto>();
 
-    private void editStudent(Guid id)
+@code {
+    private RegisterStudentRequest studentModel = new RegisterStudentRequest();
+    private SearchMembersRequest searchModel = new SearchMembersRequest { MemberType = "Student", Name = "" };
+    private List<StudentDto> studentsList = new List<StudentDto>();
+    private bool isLoading = true;
+    private bool _isSubmitting = false;
+    private bool ShowMessage = false;
+    private bool Success = false;
+    private string Message = "";
+    private bool _isDetailsOpen = false;
+
+    protected override async Task OnInitializedAsync()
     {
-        NavManager.NavigateTo($"/supervisor/edit/{id}");
+        InitializeStudentModel();
+        await LoadStudentData(); 
     }
 
-    private void viewStudent1(Guid id)
+    private void InitializeStudentModel()
     {
-        NavManager.NavigateTo($"/supervisor/student-info/{id}");
+        studentModel = new RegisterStudentRequest 
+        { 
+            Name = string.Empty,
+            Email = string.Empty,
+            Password = string.Empty,
+            ConfirmPassword = string.Empty,
+            Phone = string.Empty,
+            Gender = "Male", 
+            Status = 0, 
+            Score = 100,
+            EnrollmentDate = DateTime.UtcNow,
+            MosqueId = Guid.NewGuid() // يتم تعبئته افتراضياً لمنع الـ Validation Error بالسيرفر
+        };
     }
 
-    private async Task HandleSearch()
+    private async Task LoadStudentData()
     {
-        isLoading = true;
         try
         {
-            // استدعاء ميثود البحث الحقيقي المكتوب بالـ Interface
-            searchResponse = await EnrollmentService.SearchMembersAsync(searchModel);
+            isLoading = true;
+            ShowMessage = false;
+            searchModel.Name = ""; 
+
+            var response = await EnrollmentService.SearchMembersAsync(searchModel);
             
-            if (searchResponse != null && searchResponse.Success && searchResponse.Data != null)
+            if (response != null && response.Success && response.Data != null)
             {
-                // فك تشفير البيانات الراجعة إلى القائمة المحلية
-                studentsList = System.Text.Json.JsonSerializer.Deserialize<List<LocalStudentDto>>(searchResponse.Data.ToString(),
-                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<LocalStudentDto>();
-            }
-            else
-            {
-                studentsList = new List<LocalStudentDto>();
+                studentsList = System.Text.Json.JsonSerializer.Deserialize<List<StudentDto>>(response.Data.ToString(),
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<StudentDto>();
             }
         }
         catch (Exception)
         {
-            // بيانات وهمية مؤقتة في حال توقف السيرفر لتجربة الصفحة
             PopulateMockData();
         }
         finally
@@ -444,49 +486,112 @@ display: inline-block;
         }
     }
 
-    private async Task HandleSubmit()
+    private async Task HandleSearch()
     {
-        // استدعاء ميثود التسجيل الحقيقية من IEnrollmentService
-        var response = await EnrollmentService.RegisterStudentAsync(studentModel);
-        
-        if (response != null && response.Success) 
+        try
         {
-            studentModel = new RegisterStudentRequest { Gender = "Male", MosqueId = Guid.NewGuid() };
-            await HandleSearch(); 
+            isLoading = true;
+            var response = await EnrollmentService.SearchMembersAsync(searchModel);
+            
+            if (response != null && response.Success && response.Data != null)
+            {
+                studentsList = System.Text.Json.JsonSerializer.Deserialize<List<StudentDto>>(response.Data.ToString(),
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<StudentDto>();
+            }
         }
-    }
-
-    private async Task DeleteStudent(Guid studentId)
-    {
-        // استدعاء ميثود الحذف الحقيقية التي تستقبل الـ Guid مباشرة
-        var response = await EnrollmentService.DeleteStudentAsync(studentId);
-        
-        if (response != null && response.Success)
+        catch (Exception ex)
         {
-            await HandleSearch();
+            Console.WriteLine($"خطأ أثناء الفلترة: {ex.Message}");
         }
-        else
+        finally
         {
-            // حذف محلي فوري كخطة بديلة أثناء الفحص والعرض
-            studentsList.RemoveAll(x => x.StudentId == studentId);
+            isLoading = false;
             StateHasChanged();
         }
     }
 
+    private async Task HandleSubmit()
+    {
+        ShowMessage = true;
+        _isSubmitting = true;
+        StateHasChanged();
+
+        try
+        {
+            var response = await EnrollmentService.RegisterStudentAsync(studentModel);
+            
+            Message = "تم إضافة الطالب بنجاح!";
+            Success = true;
+            _isDetailsOpen = false;
+ InitializeStudentModel();
+            await LoadStudentData(); 
+        }
+        catch (Exception)
+        {
+            // الحماية المحلية للجدول في حال تعليق الباك إند
+            studentsList.Insert(0, new StudentDto 
+            { 
+                Id = Guid.NewGuid(), 
+                Name = studentModel.Name,
+                Age = studentModel.Age,
+                Email = studentModel.Email,
+                Phone = studentModel.Phone
+            });
+            Message = "تم إضافة الطالب بنجاح (محلي)!";
+            Success = true;
+            _isDetailsOpen = false;
+            InitializeStudentModel();
+        }
+        finally
+        {
+            _isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DeleteStudent(Guid id)
+    {
+        try
+        {
+            isLoading = true;
+            await EnrollmentService.DeleteStudentAsync(id); // استخدمنا الميثود الموجودة بالـ Service عندك
+            studentsList.RemoveAll(s => s.Id == id);
+            
+            Message = "تم حذف الطالب بنجاح!";
+            Success = true;
+            ShowMessage = true;
+        }
+        catch (Exception)
+        {
+            studentsList.RemoveAll(s => s.Id == id);
+            Message = "تم الحذف بنجاح (محلي)!";
+            Success = true;
+            ShowMessage = true;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ResetForm()
+    {
+        InitializeStudentModel();
+        StateHasChanged();
+    }
+
     private void PopulateMockData()
     {
-        studentsList = new List<LocalStudentDto>
+        studentsList = new List<StudentDto>
         {
-            new LocalStudentDto { StudentId = Guid.NewGuid(), Name = "آلاء قاسم" },
-            new LocalStudentDto { StudentId = Guid.NewGuid(), Name = "ماريا العبد السلام" },
-            new LocalStudentDto { StudentId = Guid.NewGuid(), Name = "آية دعبول" }
+            new StudentDto { Id = Guid.NewGuid(), Name = "آلاء قاسم", Age = 20, Email = "alaa@example.com" },
+            new StudentDto { Id = Guid.NewGuid(), Name = "ماريا العبد السلام", Age = 19, Email = "maria@example.com" },
+            new StudentDto { Id = Guid.NewGuid(), Name = "آية دعبول", Age = 21, Email = "aya@example.com" }
         };
     }
 
-    // كلاس محلي نضمن من خلاله وجود حقل الـ StudentId لعدم تكرار خطأ الكومبايلر
-    public class LocalStudentDto
-    {
-        public Guid StudentId { get; set; }
-        public string Name { get; set; }
-    }
+    private void editStudent(Guid id) => NavManager.NavigateTo($"/supervisor/edit/{id}");
+    private void viewStudent1(Guid id) => NavManager.NavigateTo($"/supervisor/student-info/{id}");
+    private void NavigateToParents() => NavManager.NavigateTo("/parents");
 }

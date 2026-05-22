@@ -1,5 +1,10 @@
 ﻿@page "/details-p" 
+@page "/details-p/{Id:guid}"
+@using Moeen.Dashboard.Application.Services.Abstractions
+@using Moeen.Shared.Responses.Enrollment
+@inject IEnrollmentService EnrollmentService
 @inject NavigationManager mgr
+@rendermode InteractiveServer
 
 <style>
     :root {
@@ -14,7 +19,6 @@
         --font-main: 'Tajawal', sans-serif;
     }
 
-    /* تنسيق كرت التفاصيل */
     .details-card-container {
         background: #ffffff;
         border-radius: 20px;
@@ -26,118 +30,24 @@
         font-family: var(--font-main);
     }
 
-    .details-header {
-        background-color: var(--primary-green);
-        color: white;
-        padding: 20px;
-        text-align: center;
-    }
+    .details-header { background-color: var(--primary-green); color: white; padding: 20px; text-align: center; }
+    .person-icon { font-size: 2.5rem; display: block; margin-bottom: 10px; color: var(--accent-beige); }
+    .details-body { padding: 25px; direction: rtl; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .info-item { display: flex; flex-direction: column; align-items: flex-start; }
+    .info-item.full-width { grid-column: span 2; }
+    .info-item label { font-size: 0.85rem; color: #91855a; margin-bottom: 5px; font-weight: bold; }
+    .info-item .value { font-size: 1rem; color: var(--primary-green); background: #fcfbf9; padding: 8px 12px; border-radius: 8px; width: 100%; border-right: 3px solid var(--accent-beige); }
 
-    .person-icon {
-        font-size: 2.5rem;
-        display: block;
-        margin-bottom: 10px;
-        color: var(--accent-beige);
-    }
-
-    .details-body {
-        padding: 25px;
-        direction: rtl;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-
-    .info-item {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-        .info-item.full-width {
-            grid-column: span 2;
-        }
-
-        .info-item label {
-            font-size: 0.85rem;
-            color: #91855a;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        .info-item .value {
-            font-size: 1rem;
-            color: var(--primary-green);
-            background: #fcfbf9;
-            padding: 8px 12px;
-            border-radius: 8px;
-            width: 100%;
-            border-right: 3px solid var(--accent-beige);
-        }
-
-    /* تنسيق الجدول الموحد */
-    .management-container {
-        max-width: 500px; /* جعل الجدول بنفس عرض الكرت للتناسق */
-        margin: 0 auto 2rem;
-        padding: 0 10px;
-        direction: rtl;
-        font-family: var(--font-main);
-    }
-
-    .table-responsive {
-        width: 100%;
-        overflow-x: auto;
-    }
-
-    .data-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 8px;
-    }
-
-        .data-table th {
-            background-color: var(--light-beige);
-            color: var(--primary-green);
-            padding: 12px 15px;
-            text-align: right;
-        }
-
-        .data-table tbody tr {
-            background-color: var(--white);
-            transition: 0.3s;
-        }
-
-            .data-table tbody tr td {
-                padding: 12px 15px;
-                border-top: 1px solid var(--border-gray);
-                border-bottom: 1px solid var(--border-gray);
-            }
-
-            .data-table tbody tr:hover {
-                background-color: var(--bg-row-hover);
-            }
-
-    /* أيقونة العرض */
-    .actions-cell {
-        text-align: center;
-    }
-
-    .btn-icon.info {
-        background: none;
-        border: none;
-        color: var(--primary-green);
-        font-size: 1.2rem;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-
-        .btn-icon.info:hover {
-            transform: scale(1.2);
-        }
-
+    .management-container { max-width: 500px; margin: 0 auto 2rem; padding: 0 10px; direction: rtl; font-family: var(--font-main); }
+    .table-responsive { width: 100%; overflow-x: auto; }
+    .data-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    .data-table th { background-color: var(--light-beige); color: var(--primary-green); padding: 12px 15px; text-align: right; }
+    .data-table tbody tr { background-color: var(--white); transition: 0.3s; }
+    .data-table tbody tr td { padding: 12px 15px; border-top: 1px solid var(--border-gray); border-bottom: 1px solid var(--border-gray); }
+    .data-table tbody tr:hover { background-color: var(--bg-row-hover); }
+    .btn-icon.info { background: none; border: none; color: var(--primary-green); font-size: 1.2rem; cursor: pointer; transition: 0.3s; }
+    .btn-icon.info:hover { transform: scale(1.2); }
 </style>
 
 <div class="details-card-container">
@@ -150,22 +60,17 @@
         <div class="info-grid">
             <div class="info-item">
                 <label>الاسم الكامل</label>
-                <div class="value">مصطفى محمد المحمد</div>
+                <div class="value">@currentParent.Name</div>
             </div>
 
             <div class="info-item">
-                <label>المهنة / الوظيفة</label>
-                <div class="value">مهندس برمجيات</div>
+                <label>رقم الهاتف</label>
+                <div class="value">@currentParent.Phone</div>
             </div>
 
-            <div class="info-item">
+            <div class="input-item full-width">
                 <label>البريد الإلكتروني</label>
-                <div class="value">mostafa@example.com</div>
-            </div>
-
-            <div class="info-item full-width">
-                <label>العنوان</label>
-                <div class="value">سوريا - حلب - الحي المرديان</div>
+                <div class="value">@currentParent.Email</div>
             </div>
         </div>
     </div>
@@ -182,23 +87,55 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>عمر العلي</td>
-                    <td class="actions-cell">
-                        <button class="btn-icon info" title="عرض التفاصيل"><i class="bi bi-info-circle"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>أحمد العلي</td>
-                    <td class="actions-cell">
-                        <button class="btn-icon info" title="عرض التفاصيل"><i class="bi bi-info-circle"></i></button>
-                    </td>
-                </tr>
+                @if (Id != null && !string.IsNullOrEmpty(currentParent.StudentName))
+                    {
+                    <tr>
+                        <td>@currentParent.StudentName</td>
+                        <td class="actions-cell">
+                            <button class="btn-icon info" title="عرض التفاصيل" @onclick="() => GoToStudent(currentParent.StudentId)"><i class="bi bi-info-circle"></i></button>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="2" class="text-center p-2">لا يوجد أبناء مرتبطون بهذا الحساب</td>
+                    </tr>
+                }
             </tbody>
         </table>
     </div>
 </section>
 
 @code {
-    // يمكنك إضافة منطق العرض هنا
+    [Parameter] public Guid? Id { get; set; }
+    private ParentDto currentParent = new ParentDto { Name = "جاري التحميل...", Email = "...", Phone = "..." };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != null)
+        {
+            // هنا يتم استدعاء تفاصيل العضو من الـ API الحقيقي ومطابقتها
+            // var response = await EnrollmentService.GetMemberProfileAsync(Id.Value);
+            LoadMockData();
+        }
+    }
+
+    private void GoToStudent(Guid studentId)
+    {
+        mgr.NavigateTo($"/supervisor/student-info/{studentId}");
+    }
+
+    private void LoadMockData()
+    {
+        currentParent = new ParentDto
+        {
+            Id = Id ?? Guid.NewGuid(),
+            Name = "مصطفى محمد المحمد",
+            Email = "mostafa@example.com",
+            Phone = "0933333333",
+            StudentId = Guid.NewGuid(),
+            StudentName = "عمر العلي"
+        };
+    }
 }

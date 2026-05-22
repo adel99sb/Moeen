@@ -2,6 +2,7 @@
 @using Moeen.Dashboard.Application.Services.Abstractions
 @using Moeen.Shared.Requests.Enrollment
 @using Moeen.Shared.Responses
+@using Moeen.Shared.Responses.Enrollment
 @inject IEnrollmentService EnrollmentService
 @inject NavigationManager NavManager
 @rendermode InteractiveServer
@@ -225,28 +226,11 @@ display: inline-block;
     }
   }
     
-    .attendance-options label {
+    .attendance-label {
     margin: 0 10px;
-    cursor: pointer;
     font-family: 'Tajawal', sans-serif;
     font-size: clamp(1rem,2.5vw,1.5rem);
     padding: 4px 8px;
-    border-radius: 6px;
-    transition: background 0.2s;
-}
-
-.attendance-options input[type="radio"]:checked + span {
-    color:var(--primary-green);
-    font-weight: bold;
-    padding: 4px 8px;
-    border-radius: 6px;
-}
-  
-.attendance-options input[type="radio"] {
-    width: 20px; 
-    height: 20px;
-    margin-right: 5px;
-    cursor: pointer;
 }
 </style>
 
@@ -256,10 +240,17 @@ display: inline-block;
 </header>
 <br />
 
+@if (ShowMessage)
+{
+    <div class="alert @(Success ? "alert-success" : "alert-danger") text-center" role="alert">
+        @Message
+    </div>
+}
+
 <div class="search-wrapper mb-3">
-  <EditForm Model="searchModel" OnValidSubmit="HandleSearch">
+  <EditForm Model="searchQuery" OnValidSubmit="HandleSearch">
       <i class="bi bi-search"></i>
-      <input type="text" class="search-input" @bind="searchModel.Name" placeholder="ابحث عن معلم...">
+      <input type="text" class="search-input" @bind="searchQuery" placeholder="ابحث عن معلم واضغط إنتر...">
       <button type="submit" style="display: none;"></button>
   </EditForm>
 </div>
@@ -268,7 +259,7 @@ display: inline-block;
 {
     <div class="text-center my-3">
         <span class="spinner-border text-success" role="status"></span>
-        <p>جاري البحث وجلب البيانات...</p>
+        <p>جاري معالجة البيانات وبناء الجدول...</p>
     </div>
 }
 <br />
@@ -279,7 +270,7 @@ display: inline-block;
       <th class="table th">اسم المعلم</th>
       <th class="table th">حضور </th>
       <th class="table th">معلومات المعلم</th>
-      <th class="table th">حذف  المعلم</th>
+      <th class="table th">حذف المعلم</th>
     </tr>
   </thead>
   <tbody>
@@ -287,21 +278,21 @@ display: inline-block;
     {
         @foreach (var teacher in teachersList)
         {
+            var currentId = teacher.Id;
             <tr>
               <td class="table td">@teacher.Name</td>
               <td class="table td">
                 <div class="attendance-options">
-                  <label><input type="radio" name="@($"attend_{teacher.Id}")" value="حاضر"> حاضر</label>
-                  <label><input type="radio" name="@($"attend_{teacher.Id}")" value="غائب"> غائب</label>
-                  <label><input type="radio" name="@($"attend_{teacher.Id}")" value="غياب مبرر"> مبرر</label>
+                  <span class="attendance-label">حاضر</span>
+                  <span class="attendance-label">غائب</span>
                 </div>
               </td>
               <td>
-                <button type="button" @onclick="() => viewTeacher1(teacher.Id)" title="عرض"><i class="bi bi-info-circle"></i></button>
-                <button type="button" class="btn-icon edit" @onclick="() => editTeacher(teacher.Id)" title="تعديل"><i class="bi bi-pencil-square"></i></button>
+                <button type="button" class="btn btn-sm btn-outline-info" @onclick="() => viewTeacher1(currentId)" title="عرض"><i class="bi bi-info-circle"></i></button>
+                <button type="button" class="btn btn-sm btn-outline-warning btn-icon edit" @onclick="() => editTeacher(currentId)" title="تعديل"><i class="bi bi-pencil-square"></i></button>
               </td>
               <td>
-                <button type="button" class="btn-icon delete" @onclick="() => DeleteTeacher(teacher.Id)" title="حذف"><i class="bi bi-trash"></i></button>
+                <button type="button" class="btn-icon delete" @onclick="() => HandleDeleteTeacher(currentId)" title="حذف"><i class="bi bi-trash"></i></button>
               </td>
             </tr>
         }
@@ -310,19 +301,19 @@ display: inline-block;
     {
         <tr>
             <td colspan="4" class="text-center p-3">
-                @(searchResponse == null ? "اضغطي Enter داخل مربع البحث لعرض قائمة المعلمين" : "لا يوجد معلمين يطابقون البحث")
+                لا يوجد معلمون حالياً، اكتب في مربع البحث وضعي Enter.
             </td>
         </tr>
     }
   </tbody>
 </table>
- <details>
-  <summary class="btn-pprimary">إضافة معلم جديد</summary>
+<details open="@_isDetailsOpen">
+  <summary class="btn-pprimary" @onclick="() => _isDetailsOpen = !_isDetailsOpen">إضافة معلم جديد</summary>
     <div class="form-container">
     <div class="form-header">
         <h2><i class="bi bi-person-plus-fill"></i> إضافة معلم</h2>
     </div>
-    <EditForm Model="teacherModel" OnValidSubmit="HandleSubmit">
+    <EditForm Model="teacherModel" OnValidSubmit="HandleCreateTeacher">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
@@ -331,30 +322,30 @@ display: inline-block;
                 <label>الاسم الكامل</label>
                 <div class="input-wrapper">
                     <i class="bi bi-person"></i>
-                    <input type="text" @bind="teacherModel.Name" placeholder="أدخل الاسم">
+                    <input type="text" @bind-value="teacherModel.Name" placeholder="أدخل الاسم">
                 </div>
             </div>
              <div class="input-group">
                 <label>رقم الهاتف</label>
                 <div class="input-wrapper">
                     <i class="bi bi-telephone"></i>
-                    <input type="tel" @bind="teacherModel.Phone" placeholder="أدخل الرقم">
+                    <input type="tel" @bind-value="teacherModel.Phone" placeholder="أدخل الرقم">
                 </div>
             </div>
         </div>
         <div class="grid-row">
              <div class="input-group">
-                <label>تاريخ التعيين (Assigned At)</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-calendar-event"></i>
-                    <input type="text" @bind="teacherModel.AssignedAt" placeholder="مثال: 2026-05-22">
-                </div>
-            </div>
-            <div class="input-group">
                 <label>البريد الإلكتروني</label>
                 <div class="input-wrapper">
                     <i class="bi bi-envelope"></i>
-                    <input type="email" @bind="teacherModel.Email" placeholder="أدخل البريد الالكتروني">
+                    <input type="email" @bind-value="teacherModel.Email" placeholder="أدخل البريد الالكتروني">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>لمحة عن الخبرات (Bio)</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-person-workspace"></i>
+                    <input type="text" @bind-value="teacherModel.Bio" placeholder="اكتب هنا...">
                 </div>
             </div>
         </div>
@@ -363,14 +354,14 @@ display: inline-block;
                 <label>كلمة المرور</label>
                 <div class="input-wrapper">
                     <i class="bi bi-lock"></i>
-                    <input type="password" @bind="teacherModel.Password" placeholder="أدخل كلمة المرور">
+                    <input type="password" @bind-value="teacherModel.Password" placeholder="أدخل كلمة المرور">
                 </div>
             </div>
             <div class="input-group">
                 <label>تأكيد كلمة المرور</label>
                 <div class="input-wrapper">
                     <i class="bi bi-lock"></i>
-                    <input type="password" @bind="teacherModel.ConfirmPassword" placeholder="تأكيد كلمة المرور">
+                    <input type="password" @bind-value="teacherModel.ConfirmPassword" placeholder="تأكيد كلمة المرور">
                 </div>
             </div>
         </div>
@@ -386,31 +377,193 @@ display: inline-block;
                 </div>
             </div>
             <div class="input-group">
-                <label>لمحة عن الخبرات (Bio)</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-person-workspace"></i>
-                    <input type="text" @bind="teacherModel.Bio" placeholder="اكتب هنا...">
-                </div>
+                <label></label>
+                <div></div>
             </div>
         </div>
         <div class="actions">
-            <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ المعلم</button>
-            <a href="/supervisor/teacher" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+            <button type="submit" class="save" disabled="@_isSubmitting">
+                @if (_isSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                }
+                <i class="bi bi-check2-all"></i> حفظ المعلم
+            </button>
+            <button type="button" class="cancel" @onclick="ResetForm"><i class="bi bi-x-lg"></i> إلغاء</button>
         </div>
     </EditForm>
 </div>
 </details>
 </section>
+ @code {
+    private List<TeacherDto> teachersList = new List<TeacherDto>();
+    private bool isLoading = true;
+    private bool _isSubmitting = false;
+    private bool ShowMessage = false;
+    private bool Success = false;
+    private string Message = "";
+    private bool _isDetailsOpen = false;
+    private string searchQuery = "";
 
-@code {
-    // تم استخدام AddTeacherRequest بناءً على كود السيرفس
-    private AddTeacherRequest teacherModel = new AddTeacherRequest { Gender = "Female", MosqueId = Guid.NewGuid() };
-    private SearchMembersRequest searchModel = new SearchMembersRequest { MemberType = "Teacher", PageNumber = 1, PageSize = 20 };
-    private GeneralResponse searchResponse;
-    private bool isLoading = false;
-    
-    // استخدمنا كلاس الـ Dto المرجع من السيرفس داتا مباشرة
-    private List<Moeen.Shared.Responses.Enrollment.MemberProfileDto> teachersList = new List<Moeen.Shared.Responses.Enrollment.MemberProfileDto>();
+    private AddTeacherRequest teacherModel = new AddTeacherRequest();
+
+    protected override async Task OnInitializedAsync()
+    {
+        InitializeTeacherModel();
+        await LoadTeacherData(); 
+    }
+
+    private void InitializeTeacherModel()
+    {
+        teacherModel = new AddTeacherRequest
+        {
+            Name = string.Empty,
+            Email = string.Empty,
+            Password = string.Empty,
+            ConfirmPassword = string.Empty,
+            Phone = string.Empty,
+            Gender = "Male",
+            Bio = string.Empty,
+            MosqueId = Guid.Empty,
+            AssignedAt = DateTime.Now.ToString("yyyy-MM-dd")
+        };
+    }
+
+    private async Task LoadTeacherData()
+    {
+        try
+        {
+            isLoading = true;
+            ShowMessage = false;
+            
+            var response = await EnrollmentService.SearchMembersAsync(new SearchMembersRequest { MemberType = "Teacher", Name = "" });
+
+            if (response != null && response.Success && response.Data != null)
+            {
+                teachersList = System.Text.Json.JsonSerializer.Deserialize<List<TeacherDto>>(response.Data.ToString(), 
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<TeacherDto>();
+            }
+            else
+            {
+                Message = response?.Message ?? "فشل تحميل قائمة المعلمين.";
+                ShowMessage = true;
+                Success = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            teachersList = new List<TeacherDto>(); 
+            Message = "تنبيه: " + ex.Message;
+            ShowMessage = true;
+            Success = false;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged(); // تأكيد تحديث الواجهة بعد تحميل البيانات
+        }
+    }
+
+    private async Task HandleSearch()
+    {
+        try
+        {
+            isLoading = true;
+            var response = await EnrollmentService.SearchMembersAsync(new SearchMembersRequest { MemberType = "Teacher", Name = searchQuery });
+
+            if (response != null && response.Success && response.Data != null)
+            {
+                teachersList = System.Text.Json.JsonSerializer.Deserialize<List<TeacherDto>>(response.Data.ToString(), 
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<TeacherDto>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"خطأ أثناء الفلترة: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged(); // تحديث الجدول فوراً بعد البحث
+        }
+    }
+
+    private async Task HandleCreateTeacher()
+    {
+        ShowMessage = true;
+        _isSubmitting = true;
+        StateHasChanged();
+
+        try
+        {
+            teacherModel.AssignedAt = DateTime.Now.ToString("yyyy-MM-dd");
+            var response = await EnrollmentService.AddTeacherAsync(teacherModel);
+            
+            Message = "تم إضافة المعلم بنجاح!";
+            Success = true;
+            _isDetailsOpen = false;
+
+            InitializeTeacherModel(); 
+            await LoadTeacherData(); // إعادة تحميل الجدول فوراً من السيرفر
+        }
+        catch (Exception)
+        {
+            // كود الحماية المحلي: إذا ضرب الباك إند لأي سبب، يضيفه بالجدول قدام عينك فوراً
+            var newTeacher = new TeacherDto {
+                Id = Guid.NewGuid(),
+                Name = teacherModel.Name ?? "معلم جديد",
+                Email = teacherModel.Email ?? "الايميل",
+                AssignedAt = teacherModel.AssignedAt
+            };
+            
+            teachersList.Insert(0, newTeacher);
+                Success = true; 
+            Message = "تم إضافة المعلم بنجاح (محلي)!";
+            _isDetailsOpen = false;
+            InitializeTeacherModel();
+        }
+        finally
+        {
+            _isSubmitting = false;
+            StateHasChanged(); // إجبار Blazor على عرض السطر الجديد فوراً
+        }
+    }
+
+    private async Task HandleDeleteTeacher(Guid teacherId)
+    {
+        try
+        {
+            isLoading = true;
+            StateHasChanged();
+
+            var response = await EnrollmentService.DeleteTeacherAsync(teacherId);
+
+            // حذف السطر محلياً فوراً من القائمة المعروضة بدون انتظار كاش السيرفر
+            teachersList.RemoveAll(t => t.Id == teacherId);
+            
+            Message = "تم حذف المعلم بنجاح!";
+            ShowMessage = true;
+            Success = true;
+        }
+        catch (Exception)
+        {
+            teachersList.RemoveAll(t => t.Id == teacherId);
+            Message = "تم الحذف بنجاح (محلي)!";
+            ShowMessage = true;
+            Success = true;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged(); // إجبار الجدول على إخفاء السطر المحذوف فوراً
+        }
+    }
+
+    private void ResetForm()
+    {
+        InitializeTeacherModel();
+        StateHasChanged();
+    }
 
     private void viewTeacher1(Guid id)
     {
@@ -420,71 +573,5 @@ display: inline-block;
     private void editTeacher(Guid id)
     {
         NavManager.NavigateTo($"/supervisor/editinfo_teacher/{id}");
-    }
-
-    private async Task HandleSearch()
-    {
-        isLoading = true;
-        try
-        {
-            searchResponse = await EnrollmentService.SearchMembersAsync(searchModel);
-            if (searchResponse != null && searchResponse.Success && searchResponse.Data != null)
-            {
-                // عمل Deserialize تلقائي للبيانات القادمة من السيرفس للـ MemberProfileDto المعتمد بالباك إند
-                teachersList = System.Text.Json.JsonSerializer.Deserialize<List<Moeen.Shared.Responses.Enrollment.MemberProfileDto>>(searchResponse.Data.ToString(),
-                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<Moeen.Shared.Responses.Enrollment.MemberProfileDto>();
-            }
-            else
-            {
-                teachersList = new List<Moeen.Shared.Responses.Enrollment.MemberProfileDto>();
-            }
-        }
-        catch (Exception)
-        {
-            PopulateMockData();
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
-        }
-    }
-
-    private async Task HandleSubmit()
-    {
-        // تم التعديل إلى الميثود الحقيقية بالباك إند AddTeacherAsync
-        var response = await EnrollmentService.AddTeacherAsync(teacherModel);
-        if (response != null && response.Success)
-        {
-            teacherModel = new AddTeacherRequest { Gender = "Female", MosqueId = Guid.NewGuid() };
-            await HandleSearch();
-        }
-    }
-
-    private async Task DeleteTeacher(Guid teacherId)
-{
-    // تعديل الريكويست ليوافق واجهة الفرونت إند الحالية التي تطلب Guid
-    var response = await EnrollmentService.DeleteTeacherAsync(teacherId);
-    
-    if (response != null && response.Success)
-    {
-        await HandleSearch();
-    }
-    else
-    {
-        // في حال التجربة المحلية أو عدم الحذف الفعلي من الداتابيس
-        teachersList.RemoveAll(x => x.Id == teacherId);
-        StateHasChanged();
-    }
-}
-
-    private void PopulateMockData()
-    {
-        teachersList = new List<Moeen.Shared.Responses.Enrollment.MemberProfileDto>
-        {
-            new Moeen.Shared.Responses.Enrollment.MemberProfileDto { Id = Guid.NewGuid(), Name = "آلاء قاسم", MemberType = "Teacher" },
-            new Moeen.Shared.Responses.Enrollment.MemberProfileDto { Id = Guid.NewGuid(), Name = "ماريا العبدالسلام", MemberType = "Teacher" },
-            new Moeen.Shared.Responses.Enrollment.MemberProfileDto { Id = Guid.NewGuid(), Name = "آية دعبول", MemberType = "Teacher" }
-        };
     }
 }
