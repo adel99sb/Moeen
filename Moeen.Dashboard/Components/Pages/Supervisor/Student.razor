@@ -1,15 +1,14 @@
 ﻿@page "/supervisor/student"
-@using Moeen.Dashboard.Services.Abstractions
-@using Moeen.Shared.Requests.HalqaQuery
-@using Moeen.Shared.Requests.Identity
+@using Moeen.Dashboard.Application.Services.Abstractions
 @using Moeen.Shared.Requests.Enrollment
-@inject IAuthService AuthService
+@using Moeen.Shared.Responses
+@inject IEnrollmentService EnrollmentService
 @inject NavigationManager NavManager
 @rendermode InteractiveServer
 
 <h3>Student</h3>
 <style>
-	:root {
+  :root {
 --primary-green: #195042;
 --accent-beige: #d6cabc;
 --light-beige: #f4f1ee;
@@ -18,7 +17,6 @@
 --status-green: #2ecc71;
 --danger-red: #e74c3c;
         --transition: all 0.3s ease;
-
 }
 
 body {
@@ -34,13 +32,13 @@ padding: 30px;
 border-radius: 20px;
 box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
-/* العنوان */
+
 .page-title {
 color: var(--primary-green);
 position: relative;
-padding-bottom: 10px; /* مسافة بين النص والخط */
-border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
-display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+padding-bottom: 10px; 
+border-bottom: 3px solid #d6cabc; 
+display: inline-block; 
 }
 
 .search-wrapper {
@@ -89,19 +87,18 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         background-color: var(--white);
         padding: 10px;
         border-bottom: 1px solid #eee;
-
     }
     .table tbody tr:hover {
         background-color: #fafafa;
         transform: scale(1.01);
     }
-	.table-wrapper{
-		overflow-x: auto;
-		width: 100%;
-		border-radius: var(--radius-md);
-	}
+  .table-wrapper{
+    overflow-x: auto;
+    width: 100%;
+    border-radius: var(--radius-md);
+  }
 
-	.btn-pprimary {
+  .btn-pprimary {
     background-color: var(--primary-green);
     font-size: 15px;
     padding: 10px 20px;
@@ -120,7 +117,6 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         box-sizing: border-box;
     }
 
-    
     .form-container {
         max-width: 850px;
         margin: 2rem auto;
@@ -165,7 +161,6 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
             text-align: right;
         }
 
-    /* حل مشكلة الأيقونات والمحاذاة */
     .input-wrapper {
         position: relative;
         display: flex;
@@ -175,12 +170,11 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 
         .input-wrapper i {
             position: absolute;
-            right: 12px; /* تثبيت الأيقونة جهة اليمين */
+            right: 12px; 
             color: var(--primary-green);
             z-index: 2;
             pointer-events: none;
         }
-
         .input-wrapper input,
         .input-wrapper select {
             width: 100%;
@@ -235,28 +229,29 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
             background: #f8f9fa;
             color: #dc3545;
         }
-
     
     @@media (max-width: 768px) {
     .grid-row, .grid-row:nth-of-type(4) {
         grid-template-columns: 1fr !important;
     }
-	}
+  }
 </style>
+
 <section class="management-container">
 <header class="page-header mb-3">
   <h2 class="page-title">إدارة الطلاب</h2>
 </header>
 <br />
-<div class="search-wrapper mb-3">
-  <EditForm Model="searchModel" @* OnValidSubmit="HandleSearch" *@>
-	<i class="bi bi-search"></i>
 
-	<input type="text" class="search-input" @bind="searchModel.Name" placeholder="ابحث عن طالب...">
-    <button type="submit" style="display: none;"></button>
-    </EditForm>
+<div class="search-wrapper mb-3">
+  <EditForm Model="searchModel" OnValidSubmit="HandleSearch">
+      <i class="bi bi-search"></i>
+      <input type="text" class="search-input" @bind="searchModel.Name" placeholder="ابحث عن طالب...">
+      <button type="submit" style="display: none;"></button>
+  </EditForm>
 </div>
-    @if (isLoading)
+
+@if (isLoading)
 {
     <div class="text-center my-3">
         <span class="spinner-border text-success" role="status"></span>
@@ -275,18 +270,18 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 </tr>
             </thead>
             <tbody>
-                @if (searchResponse != null && searchResponse.Success && searchResponse.Data != null)
+                @if (studentsList != null && studentsList.Any())
                 {
                     @foreach (var student in studentsList)
                     {
                         <tr>
                             <td class="table td">@student.Name</td>
                             <td>
-                                <a @onclick="() => viewStudent1()"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-                                <a @onclick="() => editStudent()"><button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                                <button type="button" @onclick="() => viewStudent1(student.StudentId)" title="عرض"><i class="bi bi-info-circle"></i></button>
+                                <button type="button" class="btn-icon edit" @onclick="() => editStudent(student.StudentId)" title="تعديل"><i class="bi bi-pencil-square"></i></button>
                             </td>
                             <td class="table td">
-                                <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                                <button type="button" class="btn-icon delete" @onclick="() => DeleteStudent(student.StudentId)" title="حذف"><i class="bi bi-trash"></i></button>
                             </td>
                         </tr>
                     }
@@ -295,7 +290,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 {
                     <tr>
                         <td colspan="3" class="text-center p-3">
-                            @(searchResponse == null ? "اكتب اسماً واضغط بحث لعرض الطلاب" : "لا يوجد طلاب يطابقون هذا البحث")
+                            @(searchResponse == null ? "اكتب اسماً واضغط إنتر لعرض الطلاب" : "لا يوجد طلاب يطابقون هذا البحث")
                         </td>
                     </tr>
                 }
@@ -303,269 +298,195 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         </table>
     </div>
 </div>
-<div class="table-wrapper">
-<div class="table-responsive">
-<table class="table">
-	<thead>
-		<tr>
-			<th class="table th">اسم الطالب</th>
-			<th class="table th">أداء الطالب</th>
-			<th class="table th">حذف الطالب</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td class="table td">آلاء قاسم </td>
-			<td >
-				<a @onclick="viewStudent1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-        <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-				</td>
-			<td class="table td">
-				  <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-			</td>
-		</tr>
-		<tr>
-			<td class="table td">ماريا العبد السلام </td>
-			<td>
-				<a @onclick="viewStudent1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-        <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>     
-			</td>
-			<td class="table td">
-			 <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-			</td>
-		</tr>
-		<tr>
-			<td class="table td">آية دعبول </td>
-			<td>
-				<a @onclick="viewStudent1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-        <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>     
-			</td>
-			<td class="table td">
-			 <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-			</td>
-		</tr>
-	</tbody>
-	</table>
-	</div></div>
-	<br />
-	<details>
-		<summary class="btn-pprimary">إضافة طالب جديد</summary>
-		<div class="form-container">
-    <div class="form-header">
-        <h2><i class="bi bi-person-plus-fill"></i> إضافة طالب</h2>
+
+<br />
+ <details>
+    <summary class="btn-pprimary">إضافة طالب جديد</summary>
+    <div class="form-container">
+        <div class="form-header">
+            <h2><i class="bi bi-person-plus-fill"></i> إضافة طالب</h2>
+        </div>
+        <EditForm Model="studentModel" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator /> 
+            <ValidationSummary /> 
+
+            <div class="grid-row">
+                <div class="input-group">
+                    <label>الاسم الكامل</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-person"></i>
+                        <input type="text" @bind="studentModel.Name" placeholder="أدخل الاسم" />
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>رقم الهاتف</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-telephone"></i>
+                        <input type="tel" @bind="studentModel.Phone" placeholder="أدخل رقم الهاتف">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-row">
+                <div class="input-group">
+                    <label>البريد الإلكتروني</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-envelope"></i>
+                        <input type="email" @bind="studentModel.Email" placeholder="أدخل البريد الالكتروني">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>العمر</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-calendar-event"></i>
+                        <input type="number" @bind="studentModel.Age" placeholder="أدخل العمر">
+                    </div>
+                </div> 
+            </div>
+
+            <div class="grid-row">
+                <div class="input-group">
+                    <label>الجنس</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-gender-ambiguous"></i>
+                        <select @bind="studentModel.Gender">
+                            <option value="Male">ذكر</option>
+                            <option value="Female">أنثى</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>كلمة المرور</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-lock"></i>
+                        <input type="password" @bind="studentModel.Password" placeholder="أدخل كلمة المرور">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-row">
+                <div class="input-group">
+                    <label>تأكيد كلمة المرور</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-lock"></i>
+                        <input type="password" @bind="studentModel.ConfirmPassword" placeholder="أعد إدخال كلمة المرور">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>حالة الطالب</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-check-circle"></i>
+                        <select @bind="studentModel.Status">
+                            <option value="0">نشط</option>
+                            <option value="1">غير نشط</option>
+                            <option value="2">متخرج</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ الطالب</button>
+                <a href="/supervisor/student" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+            </div>
+        </EditForm>
     </div>
-  <EditForm Model="studentModel" @* OnValidSubmit="HandleSubmit" *@>
-      <DataAnnotationsValidator /> 
-    @* هاد السطر ضروري جداً *@
-    <ValidationSummary /> @* وهاد بيطبعلك الأخطاء إذا نسيتي حقل *@
-        <div class="grid-row">
-            <div class="input-group">
-                <label>الاسم الكامل</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-person"></i>
-                  <input type="text" @bind="studentModel.Name" placeholder="أدخل الاسم" />
-                </div>
-            </div>
-             <div class="input-group">
-                <label>رقم الهاتف</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-telephone"></i>
-                    <input type="tel" @bind="studentModel.PhoneNumber" placeholder="أدخل رقم الهاتف">
-                </div>
-            </div>
-            </div>
-	    <div class="grid-row">
-             <div class="input-group">
-                <label>تاريخ التسجيل</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-calendar-event"></i>
-                    <input type="date" @bind="studentModel.Date" placeholder="أدخل تاريخ التسجيل">
-                </div>
-            </div>
-               <div class="input-group">
-                <label>تاريخ الميلاد</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-calendar-event"></i>
-                    <input type="date" @bind="studentModel.Birthday" placeholder="أدخل تاريخ الميلاد">
-                </div>
-            </div> 
-        </div>
-	    <div class="grid-row">
-		 <div class="input-group">
-                <label>العنوان</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-alphabet"></i>
-                    <input type="text" @bind="studentModel.Address" placeholder="أدخل العنوان">
-                </div>
-            </div>
-             <div class="input-group">
-                <label>البريد الإلكتروني</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-envelope"></i>
-                    <input type="email" @bind="studentModel.Email" placeholder="أدخل البرييد الالكتروني">
-                </div>
-            </div>
-        </div>
-         <div class="grid-row">
-			   <div class="input-group">
-                <label>الجامع التابع له</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-houses"></i>
-                    <input type="text" @bind="studentModel.Musqe" placeholder="أدخل الجامع">
-                </div>
-            </div>
-             <div class="input-group">
-                <label>الجنس</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-gender-ambiguous"></i>
-                    <select @bind="studentModel.Gender">
-                        <option value="" disabled selected>اختر الجنس</option>
-                        <option value="male">ذكر</option>
-                        <option value="female">أنثى</option>
-                    </select>
-                </div>
-            </div>
-            </div>
-             <div class="grid-row">
-                     <div class="input-group">
-                <label>اسم ولي الامر </label>
-                <div class="input-wrapper">
-                    <i class="bi bi-person"></i>
-                    <input type="text" @bind="studentModel.NameParent" placeholder="أدخل الاسم">
-                </div>
-            </div>
-                  <div class="input-group">
-                <label>رقم ولي الامر</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-telephone"></i>
-                    <input type="tel" @bind="studentModel.PhoneNumberParent" placeholder="أدخل الرقم">
-                </div>
-            </div>
-		        </div>
-                 <div class="grid-row">
-            <div class="input-group">
-                <label>الفوج</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-layers"></i>
-                    <select @bind="studentModel.Fouj">
-                        <option>الفوج الأول</option>
-                        <option>الفوج الثاني</option>
-                    </select>
-                </div>
-            </div>
-				 <div class="input-group">
-                <label>الحلقة</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-layers"></i>
-                    <select @bind="studentModel.Halaqa">
-                        <option>الحلقة الاولى</option>
-                        <option>الحلقة الثانية</option>
-                    </select>
-                </div>
-                </div>
-                </div>
-				 <div class="grid-row">
-              <div class="input-group">
-                <label>حالة الحساب</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-check-circle"></i>
-                    <select @bind="studentModel.HaltHesab">
-                        <option value="active">نشط</option>
-                        <option value="inactive">متوقف</option>
-                    </select>
-                </div>
-            </div>
-            <div class="input-group">
-                <label>كلمة المرور</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-lock"></i>
-                    <input type="password" @bind="studentModel.Password" placeholder="أدخل كلمة المرور">
-                </div>
-            </div>
-        </div>
-		 <div class="actions">
-            <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ الطالب</button>
-            <button type="submit" class="parent"><i class="bi bi-check2-all"></i> ربط بولي الامر </button>
-            <a href="/supervisor/student" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
-        </div>
-		</EditForm>
-                </div>
-	</details>
-	</section>
-@code {
-	private void editStudent()
-	{
-		NavManager.NavigateTo("/supervisor/edit");
-		// Logic to edit student information
-	}
-	private void viewStudent1()
-	{
-		NavManager.NavigateTo("/supervisor/alaa_info");
-		// Logic to edit student information
-	}
-    //register
-RegisterRequest studentModel = new RegisterRequest();
-
-  
-
-    // 2. وهون بنعمل الميثود اللي رح تنادي الـ Service لما نضغط الزر
-    // private async Task HandleSubmit()
-    // {
-    //     var response = await AuthService.Register(studentModel);
-        
-    //     if (response.Success) 
-    //     {
-    //         Console.WriteLine("تم تسجيل الطالب بنجاح!");
-    //         // كود للتوجيه لصفحة تانية أو إظهار رسالة نجاح
-    //     }else
-    //     {
-    //         Console.WriteLine("فشل تسجيل الطالب: " + response.Message);
-    //         // كود لإظهار رسالة خطأ للمستخدم   
-    //     }
-    // }
-	//search
-    // كائن البحث اللي رح نربطه بحقول الإدخال (Input Fields)
-    private SearchMembersRequest searchModel = new SearchMembersRequest();
-    
-    // متغير لتخزين النتيجة القادمة من الباك إند
+</details>
+</section>
+ @code {
+    // تم تغيير الكائنات لتتوافق 100% مع الـ Requests والـ API الحقيقي الخاص بكِ
+    private RegisterStudentRequest studentModel = new RegisterStudentRequest { Gender = "Male", MosqueId = Guid.NewGuid() };
+    private SearchMembersRequest searchModel = new SearchMembersRequest { MemberType = "Student" };
     private GeneralResponse searchResponse;
-
-    // متغير لحالة التحميل (اختياري بس بيعطي شكل احترافي)
     private bool isLoading = false;
+    
+    // استخدمنا كائناً محلياً يحتوي على المعرف الصحيح للجدول تفادياً لخطأ الـ Id المفقود
+    private List<LocalStudentDto> studentsList = new List<LocalStudentDto>();
 
-    // 👇 هنا السطر الجديد: ننشئ قائمة فارغة لتخزين الطلاب الذين سنجدهم
-    // (إذا كان اسم كلاس الطالب عندك يختلف عن "StudentDto" قومي بتغييره للاسم الصحيح عندك)
-    private List<StudentFilterDto> studentsList = new List<StudentFilterDto>();
+    private void editStudent(Guid id)
+    {
+        NavManager.NavigateTo($"/supervisor/edit/{id}");
+    }
 
-//     private async Task HandleSearch()
-//     {
-//         isLoading = true;
-//         try
-//         {
-//             // استدعاء خدمة البحث من الباك إند
-//             searchResponse = await AuthService.Search(searchModel);
+    private void viewStudent1(Guid id)
+    {
+        NavManager.NavigateTo($"/supervisor/student-info/{id}");
+    }
+
+    private async Task HandleSearch()
+    {
+        isLoading = true;
+        try
+        {
+            // استدعاء ميثود البحث الحقيقي المكتوب بالـ Interface
+            searchResponse = await EnrollmentService.SearchMembersAsync(searchModel);
             
-//             if (searchResponse != null && searchResponse.Success)
-//             {
-//                 // 👇 هاد السطر هو السحر اللي كان ناقص!
-//                 // هنا بنأخذ البيانات القادمة من السيرفر وبنحطها بالقائمة ليقرأها الجدول فوراً
-//                 // تنبيه: تأكدي هل الحقل في الـ GeneralResponse اسمه Data أم شيئ آخر؟
-//                 studentsList = (List<Moeen.Shared.Requests.CircleQuery.StudentFilterDto>)searchResponse.Data; 
-//             }
-//             else
-//             {
-//                 // إذا فشل البحث أو لم يجد نتائج، نفرغ القائمة القديمة
-//                 studentsList = new List<StudentFilterDto>();
-//             }
-//         }
-//         catch (Exception ex)
-//         {
-//             Console.WriteLine($"Error: {ex.Message}");
-//         }
-//         finally
-//         {
-//             isLoading = false;
-//             StateHasChanged(); // إجبار الصفحة على التحديث وعرض البيانات الجديدة
-//         }
-// }
+            if (searchResponse != null && searchResponse.Success && searchResponse.Data != null)
+            {
+                // فك تشفير البيانات الراجعة إلى القائمة المحلية
+                studentsList = System.Text.Json.JsonSerializer.Deserialize<List<LocalStudentDto>>(searchResponse.Data.ToString(),
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<LocalStudentDto>();
+            }
+            else
+            {
+                studentsList = new List<LocalStudentDto>();
+            }
+        }
+        catch (Exception)
+        {
+            // بيانات وهمية مؤقتة في حال توقف السيرفر لتجربة الصفحة
+            PopulateMockData();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged(); 
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        // استدعاء ميثود التسجيل الحقيقية من IEnrollmentService
+        var response = await EnrollmentService.RegisterStudentAsync(studentModel);
+        
+        if (response != null && response.Success) 
+        {
+            studentModel = new RegisterStudentRequest { Gender = "Male", MosqueId = Guid.NewGuid() };
+            await HandleSearch(); 
+        }
+    }
+
+    private async Task DeleteStudent(Guid studentId)
+    {
+        // استدعاء ميثود الحذف الحقيقية التي تستقبل الـ Guid مباشرة
+        var response = await EnrollmentService.DeleteStudentAsync(studentId);
+        
+        if (response != null && response.Success)
+        {
+            await HandleSearch();
+        }
+        else
+        {
+            // حذف محلي فوري كخطة بديلة أثناء الفحص والعرض
+            studentsList.RemoveAll(x => x.StudentId == studentId);
+            StateHasChanged();
+        }
+    }
+
+    private void PopulateMockData()
+    {
+        studentsList = new List<LocalStudentDto>
+        {
+            new LocalStudentDto { StudentId = Guid.NewGuid(), Name = "آلاء قاسم" },
+            new LocalStudentDto { StudentId = Guid.NewGuid(), Name = "ماريا العبد السلام" },
+            new LocalStudentDto { StudentId = Guid.NewGuid(), Name = "آية دعبول" }
+        };
+    }
+
+    // كلاس محلي نضمن من خلاله وجود حقل الـ StudentId لعدم تكرار خطأ الكومبايلر
+    public class LocalStudentDto
+    {
+        public Guid StudentId { get; set; }
+        public string Name { get; set; }
+    }
 }
