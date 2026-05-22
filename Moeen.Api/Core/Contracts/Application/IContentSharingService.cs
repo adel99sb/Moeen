@@ -1,4 +1,6 @@
-﻿using Moeen.Shared.Requests.ContentSharing;
+﻿using Moeen.Api.Core.Entities;
+using Moeen.Shared.Requests.ContentSharing;
+using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.CircleTeacherAssignment;
 using Moeen.Shared.Responses.ContentSharing;
 using System.Collections.Generic;
@@ -11,51 +13,56 @@ namespace Moeen.Api.Core.Contracts.Application
         /// <summary>
         /// نشر منشور عام أو للحلقات
         /// </summary>
-        Task<PostDto> PublishPostAsync(PublishPostRequest request);
+        Task<GeneralResponse> PublishPostAsync(PublishPostRequest request);
 
         /// <summary>
         /// التفاعل مع منشور (إعجاب، دعم، إلخ)
         /// </summary>
-        Task<InteractWithPostResponse> InteractWithPostAsync(InteractWithPostRequest request);
+        Task<GeneralResponse> InteractWithPostAsync(InteractWithPostRequest request);
 
         /// <summary>
         /// البحث في المحتوى
         /// </summary>
-        Task<SearchContentResponse> SearchContentAsync(SearchContentRequest request);
+        Task<GeneralResponse> SearchContentAsync(SearchContentRequest request);
 
         /// <summary>
         /// حذف المحتوى القديم
         /// </summary>
-        Task<DeleteOldContentResponse> DeleteOldContentAsync(DeleteOldContentRequest request);
+        Task<GeneralResponse> DeleteOldContentAsync(DeleteOldContentRequest request);
 
         /// <summary>
         /// إدارة الإعلانات (إنشاء/تحديث)
         /// </summary>
-        Task<ManageAnnouncementResponse> ManageAnnouncementsAsync(ManageAnnouncementRequest request);
+        Task<GeneralResponse> ManageAnnouncementsAsync(ManageAnnouncementRequest request);
 
         /// <summary>
         /// إضافة وسائط متعددة (صور) لمنشور
         /// </summary>
-        Task<AddMultimediaResponse> AddMultimediaAsync(AddMultimediaRequest request);
+        Task<GeneralResponse> AddMultimediaAsync(AddMultimediaRequest request);
 
         /// <summary>
         /// [GET] جلب منشور محدد بمعرفه مع تفاصيل التفاعلات
         /// </summary>
-        Task<PostDto> GetPostByIdAsync(GetPostByIdRequest request);
+        Task<GeneralResponse> GetPostByIdAsync(GetPostByIdRequest request);
 
         /// <summary>
         /// [GET] جلب قائمة التفاعلات على منشور معين
         /// </summary>
-        Task<List<InteractionDto>> GetPostInteractionsAsync(GetPostInteractionsRequest request);
+        Task<GeneralResponse> GetPostInteractionsAsync(GetPostInteractionsRequest request);
 
         /// <summary>
         /// [PUT] تحديث محتوى منشور موجود
         /// </summary>
-        Task<PostDto> UpdatePostAsync(UpdatePostRequest request);
+        Task<GeneralResponse> UpdatePostAsync(UpdatePostRequest request);
 
         /// <summary>
         /// [DELETE] حذف منشور نهائيًا
         /// </summary>
-        Task<OperationResponseDto> DeletePostAsync(DeletePostRequest request);
+        Task<GeneralResponse> DeletePostAsync(DeletePostRequest request);
+
+        /// <summary>
+        /// [GET] جلب كافة المنشورات
+        /// </summary>
+        Task<GeneralResponse> GetAllPostsAsync();
     }
 }

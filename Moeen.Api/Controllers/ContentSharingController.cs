@@ -177,5 +177,15 @@ namespace Moeen.Api.Controllers
                 return Ok(GeneralResponse.Ok(result.Message, result));
             return BadRequest(GeneralResponse.BadRequest(result.Message, result));
         }
+
+        /// <summary>
+        /// GET: جلب كافة المنشورات.
+        /// </summary>
+        [HttpGet("all")]
+        public async Task<ActionResult<GeneralResponse>> GetAllPosts()
+        {
+            var response = await _contentService.GetAllPostsAsync();
+            return StatusCode(response.StatusCode, response);
+        }
     }
 }
