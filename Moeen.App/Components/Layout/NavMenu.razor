@@ -1,37 +1,39 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Moeen.App</a>
-    </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
+﻿<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav-menu">
+        <div class="nav-item">
             <NavLink class="nav-link" href="Student/StudentDashboard" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> الصفحة الرئيسية
+                <i class="bi bi-house-door-fill"></i>
+                <span class="nav-text">الصفحة الرئيسية</span>
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+
+        <div class="nav-item">
             <NavLink class="nav-link" href="Student/Book">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> الكتب
+                <i class="bi bi-book-fill"></i>
+                <span class="nav-text">الكتب</span>
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+
+        <div class="nav-item">
             <NavLink class="nav-link" href="Student/Post">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> الاعلانات
+                <i class="bi bi-megaphone-fill"></i>
+                <span class="nav-text">الاعلانات</span>
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Student/Profile">
-                <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> الملف الشخصي
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
+
+        <div class="nav-item">
             <NavLink class="nav-link" href="Student/Progress">
-                <span class="bi bi-graph-up-arrow-nav-m" aria-hidden="true"></span> التقدم
-            </NavLink>enu
+                <i class="bi bi-graph-up-arrow"></i>
+                <span class="nav-text">التقدم</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="Student/Profile">
+                <i class="bi bi-person-circle"></i>
+                <span class="nav-text">الملف 
+                    الشخصي</span>
+            </NavLink>
         </div>
     </nav>
 </div>
