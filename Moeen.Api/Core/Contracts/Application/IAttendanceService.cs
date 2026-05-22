@@ -75,5 +75,10 @@ namespace Moeen.Api.Core.Contracts.Application
         /// حساب نسبة حضور المعلم
         /// </summary>
         Task<GeneralResponse> GetTeacherAttendanceRateAsync(GetTeacherAttendanceRateRequest request);
+
+        /// <summary>
+        /// جلب تقرير غياب الطالب مع عدد الأيام والتنبيهات
+        /// </summary>
+        Task<GeneralResponse> GetStudentAbsenceReportAsync(GetStudentAbsenceReportRequest request);
     }
 }

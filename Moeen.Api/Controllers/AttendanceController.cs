@@ -118,5 +118,24 @@ namespace Moeen.Api.Controllers
 
             return StatusCode(response.StatusCode, response);
         }
+
+        [HttpGet("students/{studentId:guid}/absence-report")]
+        public async Task<ActionResult<GeneralResponse>> GetStudentAbsenceReport(
+            [FromRoute] Guid studentId,
+            [FromQuery] DateTime? fromDate,
+            [FromQuery] DateTime? toDate,
+            [FromQuery] int consecutiveThreshold = 3)
+        {
+            var request = new GetStudentAbsenceReportRequest
+            {
+                StudentId = studentId,
+                FromDate = fromDate,
+                ToDate = toDate,
+                ConsecutiveAlertThreshold = consecutiveThreshold
+            };
+
+            var response = await _attendanceService.GetStudentAbsenceReportAsync(request);
+            return StatusCode(response.StatusCode, response);
+        }
     }
 }

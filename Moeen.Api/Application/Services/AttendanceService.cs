@@ -17,7 +17,7 @@ namespace Moeen.Api.Application.Services
         private readonly ICurrentUserService _currentUserService;
 
         public AttendanceService(AppDbContext context, ICurrentUserService currentUserService)
-        {
+        {   
             _context = context;
             _currentUserService = currentUserService;
         }
@@ -587,6 +587,160 @@ namespace Moeen.Api.Application.Services
                 .Where(h => h.TeacherId == teacherId)
                 .Select(h => (Guid?)h.Id)
                 .FirstOrDefaultAsync();
+        }
+        public async Task<GeneralResponse> GetStudentAbsenceReportAsync(GetStudentAbsenceReportRequest request)
+        {
+            if (request == null || request.StudentId == Guid.Empty)
+                return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            var fromDate = (request.FromDate ?? DateTime.UtcNow.AddDays(-30)).Date;
+            var toDate = (request.ToDate ?? DateTime.UtcNow).Date;
+            if (fromDate > toDate)
+                return GeneralResponse.BadRequest("نطاق التاريخ غير صالح.");
+
+            var student = await _context.Students
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Id == request.StudentId);
+
+            if (student == null)
+                return GeneralResponse.NotFound("الطالب غير موجود.");
+
+            // حاول استخدام HalqaId إن وُجد ثم SaturdayHalqeId كنسخة احتياطية
+            Guid? halqaId = student.HalqaId != Guid.Empty ? student.HalqaId :
+                           (student.SaturdayHalqeId != Guid.Empty ? (Guid?)student.SaturdayHalqeId : null);
+
+            // جلسات الحلقة المتوقعة ضمن النطاق (تواريخ)
+            var sessionDates = new List<DateTime>();
+            if (halqaId.HasValue)
+            {
+                sessionDates = await _context.HalqaSessions
+                    .AsNoTracking()
+                    .Where(s => s.HalqaId == halqaId.Value && s.date.Date >= fromDate && s.date.Date <= toDate)
+                    .Select(s => s.date.Date)
+                    .Distinct()
+                    .OrderBy(d => d)
+                    .ToListAsync();
+            }
+
+            // جلب سجلات الحضور للطالب ضمن النطاق، مع التأكد من وجود HalqeSession المرتبطة بها
+            var attendances = await _context.Attendances
+                .AsNoTracking()
+                .Include(a => a.HalqeSession)
+                .Where(a => a.StudentId == student.Id
+                            && a.HalqeSession != null
+                            && a.HalqeSession.date.Date >= fromDate
+                            && a.HalqeSession.date.Date <= toDate)
+                .ToListAsync();
+
+            // إذا لم توجد جلسات معروفة للحلقة، استخدم تواريخ الجلسات الموجودة في سجلات الحضور كـ "جلسات مرصودة"
+            if (!sessionDates.Any())
+            {
+                sessionDates = attendances
+                    .Where(a => a.HalqeSession != null)
+                    .Select(a => a.HalqeSession.date.Date)
+                    .Distinct()
+                    .OrderBy(d => d)
+                    .ToList();
+            }
+
+            // قاموس سريع: تاريخ -> سجل حضور (افتراض سجل واحد لكل طالب لكل جلسة)
+            var attendanceByDate = attendances
+                .Where(a => a.HalqeSession != null)
+                .GroupBy(a => a.HalqeSession.date.Date)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            // إحصاءات مسجّلة
+            var presentCount = attendances.Count(a => a.Status == AttendanceStatus.Present || a.Status == AttendanceStatus.Late);
+            var excusedCount = attendances.Count(a => a.Status == AttendanceStatus.Excused);
+            var recordedAbsentCount = attendances.Count(a => a.Status == AttendanceStatus.Absent);
+
+            // أيام متوقعة بدون سجل => غياب غير مبرر
+            var missingSessionCount = 0;
+            var absentDates = new HashSet<DateTime>();
+
+            if (sessionDates.Any())
+            {
+                foreach (var d in sessionDates)
+                {
+                    if (!attendanceByDate.ContainsKey(d))
+                    {
+                        missingSessionCount++;
+                        absentDates.Add(d);
+                    }
+                    else
+                    {
+                        var rec = attendanceByDate[d];
+                        if (rec.Status == AttendanceStatus.Absent)
+                            absentDates.Add(d);
+                        // الغياب بعذر يحتسب في excusedCount فقط
+                    }
+                }
+            }
+            else
+            {
+                // لا توجد جلسات متوقعة: اعتمد على سجلات الغياب المسجلة فقط
+                foreach (var d in attendances.Where(a => a.Status == AttendanceStatus.Absent).Select(a => a.HalqeSession.date.Date))
+                    absentDates.Add(d);
+            }
+
+            var unexcusedCount = recordedAbsentCount + missingSessionCount;
+            var totalAbsences = excusedCount + unexcusedCount;
+
+            // حساب أطول سلسلة غيابات متتالية اعتماداً على sessionDates إن وُجدت، وإلا بناءً على absentDates المتسلسلة
+            int longestConsecutive = 0;
+            if (sessionDates.Any())
+            {
+                int cur = 0;
+                foreach (var d in sessionDates)
+                {
+                    if (absentDates.Contains(d))
+                    {
+                        cur++;
+                        if (cur > longestConsecutive) longestConsecutive = cur;
+                    }
+                    else cur = 0;
+                }
+            }
+            else
+            {
+                var ordered = absentDates.OrderBy(x => x).ToList();
+                int cur = 0;
+                DateTime? prev = null;
+                foreach (var d in ordered)
+                {
+                    if (prev == null || (d - prev.Value).TotalDays > 1)
+                        cur = 1;
+                    else
+                        cur++;
+                    if (cur > longestConsecutive) longestConsecutive = cur;
+                    prev = d;
+                }
+            }
+
+            // التنبيهات
+            var alerts = new List<string>();
+            int threshold = Math.Max(1, request.ConsecutiveAlertThreshold);
+            if (longestConsecutive >= threshold)
+                alerts.Add($"تنبيه: الطالب لديه {longestConsecutive} غيابات متتالية (العتبة = {threshold}).");
+
+            // تجميع النتائج
+            var dto = new StudentAbsenceReportDto
+            {
+                StudentId = student.Id,
+                StudentName = student.name ?? string.Empty,
+                FromDate = fromDate,
+                ToDate = toDate,
+                TotalExpectedSessions = sessionDates.Count,
+                PresentDays = presentCount,
+                ExcusedAbsences = excusedCount,
+                UnexcusedAbsences = unexcusedCount,
+                TotalAbsenceDays = totalAbsences,
+                LongestConsecutiveAbsences = longestConsecutive,
+                Alerts = alerts,
+                AbsentDates = absentDates.OrderBy(d => d).ToList()
+            };
+
+            return GeneralResponse.Ok("تم جلب تقرير الغياب.", dto);
         }
     }
 }
