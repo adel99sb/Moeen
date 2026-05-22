@@ -42,5 +42,8 @@ namespace Moeen.Shared.Requests.Enrollment
         public string Bio { get; set; } // was 'boi' in entity
 
         public string AssignedAt { get; set; } // could be date string or DateTime
+        public List<string>? Experiences { get; set; }      // مثلاً: "معلم قرآن منذ 10 سنوات"
+        public List<string>? Achievements { get; set; }    // مثلاً: "تخريج 50 طالباً"
+        public List<string>? TeachingPlaces { get; set; }  // مثلاً: "جامع الورق الكبير"
     }
 }

@@ -756,5 +756,196 @@ namespace Moeen.Api.Application.Services
                 ReportFileLock.Release();
             }
         }
+        public async Task<GeneralResponse> GetTeacherDashboardStatisticsAsync(GetTeacherDashboardStatisticsRequest request)
+        {
+            try
+            {
+                if (request == null || request.TeacherId == Guid.Empty)
+                    return GeneralResponse.BadRequest("Invalid teacher id.");
+
+                var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(request.TeacherId);
+                if (teacher == null)
+                    return GeneralResponse.NotFound("Teacher not found.");
+
+                var fromDate = (request.FromDate ?? DateTime.UtcNow.AddDays(-30)).Date;
+                var toDate = (request.ToDate ?? DateTime.UtcNow).Date;
+
+                if (fromDate > toDate)
+                    return GeneralResponse.BadRequest("Invalid date range.");
+
+                var halqaSpec = Spec.For<Halqa>(h => h.TeacherId == request.TeacherId);
+                var halqas = (await _unitOfWork.Repository<Halqa>().GetAllAsync(halqaSpec)).ToList();
+                var halqaIds = halqas.Select(h => h.Id).ToHashSet();
+
+                if (halqaIds.Count == 0)
+                {
+                    return GeneralResponse.Ok("Teacher dashboard stats.", new TeacherDashboardStatisticsDto
+                    {
+                        TeacherId = teacher.Id,
+                        TeacherName = teacher.name ?? string.Empty
+                    });
+                }
+
+                var progressSpec = Spec.For<ProgressEntry>(p => halqaIds.Contains(p.HalqaId) && p.Date >= fromDate && p.Date <= toDate);
+                var progressEntries = (await _unitOfWork.Repository<ProgressEntry>().GetAllAsync(progressSpec)).ToList();
+
+                var studentIds = progressEntries.Select(p => p.StudentId).Distinct().ToList();
+                var studentsSpec = Spec.For<Student>(s => studentIds.Contains(s.Id));
+                var students = (await _unitOfWork.Repository<Student>().GetAllAsync(studentsSpec)).ToList();
+
+                var perStudentLastPage = progressEntries
+                    .GroupBy(p => p.StudentId)
+                    .Select(g => g.Max(x => x.PageNumber))
+                    .DefaultIfEmpty(0)
+                    .Average();
+
+                var memorizationRate = studentIds.Count == 0
+                    ? 0.0
+                    : Math.Round(perStudentLastPage / 604d * 100d, 2);
+
+                var sessionSpec = Spec.For<HalqaSession>(s => halqaIds.Contains(s.HalqaId) && s.date >= fromDate && s.date <= toDate);
+                var sessions = (await _unitOfWork.Repository<HalqaSession>().GetAllAsync(sessionSpec)).ToList();
+                var sessionIds = sessions.Select(s => s.Id).ToHashSet();
+
+                var attendanceSpec = Spec.For<Attendance>(a => sessionIds.Contains(a.HalqeSessionId));
+                var attendances = (await _unitOfWork.Repository<Attendance>().GetAllAsync(attendanceSpec)).ToList();
+
+                var totalAttendance = attendances.Count;
+                var presentAttendance = attendances.Count(a => a.Status == AttendanceStatus.Present || a.Status == AttendanceStatus.Late);
+                var attendanceRate = totalAttendance == 0 ? 0 : Math.Round((double)presentAttendance / totalAttendance * 100, 2);
+
+                var totalPoints = students.Sum(s => s.score);
+
+                return GeneralResponse.Ok("Teacher dashboard stats.", new TeacherDashboardStatisticsDto
+                {
+                    TeacherId = teacher.Id,
+                    TeacherName = teacher.name ?? string.Empty,
+                    StudentsCount = studentIds.Count,
+                    HalaqasCount = halqas.Count,
+                    MemorizationRate = memorizationRate,
+                    AttendanceRate = attendanceRate,
+                    TotalPoints = totalPoints
+                });
+            }
+            catch
+            {
+                return GeneralResponse.InternalError("Get teacher dashboard stats failed.");
+            }
+        }
+
+        public async Task<GeneralResponse> GetMostRegressingStudentAsync(GetMostRegressingStudentRequest request)
+        {
+            try
+            {
+                if (request == null || request.TeacherId == Guid.Empty)
+                    return GeneralResponse.BadRequest("Invalid teacher id.");
+
+                var halqaSpec = Spec.For<Halqa>(h => h.TeacherId == request.TeacherId);
+                var halqas = (await _unitOfWork.Repository<Halqa>().GetAllAsync(halqaSpec)).ToList();
+                var halqaIds = halqas.Select(h => h.Id).ToHashSet();
+
+                if (halqaIds.Count == 0)
+                    return GeneralResponse.NotFound("No halqas found.");
+
+                var recentTo = (request.RecentTo ?? DateTime.UtcNow).Date;
+                var recentFrom = (request.RecentFrom ?? recentTo.AddDays(-request.WindowDays)).Date;
+                var prevFrom = recentFrom.AddDays(-request.WindowDays);
+                var prevTo = recentFrom.AddDays(-1);
+
+                var progressSpec = Spec.For<ProgressEntry>(p => halqaIds.Contains(p.HalqaId) && p.Date >= prevFrom && p.Date <= recentTo);
+                var progress = (await _unitOfWork.Repository<ProgressEntry>().GetAllAsync(progressSpec)).ToList();
+
+                var recent = progress
+                    .Where(p => p.Date >= recentFrom && p.Date <= recentTo)
+                    .GroupBy(p => p.StudentId)
+                    .ToDictionary(g => g.Key, g => g.Average(x => (double)x.PageNumber));
+
+                var previous = progress
+                    .Where(p => p.Date >= prevFrom && p.Date <= prevTo)
+                    .GroupBy(p => p.StudentId)
+                    .ToDictionary(g => g.Key, g => g.Average(x => (double)x.PageNumber));
+
+                var allIds = recent.Keys.Union(previous.Keys).ToList();
+                if (allIds.Count == 0)
+                    return GeneralResponse.NotFound("No progress data found.");
+
+                var minDelta = double.MaxValue;
+                Guid targetId = Guid.Empty;
+                double prevVal = 0;
+                double recentVal = 0;
+
+                foreach (var id in allIds)
+                {
+                    var r = recent.TryGetValue(id, out var rv) ? rv : 0;
+                    var p = previous.TryGetValue(id, out var pv) ? pv : 0;
+                    var delta = r - p;
+
+                    if (delta < minDelta)
+                    {
+                        minDelta = delta;
+                        targetId = id;
+                        prevVal = p;
+                        recentVal = r;
+                    }
+                }
+
+                var student = await _unitOfWork.Repository<Student>().GetByIdAsync(targetId);
+
+                return GeneralResponse.Ok("Most regressing student.", new RegressingStudentDto
+                {
+                    StudentId = targetId,
+                    StudentName = student?.name ?? string.Empty,
+                    PreviousAveragePages = Math.Round(prevVal, 2),
+                    RecentAveragePages = Math.Round(recentVal, 2),
+                    Delta = Math.Round(minDelta, 2)
+                });
+            }
+            catch
+            {
+                return GeneralResponse.InternalError("Get most regressing student failed.");
+            }
+        }
+
+        public async Task<GeneralResponse> GetMotivationPlansSummaryAsync(GetMotivationPlansSummaryRequest request)
+        {
+            try
+            {
+                if (request == null || request.TeacherId == Guid.Empty)
+                    return GeneralResponse.BadRequest("Invalid teacher id.");
+
+                var planSize = request.PlanSize <= 0 ? 5 : request.PlanSize;
+
+                var halqaSpec = Spec.For<Halqa>(h => h.TeacherId == request.TeacherId);
+                var halqas = (await _unitOfWork.Repository<Halqa>().GetAllAsync(halqaSpec)).ToList();
+                var halqaIds = halqas.Select(h => h.Id).ToHashSet();
+
+                if (halqaIds.Count == 0)
+                    return GeneralResponse.Ok("Motivation plans summary.", new MotivationPlansSummaryDto());
+
+                var progressSpec = Spec.For<ProgressEntry>(p => halqaIds.Contains(p.HalqaId));
+                var progress = (await _unitOfWork.Repository<ProgressEntry>().GetAllAsync(progressSpec)).ToList();
+                var studentIds = progress.Select(p => p.StudentId).Distinct().ToList();
+
+                var studentsSpec = Spec.For<Student>(s => studentIds.Contains(s.Id));
+                var students = (await _unitOfWork.Repository<Student>().GetAllAsync(studentsSpec))
+                    .OrderByDescending(s => s.score)
+                    .ToList();
+
+                var planOne = students.Take(planSize).ToList();
+                var planTwo = students.Skip(planSize).Take(planSize).ToList();
+
+                return GeneralResponse.Ok("Motivation plans summary.", new MotivationPlansSummaryDto
+                {
+                    PlanOneStudentsCount = planOne.Count,
+                    PlanTwoStudentsCount = planTwo.Count,
+                    PlanOneAverageScore = planOne.Count == 0 ? 0 : Math.Round(planOne.Average(s => s.score), 2),
+                    PlanTwoAverageScore = planTwo.Count == 0 ? 0 : Math.Round(planTwo.Average(s => s.score), 2)
+                });
+            }
+            catch
+            {
+                return GeneralResponse.InternalError("Get motivation plans summary failed.");
+            }
+        }
     }
 }

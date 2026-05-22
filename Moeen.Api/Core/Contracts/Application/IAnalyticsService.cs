@@ -63,5 +63,20 @@ namespace Moeen.Api.Core.Contracts.Application
         /// حذف تقرير تحليلي محفوظ
         /// </summary>
         Task<GeneralResponse> DeleteAnalyticsReportAsync(Guid reportId);
+
+        /// <summary>
+        /// احضار احصائيات لوحة تحكم المعلم
+        /// </summary>
+        Task<GeneralResponse> GetTeacherDashboardStatisticsAsync(GetTeacherDashboardStatisticsRequest request);
+
+        /// <summary>
+        /// الحصول على أكثر الطلاب تراجعاً
+        /// </summary>
+        Task<GeneralResponse> GetMostRegressingStudentAsync(GetMostRegressingStudentRequest request);
+
+        /// <summary>
+        /// ملخص خطط التحفيز
+        /// </summary>
+        Task<GeneralResponse> GetMotivationPlansSummaryAsync(GetMotivationPlansSummaryRequest request);
     }
 }

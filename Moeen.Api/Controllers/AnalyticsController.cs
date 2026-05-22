@@ -131,5 +131,60 @@ namespace Moeen.Api.Controllers
             var result = await _analyticsService.DeleteAnalyticsReportAsync(reportId);
             return result.ToActionResult();
         }
+
+        /// <summary>
+        /// GET: جلب إحصائيات واجهة معلم.
+        /// </summary>
+        [HttpGet("teacher/{teacherId:guid}/dashboard")]
+        public async Task<IActionResult> GetTeacherDashboard(
+            [FromRoute] Guid teacherId,
+            [FromQuery] DateTime? fromDate,
+            [FromQuery] DateTime? toDate)
+        {
+            var result = await _analyticsService.GetTeacherDashboardStatisticsAsync(new GetTeacherDashboardStatisticsRequest
+            {
+                TeacherId = teacherId,
+                FromDate = fromDate,
+                ToDate = toDate
+            });
+
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// GET: جلب الطلاب الأكثر تراجعًا.
+        /// </summary>
+        [HttpGet("teacher/{teacherId:guid}/most-regressing")]
+        public async Task<IActionResult> GetMostRegressingStudent(
+            [FromRoute] Guid teacherId,
+            [FromQuery] DateTime? recentFrom,
+            [FromQuery] DateTime? recentTo,
+            [FromQuery] int windowDays = 30)
+        {
+            var result = await _analyticsService.GetMostRegressingStudentAsync(new GetMostRegressingStudentRequest
+            {
+                TeacherId = teacherId,
+                RecentFrom = recentFrom,
+                RecentTo = recentTo,
+                WindowDays = windowDays
+            });
+
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// GET: ملخص خطط التحفيز.
+        /// </summary>
+        [HttpGet("teacher/{teacherId:guid}/motivation-summary")]
+        public async Task<IActionResult> GetMotivationPlansSummary([FromRoute] Guid teacherId, [FromQuery] int planSize = 5)
+        {
+            var result = await _analyticsService.GetMotivationPlansSummaryAsync(new GetMotivationPlansSummaryRequest
+            {
+                TeacherId = teacherId,
+                PlanSize = planSize
+            });
+
+            return result.ToActionResult();
+        }
     }
 }
