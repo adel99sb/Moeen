@@ -62,14 +62,14 @@ namespace Moeen.Api.Controllers
                 PageSize = pageSize
             }));
 
-        [HttpGet("circle/overview")]
-        public async Task<ActionResult<GeneralResponse>> GetCirclePerformanceOverview(
-            [FromQuery] Guid? circleId,
+        [HttpGet("halqa/overview")]
+        public async Task<ActionResult<GeneralResponse>> GetHalqaPerformanceOverview(
+            [FromQuery] Guid? HalqaId,
             [FromQuery] DateTime? fromDate,
             [FromQuery] DateTime? toDate)
-            => Ok(await _goalService.GetCirclePerformanceOverviewAsync(new GetCirclePerformanceOverviewRequest
+            => Ok(await _goalService.GetHalqaPerformanceOverviewAsync(new GetHalqaPerformanceOverviewRequest
             {
-                CircleId = circleId,
+                HalqaId = HalqaId,
                 FromDate = fromDate,
                 ToDate = toDate
             }));

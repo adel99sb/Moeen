@@ -26,5 +26,6 @@ namespace Moeen.Shared.Requests.Library
 
         [Url(ErrorMessage = "Invalid cover image URL")]
         public string CoverImageUrl { get; set; }
+        public string? DownloadUrl { get; set; }
     }
 }

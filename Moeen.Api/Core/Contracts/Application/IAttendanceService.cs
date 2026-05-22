@@ -65,5 +65,15 @@ namespace Moeen.Api.Core.Contracts.Application
         /// تحديث حالة حضور لسجل موجود
         /// </summary>
         Task<GeneralResponse> UpdateAttendanceStatusAsync(Guid recordId, UpdateAttendanceStatusRequest request);
+
+        /// <summary>
+        /// تسجيل حضور المعلم
+        /// </summary>
+        Task<GeneralResponse> RecordTeacherAttendanceAsync(RecordTeacherAttendanceRequest request);
+
+        /// <summary>
+        /// حساب نسبة حضور المعلم
+        /// </summary>
+        Task<GeneralResponse> GetTeacherAttendanceRateAsync(GetTeacherAttendanceRateRequest request);
     }
 }

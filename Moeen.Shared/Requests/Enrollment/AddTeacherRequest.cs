@@ -26,9 +26,13 @@ namespace Moeen.Shared.Requests.Enrollment
         [Phone(ErrorMessage = "Invalid phone number")]
         public string Phone { get; set; }
 
+        public string PhoneNumber { get; set; }
+
         [Required(ErrorMessage = "Gender is required")]
         [RegularExpression("^(Male|Female)$", ErrorMessage = "Gender must be Male or Female")]
         public string Gender { get; set; }
+
+        public DateTime? DateOfBirth { get; set; }
 
         // Teacher specific
         [Required(ErrorMessage = "Mosque ID is required")]
@@ -38,5 +42,8 @@ namespace Moeen.Shared.Requests.Enrollment
         public string Bio { get; set; } // was 'boi' in entity
 
         public string AssignedAt { get; set; } // could be date string or DateTime
+        public List<string>? Experiences { get; set; }      // مثلاً: "معلم قرآن منذ 10 سنوات"
+        public List<string>? Achievements { get; set; }    // مثلاً: "تخريج 50 طالباً"
+        public List<string>? TeachingPlaces { get; set; }  // مثلاً: "جامع الورق الكبير"
     }
 }

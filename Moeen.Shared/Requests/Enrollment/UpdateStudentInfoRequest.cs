@@ -11,5 +11,6 @@ namespace Moeen.Shared.Requests.Enrollment
         public int? Status { get; set; }
         public int? Score { get; set; }
         public string? Notes { get; set; }
+        public string? LabCategory { get; set; } // "«· “«„", " „Ì“", √Ê null
     }
 }

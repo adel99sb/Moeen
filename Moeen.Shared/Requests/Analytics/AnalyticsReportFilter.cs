@@ -7,7 +7,7 @@ namespace Moeen.Shared.Requests.Analytics
         public string? ReportType { get; set; }
         public Guid? StudentId { get; set; }
         public Guid? TeacherId { get; set; }
-        public Guid? CircleId { get; set; }
+        public Guid? HalqId { get; set; }
 
         public DateTime? From { get; set; }
         public DateTime? To { get; set; }

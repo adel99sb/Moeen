@@ -18,5 +18,6 @@ namespace Moeen.Shared.Requests.Points
 
         [StringLength(500)]
         public string? Reason { get; set; }
+        public string? Notes { get; set; } // ãáÇÍÙÇÊ ÇáãÚáã ÚäÏ ãäÍ ÇáäŞÇØ
     }
 }

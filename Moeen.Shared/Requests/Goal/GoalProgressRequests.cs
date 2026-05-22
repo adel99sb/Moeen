@@ -67,9 +67,9 @@ namespace Moeen.Shared.Requests.Goal
         public DateTime? ToDate { get; set; }
     }
 
-    public class GetCirclePerformanceOverviewRequest
+    public class GetHalqaPerformanceOverviewRequest
     {
-        public Guid? CircleId { get; set; }
+        public Guid? HalqaId { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
     }

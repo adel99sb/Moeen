@@ -46,6 +46,7 @@ namespace Moeen.Shared.Requests.Enrollment
         public Guid MosqueId { get; set; }
 
         public Guid? SaturdayHalqeId { get; set; } // Optional
+        public string? LabCategory { get; set; } // "التزام", "تميز", أو null
 
     }
 }

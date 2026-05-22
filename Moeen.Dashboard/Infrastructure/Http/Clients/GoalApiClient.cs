@@ -61,12 +61,12 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
                    ?? GeneralResponse.BadRequest("فشل استرجاع السجل التفصيلي للطالب.");
         }
 
-        public async Task<GeneralResponse> GetCirclePerformanceOverviewAsync(GetCirclePerformanceOverviewRequest request)
+        public async Task<GeneralResponse> GetCirclePerformanceOverviewAsync(GetHalqaPerformanceOverviewRequest request)
         {
             var url = ApiRoutes.GetCirclePerformanceOverviewAsyncRoute;
 
             var query = "";
-            if (request.CircleId.HasValue) query += $"circleId={request.CircleId.Value}&";
+            if (request.HalqaId.HasValue) query += $"circleId={request.HalqaId.Value}&";
             if (request.FromDate.HasValue) query += $"fromDate={request.FromDate.Value:yyyy-MM-dd}&";
             if (request.ToDate.HasValue) query += $"toDate={request.ToDate.Value:yyyy-MM-dd}&";
 

@@ -271,6 +271,98 @@ namespace Moeen.Api.Application.Services
             return GeneralResponse.Ok("تم حذف السجل.");
         }
 
+        public async Task<GeneralResponse> GetTopPerformingStudentsAsync(GetTopPerformingStudentsRequest request)
+        {
+            request ??= new GetTopPerformingStudentsRequest();
+
+            var fromDate = (request.FromDate ?? DateTime.UtcNow.AddDays(-30)).Date;
+            var toDate = (request.ToDate ?? DateTime.UtcNow).Date;
+            var limit = request.Limit <= 0 ? 5 : request.Limit;
+
+            var query = _context.ProgressEntries.AsNoTracking()
+                .Where(p => p.Date >= fromDate && p.Date <= toDate);
+
+            if (request.CircleId.HasValue)
+                query = query.Where(p => p.HalqaId == request.CircleId.Value);
+
+            var summaries = await query
+                .GroupBy(p => p.StudentId)
+                .Select(g => new
+                {
+                    StudentId = g.Key,
+                    TotalPages = g.Select(x => x.PageNumber).Distinct().Count(),
+                    AverageScore = g.Average(x => x.LevelScore)
+                })
+                .ToListAsync();
+
+            var studentIds = summaries.Select(s => s.StudentId).ToList();
+            var studentNames = await _context.Students
+                .AsNoTracking()
+                .Where(s => studentIds.Contains(s.Id))
+                .ToDictionaryAsync(s => s.Id, s => s.name);
+
+            var results = summaries
+                .Select(s => new StudentPerformanceDto
+                {
+                    StudentId = s.StudentId,
+                    StudentName = studentNames.GetValueOrDefault(s.StudentId, string.Empty),
+                    TotalPagesMemorized = s.TotalPages,
+                    AverageScore = Math.Round(s.AverageScore, 2)
+                })
+                .OrderByDescending(s => s.TotalPagesMemorized)
+                .ThenByDescending(s => s.AverageScore)
+                .Take(limit)
+                .ToList();
+
+            return GeneralResponse.Ok("تم جلب الطلاب المتميزين.", results, totalCount: results.Count);
+        }
+
+        public async Task<GeneralResponse> GetStrugglingStudentsAsync(GetStrugglingStudentsRequest request)
+        {
+            request ??= new GetStrugglingStudentsRequest();
+
+            var fromDate = (request.FromDate ?? DateTime.UtcNow.AddDays(-30)).Date;
+            var toDate = (request.ToDate ?? DateTime.UtcNow).Date;
+            var limit = request.Limit <= 0 ? 5 : request.Limit;
+
+            var query = _context.ProgressEntries.AsNoTracking()
+                .Where(p => p.Date >= fromDate && p.Date <= toDate);
+
+            if (request.CircleId.HasValue)
+                query = query.Where(p => p.HalqaId == request.CircleId.Value);
+
+            var summaries = await query
+                .GroupBy(p => p.StudentId)
+                .Select(g => new
+                {
+                    StudentId = g.Key,
+                    TotalPages = g.Select(x => x.PageNumber).Distinct().Count(),
+                    AverageScore = g.Average(x => x.LevelScore)
+                })
+                .ToListAsync();
+
+            var studentIds = summaries.Select(s => s.StudentId).ToList();
+            var studentNames = await _context.Students
+                .AsNoTracking()
+                .Where(s => studentIds.Contains(s.Id))
+                .ToDictionaryAsync(s => s.Id, s => s.name);
+
+            var results = summaries
+                .Select(s => new StudentPerformanceDto
+                {
+                    StudentId = s.StudentId,
+                    StudentName = studentNames.GetValueOrDefault(s.StudentId, string.Empty),
+                    TotalPagesMemorized = s.TotalPages,
+                    AverageScore = Math.Round(s.AverageScore, 2)
+                })
+                .OrderBy(s => s.TotalPagesMemorized)
+                .ThenBy(s => s.AverageScore)
+                .Take(limit)
+                .ToList();
+
+            return GeneralResponse.Ok("تم جلب الطلاب المتأخرين.", results, totalCount: results.Count);
+        }
+
         private async Task<Guid> ResolveHalqaIdAsync(Guid teacherId, Guid? fallbackHalqaId)
         {
             var halqaId = await _context.Halqas

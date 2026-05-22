@@ -19,6 +19,6 @@ namespace Moeen.Api.Core.Contracts.Application
         Task<GeneralResponse> GetStudentProgressHistoryAsync(GetStudentProgressHistoryRequest request);
 
         // جلب نظرة عامة على أداء حلقة
-        Task<GeneralResponse> GetCirclePerformanceOverviewAsync(GetCirclePerformanceOverviewRequest request);
+        Task<GeneralResponse> GetHalqaPerformanceOverviewAsync(GetHalqaPerformanceOverviewRequest request);
     }
 }

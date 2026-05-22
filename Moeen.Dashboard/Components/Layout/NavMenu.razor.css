@@ -12,13 +12,13 @@
 }
 
     .navbar-toggler:checked {
-        background-color: rgba(255, 255, 255, 0.5);
+        background-color: #195042;
     }
 
 .top-row {
     height: 3.5rem;
     /*background-color: rgba(0,0,0,0.4);*/
-    background-color: #f4f1ee;
+    background-color: #195042;
 }
 
 .navbar-brand {
@@ -67,8 +67,9 @@
 
     .nav-item ::deep a.active {
         /*background-color: rgba(255,255,255,0.37);*/
-        background-color: #91855a;
-        color: white;
+        background-color: #F4F1E8;
+        
+        color: #195042;
     }
 
     .nav-item ::deep .nav-link:hover {

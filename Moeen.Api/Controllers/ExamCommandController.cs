@@ -124,5 +124,15 @@ namespace Moeen.Api.Controllers
                 return StatusCode(500, GeneralResponse.InternalError("حدث خطأ داخلي أثناء حذف النتيجة"));
             }
         }
+
+        /// <summary>
+        /// تسجيل اختبار مختبر جديد.
+        /// </summary>
+        [HttpPost("create-lab-exam")]
+        public async Task<ActionResult<GeneralResponse>> CreateLabExam([FromBody] CreateLabExamRequest request)
+        {
+            var result = await _examCommandService.CreateLabExamAsync(request);
+            return StatusCode(result.StatusCode, result);
+        }
     }
 }

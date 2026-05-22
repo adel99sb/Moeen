@@ -202,5 +202,23 @@ namespace Moeen.Api.Application.Services
             var roles = await _userManager.GetRolesAsync(user);
             return roles.Contains("Admin") || roles.Contains("Supervisor");
         }
+        public async Task<GeneralResponse> DeleteComplaintAsync(Guid complaintId)
+        {
+            if (complaintId == Guid.Empty)
+                return GeneralResponse.BadRequest("معرف الشكوى مطلوب.");
+
+            // تحقق من صلاحيات المدير/مشرف
+            if (!await IsSupervisorOrAdminAsync())
+                return GeneralResponse.Unauthorized("غير مصرح لك بالحذف.");
+
+            var complaint = await _unitOfWork.Repository<Complaint>().GetByIdAsync(complaintId);
+            if (complaint == null)
+                return GeneralResponse.NotFound("الشكوى أو الاقتراح غير موجود.");
+
+            await _unitOfWork.Repository<Complaint>().DeleteAsync(complaint);
+            await _unitOfWork.CompleteAsync();
+
+            return GeneralResponse.Ok("تم حذف الشكوى/الاقتراح بنجاح.");
+        }
     }
 }

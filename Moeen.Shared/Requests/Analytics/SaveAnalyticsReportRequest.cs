@@ -20,6 +20,6 @@ namespace Moeen.Shared.Requests.Analytics
 
         public Guid? StudentId { get; set; }
         public Guid? TeacherId { get; set; }
-        public Guid? CircleId { get; set; }
+        public Guid? HalqaId { get; set; }
     }
 }
