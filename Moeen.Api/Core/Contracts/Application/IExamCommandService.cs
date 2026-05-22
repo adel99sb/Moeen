@@ -29,5 +29,10 @@ namespace Moeen.Api.Core.Contracts.Application
         /// [PUT] إضافة ملاحظات تقييمية أو توصيات للطالب بعد الاختبار
         /// </summary>
         Task<GeneralResponse> AddExamFeedbackAsync(AddExamFeedbackRequest request);
+
+        /// <summary>
+        /// إضافة اختبار جديد من قبل المختبر مع تفاصيل الأجزاء والتقدير
+        /// </summary>
+        Task<GeneralResponse> CreateLabExamAsync(CreateLabExamRequest request);
     }
 }

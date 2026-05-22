@@ -123,7 +123,7 @@ namespace Moeen.Api.Application.Services
             // Count distinct students who have progress entries for the halqa
             var count = await _context.ProgressEntries
                 .Where(pe => pe.HalqaId == request.HalqaId)
-                .Select(pe => pe.studentId)
+                .Select(pe => pe.StudentId)
                 .Distinct()
                 .CountAsync();
 

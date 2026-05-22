@@ -1,374 +1,458 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Api.Core.Contracts.infrastructure.Repositories;
-using Moeen.Api.Core.Entities;
-using Moeen.Api.infrastructure.Repositories;
+using Moeen.Api.infrastructure.Data;
 using Moeen.Shared.Requests.ExamQuery;
 using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.ExamCommand;
 using Moeen.Shared.Responses.ExamQuery;
+using Moeen.Shared.Responses.ExamQuery.Moeen.Shared.Responses.ExamQuery;
 using System;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Application.Services
 {
-    public class ExamQueryService : IExamQueryService   
+    public class ExamQueryService : IExamQueryService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly AppDbContext _context;
 
-        public ExamQueryService(IUnitOfWork unitOfWork)
+        public ExamQueryService(AppDbContext context)
         {
-            _unitOfWork = unitOfWork;
-        }
-
-        private ExamResultDto MapExamToDto(Exam e, string studentName = "", string teacherName = "")
-        {
-            if (e == null) return null;
-            return new ExamResultDto
-            {
-                Id = e.Id,
-                StudentId = e.StudentId,
-                StudentName = studentName,
-                TeacherId = e.TeacherId,
-                TeacherName = teacherName,
-                JuzFrom = e.juz_form,
-                JuzTo = e.juz_to,
-                Score = e.score,
-                Date = e.date,
-                Notes = e.notes,
-                Mark = e.mark,
-                Grade = e.score.ToString() // fallback; consumer may compute grade differently
-            };
-        }
-
-        public async Task<GeneralResponse> GetExamResultByIdAsync(GetExamResultByIdRequest request)
-        {
-            try
-            {
-                if (request == null || request.ExamId == Guid.Empty)
-                    return GeneralResponse.BadRequest("معرّف الاختبار غير صالح");
-
-                var spec = Spec.ForChain<Exam>(
-                    e => e.Id == request.ExamId,
-                    q => q.Include(x => x.Student).Include(x => x.Teacher)
-                );
-
-                var exams = await _unitOfWork.Repository<Exam>().GetAllAsync(spec);
-                var exam = exams.FirstOrDefault();
-                if (exam == null)
-                    return GeneralResponse.NotFound("نتيجة الاختبار غير موجودة");
-
-                var dto = MapExamToDto(exam, exam.Student?.name ?? string.Empty, exam.Teacher?.name ?? string.Empty);
-                return GeneralResponse.Ok("تم جلب نتيجة الاختبار", dto);
-            }
-            catch (Exception ex)
-            {
-                return GeneralResponse.InternalError("حدث خطأ أثناء جلب نتيجة الاختبار", ex.Message);
-            }
-        }
-
-        public async Task<GeneralResponse> SearchExamResultsAsync(SearchExamResultsRequest request)
-        {
-            try
-            {
-                if (request == null)
-                    request = new SearchExamResultsRequest { Criteria = new ExamResultSearchCriteria() };
-
-                var c = request.Criteria ?? new ExamResultSearchCriteria();
-                int page = Math.Max(1, c.PageNumber);
-                int pageSize = Math.Max(1, c.PageSize);
-                int skip = (page - 1) * pageSize;
-
-                var spec = Spec.ForChain<Exam>(
-                    e =>
-                        (!c.StudentId.HasValue || e.StudentId == c.StudentId) &&
-                        (!c.TeacherId.HasValue || e.TeacherId == c.TeacherId) &&
-                        (!c.DateFrom.HasValue || e.date >= c.DateFrom.Value) &&
-                        (!c.DateTo.HasValue || e.date <= c.DateTo.Value) &&
-                        (!c.MinScore.HasValue || e.score >= c.MinScore.Value) &&
-                        (!c.MaxScore.HasValue || e.score <= c.MaxScore.Value) &&
-                        (!c.JuzFrom.HasValue || e.juz_form >= c.JuzFrom.Value) &&
-                        (!c.JuzTo.HasValue || e.juz_to <= c.JuzTo.Value),
-                    q => q.Include(x => x.Student).Include(x => x.Teacher)
-                );
-
-                spec.ApplyOrderByDescending(e => e.date);
-                spec.ApplyPaging(skip, pageSize);
-
-                var exams = (await _unitOfWork.Repository<Exam>().GetAllAsync(spec)).ToList();
-                var results = exams.Select(e => MapExamToDto(e, e.Student?.name ?? string.Empty, e.Teacher?.name ?? string.Empty)).ToList();
-
-                // total count (without paging)
-                var countSpec = Spec.For<Exam>(spec.Predicate); // reuse predicate if Spec exposes it; if not, fallback
-                var total = (await _unitOfWork.Repository<Exam>().GetAllAsync(countSpec)).Count();
-
-                var response = new SearchExamResultsResponse
-                {
-                    Results = results,
-                    TotalCount = total,
-                    PageNumber = page,
-                    PageSize = pageSize
-                };
-
-                return GeneralResponse.Ok("تم البحث في نتائج الاختبارات", response, page, pageSize, total);
-            }
-            catch (Exception ex)
-            {
-                return GeneralResponse.InternalError("حدث خطأ أثناء البحث في نتائج الاختبارات", ex.Message);
-            }
-        }
-
-        public async Task<GeneralResponse> GetStudentExamsAsync(GetStudentExamsRequest request)
-        {
-            try
-            {
-                if (request == null || request.StudentId == Guid.Empty)
-                    return GeneralResponse.BadRequest("معرّف الطالب غير صالح");
-
-                var spec = Spec.ForChain<Exam>(e => e.StudentId == request.StudentId, q => q.Include(x => x.Teacher));
-                var exams = (await _unitOfWork.Repository<Exam>().GetAllAsync(spec)).ToList();
-
-                var dtos = exams.Select(e => MapExamToDto(e, e.Student?.name ?? string.Empty, e.Teacher?.name ?? string.Empty)).ToList();
-
-                var resp = new GetStudentExamsResponse { Exams = dtos, TotalCount = dtos.Count };
-                return GeneralResponse.Ok("تم جلب اختبارات الطالب", resp);
-            }
-            catch (Exception ex)
-            {
-                return GeneralResponse.InternalError("حدث خطأ أثناء جلب اختبارات الطالب", ex.Message);
-            }
-        }
-
-        public async Task<GeneralResponse> GetExamsByHalqaAsync(GetExamsByHalqaRequest request)
-        {
-            try
-            {
-                if (request == null || request.HalqaId == Guid.Empty)
-                    return GeneralResponse.BadRequest("معرّف الحلقة غير صالح");
-
-                int page = Math.Max(1, request.PageNumber);
-                int pageSize = Math.Max(1, request.PageSize);
-                int skip = (page - 1) * pageSize;
-
-                var spec = Spec.ForChain<Exam>(
-                    e => e.Student != null && e.Student.HalqaId == request.HalqaId &&
-                         (!request.FromDate.HasValue || e.date >= request.FromDate.Value) &&
-                         (!request.ToDate.HasValue || e.date <= request.ToDate.Value),
-                    q => q.Include(x => x.Student).Include(x => x.Teacher)
-                );
-
-                spec.ApplyOrderByDescending(e => e.date);
-                spec.ApplyPaging(skip, pageSize);
-
-                var exams = (await _unitOfWork.Repository<Exam>().GetAllAsync(spec)).ToList();
-                var dtos = exams.Select(e => MapExamToDto(e, e.Student?.name ?? string.Empty, e.Teacher?.name ?? string.Empty)).ToList();
-
-                var totalSpec = Spec.For<Exam>(spec.Predicate);
-                var total = (await _unitOfWork.Repository<Exam>().GetAllAsync(totalSpec)).Count();
-
-                var paged = new PagedList<ExamResultDto>
-                {
-                    Items = dtos,
-                    PageNumber = page,
-                    PageSize = pageSize,
-                    TotalCount = total
-                };
-
-                return GeneralResponse.Ok("تم جلب اختبارات الحلقة", paged, page, pageSize, total);
-            }
-            catch (Exception ex)
-            {
-                return GeneralResponse.InternalError("حدث خطأ أثناء جلب اختبارات الحلقة", ex.Message);
-            }
-        }
-
-        public async Task<GeneralResponse> GetStudentExamsByDateRangeAsync(GetStudentExamsByDateRequest request)
-        {
-            try
-            {
-                if (request == null || request.StudentId == Guid.Empty)
-                    return GeneralResponse.BadRequest("معرّف الطالب غير صالح");
-
-                var spec = Spec.ForChain<Exam>(
-                    e => e.StudentId == request.StudentId && e.date >= request.FromDate && e.date <= request.ToDate,
-                    q => q.Include(x => x.Teacher)
-                );
-
-                var exams = (await _unitOfWork.Repository<Exam>().GetAllAsync(spec)).ToList();
-                var dtos = exams.Select(e => MapExamToDto(e, e.Student?.name ?? string.Empty, e.Teacher?.name ?? string.Empty)).ToList();
-                return GeneralResponse.Ok("تم جلب اختبارات الطالب ضمن الفترة", dtos);
-            }
-            catch (Exception ex)
-            {
-                return GeneralResponse.InternalError("حدث خطأ أثناء جلب اختبارات الطالب ضمن الفترة", ex.Message);
-            }
-        }
-
-        public async Task<GeneralResponse> GetExamsByTeacherAsync(GetExamsByTeacherRequest request)
-        {
-            try
-            {
-                if (request == null || request.TeacherId == Guid.Empty)
-                    return GeneralResponse.BadRequest("معرّف المعلم غير صالح");
-
-                var spec = Spec.ForChain<Exam>(
-                    e => e.TeacherId == request.TeacherId &&
-                         (!request.FromDate.HasValue || e.date >= request.FromDate.Value) &&
-                         (!request.ToDate.HasValue || e.date <= request.ToDate.Value),
-                    q => q.Include(x => x.Student)
-                );
-
-                var exams = (await _unitOfWork.Repository<Exam>().GetAllAsync(spec)).ToList();
-                var dtos = exams.Select(e => MapExamToDto(e, e.Student?.name ?? string.Empty, e.Teacher?.name ?? string.Empty)).ToList();
-                return GeneralResponse.Ok("تم جلب اختبارات المعلم", dtos);
-            }
-            catch (Exception ex)
-            {
-                return GeneralResponse.InternalError("حدث خطأ أثناء جلب اختبارات المعلم", ex.Message);
-            }
-        }
-
-        public async Task<GeneralResponse> GetExamsByPhaseAsync(GetExamsByPhaseRequest request)
-        {
-            try
-            {
-                if (request == null || request.PhaseId == Guid.Empty)
-                    return GeneralResponse.BadRequest("معرّف المرحلة غير صالح");
-
-                // تبسيط: نبحث عن الاختبارات التي تحمل PhaseId في notes أو علامته الخاصة إن كان موجوداً
-                var spec = Spec.ForChain<Exam>(e => e.notes != null && e.notes.Contains(request.PhaseId.ToString()), q => q.Include(x => x.Student));
-                var exams = (await _unitOfWork.Repository<Exam>().GetAllAsync(spec)).ToList();
-                var dtos = exams.Select(e => MapExamToDto(e, e.Student?.name ?? string.Empty, e.Teacher?.name ?? string.Empty)).ToList();
-                return GeneralResponse.Ok("تم جلب اختبارات المرحلة", dtos);
-            }
-            catch (Exception ex)
-            {
-                return GeneralResponse.InternalError("حدث خطأ أثناء جلب اختبارات المرحلة", ex.Message);
-            }
-        }
-
-        public async Task<GeneralResponse> GetExamStatisticsAsync(GetExamStatisticsRequest request)
-        {
-            try
-            {
-                var repo = _unitOfWork.Repository<Exam>();
-                var spec = Spec.For<Exam>(e => true);
-                var exams = (await repo.GetAllAsync(spec)).ToList();
-
-                var total = exams.Count;
-                var avg = total > 0 ? exams.Average(e => e.score) : 0.0;
-                var passed = exams.Count(e => e.score >= 60);
-                var failed = total - passed;
-                var successRate = total > 0 ? (passed / (double)total) * 100.0 : 0.0;
-
-                var dto = new ExamStatisticsDto
-                {
-                    TotalExams = total,
-                    AverageScore = Math.Round(avg, 2),
-                    SuccessRate = Math.Round(successRate, 2),
-                    PassedCount = passed,
-                    FailedCount = failed
-                };
-
-                return GeneralResponse.Ok("تم حساب إحصائيات الاختبارات", dto);
-            }
-            catch (Exception ex)
-            {
-                return GeneralResponse.InternalError("حدث خطأ أثناء حساب إحصائيات الاختبارات", ex.Message);
-            }
-        }
-
-        public async Task<GeneralResponse> GetHalqeExamAnalyticsAsync(GetHalqaAnalyticsRequest request)
-        {
-            try
-            {
-                if (request == null || request.HalqaId == Guid.Empty)
-                    return GeneralResponse.BadRequest("معرّف الحلقة غير صالح");
-
-                // تعديل الـ Specification ليشمل Include و ThenInclude
-                var spec = Spec.ForChain<Exam>(
-                    e => e.Student != null && e.Student.HalqaId == request.HalqaId,
-                    q => q.Include(x => x.Student)
-                          .ThenInclude(s => s.Halqa)   // إضافة ThenInclude لتحميل Halqa
-                          .Include(x => x.Teacher)
-                );
-
-                var exams = (await _unitOfWork.Repository<Exam>().GetAllAsync(spec)).ToList();
-                if (!exams.Any())
-                    return GeneralResponse.Ok("لا توجد بيانات للاختبارات في هذه الحلقة", new HalqaExamAnalyticsDto { HalqaId = request.HalqaId, HalqaName = string.Empty });
-
-                var avg = exams.Average(e => e.score);
-                var passed = exams.Count(e => e.score >= 60);
-                var total = exams.Count;
-                var successRate = total > 0 ? (passed / (double)total) * 100.0 : 0.0;
-
-                var dto = new HalqaExamAnalyticsDto
-                {
-                    HalqaId = request.HalqaId,
-                    HalqaName = exams.FirstOrDefault()?.Student?.Halqa?.Name ?? string.Empty,   // تعديل: Halqa?.Name بدلاً من HalqaId?.Name
-                    AverageScore = Math.Round(avg, 2),
-                    SuccessRate = Math.Round(successRate, 2),
-                    TopStudents = exams.OrderByDescending(e => e.score).Take(5).Select(e => new StudentExamPerformanceDto 
-                    { StudentId = e.StudentId, StudentName = e.Student?.name ?? string.Empty, AverageScore = e.score }).ToList(),
-                    LowStudents = exams.OrderBy(e => e.score).Take(5).Select(e => new StudentExamPerformanceDto
-                    { StudentId = e.StudentId, StudentName = e.Student?.name ?? string.Empty, AverageScore = e.score }).ToList()
-                };
-
-                return GeneralResponse.Ok("تم جلب تحليلات الاختبارات للحلقة", dto);
-            }
-            catch (Exception ex)
-            {
-                return GeneralResponse.InternalError("حدث خطأ أثناء جلب تحليلات الاختبارات للحلقة", ex.Message);
-            }
+            _context = context;
         }
 
         public async Task<GeneralResponse> CompareHalqasPerformanceAsync(CompareHalqasRequest request)
         {
-            try
-            {
-                // تبسيط: تنفيذ مقارنة حسب متوسط الدرجات لكل حلقة في القائمة
-                if (request == null || request.HalqaId == null || !request.HalqaId.Any())
-                    return GeneralResponse.BadRequest("قائمة الحلقات مطلوبة للمقارنة");
+            if (request == null || request.HalqaId == null || !request.HalqaId.Any())
+                return GeneralResponse.BadRequest("معرفات الحلقات مطلوبة.");
 
-                var items = new HalqaComparisonDto();
+            var fromDate = request.FromDate ?? DateTime.MinValue;
+            var toDate = request.ToDate ?? DateTime.MaxValue;
 
-                foreach (var hid in request.HalqaId)
+            var query = _context.Exams
+                .AsNoTracking()
+                .Include(e => e.Student)
+                    .ThenInclude(s => s.Halqa)
+                .Where(e => e.Student != null && e.Student.HalqaId.HasValue && request.HalqaId.Contains(e.Student.HalqaId.Value) && e.date >= fromDate && e.date <= toDate);
+
+            var performance = await query
+                .GroupBy(e => e.Student.Halqa.Name)
+                .Select(g => new HalqaPerformanceDto
                 {
-                    var spec = Spec.ForChain<Exam>(e => e.Student != null && e.Student.HalqaId == hid, q => q.Include(x => x.Student));
-                    var exams = (await _unitOfWork.Repository<Exam>().GetAllAsync(spec)).ToList();
-                    var avg = exams.Any() ? exams.Average(e => e.score) : 0.0;
-                    items.Items.Add(new HalqaComparisonItemDto { HalqaId = hid, AverageScore = Math.Round(avg, 2), TotalExams = exams.Count });
-                }
+                    HalqaName = g.Key,
+                    AverageScore = g.Average(e => e.score),
+                    ExamsCount = g.Count(),
+                    StudentsCount = g.Select(e => e.StudentId).Distinct().Count()
+                })
+                .OrderByDescending(p => p.AverageScore)
+                .ToListAsync();
 
-                return GeneralResponse.Ok("تمت المقارنة بين الحلقات", items);
-            }
-            catch (Exception ex)
+            return GeneralResponse.Ok("تم جلب مقارنة أداء الحلقات.", performance);
+        }
+
+        public async Task<GeneralResponse> GetExamResultByIdAsync(GetExamResultByIdRequest request)
+        {
+            if (request == null)
+                return GeneralResponse.BadRequest("الطلب غير صالح.");
+
+            var exam = await _context.Exams
+                .AsNoTracking()
+                .Include(e => e.Student)
+                .Include(e => e.Teacher)
+                .FirstOrDefaultAsync(e => e.Id == request.ExamId);
+
+            if (exam == null)
+                return GeneralResponse.NotFound("الاختبار غير موجود.");
+
+            var dto = new ExamResultDto
             {
-                return GeneralResponse.InternalError("حدث خطأ أثناء مقارنة أداء الحلقات", ex.Message);
-            }
+                Id = exam.Id,
+                StudentId = exam.StudentId,
+                StudentName = exam.Student?.name,
+                TeacherId = exam.TeacherId,
+                TeacherName = exam.Teacher?.name,
+                JuzFrom = exam.juz_form,
+                JuzTo = exam.juz_to,
+                Score = exam.score,
+                Mark = exam.mark,
+                Date = exam.date,
+                Notes = exam.notes,
+                Grade = CalculateGrade(exam.score)
+            };
+
+            return GeneralResponse.Ok("تم جلب نتيجة الاختبار.", dto);
+        }
+
+        public async Task<GeneralResponse> GetExamsByHalqaAsync(GetExamsByHalqaRequest request)
+        {
+            if (request == null)
+                return GeneralResponse.BadRequest("الطلب غير صالح.");
+
+            var query = _context.Exams
+                .AsNoTracking()
+                .Include(e => e.Student)
+                .Where(e => e.Student != null && e.Student.HalqaId == request.HalqaId);
+
+            if (request.FromDate.HasValue)
+                query = query.Where(e => e.date >= request.FromDate.Value);
+            if (request.ToDate.HasValue)
+                query = query.Where(e => e.date <= request.ToDate.Value);
+
+            var total = await query.CountAsync();
+            var exams = await query
+                .OrderByDescending(e => e.date)
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(e => new ExamSummaryDto
+                {
+                    ExamId = e.Id,
+                    StudentName = e.Student.name,
+                    Score = e.score,
+                    Date = e.date
+                })
+                .ToListAsync();
+
+            return GeneralResponse.Ok("تم جلب اختبارات الحلقة.", exams, request.PageNumber, request.PageSize, total);
+        }
+
+        //public async Task<GeneralResponse> GetExamsByPhaseAsync(GetExamsByPhaseRequest request)
+        //{
+        //    // Not implemented due to unclear schema
+        //    return GeneralResponse.NotImplemented("GetExamsByPhaseAsync is not implemented.");
+        //}
+
+        public async Task<GeneralResponse> GetExamsByTeacherAsync(GetExamsByTeacherRequest request)
+        {
+            if (request == null)
+                return GeneralResponse.BadRequest("الطلب غير صالح.");
+
+            var query = _context.Exams
+                .AsNoTracking()
+                .Include(e => e.Student)
+                .Where(e => e.TeacherId == request.TeacherId);
+
+            if (request.FromDate.HasValue)
+                query = query.Where(e => e.date >= request.FromDate.Value);
+            if (request.ToDate.HasValue)
+                query = query.Where(e => e.date <= request.ToDate.Value);
+
+            var exams = await query
+                .OrderByDescending(e => e.date)
+                .Select(e => new ExamSummaryDto
+                {
+                    ExamId = e.Id,
+                    StudentName = e.Student.name,
+                    Score = e.score,
+                    Date = e.date
+                })
+                .ToListAsync();
+
+            return GeneralResponse.Ok("تم جلب اختبارات المعلم.", exams);
+        }
+
+        public async Task<GeneralResponse> GetExamStatisticsAsync(GetExamStatisticsRequest request)
+        {
+            var query = _context.Exams.AsNoTracking();
+
+            if (request.FromDate.HasValue)
+                query = query.Where(e => e.date >= request.FromDate.Value);
+            if (request.ToDate.HasValue)
+                query = query.Where(e => e.date <= request.ToDate.Value);
+
+            if (!await query.AnyAsync())
+                return GeneralResponse.Ok("لا توجد بيانات لعرض الإحصائيات.", new ExamStatisticsDto());
+
+            var stats = new ExamStatisticsDto
+            {
+                TotalExams = await query.CountAsync(),
+                AverageScore = await query.AverageAsync(e => e.score),
+                HighestScore = await query.MaxAsync(e => e.score),
+                LowestScore = await query.MinAsync(e => e.score),
+                PassCount = await query.CountAsync(e => e.score >= 50),
+                PassRate = (double)await query.CountAsync(e => e.score >= 50) / await query.CountAsync() * 100
+            };
+
+            return GeneralResponse.Ok("تم جلب إحصائيات الاختبارات.", stats);
+        }
+
+        public async Task<GeneralResponse> GetHalqaExamAnalyticsAsync(GetHalqaAnalyticsRequest request)
+        {
+            if (request == null)
+                return GeneralResponse.BadRequest("الطلب غير صالح.");
+
+            var query = _context.Exams
+                .AsNoTracking()
+                .Include(e => e.Student)
+                .Where(e => e.Student != null && e.Student.HalqaId == request.HalqaId);
+
+            if (request.FromDate.HasValue)
+                query = query.Where(e => e.date >= request.FromDate.Value);
+            if (request.ToDate.HasValue)
+                query = query.Where(e => e.date <= request.ToDate.Value);
+
+            if (!await query.AnyAsync())
+                return GeneralResponse.Ok("لا توجد بيانات لعرض التحليلات.", new HalqaExamAnalyticsDto());
+
+            var analytics = new HalqaExamAnalyticsDto
+            {
+                HalqaId = request.HalqaId,
+                AverageScore = await query.AverageAsync(e => e.score),
+                ExamsCount = await query.CountAsync(),
+                TopStudent = await query.OrderByDescending(e => e.score).Select(e => e.Student.name).FirstOrDefaultAsync(),
+                LowestStudent = await query.OrderBy(e => e.score).Select(e => e.Student.name).FirstOrDefaultAsync()
+            };
+
+            return GeneralResponse.Ok("تم جلب تحليلات الحلقة.", analytics);
+        }
+
+        public async Task<GeneralResponse> GetStudentExamsAsync(GetStudentExamsRequest request)
+        {
+            if (request == null)
+                return GeneralResponse.BadRequest("الطلب غير صالح.");
+
+            var exams = await _context.Exams
+                .AsNoTracking()
+                .Where(e => e.StudentId == request.StudentId)
+                .OrderByDescending(e => e.date)
+                .Select(e => new ExamSummaryDto
+                {
+                    ExamId = e.Id,
+                    StudentName = e.Student.name,
+                    Score = e.score,
+                    Date = e.date
+                })
+                .ToListAsync();
+
+            return GeneralResponse.Ok("تم جلب اختبارات الطالب.", exams);
+        }
+
+        public async Task<GeneralResponse> GetStudentExamsByDateRangeAsync(GetStudentExamsByDateRequest request)
+        {
+            if (request == null)
+                return GeneralResponse.BadRequest("الطلب غير صالح.");
+
+            var exams = await _context.Exams
+                .AsNoTracking()
+                .Where(e => e.StudentId == request.StudentId && e.date >= request.FromDate && e.date <= request.ToDate)
+                .OrderByDescending(e => e.date)
+                .Select(e => new ExamSummaryDto
+                {
+                    ExamId = e.Id,
+                    StudentName = e.Student.name,
+                    Score = e.score,
+                    Date = e.date
+                })
+                .ToListAsync();
+
+            return GeneralResponse.Ok("تم جلب اختبارات الطالب ضمن الفترة المحددة.", exams);
         }
 
         public async Task<GeneralResponse> PrepareExamDataForExportAsync(PrepareExportRequest request)
         {
-            try
-            {
-                var spec = Spec.ForChain<Exam>(e => true, q => q.Include(x => x.Student).Include(x => x.Teacher));
-                var exams = (await _unitOfWork.Repository<Exam>().GetAllAsync(spec)).ToList();
-                var rows = exams.Select(e => MapExamToDto(e, e.Student?.name ?? string.Empty, e.Teacher?.name ?? string.Empty)).ToList();
+            var query = _context.Exams
+                .AsNoTracking()
+                .Include(e => e.Student)
+                .Include(e => e.Teacher);
 
-                var dto = new ExportExamDataDto { Rows = rows, TotalCount = rows.Count };
-                return GeneralResponse.Ok("تم تجهيز بيانات التصدير", dto);
-            }
-            catch (Exception ex)
+            if (request.FromDate.HasValue)
+                query = (Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Core.Entities.Exam, Core.Entities.Teacher>)query.Where(e => e.date >= request.FromDate.Value);
+            if (request.ToDate.HasValue)
+                query = (Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Core.Entities.Exam, Core.Entities.Teacher>)query.Where(e => e.date <= request.ToDate.Value);
+
+            var data = await query
+                .OrderBy(e => e.date)
+                .ToListAsync();
+
+            var sb = new StringBuilder();
+            sb.AppendLine("ExamId,StudentName,TeacherName,Date,Score,Mark,Notes");
+            foreach (var exam in data)
             {
-                return GeneralResponse.InternalError("حدث خطأ أثناء تجهيز بيانات التصدير", ex.Message);
+                sb.AppendLine($"{exam.Id},{exam.Student?.name},{exam.Teacher?.name},{exam.date:yyyy-MM-dd},{exam.score},{exam.mark},\"{exam.notes?.Replace("\"", "\"\"")}\"");
             }
+
+            var response = new ExportDataResponse
+            {
+                FileName = $"Exams_{DateTime.Now:yyyyMMdd}.csv",
+                ContentType = "text/csv",
+                Content = Encoding.UTF8.GetBytes(sb.ToString())
+            };
+
+            return GeneralResponse.Ok("تم تجهيز بيانات التصدير.", response);
         }
 
-        public Task<GeneralResponse> GetHalqaExamAnalyticsAsync(GetHalqaAnalyticsRequest request)
+        public async Task<GeneralResponse> SearchExamResultsAsync(SearchExamResultsRequest request)
         {
-            throw new NotImplementedException();
+            if (request == null)
+                return GeneralResponse.BadRequest("الطلب غير صالح.");
+
+            var query = _context.Exams
+                .AsNoTracking()
+                .Include(e => e.Student)
+                .Include(e => e.Teacher)
+                .AsQueryable();
+
+            if (request.StudentId.HasValue)
+                query = query.Where(e => e.StudentId == request.StudentId.Value);
+            if (request.TeacherId.HasValue)
+                query = query.Where(e => e.TeacherId == request.TeacherId.Value);
+            if (request.MinScore.HasValue)
+                query = query.Where(e => e.score >= request.MinScore.Value);
+            if (request.MaxScore.HasValue)
+                query = query.Where(e => e.score <= request.MaxScore.Value);
+            if (request.FromDate.HasValue)
+                query = query.Where(e => e.date >= request.FromDate.Value);
+            if (request.ToDate.HasValue)
+                query = query.Where(e => e.date <= request.ToDate.Value);
+
+            var total = await query.CountAsync();
+            var results = await query
+                .OrderByDescending(e => e.date)
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(e => new ExamResultDto
+                {
+                    Id = e.Id,
+                    StudentId = e.StudentId,
+                    StudentName = e.Student.name,
+                    TeacherId = e.TeacherId,
+                    TeacherName = e.Teacher.name,
+                    JuzFrom = e.juz_form,
+                    JuzTo = e.juz_to,
+                    Score = e.score,
+                    Mark = e.mark,
+                    Date = e.date,
+                    Notes = e.notes,
+                    Grade = CalculateGrade(e.score)
+                })
+                .ToListAsync();
+
+            return GeneralResponse.Ok("تم جلب نتائج البحث.", results, request.PageNumber, request.PageSize, total);
+        }
+
+        private string CalculateGrade(int score)
+        {
+            if (score >= 90) return "ممتاز";
+            if (score >= 80) return "جيد جداً";
+            if (score >= 70) return "جيد";
+            if (score >= 60) return "مقبول";
+            return "يحتاج تحسين";
+        }
+
+        public async Task<GeneralResponse> GetTopPerformingStudentsInExamsAsync(GetTopPerformingStudentsInExamsRequest request)
+        {
+            var query = _context.Exams.AsNoTracking();
+
+            if (request.FromDate.HasValue)
+                query = query.Where(e => e.date >= request.FromDate.Value);
+            if (request.ToDate.HasValue)
+                query = query.Where(e => e.date <= request.ToDate.Value);
+
+            var topStudents = await query
+                .GroupBy(e => e.StudentId)
+                .Select(g => new
+                {
+                    StudentId = g.Key,
+                    AverageGrade = g.Average(e => e.score),
+                    TotalPoints = g.Sum(e => e.mark),
+                    ExamsTaken = g.Count()
+                })
+                .OrderByDescending(s => s.AverageGrade)
+                .ThenByDescending(s => s.TotalPoints)
+                .Take(request.TopCount)
+                .Join(_context.Students,
+                      examStat => examStat.StudentId,
+                      student => student.Id,
+                      (examStat, student) => new ExamStudentPerformanceDto
+                      {
+                          StudentId = student.Id,
+                          StudentName = student.name,
+                          ExamsTaken = examStat.ExamsTaken,
+                          AverageGrade = Math.Round(examStat.AverageGrade, 2),
+                          TotalPoints = examStat.TotalPoints
+                      })
+                .ToListAsync();
+
+            return GeneralResponse.Ok("تم جلب الطلاب الأكثر تميزاً.", topStudents);
+        }
+
+        public async Task<GeneralResponse> GetLowestPerformingStudentsInExamsAsync(GetLowestPerformingStudentsInExamsRequest request)
+        {
+            var query = _context.Exams.AsNoTracking();
+
+            if (request.FromDate.HasValue)
+                query = query.Where(e => e.date >= request.FromDate.Value);
+            if (request.ToDate.HasValue)
+                query = query.Where(e => e.date <= request.ToDate.Value);
+
+            var lowestStudents = await query
+                .GroupBy(e => e.StudentId)
+                .Select(g => new
+                {
+                    StudentId = g.Key,
+                    AverageGrade = g.Average(e => e.score),
+                    TotalPoints = g.Sum(e => e.mark),
+                    ExamsTaken = g.Count()
+                })
+                .OrderBy(s => s.AverageGrade)
+                .ThenBy(s => s.TotalPoints)
+                .Take(request.BottomCount)
+                .Join(_context.Students,
+                      examStat => examStat.StudentId,
+                      student => student.Id,
+                      (examStat, student) => new ExamStudentPerformanceDto
+                      {
+                          StudentId = student.Id,
+                          StudentName = student.name,
+                          ExamsTaken = examStat.ExamsTaken,
+                          AverageGrade = Math.Round(examStat.AverageGrade, 2),
+                          TotalPoints = examStat.TotalPoints
+                      })
+                .ToListAsync();
+
+            return GeneralResponse.Ok("تم جلب الطلاب الأقل تميزاً.", lowestStudents);
+        }
+
+        public async Task<GeneralResponse> GetLabStatisticsAsync(GetLabStatisticsRequest request)
+        {
+            var query = _context.Exams.AsNoTracking();
+
+            if (request.FromDate.HasValue)
+                query = query.Where(e => e.date >= request.FromDate.Value);
+            if (request.ToDate.HasValue)
+                query = query.Where(e => e.date <= request.ToDate.Value);
+
+            if (!await query.AnyAsync())
+                return GeneralResponse.Ok("لا توجد بيانات لعرض الإحصائيات.", new LabStatisticsDto());
+
+            var totalExams = await query.CountAsync();
+            var totalStudents = await query.Select(e => e.StudentId).Distinct().CountAsync();
+            var averageGrade = await query.AverageAsync(e => e.score);
+            var passCount = await query.CountAsync(e => e.score >= 50);
+            var totalPoints = await query.SumAsync(e => e.mark);
+
+            var studentPerformance = query
+                .GroupBy(e => e.StudentId)
+                .Select(g => new { StudentId = g.Key, AverageGrade = g.Average(e => e.score) });
+
+            var topStudentId = await studentPerformance.OrderByDescending(p => p.AverageGrade).Select(p => p.StudentId).FirstOrDefaultAsync();
+            var lowestStudentId = await studentPerformance.OrderBy(p => p.AverageGrade).Select(p => p.StudentId).FirstOrDefaultAsync();
+
+            var topStudentName = await _context.Students.Where(s => s.Id == topStudentId).Select(s => s.name).FirstOrDefaultAsync();
+            var lowestStudentName = await _context.Students.Where(s => s.Id == lowestStudentId).Select(s => s.name).FirstOrDefaultAsync();
+
+            var stats = new LabStatisticsDto
+            {
+                TotalExamsConducted = totalExams,
+                TotalStudentsTested = totalStudents,
+                AverageGrade = Math.Round(averageGrade, 2),
+                PassRate = totalExams > 0 ? Math.Round((double)passCount / totalExams * 100, 2) : 0,
+                TotalPointsAwarded = totalPoints,
+                TopPerformingStudent = topStudentName,
+                LowestPerformingStudent = lowestStudentName
+            };
+
+            return GeneralResponse.Ok("تم جلب إحصائيات المختبر.", stats);
         }
     }
 }

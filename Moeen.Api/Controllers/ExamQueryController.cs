@@ -73,7 +73,7 @@ namespace Moeen.Api.Controllers
         [HttpGet("halqas/{halqaId:guid}/exams")]
         public async Task<ActionResult<GeneralResponse>> GetExamsByHalqa([FromRoute] Guid halqaId, [FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
         {
-            var r = await _examQueryService.GetExamsByHalqaAsync(new GetExamsByHalqaRequest { HalqaId = halqaId , FromDate = fromDate, ToDate = toDate, PageNumber = pageNumber, PageSize = pageSize });
+            var r = await _examQueryService.GetExamsByHalqaAsync(new GetExamsByHalqaRequest { HalqaId = halqaId, FromDate = fromDate, ToDate = toDate, PageNumber = pageNumber, PageSize = pageSize });
             return StatusCode(r.StatusCode, r);
         }
 
@@ -100,12 +100,12 @@ namespace Moeen.Api.Controllers
         /// <summary>
         /// GET: اختبارات حسب المرحلة.
         /// </summary>
-        [HttpGet("phases/{phaseId:guid}/exams")]
-        public async Task<ActionResult<GeneralResponse>> GetExamsByPhase([FromRoute] Guid phaseId, [FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
-        {
-            var r = await _examQueryService.GetExamsByPhaseAsync(new GetExamsByPhaseRequest { PhaseId = phaseId, FromDate = fromDate, ToDate = toDate });
-            return StatusCode(r.StatusCode, r);
-        }
+        //[HttpGet("phases/{phaseId:guid}/exams")]
+        //public async Task<ActionResult<GeneralResponse>> GetExamsByPhase([FromRoute] Guid phaseId, [FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
+        //{
+        //    var r = await _examQueryService.GetExamsByPhaseAsync(new GetExamsByPhaseRequest { PhaseId = phaseId, FromDate = fromDate, ToDate = toDate });
+        //    return StatusCode(r.StatusCode, r);
+        //}
 
         /// <summary>
         /// GET: إحصائيات شاملة للاختبارات.
@@ -145,6 +145,36 @@ namespace Moeen.Api.Controllers
         {
             var r = await _examQueryService.PrepareExamDataForExportAsync(request);
             return StatusCode(r.StatusCode, r);
+        }
+
+        /// <summary>
+        /// GET: جلب الطلاب الأكثر تميزاً في المختبر
+        /// </summary>
+        [HttpGet("lab/top-performers")]
+        public async Task<ActionResult<GeneralResponse>> GetTopPerformingStudents([FromQuery] GetTopPerformingStudentsInExamsRequest request)
+        {
+            var response = await _examQueryService.GetTopPerformingStudentsInExamsAsync(request);
+            return StatusCode(response.StatusCode, response);
+        }
+
+        /// <summary>
+        /// GET: جلب الطلاب الأقل تميزاً في المختبر
+        /// </summary>
+        [HttpGet("lab/lowest-performers")]
+        public async Task<ActionResult<GeneralResponse>> GetLowestPerformingStudents([FromQuery] GetLowestPerformingStudentsInExamsRequest request)
+        {
+            var response = await _examQueryService.GetLowestPerformingStudentsInExamsAsync(request);
+            return StatusCode(response.StatusCode, response);
+        }
+
+        /// <summary>
+        /// GET: إحصائيات عامة للمختبر
+        /// </summary>
+        [HttpGet("lab/statistics")]
+        public async Task<ActionResult<GeneralResponse>> GetLabStatistics([FromQuery] GetLabStatisticsRequest request)
+        {
+            var response = await _examQueryService.GetLabStatisticsAsync(request);
+            return StatusCode(response.StatusCode, response);
         }
     }
 }

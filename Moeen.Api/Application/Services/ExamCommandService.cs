@@ -269,5 +269,51 @@ namespace Moeen.Api.Application.Services
                 return GeneralResponse.InternalError("حدث خطأ داخلي أثناء تحديث نتيجة الامتحان.");
             }
         }
+
+        public async Task<GeneralResponse> CreateLabExamAsync(CreateLabExamRequest request)
+        {
+            try
+            {
+                if (request == null)
+                    return GeneralResponse.BadRequest("بيانات الاختبار مطلوبة.");
+
+                var student = await _unitOfWork.Repository<Student>().GetByIdAsync(request.StudentId);
+                if (student == null) return GeneralResponse.NotFound("الطالب غير موجود.");
+
+                var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(request.TeacherId);
+                if (teacher == null) return GeneralResponse.NotFound("المعلم غير موجود.");
+
+                // دمج الملاحظات مع التقييم واسم الفوج لعدم وجود حقول مستقلة لها في الكيان حالياً
+                var enrichedNotes = $"[التقييم: {request.Rating}] [الفوج: {request.FoujName}] {request.Notes}";
+
+                var exam = new Exam
+                {
+                    Id = Guid.NewGuid(),
+                    StudentId = request.StudentId,
+                    TeacherId = request.TeacherId,
+                    date = request.ExamDate == default ? DateTime.UtcNow : request.ExamDate,
+                    score = request.Grade,      // تخزين الدرجة في Score
+                    mark = request.PointsAwarded, // تخزين النقاط في Mark
+                    notes = enrichedNotes,
+                    juz_form = 0, // افتراضي حيث لم يحدد في طلب المختبر
+                    juz_to = 0,
+                    TeacherExamId = Guid.Empty // أو معرف افتراضي
+                };
+
+                await _unitOfWork.Repository<Exam>().AddAsync(exam);
+                
+                // تحديث نقاط الطالب في جدول الطلاب
+                student.score += request.PointsAwarded;
+                await _unitOfWork.Repository<Student>().UpdateAsync(student);
+
+                await _unitOfWork.CompleteAsync();
+
+                return GeneralResponse.Ok("تم تسجيل اختبار المختبر بنجاح.");
+            }
+            catch (Exception)
+            {
+                return GeneralResponse.InternalError("حدث خطأ أثناء تسجيل اختبار المختبر.");
+            }
+        }
     }
 }

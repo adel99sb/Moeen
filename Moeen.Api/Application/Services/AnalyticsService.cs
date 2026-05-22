@@ -4,6 +4,8 @@ using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Repositories;
+using Moeen.Shared.Constants;
+
 using Moeen.Shared.Requests.Analytics;
 using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.Analytics;
@@ -949,3 +951,4 @@ namespace Moeen.Api.Application.Services
         }
     }
 }
+

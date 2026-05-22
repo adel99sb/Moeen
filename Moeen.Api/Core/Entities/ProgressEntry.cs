@@ -4,7 +4,7 @@ namespace Moeen.Api.Core.Entities
 {
     public class ProgressEntry
     {
-        internal object studentId;
+        //internal object studentId;
 
         public Guid Id { get; set; }
 
