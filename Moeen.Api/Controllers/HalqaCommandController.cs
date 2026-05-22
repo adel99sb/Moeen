@@ -64,22 +64,13 @@ namespace Moeen.Api.Controllers
         [HttpDelete("delete")]
         public async Task<ActionResult<GeneralResponse>> DeleteHalqa([FromBody] DeleteHalqaRequest request)
         {
-            try
-            {
-                var deleted = await _HalqaCommandService.DeleteHalqaAsync(request);
-                if (!deleted)
-                    return NotFound(GeneralResponse.NotFound("لم يتم العثور على الحلقة."));
+            var deleted = await _HalqaCommandService.DeleteHalqaAsync(request);
 
-                return Ok(GeneralResponse.Ok("تم حذف الحلقة بنجاح.", deleted));
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(GeneralResponse.BadRequest(ex.Message));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, GeneralResponse.InternalError($"فشل الحذف: {ex.Message}"));
-            }
+            // ✅ Optional: تفحص على الـ Success
+            if (!deleted.Success)
+                return StatusCode(deleted.StatusCode, deleted);
+
+            return Ok(deleted);
         }
 
         /// <summary>
