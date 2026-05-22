@@ -37,33 +37,33 @@
         display: inline-block; 
    }
    
-.search-wrapper {
-    position: relative;
-    flex: 1;
-    max-width: 400px;
-}
+   .search-wrapper {
+        position: relative;
+        flex: 1;
+        max-width: 400px;
+   }
 
-.search-input {
-    width: 100%;
-    padding: 12px 45px 12px 15px;
-    border: 1.5px solid var(--accent-beige);
-    border-radius: 12px;
-    outline: none;
-    transition: 0.3s;
-}
+   .search-input {
+        width: 100%;
+        padding: 12px 45px 12px 15px;
+        border: 1.5px solid var(--accent-beige);
+        border-radius: 12px;
+        outline: none;
+        transition: 0.3s;
+   }
 
-    .search-input:focus {
+   .search-input:focus {
         border-color: var(--primary-green);
         box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
-    }
+   }
 
-.search-wrapper i {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--primary-green);
-}
+   .search-wrapper i {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary-green);
+   }
    .table {
         width: 100%;
         table-layout: fixed;
@@ -151,7 +151,7 @@
         color: var(--primary-green);
         z-index: 2;
         pointer-events: none;
-   }
+        }
    .input-wrapper input,
    .input-wrapper select {
         width: 100%;
@@ -209,7 +209,6 @@
    .btn-icon.delete { color: var(--danger-red); }
    .btn-icon:hover { transform: scale(1.1); }
    
-   /* ستايل كبسة اللايك لجعلها تفاعلية */
    .btn-like {
         background: #f0f0f0;
         border: 1px solid #ddd;
@@ -237,26 +236,19 @@
     </header>
     <br>
    <div class="search-wrapper">
-  <i class="bi bi-search"></i>
-  <input type="text" 
-         class="search-input" 
-         placeholder="ابحث عن منشور..."
-         @bind="searchQuery" 
-         @bind:event="oninput" 
-         @onkeyup="HandleSearch">
-</div>
-<br />
+      <i class="bi bi-search"></i>
+      <input type="text" 
+             class="search-input" 
+             placeholder="ابحث عن منشور..."
+             @bind="searchQuery" 
+             @bind:event="oninput" 
+             @onkeyup="HandleSearch">
+    </div>
+    <br />
     
     @if (ShowMessage)
     {
-        if (Success)
-        {
-            <div class="alert alert-success mt-3">@Message</div>
-        }
-        else
-        {
-            <div class="alert alert-danger mt-3">@Message</div>
-        }
+        <div class="alert @(Success ? "alert-success" : "alert-danger") mt-3">@Message</div>
     }
 
     <table class="table mt-3">
@@ -290,7 +282,6 @@
                         <td class="table td fw-bold">@post.Title</td>
                         <td class="table td text-truncate" style="max-width: 200px;">@post.Body</td>
                         <td class="table td">
-                            <!-- التعديل 1: تحويل اللايك لكبسة تفاعلية تستدعي الباك إند أو تحرك العداد محلياً -->
                             <button class="btn-like" @onclick="() => HandleLike(post.Id)">
                                 👍 @post.InteractionsCount
                             </button>
@@ -299,8 +290,8 @@
                             <button class="btn-icon" title="عرض" @onclick="() => viewPost1(post.Id)">
                                 <i class="bi bi-info-circle" style="color: #2ecc71;"></i>
                             </button>
-                            <!-- التعديل 2: كبسة القلم صارت تفتح الـ Modal المحلي فوراً للتعديل السريع -->
-                            <button class="btn-icon edit" title="تعديل" @onclick="() => OpenEditModal(post)">
+                            @* اللمسة البرمجية: هنا يوجه لصفحة التعديل المنفصلة ويمرر الـ Id *@
+                            <button class="btn-icon edit" title="تعديل" @onclick="() => editPost(post.Id)">
                                 <i class="bi bi-pencil-square"></i>
                             </button>
                         </td>
@@ -314,19 +305,21 @@
             }
         </tbody>
     </table>
+
+@* هنا بقي فقط كود إضافة بوست جديد ونظفناه من شروط التعديل *@
 <details class="mt-4" @bind="_isDetailsOpen">
-    <summary class="btn-pprimary" @onclick="PrepareForCreate">
-        @(_isEditMode ? "تعديل المنشور الحالي" : "إضافة منشور جديد")
+    <summary class="btn-pprimary">
+        إضافة منشور جديد
     </summary>
     <div class="form-container">
-        <div class="form-header" style="background: @(_isEditMode ? "#3498db" : "var(--accent-beige)");">
+        <div class="form-header" style="background: var(--accent-beige);">
             <h2>
-                <i class="bi @(_isEditMode ? "bi-pencil-square" : "bi-plus-circle-dotted")"></i> 
-                @(_isEditMode ? "تعديل المنشور الحالي" : "إضافة منشور جديد")
+                <i class="bi bi-plus-circle-dotted"></i> 
+                إضافة منشور جديد
             </h2>
         </div>
         
-        <EditForm Model="_publishModel" OnValidSubmit="SavePost" FormName="PublishPostForm">
+        <EditForm Model="_publishModel" OnValidSubmit="HandleCreatePost" FormName="PublishPostForm">
             <DataAnnotationsValidator />
             <ValidationSummary />
             <div class="grid-row">
@@ -359,7 +352,7 @@
                 <div class="input-group"></div>
             </div>
             <div class="actions">
-                <button type="submit" class="save" style="background: @(_isEditMode ? "#3498db" : "var(--primary-green)");" disabled="@_isSubmitting">
+                <button type="submit" class="save" disabled="@_isSubmitting">
                     @if (_isSubmitting)
                     {
                         <span class="spinner-border spinner-border-sm"></span>
@@ -367,11 +360,11 @@
                     }
                     else
                     {
-                        <span><i class="bi bi-check2-all"></i> @(_isEditMode ? "تحديث التعديلات" : "نشر المنشور")</span>
+                        <span><i class="bi bi-check2-all"></i> نشر المنشور</span>
                     }
                 </button>
                 <button type="button" class="cancel" @onclick="ResetForm">
-                    <i class="bi bi-x-lg"></i> إلغاء @(_isEditMode ? "التعديل" : "")
+                    <i class="bi bi-x-lg"></i> إلغاء
                 </button>
             </div>
         </EditForm>
@@ -382,25 +375,22 @@
 @code {
     private List<PostDto>? postList;
     private bool isLoading = true;
-    
     private bool _isSubmitting = false;
     private bool ShowMessage = false;
     private bool Success = false;
     private string Message = "";
     private bool _isDetailsOpen = false;
-    private bool _isEditMode = false;
-    private PostDto? _editingPost;
+    private string searchQuery = "";
 
     private PublishPostRequest _publishModel = new PublishPostRequest();
-
-    protected override async Task OnInitializedAsync()
+     protected override async Task OnInitializedAsync()
     {
         InitializePublishModel();
         postList = new List<PostDto>();
-        // التعديل 4: استدعاء جلب البيانات فور تحميل الصفحة
         await LoadPostData(); 
     }
-          private void InitializePublishModel()
+
+    private void InitializePublishModel()
     {
         _publishModel = new PublishPostRequest
         {
@@ -420,7 +410,8 @@
 
             if (response != null && response.Success && response.Data != null)
             {
-                postList = System.Text.Json.JsonSerializer.Deserialize<List<PostDto>>(response.Data.ToString());
+                var searchResult = System.Text.Json.JsonSerializer.Deserialize<SearchContentResponse>(response.Data.ToString(), new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                postList = searchResult?.Posts ?? new List<PostDto>();
             }
             else
             {
@@ -433,49 +424,31 @@
         {
             postList = new List<PostDto>(); 
             Message = "تنبيه: " + ex.Message;
+            ShowMessage = true;
+            Success = false;
         }
         finally
         {
             isLoading = false;
         }
     }
-    // 1. المتغير اللي بيمسك النص اللي عم يكتبه المشرف بمربع البحث
-private string searchQuery = "";
 
-// 2. ميثود البحث الفوري اللي بتشتغل مع كل حرف بيكتبه المشرف
-private async Task HandleSearch()
-{
-    try
+    private async Task HandleSearch()
     {
-        // استدعاء ميثود البحث الأصلية بالخدمة وتمرير الكلمة
-        var response = await PostService.SearchContentGetAsync(searchQuery);
-
-        if (response != null && response.Success && response.Data != null)
+        try
         {
-            // فك تشكيل البيانات وتحديث الجدول فوراً بالنتائج المفلترة
-            var filteredPosts = System.Text.Json.JsonSerializer.Deserialize<List<PostDto>>(response.Data.ToString());
-            if (filteredPosts != null)
+            var response = await PostService.SearchContentGetAsync(searchQuery);
+
+            if (response != null && response.Success && response.Data != null)
             {
-               postList = filteredPosts;
+                var searchResult = System.Text.Json.JsonSerializer.Deserialize<SearchContentResponse>(response.Data.ToString(), new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                postList = searchResult?.Posts ?? new List<PostDto>();
+                StateHasChanged();
             }
         }
-    }
-    catch (Exception ex)
-    {
-        // حماية في حال حدث خطأ أثناء الاتصال بالسيرفر
-        Console.WriteLine($"خطأ أثناء الفلترة: {ex.Message}");
-    }
-}
-    // ميثود ذكية لتحديد العملية (تعديل أم إضافة جديدة)
-    private async Task SavePost()
-    {
-        if (_isEditMode)
+        catch (Exception ex)
         {
-            await HandleUpdatePost();
-        }
-        else
-        {
-            await HandleCreatePost();
+            Console.WriteLine($"خطأ أثناء الفلترة: {ex.Message}");
         }
     }
 
@@ -486,29 +459,17 @@ private async Task HandleSearch()
         {
             _isSubmitting = true;
             var response = await PostService.PublishPostAsync(_publishModel);
-
-            if (postList == null) postList = new List<PostDto>();
-
-            var newLocalPost = new PostDto
-            {
-                Id = Guid.NewGuid(),
-                Title = _publishModel.PostData?.Title ?? "عنوان المنشور",
-                Body = _publishModel.PostData?.Body ?? "محتوى المنشور",
-                InteractionsCount = 0
-            };
-
-            postList.Insert(0, newLocalPost);
+            
             Message = "تم نشر المنشور بنجاح!";
             Success = true;
             _isDetailsOpen = false;
 
             InitializePublishModel(); 
-            StateHasChanged(); 
+            await LoadPostData(); 
         }
         catch (Exception)
         {
             if (postList == null) postList = new List<PostDto>();
-            
             postList.Insert(0, new PostDto {
                 Id = Guid.NewGuid(),
                 Title = _publishModel.PostData?.Title ?? "عنوان المنشور",
@@ -520,11 +481,11 @@ private async Task HandleSearch()
             Message = "تم نشر المنشور بنجاح (محلي)!";
             _isDetailsOpen = false;
             InitializePublishModel();
-            StateHasChanged();
         }
         finally
         {
             _isSubmitting = false;
+            StateHasChanged();
         }
     }
 
@@ -535,9 +496,8 @@ private async Task HandleSearch()
         {
             _isSubmitting = true;
             var deleteRequest = new DeletePostRequest { PostId = id };
-            var response = await PostService.DeletePostAsync(deleteRequest);
+            await PostService.DeletePostAsync(deleteRequest);
 
-            // حذف العنصر محلياً فوراً لسرعة استجابة الواجهة
             if (postList != null)
             {
                 var itemToRemove = postList.FirstOrDefault(p => p.Id == id);
@@ -546,11 +506,9 @@ private async Task HandleSearch()
 
             Message = "تم حذف المنشور بنجاح!";
             Success = true;
-            StateHasChanged();
         }
-        catch (Exception ex)
+              catch (Exception)
         {
-            // حماية محلية حتى لو الباك إند ضرب يختفي من الجدول
             if (postList != null)
             {
                 var itemToRemove = postList.FirstOrDefault(p => p.Id == id);
@@ -562,79 +520,7 @@ private async Task HandleSearch()
         finally
         {
             _isSubmitting = false;
-        }
-    }
-           private void PrepareForCreate()
-    {
-        if (_isEditMode)
-        {
-            _isEditMode = false;
-            InitializePublishModel();
-        }
-    }
-
-    private void OpenEditModal(PostDto post)
-    {
-        _editingPost = post;
-        if (_publishModel.PostData == null) _publishModel.PostData = new RequstePostDto();
-        
-        _publishModel.PostData.Title = post.Title;
-        _publishModel.PostData.Body = post.Body;
-        _isEditMode = true;
-        _isDetailsOpen = true; 
-    }
-
-    private async Task HandleUpdatePost()
-    {
-        try
-        {
-            _isSubmitting = true;
-            
-            if (_editingPost != null)
-            {
-                var response = await PostService.UpdatePostAsync(new UpdatePostRequest 
-                { 
-                    PostId = _editingPost.Id,
-                    Title = _publishModel.PostData.Title,
-                    Body = _publishModel.PostData.Body
-                });
-
-                var post = postList?.FirstOrDefault(p => p.Id == _editingPost.Id);
-                if (post != null)
-                {
-                    post.Title = _publishModel.PostData.Title;
-                    post.Body = _publishModel.PostData.Body;
-                }
-            }
-
-            Message = "تم تعديل المنشور بنجاح!";
-            Success = true;
-            _isDetailsOpen = false;
-            _isEditMode = false;
-            InitializePublishModel();
             StateHasChanged();
-        }
-        catch (Exception)
-        {
-            if (_editingPost != null && postList != null)
-            {
-                var post = postList.FirstOrDefault(p => p.Id == _editingPost.Id);
-                if (post != null)
-                {
-                    post.Title = _publishModel.PostData.Title;
-                    post.Body = _publishModel.PostData.Body;
-                }
-            }
-            Success = true;
-            Message = "تم تعديل المنشور بنجاح (محلي)!";
-            _isDetailsOpen = false;
-            _isEditMode = false;
-            InitializePublishModel();
-            StateHasChanged();
-        }
-        finally
-        {
-            _isSubmitting = false;
         }
     }
 
@@ -655,7 +541,6 @@ private async Task HandleSearch()
                 {
                     post.InteractionsCount++;
                 }
-                StateHasChanged();
             }
         }
         catch (Exception)
@@ -664,8 +549,11 @@ private async Task HandleSearch()
             if (post != null)
             {
                 post.InteractionsCount++;
-                StateHasChanged();
             }
+        }
+        finally
+        {
+            StateHasChanged();
         }
     }
 
@@ -673,7 +561,6 @@ private async Task HandleSearch()
     {
         InitializePublishModel();
         _isDetailsOpen = false;
-        _isEditMode = false;
         ShowMessage = false;
     }
 

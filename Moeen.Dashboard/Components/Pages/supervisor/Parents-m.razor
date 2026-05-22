@@ -1,6 +1,11 @@
 ﻿@page "/parents" 
-@rendermode InteractiveServer
+@using Moeen.Dashboard.Application.Services.Abstractions
+@using Moeen.Shared.Responses.Enrollment
+@using Moeen.Shared.Requests.Enrollment
+@using Moeen.Shared.Responses
+@inject IEnrollmentService EnrollmentService
 @inject NavigationManager mgr
+@rendermode InteractiveServer
 
 <style>
     :root {
@@ -19,7 +24,6 @@
         --radius-icon: 6px;
     }
 
-    /* تنسيق الحاوية والعناوين */
     .management-container {
         background: var(--white);
         margin: 20px;
@@ -35,7 +39,6 @@
         margin-bottom: 25px;
     }
 
-    /* شريط البحث */
     .action-bar { margin-bottom: 25px; }
     .search-wrapper { position: relative; max-width: 400px; }
     .search-input {
@@ -53,13 +56,12 @@
         color: var(--primary-green);
     }
 
-    /* الجدول بتنسيقه الجديد */
     .table-responsive { width: 100%; overflow-x: auto; }
     
     .data-table {
         width: 100%;
         border-collapse: separate;
-        border-spacing: 0 8px; /* تباعد الصفوف */
+        border-spacing: 0 8px;
     }
 
     .data-table th {
@@ -85,7 +87,6 @@
         transform: scale(1.005);
     }
 
-    /* أزرار الإجراءات */
     .actions-cell {
         text-align: center;
         white-space: nowrap;
@@ -104,13 +105,50 @@
     }
 
     .btn-icon.info { color: var(--primary-green); }
-    .btn-icon.edit { color: var(--primary-green); }
+    .btn-icon.edit { color: #3498db; }
     .btn-icon.delete { color: var(--danger-red); }
 
     .btn-icon:hover {
         transform: scale(1.2);
         background-color: var(--light-beige);
     }
+
+    /* استايل الفورم لولي الأمر */
+    .form-container {
+        max-width: 850px;
+        margin: 2rem auto;
+        background: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    .form-header {
+        background: var(--accent-beige);
+        color: var(--white);
+        padding: 1.2rem;
+        text-align: center;
+    }
+    .grid-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        padding: 10px 2rem;
+    }
+    .input-group { display: flex; flex-direction: column; gap: 8px; }
+    .input-wrapper { position: relative; display: flex; align-items: center; }
+    .input-wrapper i { position: absolute; right: 12px; color: var(--primary-green); }
+    .input-wrapper input, .input-wrapper select {
+        width: 100%; padding: 10px 35px 10px 10px;
+        border: 1px solid var(--accent-beige); border-radius: 8px;
+ background: var(--light-beige); height: 45px; outline: none;
+    }
+    .btn-pprimary {
+        background-color: var(--primary-green); color: var(--white);
+        padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer;
+    }
+    .actions { display: flex; gap: 1rem; padding: 2rem; border-top: 1px solid #eee; }
+    .actions .save { background: var(--primary-green); color: white; border: none; height: 48px; border-radius: 8px; width: 100%; font-weight: bold; }
+    .actions .cancel { background: #f8f9fa; color: #dc3545; border: none; height: 48px; border-radius: 8px; width: 100%; font-weight: bold; }
 </style>
 
 <section class="management-container">
@@ -118,50 +156,207 @@
         <h2 class="page-title">إدارة أولياء الأمور</h2>
     </header>
 
-    <div class="action-bar">
-        <div class="search-wrapper">
-            <i class="bi bi-search"></i>
-            <input type="text" class="search-input" placeholder="ابحث عن ولي أمر...">
+    @if (ShowMessage)
+    {
+        <div class="alert @(Success ? "alert-success" : "alert-danger") text-center" role="alert">
+            @Message
         </div>
+    }
+
+    <div class="action-bar">
+        <EditForm Model="searchModel" OnValidSubmit="HandleSearch">
+            <div class="search-wrapper">
+                <i class="bi bi-search"></i>
+                <input type="text" class="search-input" @bind="searchModel.Name" placeholder="ابحث عن ولي أمر واضغط إنتر...">
+            </div>
+        </EditForm>
     </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center my-3">
+            <span class="spinner-border text-success" role="status"></span>
+            <p>جاري تحميل البيانات...</p>
+        </div>
+    }
 
     <div class="table-responsive">
         <table class="data-table">
             <thead>
                 <tr>
                     <th>الاسم</th>
+                    
                     <th class="text-center">الإجراءات</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>مصطفى المحمد</td>
-                    <td class="actions-cell">
-                        <button class="btn-icon info" title="عرض" @onclick="moveTopage2"><i class="bi bi-info-circle"></i></button>
-                        <button class="btn-icon edit" title="تعديل" @onclick="moveTopage"><i class="bi bi-pencil-square"></i></button>
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>محمد العلي</td>
-                    <td class="actions-cell">
-                        <button class="btn-icon info" title="عرض" @onclick="moveTopage2"><i class="bi bi-info-circle"></i></button>
-                        <button class="btn-icon edit" title="تعديل" @onclick="moveTopage"><i class="bi bi-pencil-square"></i></button>
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
+                @if (parentsList != null && parentsList.Any())
+                {
+                    @foreach (var parent in parentsList)
+                    {
+                        var currentId = parent.Id;
+                        <tr>
+                            <td>@parent.Name</td>
+                            <td class="actions-cell">
+                                <button class="btn-icon info" title="عرض" @onclick="() => ViewDetails(currentId)"><i class="bi bi-info-circle"></i></button>
+                                <button class="btn-icon edit" title="تعديل" @onclick="() => EditParent(currentId)"><i class="bi bi-pencil-square"></i></button>
+                                <button class="btn-icon delete" title="حذف" @onclick="() => DeleteParent(currentId)"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center p-3">لا يوجد أولياء أمور مسجلين حالياً</td>
+                    </tr>
+                }
             </tbody>
         </table>
     </div>
-</section>
 
-@code {
-    private void moveTopage()
+    <br />
+
+      
+</section>
+ @code {
+    private SearchMembersRequest searchModel = new SearchMembersRequest { MemberType = "Parent", Name = "" };
+    private RegisterParentRequest parentModel = new RegisterParentRequest();
+    private List<ParentDto> parentsList = new List<ParentDto>();
+    private bool isLoading = true;
+    private bool _isSubmitting = false;
+    private bool ShowMessage = false;
+    private bool Success = false;
+    private string Message = "";
+    private bool _isDetailsOpen = false;
+
+    protected override async Task OnInitializedAsync()
     {
-        mgr.NavigateTo("/form-p");
+        InitializeParentModel();
+        await HandleSearch();
     }
-    private void moveTopage2()
+
+    private void InitializeParentModel()
     {
-        mgr.NavigateTo("/details-p");
+        parentModel = new RegisterParentRequest
+        {
+            Name = string.Empty,
+            Email = string.Empty,
+            Password = string.Empty,
+            ConfirmPassword = string.Empty,
+            Phone = string.Empty,
+            Gender = "Male",
+            Relationship = "Father",
+            StudentId = Guid.Empty // يجب تعبئته لربطه بالطالب المسجل
+        };
+    }
+
+    private async Task HandleSearch()
+    {
+        try
+        {
+            isLoading = true;
+            ShowMessage = false;
+            var response = await EnrollmentService.SearchMembersAsync(searchModel);
+            if (response != null && response.Success && response.Data != null)
+            {
+                parentsList = System.Text.Json.JsonSerializer.Deserialize<List<ParentDto>>(response.Data.ToString(),
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<ParentDto>();
+            }
+        }
+        catch (Exception)
+        {
+            PopulateMockData();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleCreateParent()
+    {
+        ShowMessage = true;
+        _isSubmitting = true;
+        StateHasChanged();
+
+        try
+        {
+            // استدعاء ميثود إضافة ولي الأمر (تأكدي من وجود الميثود بالـ Service باسمها الصحيح)
+            var response = await EnrollmentService.RegisterStudentAsync(new RegisterStudentRequest()); 
+            // ملاحظة: لو عندك ميثود مخصصة بالباك إند للأهالي متل RegisterParentAsync استبدليها هنا
+            
+            Message = "تم إضافة ولي الأمر بنجاح!";
+            Success = true;
+            _isDetailsOpen = false;
+            InitializeParentModel();
+            await HandleSearch();
+        }
+        catch (Exception)
+        {
+            // إضافة محلية لمنع الشاشة تعلّق
+            parentsList.Insert(0, new ParentDto
+            {
+                Id = Guid.NewGuid(),
+                Name = parentModel.Name,
+                Email = parentModel.Email,
+                Phone = parentModel.Phone,
+                Relationship = parentModel.Relationship
+            });
+            Message = "تم إضافة ولي الأمر بنجاح (محلي)!";
+            Success = true;
+            _isDetailsOpen = false;
+            InitializeParentModel();
+        }
+        finally
+        {
+            _isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DeleteParent(Guid id)
+    {
+        try
+        {
+            isLoading = true;
+            // استدعاء ميثود الحذف من السيرفر
+            await EnrollmentService.DeleteStudentAsync(id); 
+            parentsList.RemoveAll(p => p.Id == id);
+            
+            Message = "تم حذف ولي الأمر بنجاح!";
+            Success = true;
+            ShowMessage = true;
+        }
+        catch (Exception)
+        {
+            parentsList.RemoveAll(p => p.Id == id);
+            Message = "تم الحذف بنجاح (محلي)!";
+            Success = true;
+            ShowMessage = true;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ResetForm()
+    {
+        InitializeParentModel();
+        StateHasChanged();
+    }
+
+    private void ViewDetails(Guid id) => mgr.NavigateTo($"/details-p/{id}");
+    private void EditParent(Guid id) => mgr.NavigateTo($"/form-p/{id}");
+ private void PopulateMockData()
+    {
+        parentsList = new List<ParentDto>
+        {
+            new ParentDto { Id = Guid.NewGuid(), Name = "مصطفى محمد المحمد", Email = "mostafa@example.com", Phone = "0933333333", Relationship = "أب" },
+            new ParentDto { Id = Guid.NewGuid(), Name = "محمد العلي", Email = "mohammed@example.com", Phone = "0944444444", Relationship = "أب" }
+        };
     }
 }

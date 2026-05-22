@@ -1,7 +1,9 @@
-﻿@page "/supervisor/edit"
+﻿@page "/supervisor/edit/{Id}"
+@using Moeen.Dashboard.Services.Abstractions
+@using Moeen.Shared.Requests.Identity
 @inject NavigationManager NavManager
-
 @rendermode InteractiveServer
+
 <style>
     :root {
 --primary-green: #195042;
@@ -28,22 +30,13 @@ box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 .page-title {
 color: var(--primary-green);
 position: relative;
-padding-bottom: 10px; /* مسافة بين النص والخط */
-border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
-display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+padding-bottom: 10px; 
+border-bottom: 3px solid #d6cabc; 
+display: inline-block; 
 }
  
   .form-container, .form-container * {
         box-sizing: border-box;
-    }
-
-    :root {
-        --primary-green: #195042;
-        --accent-beige: #d6cabc;
-        --light-beige: #f4f1ee;
-        --white: #ffffff;
-        --text-dark: #2d3436;
-        --transition: all 0.3s ease;
     }
 
     .form-container {
@@ -90,7 +83,6 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
             text-align: right;
         }
 
-    /* حل مشكلة الأيقونات والمحاذاة */
     .input-wrapper {
         position: relative;
         display: flex;
@@ -100,7 +92,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
 
         .input-wrapper i {
             position: absolute;
-            right: 12px; /* تثبيت الأيقونة جهة اليمين */
+            right: 12px; 
             color: var(--primary-green);
             z-index: 2;
             pointer-events: none;
@@ -161,157 +153,193 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
             color: #dc3545;
         }
 
-    
     @@media (max-width: 768px) {
     .grid-row, .grid-row:nth-of-type(4) {
         grid-template-columns: 1fr !important;
     }
-	}
+  }
 </style>
-   <section class="management-container">
 
+<section class="management-container">
     <header class="page-header">
-	<h2 class="page-title"> تعديل معلومات طالب </h2>
-</header>
+      <h2 class="page-title">تعديل معلومات طالب</h2>
+    </header>
    
-	<div class="form-container">
-    <div class="form-header">
-        <h2><i class="bi bi-pencil"></i> تعديل المعلومات</h2>
-    </div>
-    <form>
-        <div class="grid-row">
-            <div class="input-group">
-                <label>الاسم الكامل</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-person"></i>
-                    <input type="text" placeholder="أدخل الاسم">
-                </div>
-            </div>
-             <div class="input-group">
-                <label>رقم الهاتف</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-telephone"></i>
-                    <input type="tel" placeholder="أدخل رقم الهاتف">
-                </div>
-            </div>
-            </div>
-	    <div class="grid-row">
-             <div class="input-group">
-                <label>تاريخ التسجيل</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-calendar-event"></i>
-                    <input type="date" placeholder="أدخل تاريخ التسجيل">
-                </div>
-            </div>
-               <div class="input-group">
-                <label>تاريخ الميلاد</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-calendar-event"></i>
-                    <input type="date" placeholder="أدخل تاريخ الميلاد">
-                </div>
-            </div> 
+    <div class="form-container">
+        <div class="form-header">
+            <h2><i class="bi bi-pencil"></i> تعديل المعلومات</h2>
         </div>
-	    <div class="grid-row">
-		 <div class="input-group">
-                <label>العنوان</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-alphabet"></i>
-                    <input type="text" placeholder="أدخل العنوان">
-                </div>
-            </div>
-             <div class="input-group">
-                <label>البريد الإلكتروني</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-envelope"></i>
-                    <input type="email" placeholder="أدخل البريد الالكتروني">
-                </div>
-            </div>
-        </div>
-         <div class="grid-row">
-			   <div class="input-group">
-                <label>الجامع التابع له</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-houses"></i>
-                    <input type="text" placeholder="أدخل اسم الجامع">
-                </div>
-            </div>
-             <div class="input-group">
-                <label>الجنس</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-gender-ambiguous"></i>
-                    <select>
-                        <option value="" disabled selected>اختر الجنس</option>
-                        <option value="male">ذكر</option>
-                        <option value="female">أنثى</option>
-                    </select>
-                </div>
-            </div>
-            </div>
-             <div class="grid-row">
-                     <div class="input-group">
-                <label>اسم ولي الامر </label>
-                <div class="input-wrapper">
-                    <i class="bi bi-person"></i>
-                    <input type="text" placeholder="أدخل الاسم">
-                </div>
-            </div>
-                  <div class="input-group">
-                <label>رقم ولي الامر</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-telephone"></i>
-                    <input type="tel" placeholder="أدخل رقم ولي الامر">
-                </div>
-            </div>
-		        </div>
-                 <div class="grid-row">
-            <div class="input-group">
-                <label>الفوج</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-layers"></i>
-                    <select>
-                        <option>الفوج الأول</option>
-                        <option>الفوج الثاني</option>
-                    </select>
-                </div>
-            </div>
-				 <div class="input-group">
-                <label>الحلقة</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-layers"></i>
-                    <select>
-                        <option>الحلقة الاولى</option>
-                        <option>الحلقة الثانية</option>
-                    </select>
-                </div>
-                </div>
-                </div>
-				 <div class="grid-row">
-              <div class="input-group">
-                <label>حالة الحساب</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-check-circle"></i>
-                    <select>
-                        <option value="active">نشط</option>
-                        <option value="inactive">متوقف</option>
-                    </select>
-                </div>
-            </div>
-            <div class="input-group">
-                <label>كلمة المرور</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-lock"></i>
-                    <input type="password" placeholder="أدخل كلمة المرور">
-                </div>
-            </div>
-        </div>
-		 <div class="actions">
-            <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ الطالب</button>
-            <button type="submit" class="parent"><i class="bi bi-check2-all"></i> ربط بولي الامر </button>
-            <a href="/supervisor/student" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
-        </div>
-		</form>
-                </div>
-</section>
-@code {
+        
+        <EditForm Model="editModel" OnValidSubmit="HandleUpdate">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
+            <div class="grid-row">
+                <div class="input-group">
+                    <label>الاسم الكامل</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-person"></i>
+                        <input type="text" @bind="editModel.Name" placeholder="أدخل الاسم">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>رقم الهاتف</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-telephone"></i>
+                        <input type="tel" @bind="editModel.PhoneNumber" placeholder="أدخل رقم الهاتف">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-row">
+                <div class="input-group">
+                    <label>تاريخ التسجيل</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-calendar-event"></i>
+                        <input type="date" @bind="editModel.Date" placeholder="أدخل تاريخ التسجيل">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>تاريخ الميلاد</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-calendar-event"></i>
+                        <input type="date" @bind="editModel.Birthday" placeholder="أدخل تاريخ الميلاد">
+                    </div>
+                </div> 
+            </div>
+
+            <div class="grid-row">
+                <div class="input-group">
+                    <label>العنوان</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-alphabet"></i>
+                        <input type="text" @bind="editModel.Address" placeholder="أدخل العنوان">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>البريد الإلكتروني</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-envelope"></i>
+                        <input type="email" @bind="editModel.Email" placeholder="أدخل البريد الالكتروني">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-row">
+                <div class="input-group">
+                    <label>الجامع التابع له</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-houses"></i>
+                        <input type="text" @bind="editModel.Musqe" placeholder="أدخل اسم الجامع">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>الجنس</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-gender-ambiguous"></i>
+                        <select @bind="editModel.Gender">
+                            <option value="" disabled>اختر الجنس</option>
+                            <option value="male">ذكر</option>
+                            <option value="female">أنثى</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-row">
+                <div class="input-group">
+                    <label>اسم ولي الأمر</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-person"></i>
+                        <input type="text" @bind="editModel.NameParent" placeholder="أدخل الاسم">
+                </div>
+                </div>
+                <div class="input-group">
+                    <label>رقم ولي الأمر</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-telephone"></i>
+                        <input type="tel" @bind="editModel.PhoneNumberParent" placeholder="أدخل رقم ولي الامر">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-row">
+                <div class="input-group">
+                    <label>الفوج</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-layers"></i>
+                        <select @bind="editModel.Fouj">
+                            <option value="الفوج الأول">الفوج الأول</option>
+                            <option value="الفوج الثاني">الفوج الثاني</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>الحلقة</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-layers"></i>
+                        <select @bind="editModel.Halaqa">
+                            <option value="الحلقة الاولى">الحلقة الاولى</option>
+                            <option value="الحلقة الثانية">الحلقة الثانية</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-row">
+                <div class="input-group">
+                    <label>حالة الحساب</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-check-circle"></i>
+                        <select @bind="editModel.HaltHesab">
+                            <option value="active">نشط</option>
+                            <option value="inactive">متوقف</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>كلمة المرور جديدة (اختياري)</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-lock"></i>
+                        <input type="password" @bind="editModel.Password" placeholder="أدخل كلمة مرور جديدة إذا أردت تغييرها">
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ التعديلات</button>
+                <button type="button" class="parent"><i class="bi bi-link-45deg"></i> ربط بولي الأمر</button>
+                <a href="/supervisor/student" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+            </div>
+        </EditForm>
+    </div>
+</section>
+
+@code {
+    [Parameter] public string Id { get; set; }
+    
+    // نستخدم نفس كلاس الـ RegisterRequest أو كلاس مخصص للتعديل إذا كان موجوداً لديكِ (مثل UpdateStudentRequest)
+    private RegisterRequest editModel = new RegisterRequest();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // هنا نقوم بجلب بيانات الطالب الحالية من الباك إند باستخدام المعرف (Id)
+        if (!string.IsNullOrEmpty(Id))
+        {
+            Console.WriteLine($"تحميل بيانات الطالب صاحب المعرف: {Id}");
+            // مثال للربط الحقيقي:
+            // var response = await UserService.GetStudentById(Id);
+            // if(response.Success) editModel = response.Data;
+        }
+    }
+
+    private async Task HandleUpdate()
+    {
+        Console.WriteLine($"تحديث بيانات الطالب الحالية للمعرف: {Id}");
+        // هنا نقوم باستدعاء خدمة التعديل من الباك إند
+        // var response = await UserService.UpdateStudent(Id, editModel);
+        // if(response.Success) NavManager.NavigateTo("/supervisor/student");
+        
+        NavManager.NavigateTo("/supervisor/student"); // العودة للقائمة بعد الحفظ
+    }
 }
