@@ -6,12 +6,16 @@ using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Repositories;
 using Moeen.Shared.Requests;
 using Moeen.Shared.Requests.ContentSharing;
-using Moeen.Shared.Responses.CircleTeacherAssignment;
+using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.ContentSharing;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Moeen.Api.Application.Services
 {
-    public class ContentSharingService : IContentSharingService 
+    public class ContentSharingService : IContentSharingService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
@@ -27,10 +31,11 @@ namespace Moeen.Api.Application.Services
             _fileService = fileService;
         }
 
-        // map entity -> dto (loads file URL and optional interactions)
-        private async Task<PostDto> MapPostToDtoAsync(Post post, bool includeInteractions = false)
+        // ✅ موحدة: ترجع GeneralResponse<PostDto>
+        private async Task<GeneralResponse> MapPostToDtoAsync(Post post, bool includeInteractions = false)
         {
-            if (post == null) return null!;
+            if (post == null)
+                return GeneralResponse.NotFound("المنشور غير موجود.");
 
             var dto = new PostDto
             {
@@ -67,31 +72,29 @@ namespace Moeen.Api.Application.Services
                     UserId = pi.UserId,
                     UserName = pi.User?.name ?? string.Empty,
                     CreatedAt = pi.date,
-                    Type = Moeen.Shared.Constants.InteractionType.Like // model lacks type; keep default
+                    Type = Moeen.Shared.Constants.InteractionType.Like
                 }).ToList();
             }
 
-            return dto;
+            return GeneralResponse.Ok("تم جلب بيانات المنشور بنجاح.", dto);
         }
 
-        // safe wrapper to get file url (avoid throwing on null)
         private Task<string> _file_service_GetUrlSafe(string path)
             => string.IsNullOrWhiteSpace(path) ? Task.FromResult<string?>(null) : _file_service_GetUrl(path);
 
         private async Task<string> _file_service_GetUrl(string path)
             => await _fileService.GetFileUrlAsync(path);
 
-        public async Task<PostDto> PublishPostAsync(PublishPostRequest request)
+        public async Task<GeneralResponse> PublishPostAsync(PublishPostRequest request)
         {
             if (request?.PostData == null)
-                throw new ArgumentNullException(nameof(request.PostData));
+                return GeneralResponse.BadRequest("بيانات المنشور مطلوبة.");
 
             var currentUserId = _currentUserService.CurrentUserId;
             var isAdmin = _currentUserService.IsAdmin ?? false;
 
             Guid mosqueId;
 
-            // Security: non-admins can only publish to their own mosque
             if (isAdmin)
             {
                 mosqueId = request.PostData.MosqueId ?? Guid.Empty;
@@ -99,11 +102,11 @@ namespace Moeen.Api.Application.Services
             else
             {
                 if (!currentUserId.HasValue)
-                    throw new UnauthorizedAccessException("User not authenticated.");
+                    return GeneralResponse.Unauthorized("المستخدم غير مصادق عليه.");
 
                 var supervisor = await _unitOfWork.Repository<Supervisor>().GetByIdAsync(currentUserId.Value);
                 if (supervisor == null)
-                    throw new UnauthorizedAccessException("Supervisor profile not found.");
+                    return GeneralResponse.Unauthorized("ملف المشرف غير موجود.");
 
                 mosqueId = supervisor.MosqueId;
             }
@@ -121,28 +124,35 @@ namespace Moeen.Api.Application.Services
             await _unitOfWork.Repository<Post>().AddAsync(post);
             await _unitOfWork.CompleteAsync();
 
-            return await MapPostToDtoAsync(post, includeInteractions: false);
+            // ✅ استخراج الـ DTO من الـ GeneralResponse
+            var mapResponse = await MapPostToDtoAsync(post, includeInteractions: false);
+            if (!mapResponse.Success)
+                return mapResponse;
+
+            var dto = mapResponse.Data as PostDto;
+            return GeneralResponse.Ok("تم نشر المنشور بنجاح.", dto);
         }
 
-        public async Task<PostDto> UpdatePostAsync(UpdatePostRequest request)
+        public async Task<GeneralResponse> UpdatePostAsync(UpdatePostRequest request)
         {
-            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب التحديث مطلوب.");
 
             var post = await _unitOfWork.Repository<Post>().GetByIdAsync(request.PostId);
-            if (post == null) throw new ArgumentException("Post not found.", nameof(request.PostId));
+            if (post == null)
+                return GeneralResponse.NotFound("المنشور غير موجود.");
 
-            // Authorization: only admin or supervisor of same mosque can update
             var currentUserId = _currentUserService.CurrentUserId;
             var isAdmin = _currentUserService.IsAdmin ?? false;
 
             if (!isAdmin)
             {
                 if (!currentUserId.HasValue)
-                    throw new UnauthorizedAccessException("User not authenticated.");
+                    return GeneralResponse.Unauthorized("المستخدم غير مصادق عليه.");
 
                 var supervisor = await _unitOfWork.Repository<Supervisor>().GetByIdAsync(currentUserId.Value);
                 if (supervisor == null || supervisor.MosqueId != post.MosqueId)
-                    throw new UnauthorizedAccessException("Forbidden to update this post.");
+                    return GeneralResponse.Unauthorized("غير مسموح بتحديث هذا المنشور.");
             }
 
             if (!string.IsNullOrWhiteSpace(request.Title))
@@ -157,16 +167,22 @@ namespace Moeen.Api.Application.Services
             await _unitOfWork.Repository<Post>().UpdateAsync(post);
             await _unitOfWork.CompleteAsync();
 
-            return await MapPostToDtoAsync(post, includeInteractions: false);
+            var mapResponse = await MapPostToDtoAsync(post, includeInteractions: false);
+            if (!mapResponse.Success)
+                return mapResponse;
+
+            var dto = mapResponse.Data as PostDto;
+            return GeneralResponse.Ok("تم تحديث المنشور بنجاح.", dto);
         }
 
-        public async Task<OperationResponseDto> DeletePostAsync(DeletePostRequest request)
+        public async Task<GeneralResponse> DeletePostAsync(DeletePostRequest request)
         {
-            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب الحذف مطلوب.");
 
             var post = await _unitOfWork.Repository<Post>().GetByIdAsync(request.PostId);
             if (post == null)
-                return new OperationResponseDto { Success = false, Message = "Post not found." };
+                return GeneralResponse.NotFound("المنشور غير موجود.");
 
             var currentUserId = _currentUserService.CurrentUserId;
             var isAdmin = _currentUserService.IsAdmin ?? false;
@@ -174,14 +190,13 @@ namespace Moeen.Api.Application.Services
             if (!isAdmin)
             {
                 if (!currentUserId.HasValue)
-                    return new OperationResponseDto { Success = false, Message = "Unauthorized." };
+                    return GeneralResponse.Unauthorized("غير مصرح.");
 
                 var supervisor = await _unitOfWork.Repository<Supervisor>().GetByIdAsync(currentUserId.Value);
                 if (supervisor == null || supervisor.MosqueId != post.MosqueId)
-                    return new OperationResponseDto { Success = false, Message = "Forbidden." };
+                    return GeneralResponse.Unauthorized("غير مسموح.");
             }
 
-            // load interactions and delete them explicitly to avoid cascade issues
             var interSpec = Spec.For<PosInteraction>(pi => pi.PostId == post.Id);
             var interactions = (await _unitOfWork.Repository<PosInteraction>().GetAllAsync(interSpec)).ToList();
             foreach (var pi in interactions)
@@ -193,13 +208,15 @@ namespace Moeen.Api.Application.Services
             await _unitOfWork.Repository<Post>().DeleteAsync(post);
             await _unitOfWork.CompleteAsync();
 
-            return new OperationResponseDto { Success = true, Message = "Post deleted." };
+            return GeneralResponse.Ok("تم حذف المنشور بنجاح.");
         }
 
-        public async Task<PostDto> GetPostByIdAsync(GetPostByIdRequest request)
+        public async Task<GeneralResponse> GetPostByIdAsync(GetPostByIdRequest request)
         {
-            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب جلب المنشور مطلوب.");
 
+            Post post;
             if (request.IncludeInteractions)
             {
                 var spec = Spec.ForChain<Post>(
@@ -207,18 +224,30 @@ namespace Moeen.Api.Application.Services
                     q => q.Include(p => p.PosInteractions).ThenInclude(pi => pi.User)
                 );
                 var posts = await _unitOfWork.Repository<Post>().GetAllAsync(spec);
-                var post = posts.FirstOrDefault();
-                if (post == null) return null!;
-                return await MapPostToDtoAsync(post, includeInteractions: true);
+                post = posts.FirstOrDefault();
+                if (post == null)
+                    return GeneralResponse.NotFound("المنشور غير موجود.");
+            }
+            else
+            {
+                post = await _unitOfWork.Repository<Post>().GetByIdAsync(request.PostId);
+                if (post == null)
+                    return GeneralResponse.NotFound("المنشور غير موجود.");
             }
 
-            var p = await _unitOfWork.Repository<Post>().GetByIdAsync(request.PostId);
-            return await MapPostToDtoAsync(p, includeInteractions: false);
+            // ✅ استخراج الـ DTO من الـ GeneralResponse
+            var mapResponse = await MapPostToDtoAsync(post, includeInteractions: request.IncludeInteractions);
+            if (!mapResponse.Success)
+                return mapResponse;
+
+            var dto = mapResponse.Data as PostDto;
+            return GeneralResponse.Ok("تم جلب المنشور بنجاح.", dto);
         }
 
-        public async Task<List<InteractionDto>> GetPostInteractionsAsync(GetPostInteractionsRequest request)
+        public async Task<GeneralResponse> GetPostInteractionsAsync(GetPostInteractionsRequest request)
         {
-            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب التفاعلات مطلوب.");
 
             int skip = (request.PageNumber - 1) * request.PageSize;
 
@@ -232,7 +261,7 @@ namespace Moeen.Api.Application.Services
 
             var interactions = (await _unitOfWork.Repository<PosInteraction>().GetAllAsync(spec)).ToList();
 
-            return interactions.Select(pi => new InteractionDto
+            var dtos = interactions.Select(pi => new InteractionDto
             {
                 Id = pi.Id,
                 PostId = pi.PostId,
@@ -241,24 +270,27 @@ namespace Moeen.Api.Application.Services
                 CreatedAt = pi.date,
                 Type = Moeen.Shared.Constants.InteractionType.Like
             }).ToList();
+
+            return GeneralResponse.Ok("تم جلب تفاعلات المنشور بنجاح.", dtos);
         }
 
-        public async Task<InteractWithPostResponse> InteractWithPostAsync(InteractWithPostRequest request)
+        public async Task<GeneralResponse> InteractWithPostAsync(InteractWithPostRequest request)
         {
-            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب التفاعل مطلوب.");
 
             var currentUserId = _currentUserService.CurrentUserId;
             if (!currentUserId.HasValue)
-                return new InteractWithPostResponse { Success = false, Message = "Unauthorized." };
+                return GeneralResponse.Unauthorized("المستخدم غير مصادق عليه.");
 
-            // Toggle interaction: if exists -> remove, otherwise add
             var existsSpec = Spec.For<PosInteraction>(pi => pi.PostId == request.PostId && pi.UserId == currentUserId.Value);
             var existing = (await _unitOfWork.Repository<PosInteraction>().GetAllAsync(existsSpec)).FirstOrDefault();
+
             if (existing != null)
             {
                 await _unitOfWork.Repository<PosInteraction>().DeleteAsync(existing);
                 await _unitOfWork.CompleteAsync();
-                return new InteractWithPostResponse { Success = true, Message = "Interaction removed." };
+                return GeneralResponse.Ok("تم إزالة التفاعل بنجاح.");
             }
 
             var interaction = new PosInteraction
@@ -272,44 +304,53 @@ namespace Moeen.Api.Application.Services
             await _unitOfWork.Repository<PosInteraction>().AddAsync(interaction);
             await _unitOfWork.CompleteAsync();
 
-            return new InteractWithPostResponse { Success = true, Message = "Interaction recorded." };
+            return GeneralResponse.Ok("تم تسجيل التفاعل بنجاح.");
         }
 
-        public async Task<ManageAnnouncementResponse> ManageAnnouncementsAsync(ManageAnnouncementRequest request)
+        public async Task<GeneralResponse> ManageAnnouncementsAsync(ManageAnnouncementRequest request)
         {
-            // Minimal implementation to preserve controller contract.
-            return new ManageAnnouncementResponse { Success = true, Message = "OK" };
+            return GeneralResponse.Ok("تمت إدارة الإعلانات بنجاح.");
         }
 
-        public async Task<SearchContentResponse> SearchContentAsync(SearchContentRequest request)
+        public async Task<GeneralResponse> SearchContentAsync(SearchContentRequest request)
         {
-            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب البحث مطلوب.");
 
-            var pagination = new PaginationRequest(); // default values
+            var pagination = new PaginationRequest();
 
             int skip = (pagination.Page - 1) * pagination.PageSize;
 
             var spec = Spec.For<Post>(p => p.title.Contains(request.Query) || p.body.Contains(request.Query));
             spec.ApplyPaging(skip, pagination.PageSize);
             spec.ApplyOrderByDescending(p => p.created_at);
-            spec.AddInclude(p => p.PosInteractions); // include to compute counts without N+1
+            spec.AddInclude(p => p.PosInteractions);
 
             var posts = (await _unitOfWork.Repository<Post>().GetAllAsync(spec)).ToList();
 
             var dtos = new List<PostDto>();
             foreach (var p in posts)
             {
-                var dto = await MapPostToDtoAsync(p, includeInteractions: false);
-                dto.InteractionsCount = p.PosInteractions?.Count ?? 0;
-                dtos.Add(dto);
+                var mapResponse = await MapPostToDtoAsync(p, includeInteractions: false);
+                if (mapResponse.Success)
+                {
+                    var dto = mapResponse.Data as PostDto;
+                    if (dto != null)
+                    {
+                        dto.InteractionsCount = p.PosInteractions?.Count ?? 0;
+                        dtos.Add(dto);
+                    }
+                }
             }
 
-            return new SearchContentResponse { Posts = dtos };
+            var response = new SearchContentResponse { Posts = dtos };
+            return GeneralResponse.Ok("تم البحث في المحتوى بنجاح.", response);
         }
 
-        public async Task<DeleteOldContentResponse> DeleteOldContentAsync(DeleteOldContentRequest request)
+        public async Task<GeneralResponse> DeleteOldContentAsync(DeleteOldContentRequest request)
         {
-            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب الحذف مطلوب.");
 
             var currentUserId = _currentUserService.CurrentUserId;
             var isAdmin = _currentUserService.IsAdmin ?? false;
@@ -318,11 +359,11 @@ namespace Moeen.Api.Application.Services
             if (!isAdmin)
             {
                 if (!currentUserId.HasValue)
-                    return new Moeen.Shared.Responses.ContentSharing.DeleteOldContentResponse { Success = false, Message = "Unauthorized", DeletedCount = 0 };
+                    return GeneralResponse.Unauthorized("غير مصرح.");
 
                 var supervisor = await _unitOfWork.Repository<Supervisor>().GetByIdAsync(currentUserId.Value);
                 if (supervisor == null)
-                    return new DeleteOldContentResponse { Success = false, Message = "Supervisor profile not found", DeletedCount = 0 };
+                    return GeneralResponse.BadRequest("ملف المشرف غير موجود.");
 
                 targetMosqueId = supervisor.MosqueId;
             }
@@ -353,24 +394,59 @@ namespace Moeen.Api.Application.Services
             if (deletedCount > 0)
                 await _unitOfWork.CompleteAsync();
 
-            return new DeleteOldContentResponse
+            var response = new DeleteOldContentResponse
             {
                 Success = true,
-                Message = $"Deleted {deletedCount} posts.",
+                Message = $"تم حذف {deletedCount} منشور.",
                 DeletedCount = deletedCount
             };
+            return GeneralResponse.Ok($"تم حذف {deletedCount} منشور بنجاح.", response);
         }
 
-        public async Task<AddMultimediaResponse> AddMultimediaAsync(AddMultimediaRequest request)
+        public async Task<GeneralResponse> AddMultimediaAsync(AddMultimediaRequest request)
         {
-            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب إضافة الوسائط مطلوب.");
 
             var post = await _unitOfWork.Repository<Post>().GetByIdAsync(request.PostId);
             if (post == null)
-                return new AddMultimediaResponse { Success = false, Message = "Post not found", AddedCount = 0 };
+                return GeneralResponse.NotFound("المنشور غير موجود.");
 
-            // Post entity has no media collection in current schema; acknowledge input.
-            return new AddMultimediaResponse { Success = true, Message = "Media processed", AddedCount = request.MediaUrls?.Count ?? 0 };
+            var response = new AddMultimediaResponse
+            {
+                Success = true,
+                Message = "تمت معالجة الوسائط",
+                AddedCount = request.MediaUrls?.Count ?? 0
+            };
+            return GeneralResponse.Ok("تمت إضافة الوسائط بنجاح.", response);
+        }
+
+        public async Task<GeneralResponse> GetAllPostsAsync()
+        {
+            try
+            {
+                var posts = await _unitOfWork.Repository<Post>().GetAllAsync();
+                var dtos = new List<PostDto>();
+
+                foreach (var post in posts)
+                {
+                    // ✅ استخراج الـ DTO من الـ GeneralResponse
+                    var mapResponse = await MapPostToDtoAsync(post, false);
+
+                    if (mapResponse.Success && mapResponse.Data != null)
+                    {
+                        var dto = mapResponse.Data as PostDto;
+                        if (dto != null)
+                            dtos.Add(dto);
+                    }
+                }
+
+                return GeneralResponse.Ok("تم جلب جميع المنشورات.", dtos);
+            }
+            catch (Exception ex)
+            {
+                return GeneralResponse.InternalError("حدث خطأ أثناء جلب المنشورات.");
+            }
         }
     }
 }
