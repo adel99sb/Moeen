@@ -99,6 +99,7 @@ builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IExamHalqaService, ExamHalqaService>();
 builder.Services.AddScoped<IBackupService, BackupService>();
 builder.Services.AddScoped<IFoujService, FoujService>();
+builder.Services.AddScoped<IStudentNotesService, StudentNotesService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
