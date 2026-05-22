@@ -26,9 +26,13 @@ namespace Moeen.Shared.Requests.Enrollment
         [Phone(ErrorMessage = "Invalid phone number")]
         public string Phone { get; set; }
 
+        public string PhoneNumber { get; set; }
+
         [Required(ErrorMessage = "Gender is required")]
         [RegularExpression("^(Male|Female)$", ErrorMessage = "Gender must be Male or Female")]
         public string Gender { get; set; }
+
+        public DateTime? DateOfBirth { get; set; }
 
         // Teacher specific
         [Required(ErrorMessage = "Mosque ID is required")]

@@ -90,5 +90,13 @@ namespace Moeen.Api.Controllers
         [HttpDelete("records/{recordId:guid}")]
         public async Task<ActionResult<GeneralResponse>> DeleteRecord([FromRoute] Guid recordId)
             => Ok(await _memorizationService.DeleteMemorizationRecordAsync(new DeleteMemorizationRecordRequest { RecordId = recordId }));
+
+        [HttpGet("students/top-performing")]
+        public async Task<ActionResult<GeneralResponse>> GetTopPerforming([FromQuery] GetTopPerformingStudentsRequest request)
+            => Ok(await _memorizationService.GetTopPerformingStudentsAsync(request ?? new GetTopPerformingStudentsRequest()));
+
+        [HttpGet("students/struggling")]
+        public async Task<ActionResult<GeneralResponse>> GetStruggling([FromQuery] GetStrugglingStudentsRequest request)
+            => Ok(await _memorizationService.GetStrugglingStudentsAsync(request ?? new GetStrugglingStudentsRequest()));
     }
 }

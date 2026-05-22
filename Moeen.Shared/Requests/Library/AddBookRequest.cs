@@ -6,5 +6,7 @@ namespace Moeen.Shared.Requests.Library
     {
         [Required(ErrorMessage = "Book data is required")]
         public BookDto BookData { get; set; }
+
+        public byte[] BookFile { get; set; }
     }
 }

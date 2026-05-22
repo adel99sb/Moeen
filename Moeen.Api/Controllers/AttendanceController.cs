@@ -96,5 +96,27 @@ namespace Moeen.Api.Controllers
             var response = await _attendanceService.ExportAttendanceAsync(request);
             return StatusCode(response.StatusCode, response);
         }
+        [HttpPost("teachers/record-attendance")]
+        public async Task<ActionResult<GeneralResponse>> RecordTeacherAttendance([FromBody] RecordTeacherAttendanceRequest request)
+        {
+            var response = await _attendanceService.RecordTeacherAttendanceAsync(request);
+            return StatusCode(response.StatusCode, response);
+        }
+
+        [HttpGet("teachers/{teacherId:guid}/attendance-rate")]
+        public async Task<ActionResult<GeneralResponse>> GetTeacherAttendanceRate(
+            [FromRoute] Guid teacherId,
+            [FromQuery] DateTime? fromDate,
+            [FromQuery] DateTime? toDate)
+        {
+            var response = await _attendanceService.GetTeacherAttendanceRateAsync(new GetTeacherAttendanceRateRequest
+            {
+                TeacherId = teacherId,
+                FromDate = fromDate,
+                ToDate = toDate
+            });
+
+            return StatusCode(response.StatusCode, response);
+        }
     }
 }
