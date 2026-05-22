@@ -1,6 +1,6 @@
 ﻿using Moeen.Shared.Requests.Memorization;   
 using Moeen.Shared.Responses;               
-using System.Threading.Tasks;               
+using System.Threading.Tasks;
 namespace Moeen.Api.Core.Contracts.Application
 {
     public interface IMemorizationService
@@ -31,5 +31,8 @@ namespace Moeen.Api.Core.Contracts.Application
 
         // حذف سجل حفظ من النظام
         Task<GeneralResponse> DeleteMemorizationRecordAsync(DeleteMemorizationRecordRequest request);
+        Task<GeneralResponse> GetTopPerformingStudentsAsync(GetTopPerformingStudentsRequest request);
+        Task<GeneralResponse> GetStrugglingStudentsAsync(GetStrugglingStudentsRequest request);
+
     }
 }

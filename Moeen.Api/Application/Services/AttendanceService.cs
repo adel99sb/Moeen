@@ -495,5 +495,98 @@ namespace Moeen.Api.Application.Services
 
             return needsQuotes ? $"\"{escaped}\"" : escaped;
         }
+    
+        public async Task<GeneralResponse> RecordTeacherAttendanceAsync(RecordTeacherAttendanceRequest request)
+        {
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            var teacherId = request.TeacherId ?? _currentUserService.CurrentUserId;
+            if (!teacherId.HasValue)
+                return GeneralResponse.Unauthorized("غير مصرح.");
+
+            var halqaId = await ResolveCircleIdAsync(teacherId.Value);
+            if (!halqaId.HasValue)
+                return GeneralResponse.NotFound("لا توجد حلقة مرتبطة بالمعلم.");
+
+            var date = (request.Date ?? DateTime.UtcNow).Date;
+
+            // إذا كان المعلم غائبًا، نكتفي بإرجاع الاستجابة (لا يوجد مكان لتخزين الغياب دون كيان جديد)
+            if (request.Status == AttendanceStatus.Absent || request.Status == AttendanceStatus.Excused)
+                return GeneralResponse.Ok("تم تسجيل غياب المعلم.");
+
+            var session = await _context.HalqaSessions
+                .FirstOrDefaultAsync(s => s.HalqaId == halqaId.Value && s.date == date);
+
+            if (session == null)
+            {
+                session = new HalqaSession
+                {
+                    Id = Guid.NewGuid(),
+                    HalqaId = halqaId.Value,
+                    date = date,
+                    start_time = request.StartTime ?? TimeSpan.Zero,
+                    end_time = request.EndTime ?? TimeSpan.Zero
+                };
+
+                await _context.HalqaSessions.AddAsync(session);
+            }
+            else
+            {
+                if (request.StartTime.HasValue) session.start_time = request.StartTime.Value;
+                if (request.EndTime.HasValue) session.end_time = request.EndTime.Value;
+            }
+
+            await _context.SaveChangesAsync();
+            return GeneralResponse.Ok("تم تسجيل حضور المعلم.");
+        }
+
+
+        public async Task<GeneralResponse> GetTeacherAttendanceRateAsync(GetTeacherAttendanceRateRequest request)
+        {
+            if (request == null || request.TeacherId == Guid.Empty)
+                return GeneralResponse.BadRequest("معرف المعلم مطلوب.");
+
+            var fromDate = (request.FromDate ?? DateTime.UtcNow.AddDays(-30)).Date;
+            var toDate = (request.ToDate ?? DateTime.UtcNow).Date;
+
+            if (fromDate > toDate)
+                return GeneralResponse.BadRequest("نطاق التاريخ غير صالح.");
+
+            var halqaId = await ResolveCircleIdAsync(request.TeacherId);
+            if (!halqaId.HasValue)
+                return GeneralResponse.NotFound("لا توجد حلقة مرتبطة بالمعلم.");
+
+            var presentDays = await _context.HalqaSessions
+                .AsNoTracking()
+                .Where(s => s.HalqaId == halqaId.Value && s.date >= fromDate && s.date <= toDate)
+                .Select(s => s.date.Date)
+                .Distinct()
+                .CountAsync();
+
+            var totalDays = (toDate - fromDate).Days + 1;
+            var absentDays = Math.Max(0, totalDays - presentDays);
+            var rate = totalDays == 0 ? 0 : Math.Round((double)presentDays / totalDays * 100, 2);
+
+            return GeneralResponse.Ok("تم حساب نسبة حضور المعلم.", new TeacherAttendanceRateDto
+            {
+                TeacherId = request.TeacherId,
+                FromDate = fromDate,
+                ToDate = toDate,
+                TotalDays = totalDays,
+                PresentDays = presentDays,
+                AbsentDays = absentDays,
+                Rate = rate
+            });
+        }
+
+        private async Task<Guid?> ResolveCircleIdAsync(Guid teacherId)
+        {
+            return await _context.Halqas
+                .AsNoTracking()
+                .Where(h => h.TeacherId == teacherId)
+                .Select(h => (Guid?)h.Id)
+                .FirstOrDefaultAsync();
+        }
     }
 }

@@ -3,11 +3,13 @@ using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
+using Moeen.Shared.Constants;
 using Moeen.Shared.Requests.Library;
 using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.Library;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,13 +19,16 @@ namespace Moeen.Api.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IFileService _fileService;
 
         public LibraryService(
             IUnitOfWork unitOfWork,
-            ICurrentUserService currentUserService)
+            ICurrentUserService currentUserService,
+            IFileService fileService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
+            _fileService = fileService;
         }
 
         public async Task<GeneralResponse> AddBookAsync(AddBookRequest request)
@@ -37,9 +42,6 @@ namespace Moeen.Api.Application.Services
             if (string.IsNullOrWhiteSpace(request.BookData.Description))
                 return GeneralResponse.BadRequest("وصف الكتاب مطلوب.");
 
-            if (string.IsNullOrWhiteSpace(request.BookData.CoverImageUrl))
-                return GeneralResponse.BadRequest("رابط التحميل مطلوب.");
-
             if (!await CanManageLibraryAsync())
                 return GeneralResponse.Unauthorized("غير مصرح لك بإضافة الكتب.");
 
@@ -47,12 +49,24 @@ namespace Moeen.Api.Application.Services
             if (placement is null)
                 return GeneralResponse.BadRequest("لا توجد بيانات مسجد/درس سبت مرتبطة لحفظ الكتاب.");
 
+            var fileUrl = request.BookData.CoverImageUrl?.Trim();
+
+            if (request.BookFile != null && request.BookFile.Length > 0)
+            {
+                var safeName = SanitizeFileName(request.BookData.Title);
+                var fileName = $"{safeName}_{Guid.NewGuid():N}.pdf";
+                fileUrl = await _fileService.UploadFileAsync(FilePathType.LibraryBooks, placement.Value.MosqueId, fileName, request.BookFile);
+            }
+
+            if (string.IsNullOrWhiteSpace(fileUrl))
+                return GeneralResponse.BadRequest("ملف الكتاب أو رابط التحميل مطلوب.");
+
             var book = new PdfFile
             {
                 Id = Guid.NewGuid(),
                 MosqueId = placement.Value.MosqueId,
                 SaturdayLessonId = placement.Value.SaturdayLessonId,
-                FileUrl = request.BookData.CoverImageUrl.Trim(),
+                FileUrl = fileUrl,
                 title = request.BookData.Title.Trim(),
                 description = request.BookData.Description.Trim(),
                 uploaded_by = string.IsNullOrWhiteSpace(_currentUserService.CurrentUserName)
@@ -258,6 +272,13 @@ namespace Moeen.Api.Application.Services
                 CreatedAt = book.created_at,
                 UpdatedAt = null
             };
+        }
+
+        private static string SanitizeFileName(string name)
+        {
+            var invalid = Path.GetInvalidFileNameChars();
+            var clean = new string(name.Where(c => !invalid.Contains(c)).ToArray());
+            return string.IsNullOrWhiteSpace(clean) ? "book" : clean;
         }
     }
 }

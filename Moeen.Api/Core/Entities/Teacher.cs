@@ -14,5 +14,6 @@ namespace Moeen.Api.Core.Entities
         public ICollection<Halqa> halaqas { get; set; }
         public ICollection<ProgressEntry> ProgressEntrys { get; set; }
         public ICollection<Attendance> Attendances { get; set; }
+        public DateTime? DateOfBirth { get; set; }
     }
 }
