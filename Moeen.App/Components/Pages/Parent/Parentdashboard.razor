@@ -1,5 +1,426 @@
-﻿<h3>Parentdashboard</h3>
+﻿@page "/Parent/Parentdashboard"
+
+<style>
+    :root {
+        --theme-primary: #195042;
+        --theme-beige-light: #F4F1E8;
+        --theme-beige-medium: #EAE6D9;
+        --theme-bg-page: #F5F7FA;
+        --theme-gradient-primary: linear-gradient(135deg, #195042 0%, #24705D 100%);
+        --theme-gradient-beige: linear-gradient(145deg, #ffffff 0%, #F4F1E8 100%);
+        --theme-gradient-accent: linear-gradient(90deg, #195042 0%, #EAE6D9 100%);
+        --theme-shadow-sm: 0 2px 8px rgba(25, 80, 66, 0.06);
+        --theme-shadow-md: 0 6px 16px rgba(25, 80, 66, 0.09);
+        --theme-shadow-lg: 0 10px 24px rgba(25, 80, 66, 0.12);
+        --theme-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dashboard-wrapper {
+        direction: rtl;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background-color: var(--theme-bg-page);
+        min-height: 100vh;
+        padding: 0.8rem 0 2rem;
+    }
+
+    .dashboard-card {
+        background: var(--theme-gradient-beige);
+        border: 1px solid var(--theme-beige-medium);
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: var(--theme-shadow-md);
+        transition: var(--theme-transition);
+    }
+
+        .dashboard-card:hover {
+            box-shadow: var(--theme-shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-card .card-header {
+            background: var(--theme-gradient-primary);
+            border-bottom: none;
+            padding: 1rem 1.25rem;
+            color: #ffffff;
+        }
+
+            .dashboard-card .card-header h5 {
+                margin: 0;
+                font-weight: 600;
+                font-size: 1.1rem;
+            }
+
+    .stat-box {
+        background: var(--theme-gradient-beige);
+        border: 1px solid var(--theme-beige-medium);
+        border-radius: 0.85rem;
+        padding: 1.5rem 1rem;
+        position: relative;
+        transition: var(--theme-transition);
+    }
+
+        .stat-box::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--theme-gradient-accent);
+            border-radius: 0.85rem 0.85rem 0 0;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-4px);
+            border-color: var(--theme-primary);
+            box-shadow: var(--theme-shadow-lg);
+        }
+
+    .icon-wrapper {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--theme-primary);
+        font-size: 1.5rem;
+        transition: var(--theme-transition);
+    }
+
+    .stat-box:hover .icon-wrapper {
+        transform: scale(1.05);
+    }
+
+    .stat-value {
+        color: var(--theme-primary);
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid var(--theme-beige-medium);
+    }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+        background-color: var(--theme-beige-light);
+        color: var(--theme-primary);
+        border: 1px solid var(--theme-beige-medium);
+        transition: var(--theme-transition);
+    }
+
+        .status-badge.active {
+            background-color: #d1fae5;
+            color: #065f46;
+            border-color: #a7f3d0;
+        }
+
+        .status-badge.inactive {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border-color: #fecaca;
+        }
+
+    details summary {
+        cursor: pointer;
+        list-style: none;
+        user-select: none;
+        color: var(--theme-primary);
+        font-weight: 600;
+    }
+
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+
+    .toggle-icon {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    details[open] .toggle-icon {
+        transform: rotate(180deg);
+    }
+
+    .logo-container {
+        text-align: center;
+        margin: 0.2rem 0 0.6rem;
+    }
+
+        .logo-container img {
+            width: 110px;
+            height: auto;
+            object-fit: contain;
+            transition: var(--theme-transition);
+        }
+
+            .logo-container img:hover {
+                transform: scale(1.05);
+            }
+
+    /* قائمة الأبناء المدمجة داخل الشريط الأخضر */
+    .child-selector-inline {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.6rem;
+        background: rgba(214, 202, 188, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 0.5rem;
+        transition: var(--theme-transition);
+    }
+
+        .child-selector-inline:hover {
+            background: rgba(214, 202, 188, 0.35);
+        }
+
+    .child-dropdown-inline {
+        background: transparent;
+        border: none;
+        color: #d6cabc;
+        font-weight: 600;
+        font-size: 0.82rem;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+        -webkit-appearance: none;
+        padding: 0;
+    }
+
+        .child-dropdown-inline option {
+            background: var(--theme-primary);
+            color: #ffffff;
+        }
+
+    .selector-icon {
+        color: #d6cabc;
+        font-size: 0.85rem;
+    }
+
+    .selector-arrow {
+        color: #d6cabc;
+        font-size: 0.75rem;
+        transition: var(--theme-transition);
+    }
+
+    .child-selector-inline:hover .selector-arrow {
+        transform: translateY(1px);
+    }
+
+    .icon-success {
+        color: #198754;
+    }
+
+    .icon-danger {
+        color: #dc3545;
+    }
+
+    .icon-gold {
+        color: #b8860b;
+    }
+
+    .icon-red {
+        color: #c82333;
+    }
+
+    .icon-green {
+        color: #28a745;
+    }
+
+    .icon-primary-custom {
+        color: var(--theme-primary);
+    }
+</style>
+
+<div class="container-fluid dashboard-wrapper">
+    <div class="logo-container">
+        <img src="/image/LOGO.svg" alt="شعار المؤسسة" />
+    </div>
+
+    <div class="dashboard-card mb-4">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-speedometer2 fs-5"></i>
+                <h5>إحصائيات الأخيرة</h5>
+            </div>
+            <!-- قائمة الأبناء مدمجة داخل الشريط -->
+            <div class="child-selector-inline">
+                <i class="bi bi-people-fill selector-icon"></i>
+                <select class="child-dropdown-inline" id="studentSelect">
+                    <option selected disabled>اختر الابن</option>
+                    <option value="1">أحمد خالد العلي</option>
+                    <option value="2">سارة خالد العلي</option>
+                    <option value="3">عمر خالد العلي</option>
+                </select>
+                <i class="bi bi-chevron-down selector-arrow"></i>
+            </div>
+        </div>
+        <div class="card-body p-3">
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <div class="stat-box text-center h-100">
+                        <div class="icon-wrapper mb-2 mx-auto"><i class="bi bi-trophy-fill"></i></div>
+                        <div class="small text-muted mb-1">مجموع النقاط</div>
+                        <div class="stat-value">2,450</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-box text-center h-100">
+                        <div class="icon-wrapper mb-2 mx-auto"><i class="bi bi-book"></i></div>
+                        <div class="small text-muted mb-1">إجمالي التسميعات</div>
+                        <div class="stat-value">48</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-box text-center h-100">
+                        <div class="icon-wrapper mb-2 mx-auto"><i class="bi bi-arrow-counterclockwise"></i></div>
+                        <div class="small text-muted mb-1">المراجعات المنجزة</div>
+                        <div class="stat-value">12 جزء</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-box text-center h-100">
+                        <div class="icon-wrapper mb-2 mx-auto"><i class="bi bi-clipboard-check"></i></div>
+                        <div class="small text-muted mb-1">الاختبارات المنجزة</div>
+                        <div class="stat-value">5</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-card mb-4">
+        <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-journal-text fs-5"></i>
+            <h5>الواجب اليومي للابن</h5>
+        </div>
+        <div class="card-body p-3">
+            <details>
+                <summary class="d-flex align-items-center justify-content-between py-2">
+                    <span><i class="bi bi-list-task me-2"></i> عرض المهام اليومية</span>
+                    <i class="bi bi-chevron-down toggle-icon"></i>
+                </summary>
+                <div class="mt-3 ps-1">
+                    <div class="activity-item">
+                        <i class="bi bi-check-lg fs-5 icon-success"></i>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">حفظ صفحة 10 من سورة البقرة</div>
+                            <div class="small text-muted">تم التسليم والتقييم بنجاح</div>
+                        </div>
+                        <span class="status-badge active">مكتمل</span>
+                    </div>
+                    <div class="activity-item">
+                        <i class="bi bi-exclamation-circle fs-5 icon-danger"></i>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">مراجعة الجزء الخامس</div>
+                            <div class="small text-muted">موعد التسليم 24 ساعة</div>
+                        </div>
+                        <span class="status-badge inactive">غير مكتمل</span>
+                    </div>
+                    <div class="activity-item">
+                        <i class="bi bi-check-lg fs-5 icon-success"></i>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">استماع الدرس الثاني</div>
+                            <div class="small text-muted">تم التسميع بنجاح</div>
+                        </div>
+                        <span class="status-badge active">مكتمل</span>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <div class="dashboard-card mb-4">
+        <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-award fs-5"></i>
+            <h5>آخر الإنجازات والسجلات</h5>
+        </div>
+        <div class="card-body p-3">
+            <details>
+                <summary class="d-flex align-items-center justify-content-between py-2">
+                    <span><i class="bi bi-check-circle me-2"></i> عرض آخر النشاطات</span>
+                    <i class="bi bi-chevron-down toggle-icon"></i>
+                </summary>
+                <div class="mt-3 ps-1">
+                    <div class="activity-item">
+                        <i class="bi bi-bookmark-check fs-5 icon-primary-custom"></i>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">إتمام تسميع سورة الملك</div>
+                            <div class="small text-muted">تم التقييم بنجاح - 15 نقطة | منذ يومين</div>
+                        </div>
+                        <span class="status-badge active">مكتمل</span>
+                    </div>
+                    <div class="activity-item">
+                        <i class="bi bi-arrow-repeat fs-5 icon-gold"></i>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">مراجعة الجزء الثلاثين</div>
+                            <div class="small text-muted">تسميع كامل بدون أخطاء | منذ 4 أيام</div>
+                        </div>
+                        <span class="status-badge inactive"> تنبيه</span>
+                    </div>
+                    <div class="activity-item">
+                        <i class="bi bi-trophy fs-5 icon-primary-custom"></i>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">الحصول على 5 نقاط الالتزام</div>
+                            <div class="small text-muted">إنجاز خاص لحضور 30 يوم متواصل</div>
+                        </div>
+                        <span class="status-badge active">مكتمل</span>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-bell fs-5"></i>
+            <h5>الملاحظات والتنبيهات</h5>
+        </div>
+        <div class="card-body p-3">
+            <details>
+                <summary class="d-flex align-items-center justify-content-between py-2">
+                    <span><i class="bi bi-exclamation-triangle me-2"></i> عرض المتابعات والتنبيهات</span>
+                    <i class="bi bi-chevron-down toggle-icon"></i>
+                </summary>
+                <div class="mt-3 ps-1">
+                    <div class="activity-item">
+                        <i class="bi bi-person-x fs-5 icon-red"></i>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">غياب متكرر</div>
+                            <div class="small text-muted">3 أيام غياب خلال الأسبوع الحالي</div>
+                        </div>
+                        <span class="status-badge inactive">غير مكتمل</span>
+                    </div>
+                    <div class="activity-item">
+                        <i class="bi bi-graph-down-arrow fs-5 icon-gold"></i>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">تراجع في الأداء</div>
+                            <div class="small text-muted">انخفاض معدل الحفظ اليومي عن المستهدف</div>
+                        </div>
+                        <span class="status-badge inactive">تنبيه</span>
+                    </div>
+                    <div class="activity-item">
+                        <i class="bi bi-check2-circle fs-5 icon-green"></i>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">الالتزام بالجدول</div>
+                            <div class="small text-muted">تم استكمال جميع المهام المطلوبة للشهر الحالي</div>
+                        </div>
+                        <span class="status-badge active">مكتمل</span>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </div>
+</div>
 
 @code {
-
 }

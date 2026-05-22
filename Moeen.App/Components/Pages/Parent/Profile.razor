@@ -1,4 +1,309 @@
-﻿<h3>Profile</h3>
+﻿@page "/Parent/Profile"
+
+<style>
+    :root {
+        --color-primary-green: #195042;
+        --color-luxury-beige: #d6cabc;
+        --color-bg-light: #f4f7f6;
+        --color-white: #ffffff;
+        --color-text-muted: #5a6c7d;
+        --color-input-border: #d6cabc;
+        --color-input-bg: #fafbfb;
+        --color-btn-primary: #195042;
+        --color-btn-primary-hover: #246b59;
+        --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.08);
+        --shadow-card-hover: 0 14px 35px rgba(0, 0, 0, 0.12);
+        --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.04);
+        --radius-card: 20px;
+        --radius-input: 12px;
+        --radius-btn: 10px;
+        --font-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        --font-weight-semibold: 600;
+        --font-weight-bold: 700;
+        --font-size-sm: 0.88rem;
+        --font-size-base: 0.95rem;
+        --font-size-xl: 1.35rem;
+        --spacing-xs: 0.6rem;
+        --spacing-sm: 0.8rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
+        --spacing-xxl: 2.5rem;
+        --transition-base: 0.3s ease;
+        --border-header: 6px solid var(--color-luxury-beige);
+        --border-light: 1px solid var(--color-input-border);
+    }
+
+    .profile-wrapper {
+        direction: rtl;
+        text-align: right;
+        font-family: var(--font-base);
+        background-color: var(--color-bg-light);
+        padding-bottom: var(--spacing-xxl);
+        min-height: 100vh;
+    }
+
+    .header-custom {
+        background-color: var(--color-primary-green);
+        color: var(--color-luxury-beige);
+        padding: var(--spacing-xxl) 0;
+        border-bottom: var(--border-header);
+        margin-bottom: var(--spacing-xxl);
+    }
+
+    .profile-card {
+        background: var(--color-white);
+        border-radius: var(--radius-card);
+        box-shadow: var(--shadow-card);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
+        transition: transform var(--transition-base), box-shadow var(--transition-base);
+    }
+
+        .profile-card:hover {
+            box-shadow: var(--shadow-card-hover);
+        }
+
+    .profile-title {
+        color: var(--color-primary-green);
+        font-weight: var(--font-weight-bold);
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-sm);
+        border-bottom: var(--border-light);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+    .data-item {
+        display: flex;
+        align-items: center;
+        background: var(--color-input-bg);
+        border: var(--border-light);
+        border-radius: var(--radius-input);
+        padding: var(--spacing-sm) var(--spacing-md);
+        box-shadow: var(--shadow-soft);
+        transition: all var(--transition-base);
+    }
+
+        .data-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(25, 80, 66, 0.15);
+            border-color: var(--color-primary-green);
+        }
+
+    .data-icon {
+        font-size: 1.4rem;
+        color: var(--color-primary-green);
+        margin-left: var(--spacing-sm);
+        flex-shrink: 0;
+    }
+
+    .data-content {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .data-label {
+        font-size: var(--font-size-sm);
+        color: var(--color-text-muted);
+        font-weight: var(--font-weight-semibold);
+    }
+
+    .data-value {
+        font-size: var(--font-size-base);
+        color: var(--color-primary-green);
+        font-weight: var(--font-weight-bold);
+    }
+
+    .form-group {
+        margin-bottom: var(--spacing-lg);
+        resize: none;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--color-primary-green);
+        font-weight: var(--font-weight-semibold);
+        font-size: var(--font-size-base);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .form-control-custom {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: var(--border-light);
+        border-radius: var(--radius-input);
+        background-color: var(--color-input-bg);
+        color: var(--color-text-muted);
+        font-family: var(--font-base);
+        font-size: var(--font-size-base);
+        box-shadow: var(--shadow-soft);
+        min-height: 120px;
+        resize: vertical;
+    }
+
+        .form-control-custom:focus {
+            outline: none;
+            border-color: var(--color-primary-green);
+            background-color: var(--color-white);
+            box-shadow: 0 4px 12px rgba(25, 80, 66, 0.15);
+        }
+
+    .btn {
+        border: none;
+        border-radius: var(--radius-btn);
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-semibold);
+        font-family: var(--font-base);
+        cursor: pointer;
+        transition: all var(--transition-base);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        box-shadow: var(--shadow-soft);
+    }
+
+    .btn-primary {
+        background-color: var(--color-btn-primary);
+        color: var(--color-luxury-beige);
+    }
+
+        .btn-primary:hover {
+            background-color: var(--color-btn-primary-hover);
+            color: var(--color-white);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(25, 80, 66, 0.25);
+        }
+
+    @@media (max-width: 768px) {
+        .header-custom {
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .profile-card {
+            padding: 1.2rem;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="profile-wrapper">
+    <header class="header-custom text-center">
+        <div class="container">
+            <h1 class="fw-bold">الملف الشخصي لولي الأمر</h1>
+            <p class="mb-0">متابعة الأبناء والتواصل المباشر مع المؤسسة</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-12">
+                <!-- بطاقة بيانات ولي الأمر -->
+                <div class="profile-card">
+                    <h2 class="profile-title"><i class="bi bi-person-badge ms-2"></i> بيانات ولي الأمر</h2>
+                    <div class="info-grid">
+                        <div class="data-item">
+                            <i class="bi bi-person data-icon"></i>
+                            <div class="data-content">
+                                <span class="data-label">الاسم الكامل</span>
+                                <span class="data-value">محمد العبدالله</span>
+                            </div>
+                        </div>
+                        <div class="data-item">
+                            <i class="bi bi-phone data-icon"></i>
+                            <div class="data-content">
+                                <span class="data-label">رقم الجوال</span>
+                                <span class="data-value">+966 55 123 4567</span>
+                            </div>
+                        </div>
+                        <div class="data-item">
+                            <i class="bi bi-envelope data-icon"></i>
+                            <div class="data-content">
+                                <span class="data-label">البريد الإلكتروني</span>
+                                <span class="data-value">khaled@example.com</span>
+                            </div>
+                        </div>
+                        <div class="data-item">
+                            <i class="bi bi-geo-alt data-icon"></i>
+                            <div class="data-content">
+                                <span class="data-label">العنوان</span>
+                                <span class="data-value">الرياض، حي النرجس</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- بطاقة الأبناء المسجلين -->
+                <div class="profile-card">
+                    <h2 class="profile-title"><i class="bi bi-people ms-2"></i> معلومات تخص الابن</h2>
+                    <div class="info-grid">
+                        <div class="data-item">
+                            <i class="bi bi-person-check data-icon"></i>
+                            <div class="data-content">
+                                <span class="data-label">اسم الابن/الابنة</span>
+                                <span class="data-value"> احمد محمد العبدالله</span>
+                            </div>
+                        </div>
+                        <div class="data-item">
+                            <i class="bi bi-bookmark data-icon"></i>
+                            <div class="data-content">
+                                <span class="data-label">المرحلة / الحلقة</span>
+                                <span class="data-value">حلقة المتوسطين</span>
+                            </div>
+                        </div>
+                        <div class="data-item">
+                            <i class="bi bi-person-badge ms-2"></i>
+                            <div class="data-content">
+                                <span class="data-label">اسم المعلم</span>
+                                <span class="data-value">محمد الاحمد</span>
+                            </div>
+                        </div>
+                        <div class="data-item">
+                            <i class="bi bi-phone data-icon"></i>
+                            <div class="data-content">
+                                <span class="data-label">رقم التواصل</span>
+                                <span class="data-value">+966 55 123 4567</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- بطاقة التواصل والاستفسار -->
+                <div class="profile-card">
+                    <h2 class="profile-title"><i class="bi bi-chat-dots ms-2"></i> تواصل مع الإدارة</h2>
+                    <form>
+                        <div class="form-group">
+                            <label class="form-label" for="feedback"><i class="bi bi-pencil-square ms-1"></i> ملاحظة أو استفسار</label>
+                            <textarea id="feedback" class="form-control-custom" style="resize: none;" placeholder="اكتب استفسارك أو ملاحظتك بخصوص الأبناء أو الخدمات التعليمية..."></textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-send-fill"></i> إرسال</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+}
 
 @code {
 
