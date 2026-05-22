@@ -173,3 +173,41 @@
         padding: 0.5rem 0.15rem;
     }
 }
+
+
+
+
+/* حاوية شفافة تضع الزر في الزاوية */
+.mini-toggle-box {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start; /* يدفعه لليمين أو اليسار حسب الرغبة */
+    padding: 8px 12px;
+    background: transparent; /* بدون خلفية كبيرة مزعجة */
+}
+
+/* زر ناعم وصغير جداً وغير واضح */
+.mini-toggle-btn {
+    background: rgba(255, 255, 255, 0.05); /* خلفية شبه مخفية تماماً */
+    color: rgba(214, 202, 188, 0.6); /* لون البيج المطفأ بنسبة شفافية عالية ليكون خافتاً */
+    border: 1px solid rgba(214, 202, 188, 0.2); /* إطار ناعم جداً */
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem; /* خط صغير جداً */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.3s ease;
+}
+
+
+
+    /* تنسيق الأيقونة داخل الزر الصغير */
+    .mini-toggle-btn i {
+        font-size: 0.75rem;
+    }
+
+.mini-text {
+    font-weight: normal;
+}

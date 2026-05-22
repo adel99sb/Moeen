@@ -1,39 +1,123 @@
-﻿<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+﻿<div class="mini-toggle-box">
+    <button class="mini-toggle-btn" @onclick="ToggleView" title="تبديل الحساب">
+        <i class="bi bi-arrow-left-right"></i>
+        <span class="mini-text">
+            الحساب الحالي:
+            @(currentUserMode == "Guest" ? "زائر" : currentUserMode == "Student" ? "طالب" : "أهل")
+        </span>
+    </button>
+</div>
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav-menu">
-        <div class="nav-item">
-            <NavLink class="nav-link" href="Student/StudentDashboard" Match="NavLinkMatch.All">
-                <i class="bi bi-house-door-fill"></i>
-                <span class="nav-text">الصفحة الرئيسية</span>
-            </NavLink>
-        </div>
 
-        <div class="nav-item">
-            <NavLink class="nav-link" href="Student/Book">
-                <i class="bi bi-book-fill"></i>
-                <span class="nav-text">الكتب</span>
-            </NavLink>
-        </div>
+        @if (currentUserMode == "Guest")
+        {
+            <div class="nav-item">
+                <NavLink class="nav-link" href="Guest/Post" Match="NavLinkMatch.All">
+                    <i class="bi bi-megaphone-fill"></i>
+                    <span class="nav-text">الاعلانات</span>
+                </NavLink>
+            </div>
 
-        <div class="nav-item">
-            <NavLink class="nav-link" href="Student/Post">
-                <i class="bi bi-megaphone-fill"></i>
-                <span class="nav-text">الاعلانات</span>
-            </NavLink>
-        </div>
+            <div class="nav-item">
+                <NavLink class="nav-link" href="Guest/Book">
+                    <i class="bi bi-book-fill"></i>
+                    <span class="nav-text">الكتب</span>
+                </NavLink>
+            </div>
 
-        <div class="nav-item">
-            <NavLink class="nav-link" href="Student/Progress">
-                <i class="bi bi-graph-up-arrow"></i>
-                <span class="nav-text">التقدم</span>
-            </NavLink>
-        </div>
+          
+        }
+        else if (currentUserMode == "Student")
+        {
+            <div class="nav-item">
+                <NavLink class="nav-link" href="Student/StudentDashboard" Match="NavLinkMatch.All">
+                    <i class="bi bi-house-door-fill"></i>
+                    <span class="nav-text">الصفحة الرئيسية</span>
+                </NavLink>
+            </div>
 
-        <div class="nav-item">
-            <NavLink class="nav-link" href="Student/Profile">
-                <i class="bi bi-person-circle"></i>
-                <span class="nav-text">الملف 
-                    الشخصي</span>
-            </NavLink>
-        </div>
+            <div class="nav-item">
+                <NavLink class="nav-link" href="Student/Book">
+                    <i class="bi bi-book-fill"></i>
+                    <span class="nav-text">الكتب</span>
+                </NavLink>
+            </div>
+
+            <div class="nav-item">
+                <NavLink class="nav-link" href="Student/Post">
+                    <i class="bi bi-megaphone-fill"></i>
+                    <span class="nav-text">الاعلانات</span>
+                </NavLink>
+            </div>
+
+            <div class="nav-item">
+                <NavLink class="nav-link" href="Student/Progress">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span class="nav-text">التقدم</span>
+                </NavLink>
+            </div>
+
+            <div class="nav-item">
+                <NavLink class="nav-link" href="Student/Profile">
+                    <i class="bi bi-person-circle"></i>
+                    <span class="nav-text">الملف الشخصي</span>
+                </NavLink>
+            </div>
+        }
+        else if (currentUserMode == "Parent")
+        {
+            <div class="nav-item">
+                <NavLink class="nav-link" href="Parent/ParentDashboard" Match="NavLinkMatch.All">
+                    <i class="bi bi-house-door-fill"></i>
+                    <span class="nav-text">رئيسية الأهل</span>
+                </NavLink>
+            </div>
+
+            <div class="nav-item">
+                <NavLink class="nav-link" href="Parent/Post">
+                    <i class="bi bi-megaphone-fill"></i>
+                    <span class="nav-text"> الاعلانات</span>
+                </NavLink>
+            </div>
+
+            <div class="nav-item">
+                <NavLink class="nav-link" href="Parent/Book">
+                    <i class="bi bi-book-fill"></i>
+                    <span class="nav-text">الكتب</span>
+                </NavLink>
+            </div>
+
+            <div class="nav-item">
+                <NavLink class="nav-link" href="Parent/Profile">
+                    <i class="bi bi-person-bounding-box"></i>
+                    <span class="nav-text">ملف الولي</span>
+                </NavLink>
+            </div>
+        }
+
     </nav>
 </div>
+
+@code {
+    // تعريف نصي للتحكم بنوع المستخدم النشط حالياً (الافتراضي يبدأ كـ زائر مثلاً)
+    private string currentUserMode = "Guest";
+
+    private void ToggleView()
+    {
+        // حلقة دوران بسيطة للانتقال بالتناوب بين الحالات الثلاثة
+        if (currentUserMode == "Guest")
+        {
+            currentUserMode = "Student";
+        }
+        else if (currentUserMode == "Student")
+        {
+            currentUserMode = "Parent";
+        }
+        else if (currentUserMode == "Parent")
+        {
+            currentUserMode = "Guest";
+        }
+    }
+}
