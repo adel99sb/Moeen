@@ -5,6 +5,7 @@
 @using Moeen.Shared.Responses.ContentSharing
 @inject NavigationManager NavManager
 @inject Moeen.Dashboard.Services.Abstractions.IPostService PostService 
+@inject Microsoft.JSInterop.IJSRuntime JS
 
 <style>
    :root {
@@ -230,22 +231,18 @@
    }
 </style>
 
+
 <section class="management-container">
     <header class="page-header">
         <h2 class="page-title">إدارة المنشورات</h2>
     </header>
-    <br>
-   <div class="search-wrapper">
-      <i class="bi bi-search"></i>
-      <input type="text" 
-             class="search-input" 
-             placeholder="ابحث عن منشور..."
-             @bind="searchQuery" 
-             @bind:event="oninput" 
-             @onkeyup="HandleSearch">
+
+    <div class="search-wrapper">
+        <i class="bi bi-search"></i>
+        <input type="text" class="search-input" placeholder="ابحث عن منشور..."
+               @bind="searchQuery" @bind:event="oninput" @onkeyup="HandleSearch">
     </div>
-    <br />
-    
+
     @if (ShowMessage)
     {
         <div class="alert @(Success ? "alert-success" : "alert-danger") mt-3">@Message</div>
@@ -264,40 +261,26 @@
         <tbody>
             @if (isLoading)
             {
-                <tr>
-                    <td colspan="5" class="table td">جاري تحميل المنشورات...</td>
-                </tr>
+                <tr><td colspan="5">جاري التحميل من السيرفر...</td></tr>
             }
             else if (postList == null || postList.Count == 0)
             {
-                <tr>
-                    <td colspan="5" class="table td" style="color: gray;">لا توجد منشورات حالياً.</td>
-                </tr>
+                <tr><td colspan="5">لا توجد منشورات.</td></tr>
             }
             else
             {
                 @foreach (var post in postList)
                 {
                     <tr>
-                        <td class="table td fw-bold">@post.Title</td>
-                        <td class="table td text-truncate" style="max-width: 200px;">@post.Body</td>
-                        <td class="table td">
-                            <button class="btn-like" @onclick="() => HandleLike(post.Id)">
-                                👍 @post.InteractionsCount
-                            </button>
+                        <td>@post.Title</td>
+                        <td>@post.Body</td>
+                        <td>👍 @post.InteractionsCount</td>
+                        <td>
+                            <button class="btn-icon" @onclick="() => editPost(post.Id)">تعديل</button>
                         </td>
-                        <td class="table td">
-                            <button class="btn-icon" title="عرض" @onclick="() => viewPost1(post.Id)">
-                                <i class="bi bi-info-circle" style="color: #2ecc71;"></i>
-                            </button>
-                            @* اللمسة البرمجية: هنا يوجه لصفحة التعديل المنفصلة ويمرر الـ Id *@
-                            <button class="btn-icon edit" title="تعديل" @onclick="() => editPost(post.Id)">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-                        </td>
-                        <td class="table td">
-                            <button class="btn-icon delete" title="حذف" @onclick="() => DeletePost(post.Id)" disabled="@_isSubmitting">
-                              <i class="bi bi-trash"></i>
+                        <td>
+                            <button class="btn-icon delete" title="حذف" @onclick="() => ConfirmDelete(post.Id)">
+                                <i class="bi bi-trash"></i>
                             </button>
                         </td>
                     </tr>
@@ -305,272 +288,70 @@
             }
         </tbody>
     </table>
-
-@* هنا بقي فقط كود إضافة بوست جديد ونظفناه من شروط التعديل *@
-<details class="mt-4" @bind="_isDetailsOpen">
-    <summary class="btn-pprimary">
-        إضافة منشور جديد
-    </summary>
-    <div class="form-container">
-        <div class="form-header" style="background: var(--accent-beige);">
-            <h2>
-                <i class="bi bi-plus-circle-dotted"></i> 
-                إضافة منشور جديد
-            </h2>
-        </div>
-        
-        <EditForm Model="_publishModel" OnValidSubmit="HandleCreatePost" FormName="PublishPostForm">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-            <div class="grid-row">
-                <div class="input-group">
-                    <label>عنوان المنشور</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-fonts"></i>
-                        <InputText @bind-Value="_publishModel.PostData.Title" class="form-control" placeholder="أدخل العنوان" />
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>محتوى المنشور</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-pencil"></i>
-                        <InputText @bind-Value="_publishModel.PostData.Body" class="form-control" placeholder="اكتب هنا..." />
-                    </div>
-                </div>
-            </div>
-            <div class="grid-row">
-                <div class="input-group">
-                    <label>نوع المنشور</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-text-paragraph"></i>
-                        <InputSelect @bind-Value="_publishModel.IsPublic" class="form-control">
-                            <option value="true">عام (Public)</option>
-                            <option value="false">خاص (Private)</option>
-                        </InputSelect>
-                    </div>
-                </div>
-                <div class="input-group"></div>
-            </div>
-            <div class="actions">
-                <button type="submit" class="save" disabled="@_isSubmitting">
-                    @if (_isSubmitting)
-                    {
-                        <span class="spinner-border spinner-border-sm"></span>
-                        <span> جاري الحفظ...</span>
-                    }
-                    else
-                    {
-                        <span><i class="bi bi-check2-all"></i> نشر المنشور</span>
-                    }
-                </button>
-                <button type="button" class="cancel" @onclick="ResetForm">
-                    <i class="bi bi-x-lg"></i> إلغاء
-                </button>
-            </div>
-        </EditForm>
-    </div>
-</details>
 </section>
-
 @code {
-    private List<PostDto>? postList;
+    private List<PostDto> postList = new();
     private bool isLoading = true;
-    private bool _isSubmitting = false;
     private bool ShowMessage = false;
     private bool Success = false;
     private string Message = "";
-    private bool _isDetailsOpen = false;
     private string searchQuery = "";
 
-    private PublishPostRequest _publishModel = new PublishPostRequest();
-     protected override async Task OnInitializedAsync()
-    {
-        InitializePublishModel();
-        postList = new List<PostDto>();
-        await LoadPostData(); 
-    }
-
-    private void InitializePublishModel()
-    {
-        _publishModel = new PublishPostRequest
-        {
-            IsPublic = true,
-            PostData = new RequstePostDto() 
-        };
-    }
+    protected override async Task OnInitializedAsync() => await LoadPostData();
 
     private async Task LoadPostData()
     {
-        try
-        {
-            isLoading = true;
-            ShowMessage = false;
-            
-            var response = await PostService.SearchContentGetAsync("");
-
-            if (response != null && response.Success && response.Data != null)
-            {
-                var searchResult = System.Text.Json.JsonSerializer.Deserialize<SearchContentResponse>(response.Data.ToString(), new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                postList = searchResult?.Posts ?? new List<PostDto>();
-            }
-            else
-            {
-                Message = response?.Message ?? "فشل تحميل قائمة المنشورات.";
-                ShowMessage = true;
-                Success = false;
-            }
-        }
-        catch (Exception ex)
-        {
-            postList = new List<PostDto>(); 
-            Message = "تنبيه: " + ex.Message;
-            ShowMessage = true;
-            Success = false;
-        }
-        finally
-        {
-            isLoading = false;
-        }
-    }
-
-    private async Task HandleSearch()
-    {
-        try
-        {
+        isLoading = true;
+        try {
             var response = await PostService.SearchContentGetAsync(searchQuery);
-
-            if (response != null && response.Success && response.Data != null)
-            {
-                var searchResult = System.Text.Json.JsonSerializer.Deserialize<SearchContentResponse>(response.Data.ToString(), new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                postList = searchResult?.Posts ?? new List<PostDto>();
-                StateHasChanged();
+            if (response?.Success == true) {
+                // تحويل البيانات من الـ GeneralResponse
+                var json = System.Text.Json.JsonSerializer.Serialize(response.Data);
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchContentResponse>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                postList = result?.Posts ?? new();
+            } else {
+                postList = new();
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"خطأ أثناء الفلترة: {ex.Message}");
+        catch (Exception ex) {
+            Message = "خطأ في الاتصال بالسيرفر: " + ex.Message;
+            ShowMessage = true;
         }
+        finally { isLoading = false; }
     }
 
-    private async Task HandleCreatePost()
+    private async Task HandleSearch() => await LoadPostData();
+
+    private async Task ConfirmDelete(Guid id)
     {
-        ShowMessage = true;
-        try
+        // نافذة التأكيد
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "هل أنتِ متأكدة من حذف هذا المنشور؟ لا يمكن التراجع عن هذا الإجراء.");
+        if (confirmed)
         {
-            _isSubmitting = true;
-            var response = await PostService.PublishPostAsync(_publishModel);
-            
-            Message = "تم نشر المنشور بنجاح!";
-            Success = true;
-            _isDetailsOpen = false;
-
-            InitializePublishModel(); 
-            await LoadPostData(); 
-        }
-        catch (Exception)
-        {
-            if (postList == null) postList = new List<PostDto>();
-            postList.Insert(0, new PostDto {
-                Id = Guid.NewGuid(),
-                Title = _publishModel.PostData?.Title ?? "عنوان المنشور",
-                Body = _publishModel.PostData?.Body ?? "محتوى المنشور",
-                InteractionsCount = 0
-            });
-
-            Success = true; 
-            Message = "تم نشر المنشور بنجاح (محلي)!";
-            _isDetailsOpen = false;
-            InitializePublishModel();
-        }
-        finally
-        {
-            _isSubmitting = false;
-            StateHasChanged();
+            await DeletePost(id);
         }
     }
 
     private async Task DeletePost(Guid id)
     {
+        try {
+            var response = await PostService.DeletePostAsync(new DeletePostRequest { PostId = id });
+            if (response?.Success == true) {
+                Message = "تم حذف المنشور بنجاح.";
+                Success = true;
+                await LoadPostData(); // تحديث القائمة بعد الحذف
+            } else {
+                Message = response?.Message ?? "فشل الحذف.";
+                Success = false;
+            }
+        }
+        catch {
+            Message = "حدث خطأ أثناء الاتصال بالسيرفر.";
+            Success = false;
+        }
         ShowMessage = true;
-        try
-        {
-            _isSubmitting = true;
-            var deleteRequest = new DeletePostRequest { PostId = id };
-            await PostService.DeletePostAsync(deleteRequest);
-
-            if (postList != null)
-            {
-                var itemToRemove = postList.FirstOrDefault(p => p.Id == id);
-                if (itemToRemove != null) postList.Remove(itemToRemove);
-            }
-
-            Message = "تم حذف المنشور بنجاح!";
-            Success = true;
-        }
-              catch (Exception)
-        {
-            if (postList != null)
-            {
-                var itemToRemove = postList.FirstOrDefault(p => p.Id == id);
-                if (itemToRemove != null) postList.Remove(itemToRemove);
-            }
-            Success = true;
-            Message = "تم حذف المنشور بنجاح (محلي)!";
-        }
-        finally
-        {
-            _isSubmitting = false;
-            StateHasChanged();
-        }
     }
 
-    private async Task HandleLike(Guid postId)
-    {
-        try
-        {
-            var response = await PostService.InteractWithPostAsync(new InteractWithPostRequest { PostId = postId });
-
-            var post = postList?.FirstOrDefault(p => p.Id == postId);
-            if (post != null)
-            {
-                if (response != null && response.Message != null && response.Message.Contains("removed", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (post.InteractionsCount > 0) post.InteractionsCount--;
-                }
-                else
-                {
-                    post.InteractionsCount++;
-                }
-            }
-        }
-        catch (Exception)
-        {
-            var post = postList?.FirstOrDefault(p => p.Id == postId);
-            if (post != null)
-            {
-                post.InteractionsCount++;
-            }
-        }
-        finally
-        {
-            StateHasChanged();
-        }
-    }
-
-    private void ResetForm()
-    {
-        InitializePublishModel();
-        _isDetailsOpen = false;
-        ShowMessage = false;
-    }
-
-    private void editPost(Guid id)
-    {
-        NavManager.NavigateTo($"/supervisor/edit-post/{id}");
-    }
-
-    private void viewPost1(Guid id)
-    {
-        NavManager.NavigateTo($"/supervisor/post1/{id}");
-    }
+    private void editPost(Guid id) => NavManager.NavigateTo($"/supervisor/edit-post/{id}");
+}
 }
