@@ -4,6 +4,7 @@ using Moeen.Dashboard.Components;
 using Moeen.Dashboard.Infrastructure.Http;
 using Moeen.Dashboard.Infrastructure.Http.Clients;
 using Moeen.Dashboard.Services.Abstractions;
+using Moeen.Dashboard.Services.Implementation;
 using Moeen.Dashboard.Services.Implementations;
 using Moeen.Frontend.Services.Abstractions;
 
@@ -63,6 +64,15 @@ builder.Services.AddScoped<IMosquService, MosquService>();
 //point حقن خدمة النقاط
 builder.Services.AddScoped<PointsApiClient>();
 builder.Services.AddScoped<IPointsService, PointsService>();
+
+// 1. تسجيل الـ HttpClient الخاص بالـ User وتحديد الرابط الأساسي من الـ ApiRoutes عندكِ
+builder.Services.AddHttpClient<UserApiClient>(client =>
+{
+    client.BaseAddress = new Uri(Moeen.Dashboard.Infrastructure.Http.ApiRoutes.BaseUrl);
+});
+
+// 2. ربط الواجهة بالتنفيذ الفعلي ليتم حقنها في صفحات الـ Razor
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.

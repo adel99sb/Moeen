@@ -1,7 +1,14 @@
 ﻿@page "/Teacher/Profile"
+@using Moeen.Dashboard.Services.Abstractions
+@using Moeen.Shared.Responses
+@using System.Text.Json
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
 
+@inject IUserService UserService
+@inject AuthenticationStateProvider AuthStateProvider
+@rendermode InteractiveServer
 <style>
-    
     :root {
         /* الألوان */
         --color-primary-green: #195042;
@@ -90,8 +97,8 @@
         padding-bottom: var(--spacing-sm);
         border-bottom: var(--border-input);
     }
-/* 
-    حقول الادخال */
+
+    /* حقول الادخال */
     .form-group { margin-bottom: var(--spacing-lg); }
 
     .form-label {
@@ -130,7 +137,6 @@
 
     textarea.form-control-custom { min-height: 80px; resize: none; }
 
-    
     .btn {
         border: none;
         border-radius: var(--radius-btn);
@@ -160,7 +166,7 @@
 
     .btn:active { transform: translateY(0); }
 
-   /*  الية التبديل */
+    /* الية التبديل */
     #edit-toggle { display: none; }
 
     #edit-toggle:checked ~ .profile-card .form-control-custom {
@@ -173,7 +179,8 @@
     #edit-toggle:checked ~ .profile-card .btn-save-mode { display: inline-flex; }
     .btn-edit-mode { display: inline-flex; }
     .btn-save-mode { display: none; }
-/* التجاوب */ 
+
+    /* التجاوب */ 
     .info-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -189,7 +196,6 @@
 </style>
 
 <div class="profile-wrapper">
-    <!-- الترويسة -->
     <header class="header-custom text-center">
         <div class="container">
             <h1 class="fw-bold">الملف الشخصي</h1>
@@ -197,84 +203,94 @@
         </div>
     </header>
 
-    <!-- المحتوى الرئيسي -->
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-8 col-md-12">
                 
-                <!-- عنصر التحكم في وضع التعديل -->
                 <input type="checkbox" id="edit-toggle">
 
-                <!-- بطاقة المعلومات الشخصية -->
                 <div class="profile-card">
                     <h2 class="profile-title">
                         <i class="bi bi-person-circle ms-2"></i>
                         المعلومات الشخصية
                     </h2>
                     
-                    <div class="info-grid">
-                        <div class="form-group">
-                            <label class="form-label" for="teacherName">
-                                <i class="bi bi-person ms-1"></i> اسم الأستاذ
-                            </label>
-                            <input type="text" id="teacherName" class="form-control-custom" value="أحمد محمد عبدالله" readonly>
+                    @if (_isLoading)
+                    {
+                        <div class="text-center p-4">
+                            <div class="spinner-border text-success" role="status"></div>
+                            <p class="mt-2" style="color: var(--color-primary-green)">جاري جلب بيانات المعلم...</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @if (!string.IsNullOrEmpty(_errorMessage))
+                        {
+                            <div class="alert alert-danger text-center mb-3">@_errorMessage</div>
+                        }
+
+                        <div class="info-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="teacherName">
+                                    <i class="bi bi-person ms-1"></i> اسم الأستاذ
+                                </label>
+                                <input type="text" id="teacherName" class="form-control-custom" @bind="_teacherName" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="age">
+                                    <i class="bi bi-calendar ms-1"></i> العمر
+                                </label>
+                                <input type="number" id="age" class="form-control-custom" value="35" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="groupName">
+                                    <i class="bi bi-people ms-1"></i> اسم الفوج
+                                </label>
+                                <input type="text" id="groupName" class="form-control-custom" value="فوج الصباحي" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="circleName">
+                                    <i class="bi bi-book ms-1"></i> الحلقة
+                                </label>
+                                <input type="text" id="circleName" class="form-control-custom" value="حلقة الاطفال " readonly>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="age">
-                                <i class="bi bi-calendar ms-1"></i> العمر
+                            <label class="form-label" for="experience">
+                                <i class="bi bi-briefcase ms-1"></i> الخبرات
                             </label>
-                            <input type="number" id="age" class="form-control-custom" value="35" readonly>
+                            <textarea id="experience" class="form-control-custom" readonly> تجويد معلم قرآن كريم منذ 10 سنوات، حاصل على إجازة في القراءات العشر، متخصص في تعليم </textarea>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="groupName">
-                                <i class="bi bi-people ms-1"></i> اسم الفوج
+                            <label class="form-label" for="mosques">
+                                <i class="bi bi-building ms-1"></i> الجوامع التي درس فيها
                             </label>
-                            <input type="text" id="groupName" class="form-control-custom" value="فوج الصباحي" readonly>
+                            <textarea id="mosques" class="form-control-custom" readonly>جامع النور الكبير - جامع الهدى - جامع الرحمن</textarea>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="circleName">
-                                <i class="bi bi-book ms-1"></i> الحلقة
+                            <label class="form-label" for="achievements">
+                                <i class="bi bi-trophy ms-1"></i> الإنجازات
                             </label>
-                            <input type="text" id="circleName" class="form-control-custom" value="حلقة الاطفال " readonly>
+                            <textarea id="achievements" class="form-control-custom" readonly>- تخريج 50 طالب في حفظ القرآن&#10;- الحصول على شهادة التميز في التعليم&#10;- تأليف كتاب في أحكام التجويد</textarea>
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="experience">
-                            <i class="bi bi-briefcase ms-1"></i> الخبرات
-                        </label>
-                        <textarea id="experience" class="form-control-custom" readonly> تجويد معلم قرآن كريم منذ 10 سنوات، حاصل على إجازة في القراءات العشر، متخصص في تعليم </textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="mosques">
-                            <i class="bi bi-building ms-1"></i> الجوامع التي درس فيها
-                        </label>
-                        <textarea id="mosques" class="form-control-custom" readonly>جامع النور الكبير - جامع الهدى - جامع الرحمن</textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="achievements">
-                            <i class="bi bi-trophy ms-1"></i> الإنجازات
-                        </label>
-                        <textarea id="achievements" class="form-control-custom" readonly>- تخريج 50 طالب في حفظ القرآن&#10;- الحصول على شهادة التميز في التعليم&#10;- تأليف كتاب في أحكام التجويد</textarea>
-                    </div>
-
-                    <!-- أزرار التحكم في التعديل -->
-                    <div class="text-center mt-4">
-                        <label for="edit-toggle" class="btn btn-primary btn-edit-mode">
-                            <i class="bi bi-pencil-square"></i> تعديل
-                        </label>
-                        <label for="edit-toggle" class="btn btn-primary btn-save-mode">
-                            <i class="bi bi-check-lg"></i> حفظ التغييرات
-                        </label>
-                    </div>
+                        <div class="text-center mt-4">
+                            <label for="edit-toggle" class="btn btn-primary btn-edit-mode">
+                                <i class="bi bi-pencil-square"></i> تعديل
+                            </label>
+                            <label for="edit-toggle" class="btn btn-primary btn-save-mode">
+                                <i class="bi bi-check-lg"></i> حفظ التغييرات
+                            </label>
+                        </div>
+                    }
                 </div>
 
-                <!-- بطاقة الشكوى أو الاقتراح -->
                 <div class="profile-card">
                     <h2 class="profile-title">
                         <i class="bi bi-chat-dots ms-2"></i>
@@ -296,7 +312,6 @@
                         </div>
 
                         <div class="text-center">
-                          
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-send-fill"></i>
                                 إرسال
@@ -311,5 +326,71 @@
 </div>
 
 @code {
-   
+    private bool _isLoading = true;
+    private string _errorMessage = "";
+
+    // ─── الحقول التي يرجعها UserDto من الـ API ───────────────────────
+    private string _teacherName = "";
+    private string _teacherEmail = "";
+    private string _teacherPhone = "";
+    private string _teacherGender = "";
+    private string _profileImageUrl = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _isLoading = true;
+
+            // ── 1) جلب ID المعلم الحالي من التوكن ──────────────────
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var userClaims = authState.User;
+
+            var userIdString = userClaims.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid currentUserId))
+            {
+                _errorMessage = "لم يتم التعرف على المستخدم، يرجى تسجيل الدخول مجدداً";
+                return;
+            }
+
+            // ── 2) استدعاء الـ API ──────────────────────────────────
+            GeneralResponse response = await UserService.GetUserByIdAsync(currentUserId);
+
+            if (response == null || !response.Success)
+            {
+                _errorMessage = response?.Message ?? "فشل في جلب البيانات من الخادم";
+                return;
+            }
+
+            // ── 3) استخراج البيانات من الـ UserDto المُرجَع ─────────
+            // GeneralResponse.Data يصل كـ JsonElement بعد التسلسل
+            if (response.Data is JsonElement jsonElement)
+            {
+                // "name" هو الاسم الحقيقي للخاصية في UserDto
+                if (jsonElement.TryGetProperty("name", out var nameProp))
+                    _teacherName = nameProp.GetString() ?? "";
+
+                if (jsonElement.TryGetProperty("email", out var emailProp))
+                    _teacherEmail = emailProp.GetString() ?? "";
+
+                if (jsonElement.TryGetProperty("phone", out var phoneProp))
+                    _teacherPhone = phoneProp.GetString() ?? "";
+
+                if (jsonElement.TryGetProperty("gender", out var genderProp))
+                    _teacherGender = genderProp.GetString() ?? "";
+
+                if (jsonElement.TryGetProperty("profileImageUrl", out var imgProp))
+                    _profileImageUrl = imgProp.GetString() ?? "";
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = "خطأ غير متوقع: " + ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
 }
