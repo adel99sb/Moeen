@@ -193,6 +193,61 @@ namespace Moeen.Api.Application.Services
                 });
         }
 
+        public async Task<GeneralResponse> GetStudentPointsBreakdownAsync(GetStudentPointsBreakdownRequest request)
+        {
+            if (request == null || request.StudentId == Guid.Empty)
+                return GeneralResponse.BadRequest("معرف الطالب مطلوب.");
+
+            var student = await _context.Students
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Id == request.StudentId);
+
+            if (student == null)
+                return GeneralResponse.NotFound("الطالب غير موجود.");
+
+            var fromDate = (request.FromDate ?? DateTime.UtcNow.AddDays(-30)).Date;
+            var toDate = (request.ToDate ?? DateTime.UtcNow).Date;
+
+            if (fromDate > toDate)
+                return GeneralResponse.BadRequest("نطاق التاريخ غير صالح.");
+
+            var progressPoints = await _context.ProgressEntries
+                .AsNoTracking()
+                .Where(p => p.StudentId == request.StudentId && p.Date >= fromDate && p.Date <= toDate && p.LevelScore > 0)
+                .SumAsync(p => p.LevelScore);
+
+            var examPoints = await _context.Exams
+                .AsNoTracking()
+                .Where(e => e.StudentId == request.StudentId && e.date >= fromDate && e.date <= toDate)
+                .SumAsync(e => e.score);
+
+            var attendanceCount = await _context.Attendances
+                .AsNoTracking()
+                .Include(a => a.HalqeSession)
+                .Where(a =>
+                    a.StudentId == request.StudentId &&
+                    a.HalqeSession.date >= fromDate &&
+                    a.HalqeSession.date <= toDate &&
+                    (a.Status == AttendanceStatus.Present || a.Status == AttendanceStatus.Late))
+                .CountAsync();
+
+            var otherPoints = Math.Max(0, student.score - (progressPoints + examPoints));
+
+            var dto = new StudentPointsBreakdownDto
+            {
+                StudentId = student.Id,
+                FromDate = fromDate,
+                ToDate = toDate,
+                TotalPoints = student.score,
+                ProgressPoints = progressPoints,
+                ExamPoints = examPoints,
+                AttendanceCount = attendanceCount,
+                OtherPoints = otherPoints
+            };
+
+            return GeneralResponse.Ok("تم جلب تفصيل النقاط.", dto);
+        }
+
         private async Task<bool> HasFullAttendanceWeekAsync(Guid studentId, DateTime startDate, DateTime endDate)
         {
             var totalDays = (endDate.Date - startDate.Date).Days + 1;

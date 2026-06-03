@@ -10,6 +10,7 @@ namespace Moeen.Dashboard.Services.Abstractions
     {
         Task<GeneralResponse> SetupPointsSystemAsync(SetupPointsSystemRequest request);
         Task<GeneralResponse> GetStudentPointsAsync(Guid studentId);
+        Task<GeneralResponse> GetStudentPointsBreakdownAsync(GetStudentPointsBreakdownRequest request);
         Task<GeneralResponse> GetPointsLeaderboardAsync(GetLeaderboardRequest request);
         Task<GeneralResponse> AwardPointsManuallyAsync(AwardPointsManualRequest request);
         Task<GeneralResponse> RemovePointsManuallyAsync(RemovePointsManualRequest request);

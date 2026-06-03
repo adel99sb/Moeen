@@ -35,5 +35,10 @@ namespace Moeen.Api.Core.Contracts.Application
         /// إضافة النقاط التلقائية بناءً على القواعد الأسبوعية
         /// </summary>
         Task<GeneralResponse> EvaluateAutomaticPointsAsync(EvaluateAutomaticPointsRequest request);
+
+        /// <summary>
+        /// جلب تفصيل نقاط الطالب
+        /// </summary>
+        Task<GeneralResponse> GetStudentPointsBreakdownAsync(GetStudentPointsBreakdownRequest request);
     }
 }
