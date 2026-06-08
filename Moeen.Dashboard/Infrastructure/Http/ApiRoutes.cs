@@ -120,21 +120,9 @@
         public static string AwardPointsManuallyAsyncRoute { get; } = "api/Points/award";
         public static string RemovePointsManuallyAsyncRoute { get; } = "api/Points/remove";
         public static string EvaluateAutomaticPointsAsyncRoute { get; } = "api/Points/automatic-award";
-
-
+        public static string GetStudentPointsBreakdownAsyncRoute(Guid studentId)
+            => $"api/Points/students/{studentId}/points-breakdown";
 
         public static string GetUserByIdAsyncRoute { get; set; } = "api/User/{userId}";
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }

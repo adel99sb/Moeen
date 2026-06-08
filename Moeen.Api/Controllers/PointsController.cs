@@ -42,6 +42,25 @@ namespace Moeen.Api.Controllers
         }
 
         /// <summary>
+        ///  ›’Ì· ‰ﬁ«ÿ «·ÿ«·»
+        /// </summary>
+        [HttpGet("students/{studentId:guid}/points-breakdown")]
+        public async Task<ActionResult<GeneralResponse>> GetStudentPointsBreakdown(
+            [FromRoute] Guid studentId,
+            [FromQuery] DateTime? fromDate,
+            [FromQuery] DateTime? toDate)
+        {
+            var response = await _pointsService.GetStudentPointsBreakdownAsync(new GetStudentPointsBreakdownRequest
+            {
+                StudentId = studentId,
+                FromDate = fromDate,
+                ToDate = toDate
+            });
+
+            return StatusCode(response.StatusCode, response);
+        }
+
+        /// <summary>
         /// Ã·» ·ÊÕ… «·’œ«—…
         /// </summary>
         [HttpGet("leaderboard")]

@@ -4,6 +4,7 @@ namespace Moeen.Shared.Constants
     {
         Memorization = 1,
         Review = 2,
-        Exam = 3
+        Exam = 3,
+        Listening = 4
     }
 }

@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using System.Web; // مخصص لتركيب الـ Query string إذا لزم الأمر
+using System.Web;
 using Moeen.Shared.Requests.Points;
 using Moeen.Shared.Responses;
 
@@ -27,6 +28,23 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
         public async Task<GeneralResponse> GetStudentPointsAsync(Guid studentId)
         {
             var response = await _httpClient.GetAsync(ApiRoutes.GetStudentPointsAsyncRoute);
+            return await response.Content.ReadFromJsonAsync<GeneralResponse>();
+        }
+
+        public async Task<GeneralResponse> GetStudentPointsBreakdownAsync(GetStudentPointsBreakdownRequest request)
+        {
+            var queryParts = new List<string>();
+
+            if (request.FromDate.HasValue)
+                queryParts.Add($"FromDate={HttpUtility.UrlEncode(request.FromDate.Value.ToString("O"))}");
+
+            if (request.ToDate.HasValue)
+                queryParts.Add($"ToDate={HttpUtility.UrlEncode(request.ToDate.Value.ToString("O"))}");
+
+            var queryString = queryParts.Count > 0 ? "?" + string.Join("&", queryParts) : string.Empty;
+            var url = ApiRoutes.GetStudentPointsBreakdownAsyncRoute(request.StudentId) + queryString;
+
+            var response = await _httpClient.GetAsync(url);
             return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
 
