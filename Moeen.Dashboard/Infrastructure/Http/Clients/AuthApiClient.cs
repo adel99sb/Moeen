@@ -17,9 +17,17 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
 
         public async Task<GeneralResponse> Login(LoginRequest request)
         {
-            var response = await _http.PostAsJsonAsync(ApiRoutes.LoginRoute, request);
+            try
+            {
+                var response = await _http.PostAsJsonAsync(ApiRoutes.LoginRoute, request);
 
-            return await response.Content.ReadFromJsonAsync<GeneralResponse>();
+                return await response.Content.ReadFromJsonAsync<GeneralResponse>();
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message);
+            }
         }
 
         // ================= REGISTER =================

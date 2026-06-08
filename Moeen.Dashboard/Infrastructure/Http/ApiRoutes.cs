@@ -2,7 +2,7 @@
 {
     public static class ApiRoutes
     {
-        public static string BaseUrl { get; } = "http://10.213.174.50:5055/";
+        public static string BaseUrl { get; } = "https://localhost:7023/";
 
         // Auth
         public static string LoginRoute { get; } = "api/User/login";
