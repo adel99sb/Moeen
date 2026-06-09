@@ -6,7 +6,7 @@
 <style>
     :root {
         /* لوحة الألوان الأساسية للمشروع */
-       /* أخضر فاتح للحدود */
+        /* أخضر فاتح للحدود */
     }
 
     /* --- التنسيقات العامة للمحتوى --- */
@@ -27,11 +27,11 @@
         cursor: default;
     }
 
-    .stat-card:hover {
-        transform: translateY(-5px);
-        border-color: var(--primary-green);
-        box-shadow: 0 8px 20px rgba(25, 80, 66, 0.1);
-    }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-green);
+            box-shadow: 0 8px 20px rgba(25, 80, 66, 0.1);
+        }
 
     .icon-box {
         width: 45px;
@@ -102,14 +102,21 @@
         border-bottom: 1px solid var(--light-beige);
     }
 
-    .student-item:last-child { border-bottom: none; }
+        .student-item:last-child {
+            border-bottom: none;
+        }
 
-    .toggle-arrow { transition: transform 0.3s ease; }
-    details[open] .toggle-arrow { transform: rotate(180deg); }
+    .toggle-arrow {
+        transition: transform 0.3s ease;
+    }
+
+    details[open] .toggle-arrow {
+        transform: rotate(180deg);
+    }
 </style>
 
 <div class="dashboard-container">
-    
+
     <section>
         <div class="section-title"><i class="bi bi-speedometer2"></i> مؤشرات الأداء العام</div>
         <div class="row g-4">
@@ -230,71 +237,70 @@
 }
 
 <script>
-window.initLabCharts = () => {
-    const Config = {
-        fontFamily: "'Segoe UI', sans-serif",
-        colors: {
-            completed: '#195042',
-            passed: '#2e7d6a',
-            failed: '#c82333'
-        }
-    };
-
-    const metrics = [
-        { k: 'completed', l: 'اختبارات منجزة', c: Config.colors.completed },
-        { k: 'passed', l: 'طلاب ناجحون', c: Config.colors.passed },
-        { k: 'failed', l: 'طلاب راسبون', c: Config.colors.failed }
-    ];
-
-    function createLabChart(elementId, dataset) {
-        const ctx = document.getElementById(elementId);
-        if (!ctx) return;
-        if (ctx._chartInstance) { try { ctx._chartInstance.destroy(); } catch { } }
-
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: dataset.map(d => d.circleName),
-                datasets: metrics.map(m => ({
-                    label: m.l,
-                    data: dataset.map(d => d[m.k]),
-                    backgroundColor: m.c,
-                    borderRadius: 6
-                }))
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
-                    x: { grid: { display: false } }
-                },
-                plugins: {
-                    legend: { labels: { font: { family: Config.fontFamily } } }
-                }
+    window.initLabCharts = () => {
+        const Config = {
+            fontFamily: "'Segoe UI', sans-serif",
+            colors: {
+                completed: '#195042',
+                passed: '#2e7d6a',
+                failed: '#c82333'
             }
-        });
+        };
 
-        ctx._chartInstance = chart;
-        return chart;
-    }
+        const metrics = [
+            { k: 'completed', l: 'اختبارات منجزة', c: Config.colors.completed },
+            { k: 'passed', l: 'طلاب ناجحون', c: Config.colors.passed },
+            { k: 'failed', l: 'طلاب راسبون', c: Config.colors.failed }
+        ];
 
-    // بيانات مقارنة الحلقات داخل فوج التميز
-    const batch1Data = [
-        { circleName: 'حلقة الأساسيات', completed: 18, passed: 15, failed: 3 },
-        { circleName: 'حلقة التطبيق', completed: 14, passed: 10, failed: 4 },
-        { circleName: 'حلقة المراجعة', completed: 16, passed: 14, failed: 2 }
-    ];
+        function createLabChart(elementId, dataset) {
+            const ctx = document.getElementById(elementId);
+            if (!ctx) return;
+            if (ctx._chartInstance) { try { ctx._chartInstance.destroy(); } catch { } }
 
-    // بيانات مقارنة الحلقات داخل فوج الإتقان
-    const batch2Data = [
-        { circleName: 'حلقة المنهج الأول', completed: 12, passed: 8, failed: 4 },
-        { circleName: 'حلقة المنهج الثاني', completed: 10, passed: 6, failed: 4 },
-        { circleName: 'حلقة الدعم', completed: 15, passed: 12, failed: 3 }
-    ];
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dataset.map(d => d.circleName),
+                    datasets: metrics.map(m => ({
+                        label: m.l,
+                        data: dataset.map(d => d[m.k]),
+                        backgroundColor: m.c,
+                        borderRadius: 6
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { labels: { font: { family: Config.fontFamily } } }
+                    }
+                }
+            });
 
-    createLabChart('chartLab1', batch1Data);
-    createLabChart('chartLab2', batch2Data);
-};
+            ctx._chartInstance = chart;
+            return chart;
+        }
+
+        // بيانات مقارنة الحلقات داخل فوج التميز
+        const batch1Data = [
+            { circleName: 'حلقة الأساسيات', completed: 18, passed: 15, failed: 3 },
+            { circleName: 'حلقة التطبيق', completed: 14, passed: 10, failed: 4 },
+            { circleName: 'حلقة المراجعة', completed: 16, passed: 14, failed: 2 }
+        ];
+
+        // بيانات مقارنة الحلقات داخل فوج الإتقان
+        const batch2Data = [
+            { circleName: 'حلقة المنهج الأول', completed: 12, passed: 8, failed: 4 },
+            { circleName: 'حلقة المنهج الثاني', completed: 10, passed: 6, failed: 4 },
+            { circleName: 'حلقة الدعم', completed: 15, passed: 12, failed: 3 }
+        ];
+
+        createLabChart('chartLab1', batch1Data);
+        createLabChart('chartLab2', batch2Data);
+    };
 </script>
-

@@ -1,4 +1,4 @@
-﻿
+﻿﻿
 @page "/Teacher/Post"
 
 <style>
@@ -51,10 +51,10 @@
         flex-direction: column;
     }
 
-    .ad-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-card-hover);
-    }
+        .ad-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-card-hover);
+        }
 
     /* 5. منطقة صورة الإعلان */
     .ad-image {
@@ -67,26 +67,26 @@
         overflow: hidden;
     }
 
-    .ad-image::after {
-        content: '';
-        position: absolute;
-        width: 140px;
-        height: 140px;
-        background: rgba(214, 202, 188, 0.15);
-        border-radius: 50%;
-        top: -30px;
-        right: -30px;
-        z-index: 1;
-        pointer-events: none;
-    }
+        .ad-image::after {
+            content: '';
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: rgba(214, 202, 188, 0.15);
+            border-radius: 50%;
+            top: -30px;
+            right: -30px;
+            z-index: 1;
+            pointer-events: none;
+        }
 
-    .ad-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        z-index: 0;
-        transition: transform var(--transition-base);
-    }
+        .ad-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            transition: transform var(--transition-base);
+        }
 
     .ad-card:hover .ad-image img {
         transform: scale(1.05);
@@ -156,43 +156,52 @@
         gap: 0.4rem;
     }
 
-    .ad-action-btn:hover {
-        background-color: var(--color-bg-light);
-        color: var(--color-primary-green);
-        border-color: var(--color-primary-green);
-    }
+        .ad-action-btn:hover {
+            background-color: var(--color-bg-light);
+            color: var(--color-primary-green);
+            border-color: var(--color-primary-green);
+        }
 
     /* 9. تحسينات التجاوب */
     @@media (max-width: 768px) {
-        .header-custom { padding: 2rem 0; margin-bottom: 2rem; }
-        .ad-image { height: 140px; }
-        .ad-content { padding: 1.2rem; }
+        .header-custom {
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .ad-image {
+            height: 140px;
+        }
+
+        .ad-content {
+            padding: 1.2rem;
+        }
     }
     /* === بداية إضافة تفاعل أزرار الإعجاب (بدون تعديل الهيكل) === */
 
-/* زر "أعجبني" (الزر الأول داخل .ad-actions) عند الضغط أو التركيز */
-.ad-actions .ad-action-btn:first-of-type:active,
-.ad-actions .ad-action-btn:first-of-type:focus {
-    background-color: var(--color-primary-green) !important;
-    color: var(--color-luxury-beige) !important;
-    border-color: var(--color-primary-green) !important;
-    outline: none;
-}
+    /* زر "أعجبني" (الزر الأول داخل .ad-actions) عند الضغط أو التركيز */
+    .ad-actions .ad-action-btn:first-of-type:active,
+    .ad-actions .ad-action-btn:first-of-type:focus {
+        background-color: var(--color-primary-green) !important;
+        color: var(--color-luxury-beige) !important;
+        border-color: var(--color-primary-green) !important;
+        outline: none;
+    }
 
-/* زر "لم يعجبني" (الزر الثاني داخل .ad-actions) عند الضغط أو التركيز */
-.ad-actions .ad-action-btn:last-of-type:active,
-.ad-actions .ad-action-btn:last-of-type:focus {
-    background-color: #b8a99a !important; /* درجة أغمق من --color-luxury-beige */
-    color: var(--color-white) !important;
-    border-color: #b8a99a !important;
-    outline: none;
-}
+    /* زر "لم يعجبني" (الزر الثاني داخل .ad-actions) عند الضغط أو التركيز */
+    .ad-actions .ad-action-btn:last-of-type:active,
+    .ad-actions .ad-action-btn:last-of-type:focus {
+        background-color: #b8a99a !important; /* درجة أغمق من --color-luxury-beige */
+        color: var(--color-white) !important;
+        border-color: #b8a99a !important;
+        outline: none;
+    }
 
-/* الحفاظ على التأثير عند استخدام لوحة المفاتيح (إمكانية الوصول) */
-.ad-actions .ad-action-btn:focus-visible {
-    box-shadow: 0 0 0 3px rgba(25, 80, 66, 0.3);
-}
-/* === نهاية الإضافة === */
+    /* الحفاظ على التأثير عند استخدام لوحة المفاتيح (إمكانية الوصول) */
+    .ad-actions .ad-action-btn:focus-visible {
+        box-shadow: 0 0 0 3px rgba(25, 80, 66, 0.3);
+    }
+    /* === نهاية الإضافة === */
 
 </style>
 
@@ -208,7 +217,7 @@
     <!-- شبكة الإعلانات (كاردان في كل صف) -->
     <div class="container">
         <div class="row g-4">
-            
+
             <!-- الإعلان الأول -->
             <div class="col-lg-6 col-md-12">
                 <article class="ad-card">
@@ -294,5 +303,5 @@
 </div>
 
 @code {
-    
+
 }

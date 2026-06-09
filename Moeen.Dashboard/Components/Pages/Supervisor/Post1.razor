@@ -1,8 +1,6 @@
 ﻿@page "/supervisor/post1/{Id:guid}"
 @rendermode InteractiveServer
-@using Moeen.Shared.Responses.ContentSharing
 @inject NavigationManager NavManager
-@inject Moeen.Dashboard.Services.Abstractions.IPostService PostService
 
 <style>
    :root {
@@ -87,33 +85,26 @@
 </style>
 
 <section class="details-container">
-    @if (isLoading)
-    {
         <div class="text-center p-5">
             <div class="spinner-border text-success" role="status"></div>
             <p class="mt-3" style="color: var(--primary-green);">جاري تحميل تفاصيل المنشور...</p>
         </div>
-    }
-    else if (currentPost == null)
-    {
         <div class="alert alert-danger text-center">
-            <i class="bi bi-exclamation-triangle-fill"></i> @errorMessage
+            <i class="bi bi-exclamation-triangle-fill"></i> errorMessage
         </div>
         <div class="text-center mt-4">
             <button class="btn-back" @onclick="GoBack"><i class="bi bi-arrow-right"></i> العودة للمنشورات</button>
         </div>
-    }
-    else
-    {
+   
         <header class="post-header">
-            <h2 class="post-title">@currentPost.Title</h2>
+            <h2 class="post-title">currentPost.Title</h2>
             <div class="post-meta">
-                <span class="interaction-badge">👍 @currentPost.InteractionsCount تفاعل</span>
+                <span class="interaction-badge">👍 currentPost.InteractionsCount تفاعل</span>
             </div>
         </header>
 
         <article class="post-body">
-            @currentPost.Body
+            currentPost.Body
         </article>
 
         <footer class="text-start">
@@ -125,61 +116,6 @@
 </section>
 
 @code {
-    [Parameter]
-    public Guid Id { get; set; }
-
-    private PostDto? currentPost;
-    private bool isLoading = true;
-    private string errorMessage = "المنشور غير موجود أو تم حذفه.";
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadPostDetails();
-    }
-
-    private async Task LoadPostDetails()
-        {
-        try
-        {
-            isLoading = true;
-            
-            // جلب كل المنشورات للبحث عن المنشور المطلوب بالـ Id
-            // (في حال وجود ميثود بالباك إند بتجيب بالـ Id مباشرة يفضل استخدامها لاحقاً)
-            var response = await PostService.SearchContentGetAsync("");
-
-            if (response != null && response.Success && response.Data != null)
-            {
-                var allPosts = System.Text.Json.JsonSerializer.Deserialize<List<PostDto>>(response.Data.ToString());
-                
-                if (allPosts != null)
-                {
-                    currentPost = allPosts.FirstOrDefault(p => p.Id == Id);
-                }
-            }
-
-            if (currentPost == null)
-            {
-                errorMessage = "عذراً، لم يتم العثور على هذا المنشور.";
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = "حدث خطأ أثناء تحميل البيانات: " + ex.Message;
-            
-            // حماية محلية (Fallback) عشان لو ضارب الباك إند يعرض بيانات افتراضية للتجربة والامتحان
-            currentPost = new PostDto
-            {
-                Id = Id,
-                Title = "منشور تجريبي (محلي)",
-                Body = "هذا النص يظهر كحماية محلية لأن الاتصال بالسيرفر مقطوع أو ميثود الجلب واجهت استثناء.",
-                InteractionsCount = 5
-            };
-        }
-        finally
-        {
-            isLoading = false;
-        }
-    }
 
     private void GoBack()
     {

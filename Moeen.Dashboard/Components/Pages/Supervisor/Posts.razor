@@ -1,111 +1,88 @@
 ﻿@page "/supervisor/posts"
 @rendermode InteractiveServer
-@using Moeen.Shared.Responses
-@using Moeen.Shared.Requests.ContentSharing
-@using Moeen.Shared.Responses.ContentSharing
 @inject NavigationManager NavManager
-@inject Moeen.Dashboard.Services.Abstractions.IPostService PostService 
-@inject Microsoft.JSInterop.IJSRuntime JS
 
 <style>
    :root {
+--primary-green: #195042;
+--accent-beige: #d6cabc;
+--light-beige: #f4f1ee;
+--white: #ffffff;
+--text-dark: #2d3436;
+--status-green: #2ecc71;
+--danger-red: #e74c3c;
+}
+body {
+font-family: 'Tajawal', sans-serif;
+background-color: #f9f9f9;
+direction: rtl;
+}
+.management-container {
+background: var(--white);
+margin: 20px;
+padding: 30px;
+border-radius: 20px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+/* العنوان */
+.page-title {
+color: var(--primary-green);
+position: relative;
+padding-bottom: 10px; /* مسافة بين النص والخط */
+border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
+display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+}
+.table {
+    width: 100%;
+    table-layout: fixed;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+     font-family: 'Tajawal', sans-serif;
+        font-size: clamp(1rem,2.5vw,1.5rem);
+        text-align: center;
+}
+    .table th {
+        background-color: var(--light-beige);
+        color: var(--primary-green);
+        padding: 12px;
+    }
+    .table td {
+        background-color: var(--white);
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+
+    }
+    .table tbody tr:hover {
+        background-color: #fafafa;
+        transform: scale(1.01);
+    }
+          .btn-pprimary {
+    background-color: var(--primary-green);
+    font-size: 15px;
+    padding: 10px 20px;
+    color: var(--white);
+    border-radius: 12px;
+    display: inline;
+    transition: 0.3s;
+}
+
+    .btn-pprimary:hover {
+        background-color: #123d32;
+        transform: translateY(-2px);
+    }
+         .form-container, .form-container * {
+        box-sizing: border-box;
+    }
+    :root {
         --primary-green: #195042;
         --accent-beige: #d6cabc;
         --light-beige: #f4f1ee;
         --white: #ffffff;
         --text-dark: #2d3436;
-        --status-green: #2ecc71;
-        --danger-red: #e74c3c;
         --transition: all 0.3s ease;
-   }
-   body {
-        font-family: 'Tajawal', sans-serif;
-        background-color: #f9f9f9;
-        direction: rtl;
-   }
-   .management-container {
-        background: var(--white);
-        margin: 20px;
-        padding: 30px;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-   }
-   .page-title {
-        color: var(--primary-green);
-        position: relative;
-        padding-bottom: 10px; 
-        border-bottom: 3px solid #d6cabc; 
-        display: inline-block; 
-   }
-   
-   .search-wrapper {
-        position: relative;
-        flex: 1;
-        max-width: 400px;
-   }
-
-   .search-input {
-        width: 100%;
-        padding: 12px 45px 12px 15px;
-        border: 1.5px solid var(--accent-beige);
-        border-radius: 12px;
-        outline: none;
-        transition: 0.3s;
-   }
-
-   .search-input:focus {
-        border-color: var(--primary-green);
-        box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
-   }
-
-   .search-wrapper i {
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--primary-green);
-   }
-   .table {
-        width: 100%;
-        table-layout: fixed;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        font-family: 'Tajawal', sans-serif;
-        font-size: clamp(1rem,2.5vw,1.5rem);
-        text-align: center;
-   }
-   .table th {
-        background-color: var(--light-beige);
-        color: var(--primary-green);
-        padding: 12px;
-   }
-   .table td {
-        background-color: var(--white);
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-        word-wrap: break-word;
-   }
-   .table tbody tr:hover {
-        background-color: #fafafa;
-        transform: scale(1.01);
-   }
-   .btn-pprimary {
-        background-color: var(--primary-green);
-        font-size: 15px;
-        padding: 10px 20px;
-        color: var(--white);
-        border-radius: 12px;
-        display: inline-block;
-        transition: 0.3s;
-        cursor: pointer;
-        border: none;
-   }
-   .btn-pprimary:hover {
-        background-color: #123d32;
-        transform: translateY(-2px);
-   }
-   .form-container {
+    }
+    .form-container {
         max-width: 850px;
         margin: 2rem auto;
         background: var(--white);
@@ -113,245 +90,209 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         direction: rtl; 
         overflow: hidden;
-   }
-   .form-header {
+    }
+    .form-header {
         background: var(--accent-beige);
         color: var(--white);
         padding: 0.7rem;
         text-align: center;
-   }
-   form {
+    }
+    form {
         padding: 1.5rem;
-   }
-   .grid-row {
+    }
+
+.grid-row {
         display: grid;
         grid-template-columns: repeat(2, 1fr); 
         gap: 1.5rem;
         margin-bottom: 1.2rem;
-   }
-   .input-group {
+    }
+        .grid-row:nth-of-type(4) {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    .input-group {
         display: flex;
         flex-direction: column;
         gap: 8px;
-   }
-   .input-group label {
-        color: var(--text-dark);
-        font-weight: 600;
-        font-size: 0.85rem;
-        text-align: right;
-   }
-   .input-wrapper {
+    }
+        .input-group label {
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: right;
+        }
+    /* حل مشكلة الأيقونات والمحاذاة */
+    .input-wrapper {
         position: relative;
         display: flex;
         align-items: center;
         width: 100%;
-   }
-   .input-wrapper i {
-        position: absolute;
-        right: 12px; 
-        color: var(--primary-green);
-        z-index: 2;
-        pointer-events: none;
+    }
+        .input-wrapper i {
+            position: absolute;
+            right: 12px; /* تثبيت الأيقونة جهة اليمين */
+            color: var(--primary-green);
+            z-index: 2;
+            pointer-events: none;
         }
-   .input-wrapper input,
-   .input-wrapper select {
-        width: 100%;
-        padding: 10px 35px 10px 10px;
-        border: 1px solid var(--accent-beige);
-        border-radius: 8px;
-        background: var(--light-beige);
-        font-size: 0.9rem;
-        height: 45px; 
-        outline: none;
-        transition: var(--transition);
-   }
-   .input-wrapper input:focus,
-   .input-wrapper select:focus {
-        border-color: var(--primary-green);
-        background: #fff;
-   }
-   .actions {
+        .input-wrapper input,
+        .input-wrapper select {
+            width: 100%;
+            padding: 10px 35px 10px 10px;
+            border: 1px solid var(--accent-beige);
+            border-radius: 8px;
+            background: var(--light-beige);
+            font-size: 0.9rem;
+            height: 45px; 
+            outline: none;
+            transition: var(--transition);
+             }
+            .input-wrapper input:focus,
+            .input-wrapper select:focus {
+                border-color: var(--primary-green);
+                background: #fff;
+            }
+    .actions {
         display: flex;
         gap: 1rem;
         margin-top: 2rem;
         padding-top: 1.5rem;
         border-top: 1px solid #eee;
-   }
-   .actions button, .actions a {
-        flex: 1;
-        height: 48px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        border: none;
-        cursor: pointer;
-        transition: var(--transition);
-   }
-   .actions .save {
-        background: var(--primary-green);
-        color: white;
-   }
-   .actions .cancel {
-        background: #f8f9fa;
-        color: #dc3545;
-   }
-   .btn-icon {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 1.2rem;
-        transition: var(--transition);
-   }
-   .btn-icon.edit { color: #3498db; }
-   .btn-icon.delete { color: var(--danger-red); }
-   .btn-icon:hover { transform: scale(1.1); }
-   
-   .btn-like {
-        background: #f0f0f0;
-        border: 1px solid #ddd;
-        border-radius: 20px;
-        padding: 4px 12px;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: var(--transition);
-   }
-   .btn-like:hover {
-        background: #e0e0e0;
-        transform: scale(1.05);
-   }
+    }
+        .actions button, .actions a {
+            flex: 1;
+            height: 48px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .actions .save {
+            background: var(--primary-green);
+            color: white;
+        }
 
-  @@media (max-width: 768px) {
-        .grid-row {
+        .actions .cancel {
+            background: #f8f9fa;
+            color: #dc3545;
+        }
+    /* حل مشكلة الميديا كويري في Razor */
+    @@media (max-width: 768px) {
+        .grid-row, .grid-row:nth-of-type(4) {
             grid-template-columns: 1fr !important;
         }
-   }
+    }
 </style>
-
 
 <section class="management-container">
     <header class="page-header">
         <h2 class="page-title">إدارة المنشورات</h2>
     </header>
-
-    <div class="search-wrapper">
-        <i class="bi bi-search"></i>
-        <input type="text" class="search-input" placeholder="ابحث عن منشور..."
-               @bind="searchQuery" @bind:event="oninput" @onkeyup="HandleSearch">
-    </div>
-
-    @if (ShowMessage)
-    {
-        <div class="alert @(Success ? "alert-success" : "alert-danger") mt-3">@Message</div>
-    }
-
-    <table class="table mt-3">
+    
+    <table class="table">
         <thead>
             <tr>
-                <th>عنوان المنشور</th>
-                <th>المحتوى</th>
-                <th>التفاعلات</th>
-                <th>الإجراءات</th>
-                <th>حذف</th>
+                <th class="table th">المنشور</th>
+                <th class="table th">معلومات المنشور </th>
+                <th class="table th">التفاعلات</th>
+                <th class="table th">حذف</th>
             </tr>
         </thead>
         <tbody>
-            @if (isLoading)
-            {
-                <tr><td colspan="5">جاري التحميل من السيرفر...</td></tr>
-            }
-            else if (postList == null || postList.Count == 0)
-            {
-                <tr><td colspan="5">لا توجد منشورات.</td></tr>
-            }
-            else
-            {
-                @foreach (var post in postList)
-                {
-                    <tr>
-                        <td>@post.Title</td>
-                        <td>@post.Body</td>
-                        <td>👍 @post.InteractionsCount</td>
-                        <td>
-                            <button class="btn-icon" @onclick="() => editPost(post.Id)">تعديل</button>
-                        </td>
-                        <td>
-                            <button class="btn-icon delete" title="حذف" @onclick="() => ConfirmDelete(post.Id)">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                }
-            }
+                <tr>
+                    <td colspan="4" class="table td">جاري تحميل المنشور...</td>
+                </tr>
+                <tr>
+                    <td class="table td">postResponse.Message</td>
+                    <td class="table td">
+                        <a ><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
+                        <a > <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                    </td>
+                    <td class="table td">
+
+                            <span style="font-size: 0.9rem; color: gray;">جاري تحميل التفاعلات...</span>
+                        
+                            <span>interactionsResponse.Message</span>
+                        
+                    </td>
+                   <td class="table td">
+                      <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                   </td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="table td" style="color: var(--danger-red);">errorMessage</td>
+                </tr>
         </tbody>
     </table>
+
+    <details>
+        <summary class="btn-pprimary">إضافة منشور جديد</summary>
+        <div class="form-container">
+            <div class="form-header">
+                <h2><i class="bi bi-plus-circle-dotted"></i>  إضافة منشور</h2>
+            </div>
+            <form>
+                <div class="grid-row">
+                    <div class="input-group">
+                        <label>عنوان المنشور </label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-fonts"></i>
+ <input type="text" placeholder="أدخل العنوان">
+                        </div>
+ </div>
+                    <div class="input-group">
+                        <label> محتوى المنشور</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-pencil"></i>
+                            <input type="text" placeholder="اكتب هنا...">
+ </div>
+                    </div>
+                </div>
+                <div class="grid-row">
+                    <div class="input-group">
+                        <label>تاريخ النشر</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-calendar-event"></i>
+                            <input type="date">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>نوع المنشور</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-text-paragraph"></i>
+                            <select>
+                                <option value="" disabled selected>اختر النوع</option>
+                                <option value="public">عام</option>
+                                <option value="private">خاص</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="actions">
+
+<button type="submit" class="save"><i class="bi bi-check2-all"></i> نشر</button>
+                    <a href="/supervisor/posts" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+                </div>
+            </form>
+        </div>
+    </details>
 </section>
+
 @code {
-    private List<PostDto> postList = new();
-    private bool isLoading = true;
-    private bool ShowMessage = false;
-    private bool Success = false;
-    private string Message = "";
-    private string searchQuery = "";
 
-    protected override async Task OnInitializedAsync() => await LoadPostData();
-
-    private async Task LoadPostData()
+    private void editPost()
     {
-        isLoading = true;
-        try {
-            var response = await PostService.SearchContentGetAsync(searchQuery);
-            if (response?.Success == true) {
-                // تحويل البيانات من الـ GeneralResponse
-                var json = System.Text.Json.JsonSerializer.Serialize(response.Data);
-                var result = System.Text.Json.JsonSerializer.Deserialize<SearchContentResponse>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                postList = result?.Posts ?? new();
-            } else {
-                postList = new();
-            }
-        }
-        catch (Exception ex) {
-            Message = "خطأ في الاتصال بالسيرفر: " + ex.Message;
-            ShowMessage = true;
-        }
-        finally { isLoading = false; }
+        NavManager.NavigateTo("/supervisor/edit-post");
     }
 
-    private async Task HandleSearch() => await LoadPostData();
-
-    private async Task ConfirmDelete(Guid id)
+    private void viewPost1(Guid id)
     {
-        // نافذة التأكيد
-        bool confirmed = await JS.InvokeAsync<bool>("confirm", "هل أنتِ متأكدة من حذف هذا المنشور؟ لا يمكن التراجع عن هذا الإجراء.");
-        if (confirmed)
-        {
-            await DeletePost(id);
-        }
+        NavManager.NavigateTo($"/supervisor/post1/{id}");
     }
-
-    private async Task DeletePost(Guid id)
-    {
-        try {
-            var response = await PostService.DeletePostAsync(new DeletePostRequest { PostId = id });
-            if (response?.Success == true) {
-                Message = "تم حذف المنشور بنجاح.";
-                Success = true;
-                await LoadPostData(); // تحديث القائمة بعد الحذف
-            } else {
-                Message = response?.Message ?? "فشل الحذف.";
-                Success = false;
-            }
-        }
-        catch {
-            Message = "حدث خطأ أثناء الاتصال بالسيرفر.";
-            Success = false;
-        }
-        ShowMessage = true;
-    }
-
-    private void editPost(Guid id) => NavManager.NavigateTo($"/supervisor/edit-post/{id}");
-}
 }

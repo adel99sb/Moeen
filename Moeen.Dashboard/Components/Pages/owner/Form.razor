@@ -1,9 +1,4 @@
 ﻿@page "/owner/Form"
-@using Moeen.Shared.Requests.Enrollment
-@using Moeen.Dashboard.Infrastructure.Http.Clients
-@inject EnrollmentApiClient ApiClient
-@inject NavigationManager NavManager
-
 <style> 
     .form-container, .form-container * {
         box-sizing: border-box;
@@ -142,72 +137,99 @@
         <h2><i class="bi bi-person-plus-fill"></i> إضافة / تعديل بيانات</h2>
     </div>
 
-    @* استخدمنا EditForm لربط البيانات مباشرة *@
-    <EditForm Model="request" OnValidSubmit="HandleSubmit">
+    <form>
         <div class="grid-row">
             <div class="input-group">
                 <label>الاسم الكامل</label>
                 <div class="input-wrapper">
                     <i class="bi bi-person"></i>
-                    <InputText @bind-Value="request.Name" placeholder="أدخل الاسم" />
+                    <input type="text" placeholder="أدخل الاسم">
                 </div>
             </div>
             <div class="input-group">
                 <label>رقم الهاتف</label>
                 <div class="input-wrapper">
                     <i class="bi bi-telephone"></i>
-                    <InputText @bind-Value="request.Phone" placeholder="09xxxxxxxxx" />
+                    <input type="tel">
                 </div>
             </div>
         </div>
 
         <div class="grid-row">
             <div class="input-group">
+                <label>تاريخ التعيين</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-calendar-event"></i>
+                    <input type="date">
+                </div>
+            </div>
+            <div class="input-group">
                 <label>البريد الإلكتروني</label>
                 <div class="input-wrapper">
                     <i class="bi bi-envelope"></i>
-                    <InputText @bind-Value="request.Email" type="email" />
+                    <input type="email">
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-row">
+            <div class="input-group">
+                <label>الجنس</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-gender-ambiguous"></i>
+                    <select>
+                        <option value="" disabled selected>اختر الجنس</option>
+                        <option value="male">ذكر</option>
+                        <option value="female">أنثى</option>
+                    </select>
                 </div>
             </div>
             <div class="input-group">
                 <label>كلمة المرور</label>
                 <div class="input-wrapper">
                     <i class="bi bi-lock"></i>
-                    <InputText @bind-Value="request.Password" type="password" />
+                    <input type="password">
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-row">
+            <div class="input-group">
+                <label>الفوج</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-layers"></i>
+                    <select>
+                        <option>الفوج الأول</option>
+                        <option>الفوج الثاني</option>
+                    </select>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>الجامع التابع له</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-mosque"></i>
+                    <input type="text">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>حالة الحساب</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-check-circle"></i>
+                    <select>
+                        <option value="active">نشط</option>
+                        <option value="inactive">متوقف</option>
+                    </select>
                 </div>
             </div>
         </div>
 
         <div class="actions">
-            <button type="submit" class="save" disabled="@isSubmitting">
-                @(isSubmitting ? "جاري الحفظ..." : "حفظ البيانات")
-            </button>
+            <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ البيانات</button>
             <a href="/owner/AccountManagement" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
         </div>
-    </EditForm>
+    </form>
 </div>
 
-
 @code {
-    // استخدمي الـ Request المناسب (مثلاً AddTeacherRequest)
-    private AddTeacherRequest request = new(); 
-    private bool isSubmitting = false;
 
-    private async Task HandleSubmit()
-    {
-        isSubmitting = true;
-        
-        // استدعاء الخدمة (بناءً على الـ Client الذي أرسلتِه)
-        var response = await ApiClient.AddTeacherAsync(request);
-
-        if (response.Success)
-        {
-            NavManager.NavigateTo("/owner/AccountManagement");
-        }
-        else
-        {
-            // يمكنكِ هنا عرض رسالة خطأ للمستخدم
-            isSubmitting = false;
-        }
-    }
 }

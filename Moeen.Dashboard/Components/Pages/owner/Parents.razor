@@ -1,9 +1,4 @@
 ﻿@page "/owner/parents"
-@using Moeen.Shared.Requests.Enrollment
-@using Moeen.Shared.Responses.Enrollment
-@using Moeen.Dashboard.Infrastructure.Http.Clients
-@using System.Text.Json
-@inject EnrollmentApiClient ApiClient
 <style>
     /*AccountManagement style*/
     :root {
@@ -419,22 +414,37 @@
         </div>
        
     </div>
-    
+
     <div class="table-responsive">
         <table class="data-table">
-            <thead><tr><th>الاسم</th><th>الهاتف</th><th>الحالة</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th>الجامع</th>
+                    <th>الفوج</th>
+                    <th>الحالة</th>
+                    <th class="text-center">الابناء</th>
+                </tr>
+            </thead>
             <tbody>
-                @if (parents != null)
-                {
-                    @foreach (var p in parents)
-                    {
-                        <tr>
-                            <td>@p.Name</td>
-                            <td>@p.Phone</td>
-                            <td><span class="status-badge @(p.Status == 0 ? "active" : "inactive")">@(p.Status == 0 ? "نشط" : "غير نشط")</span></td>
-                        </tr>
-                    }
-                }
+                <tr>
+                    <td>أحمد العلي</td>
+                    <td>جامع التوبة</td>
+                    <td>الفوج الأول</td>
+                    <td><span class="status-badge active">نشط</span></td>
+                    <td class="actions-cell">
+                        محمد علي
+                    </td>
+                </tr>
+                <tr>
+                    <td>محمد العلي</td>
+                    <td>جامع أبي حنيفة</td>
+                    <td>الفوج الثاني</td>
+                    <td><span class="status-badge inactive">غير نشط</span></td>
+                    <td class="actions-cell">
+                       تامر العلي
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -442,10 +452,5 @@
 
 
 @code {
-    private List<MemberDto> parents;
-    protected override async Task OnInitializedAsync()
-    {
-        var res = await ApiClient.GetAllParentsAsync(new GetAllParentsRequest());
-        if (res.Success) parents = JsonSerializer.Deserialize<List<MemberDto>>(res.Data.ToString(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-    }
+
 }

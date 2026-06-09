@@ -2,112 +2,118 @@
 @rendermode InteractiveServer
 @inject NavigationManager NavManager
 <style>
-   :root {
---primary-green: #195042;
---accent-beige: #d6cabc;
---light-beige: #f4f1ee;
---white: #ffffff;
---text-dark: #2d3436;
---status-green: #2ecc71;
---danger-red: #e74c3c;
---radius-md: 12px;
- --shadow-sm: 0 3px 8px rgba(0,0,0,0.08);
-}
-body {
-font-family: 'Tajawal', sans-serif;
-background-color: #f9f9f9;
-direction: rtl;
-}
-.management-container {
-background: var(--white);
-margin: 20px;
-padding: 30px;
-border-radius: 20px;
-box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-/* العنوان */
-.page-title {
-color: var(--primary-green);
-position: relative;
-padding-bottom: 10px; /* مسافة بين النص والخط */
-border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
-display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
-margin-top:15px;
-}
-
-
-.search-wrapper {
-    position: relative;
-    flex: 1;
-    max-width: 400px;
-}
-
-.search-input {
-    width: 100%;
-    padding: 12px 45px 12px 15px;
-    border: 1.5px solid var(--accent-beige);
-    border-radius: 12px;
-    outline: none;
-    transition: 0.3s;
-}
-
-    .search-input:focus {
-        border-color: var(--primary-green);
-        box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
+    :root {
+        --primary-green: #195042;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --text-dark: #2d3436;
+        --status-green: #2ecc71;
+        --danger-red: #e74c3c;
+        --radius-md: 12px;
+        --shadow-sm: 0 3px 8px rgba(0,0,0,0.08);
     }
 
-.search-wrapper i {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--primary-green);
-}
-.table {
-    width: 100%;
-    table-layout: fixed;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-     font-family: 'Tajawal', sans-serif;
+    body {
+        font-family: 'Tajawal', sans-serif;
+        background-color: #f9f9f9;
+        direction: rtl;
+    }
+
+    .management-container {
+        background: var(--white);
+        margin: 20px;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    /* العنوان */
+    .page-title {
+        color: var(--primary-green);
+        position: relative;
+        padding-bottom: 10px; /* مسافة بين النص والخط */
+        border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
+        display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+        margin-top: 15px;
+    }
+
+
+    .search-wrapper {
+        position: relative;
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 45px 12px 15px;
+        border: 1.5px solid var(--accent-beige);
+        border-radius: 12px;
+        outline: none;
+        transition: 0.3s;
+    }
+
+        .search-input:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
+        }
+
+    .search-wrapper i {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary-green);
+    }
+
+    .table {
+        width: 100%;
+        table-layout: fixed;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        font-family: 'Tajawal', sans-serif;
         font-size: clamp(0.95rem,2.5vw,1.5rem);
         text-align: center;
-}
-    .table th {
-        background-color: var(--light-beige);
-        color: var(--primary-green);
-        padding: 12px;
     }
-    .table td {
-        background-color: var(--white);
-        padding: 10px;
-        border-bottom: 1px solid #eee;
 
+        .table th {
+            background-color: var(--light-beige);
+            color: var(--primary-green);
+            padding: 12px;
+        }
+
+        .table td {
+            background-color: var(--white);
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .table tbody tr:hover {
+            background-color: #fafafa;
+            transform: scale(1.01);
+        }
+
+    .table-wrapper {
+        overflow-x: auto;
+        width: 100%;
+        border-radius: var(--radius-md);
     }
-    .table tbody tr:hover {
-        background-color: #fafafa;
-        transform: scale(1.01);
-    }
-	.table-wrapper{
-		overflow-x: auto;
-		width: 100%;
-		border-radius: var(--radius-md);
-	}
 
     @@media (max-width: 768px) {
-    .grid-row, .grid-row:nth-of-type(4) {
-        grid-template-columns: 1fr !important;
+        .grid-row, .grid-row:nth-of-type(4) {
+            grid-template-columns: 1fr !important;
+        }
     }
-	}
-	</style>
+</style>
 <section class="management-container">
-<header class="page-header mb-3">
-  <h2 class="page-title">جميع الطلاب</h2>
-</header>
-<br />
-<div class="search-wrapper mb-3">
-	<i class="bi bi-search"></i>
-	<input type="text" class="search-input" placeholder="ابحث عن طالب...">
+    <header class="page-header mb-3">
+        <h2 class="page-title">جميع الطلاب</h2>
+    </header>
+    <br />
+    <div class="search-wrapper mb-3">
+        <i class="bi bi-search"></i>
+        <input type="text" class="search-input" placeholder="ابحث عن طالب...">
     </div>
 
     <!-- الجدول -->
@@ -131,11 +137,11 @@ margin-top:15px;
                     <td>الفوج الأول</td>
                     <td>14</td>
                     <td>
-                  	<a @onclick="AddExam"><button title="إضافة اختبار"><i class="bi bi-plus"></i></button></a>
+                        <a @onclick="AddExam"><button title="إضافة اختبار"><i class="bi bi-plus"></i></button></a>
 
-                  	<a @onclick="InformationExam"><button title="تفاصيل"><i class="bi bi-info-circle"></i></button></a>
-                 
-                        <button   class="bi bi-trash" title="حذف"></button>
+                        <a @onclick="InformationExam"><button title="تفاصيل"><i class="bi bi-info-circle"></i></button></a>
+
+                        <button class="bi bi-trash" title="حذف"></button>
                     </td>
                 </tr>
 
@@ -144,27 +150,27 @@ margin-top:15px;
                     <td>حلقة الفرقان</td>
                     <td>الفوج الثاني</td>
                     <td>15</td>
-                   <td>
-                  	<a @onclick="AddExam"><button title="إضافة اختبار"><i class="bi bi-plus"></i></button></a>
+                    <td>
+                        <a @onclick="AddExam"><button title="إضافة اختبار"><i class="bi bi-plus"></i></button></a>
 
-                  	<a @onclick="InformationExam"><button title="تفاصيل"><i class="bi bi-info-circle"></i></button></a>
-                 
-                        <button   class="bi bi-trash" title="حذف"></button>
+                        <a @onclick="InformationExam"><button title="تفاصيل"><i class="bi bi-info-circle"></i></button></a>
+
+                        <button class="bi bi-trash" title="حذف"></button>
                     </td>
                 </tr>
 
             </tbody>
         </table>
     </div>
-   
+
 </section>
 @code {
     private void AddExam()
-	{
-		NavManager.NavigateTo("/examer/addexam");
-	}
-      private void InformationExam()
-	{
-		NavManager.NavigateTo("/examer/information");
-	}
+    {
+        NavManager.NavigateTo("/examer/addexam");
+    }
+    private void InformationExam()
+    {
+        NavManager.NavigateTo("/examer/information");
+    }
 }

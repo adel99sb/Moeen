@@ -1,9 +1,4 @@
 ﻿@page "/owner/Students"
-@using Moeen.Shared.Requests.Enrollment
-@using Moeen.Shared.Responses.Enrollment
-@using Moeen.Dashboard.Infrastructure.Http.Clients
-@using System.Text.Json
-@inject EnrollmentApiClient ApiClient
 <style>
     /*AccountManagement style*/
     :root {
@@ -418,40 +413,44 @@
         </div>
        
     </div>
+
     <div class="table-responsive">
         <table class="data-table">
-            <thead><tr><th>الاسم</th><th>الجامع</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th>الجامع</th>
+                    <th>الفوج</th>
+                    <th>الحالة</th>
+                    <th class="text-center">الإجراءات</th>
+                </tr>
+            </thead>
             <tbody>
-                @if (students == null)
-                {
-                    <tr><td colspan="4">جاري التحميل...</td></tr>
-                }
-                else
-                {
-                    @foreach (var s in students)
-                    {
-                        <tr>
-                            <td>@s.Name</td>
-                            <td>@s.MosqueName</td>
-                            <td><span class="status-badge @(s.Status == 0 ? "active" : "inactive")">@(s.Status == 0 ? "نشط" : "غير نشط")</span></td>
-                            <td class="actions-cell">
-                                <button class="btn-icon delete" @onclick="() => DeleteStudent(s.Id)"><i class="bi bi-trash"></i></button>
-                            </td>
-                        </tr>
-                    }
-                }
+                <tr>
+                    <td>أحمد العلي</td>
+                    <td>جامع التوبة</td>
+                    <td>الفوج الأول</td>
+                    <td><span class="status-badge active">نشط</span></td>
+                    <td class="actions-cell">
+                        <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button>
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>محمد العلي</td>
+                    <td>جامع أبي حنيفة</td>
+                    <td>الفوج الثاني</td>
+                    <td><span class="status-badge inactive">غير نشط</span></td>
+                    <td class="actions-cell">
+                        <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button>
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
 </section>
 
 @code {
-    private List<MemberDto> students;
-    protected override async Task OnInitializedAsync() => await LoadStudents();
-    private async Task LoadStudents()
-    {
-        var res = await ApiClient.GetAllStudentsAsync(new GetAllStudentsRequest());
-        if (res.Success) students = JsonSerializer.Deserialize<List<MemberDto>>(res.Data.ToString(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-    }
-    private async Task DeleteStudent(Guid id) { await ApiClient.DeleteStudentAsync(id); await LoadStudents(); }
+
 }

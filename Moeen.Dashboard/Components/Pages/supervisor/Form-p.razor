@@ -1,11 +1,5 @@
 ﻿@page "/form-p"
-@page "/form-p/{Id:guid}"
-@using Moeen.Dashboard.Application.Services.Abstractions
-@using Moeen.Shared.Requests.Enrollment
-@using Moeen.Shared.Responses.Enrollment
-@inject IEnrollmentService EnrollmentService
 @inject NavigationManager mgr
-@rendermode InteractiveServer
 
 <style> 
     :root {
@@ -22,7 +16,10 @@
         --transition: all 0.3s ease;
     }
 
-    .form-container, .form-container * { box-sizing: border-box; }
+    .form-container, .form-container * {
+        box-sizing: border-box;
+    }
+
     .form-container {
         max-width: 850px;
         margin: 2rem auto;
@@ -34,35 +31,98 @@
         font-family: var(--font-main);
     }
 
-    .form-header { background: var(--primary-green); color: var(--white); padding: 1.2rem; text-align: center; }
+    .form-header {
+        background: var(--primary-green);
+        color: var(--white);
+        padding: 1.2rem;
+        text-align: center;
+    }
+
     form { padding: 2rem; }
-    .grid-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 1.2rem; }
+
+    .grid-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 1.5rem;
+        margin-bottom: 1.2rem;
+    }
+
     .input-group { display: flex; flex-direction: column; gap: 8px; }
     .input-group label { color: var(--text-dark); font-weight: 600; font-size: 0.85rem; text-align: right; }
+
     .input-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
     .input-wrapper i { position: absolute; right: 12px; color: var(--primary-green); z-index: 2; pointer-events: none; }
+
     .input-wrapper input {
-        width: 100%; padding: 10px 35px 10px 10px; border: 1px solid var(--accent-beige);
-        border-radius: 8px; background: var(--light-beige); font-size: 0.9rem; height: 45px; outline: none; transition: var(--transition);
+        width: 100%;
+        padding: 10px 35px 10px 10px;
+        border: 1px solid var(--accent-beige);
+        border-radius: 8px;
+        background: var(--light-beige);
+        font-size: 0.9rem;
+        height: 45px; 
+        outline: none;
+        transition: var(--transition);
     }
+
     .input-wrapper input:focus { border-color: var(--primary-green); background: #fff; }
 
-    .management-container { max-width: 850px; margin: 0 auto 2rem; padding: 0 20px; direction: rtl; font-family: var(--font-main); }
+    /* تنسيق الجدول الجديد والموحد */
+    .management-container {
+        max-width: 850px;
+        margin: 0 auto 2rem;
+        padding: 0 20px;
+        direction: rtl;
+        font-family: var(--font-main);
+    }
+
     .table-responsive { width: 100%; overflow-x: auto; }
-    .data-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
-    .data-table th { background-color: var(--light-beige); color: var(--primary-green); padding: 15px; text-align: right; }
-    .data-table tbody tr { background-color: var(--white); transition: 0.3s; }
-    .data-table tbody tr td { padding: 15px; border-top: 1px solid var(--border-gray); border-bottom: 1px solid var(--border-gray); }
+
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px; /* المسافة بين الصفوف */
+    }
+
+    .data-table th {
+        background-color: var(--light-beige);
+        color: var(--primary-green);
+        padding: 15px;
+        text-align: right;
+    }
+
+    .data-table tbody tr {
+        background-color: var(--white);
+        transition: 0.3s;
+    }
+
+    .data-table tbody tr td {
+        padding: 15px;
+        border-top: 1px solid var(--border-gray);
+        border-bottom: 1px solid var(--border-gray);
+    }
+
     .data-table tbody tr:hover { background-color: var(--bg-row-hover); }
 
+    /* أزرار الإجراءات */
     .actions-cell { text-align: center; }
-    .btn-icon.delete { background: none; border: none; color: var(--danger-red); font-size: 1.2rem; cursor: pointer; transition: 0.3s; }
+    
+    .btn-icon.delete {
+        background: none;
+        border: none;
+        color: var(--danger-red);
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+    }
     .btn-icon.delete:hover { transform: scale(1.2); }
 
+    /* زر الحفظ والإلغاء */
     .actions { display: flex; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #eee; }
     .actions button, .actions a {
         flex: 1; height: 48px; border-radius: 8px; text-decoration: none;
-        font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; cursor: pointer; transition: var(--transition);
+        font-weight: bold; display: flex; align-items: center; justify-content: center;
+        gap: 8px; border: none; cursor: pointer; transition: var(--transition);
     }
     .actions .save { background: var(--primary-green); color: white; }
     .actions .cancel { background: #f8f9fa; color: #dc3545; }
@@ -71,29 +131,32 @@
         display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         background-color: var(--primary-green); color: white; padding: 8px 20px;
         border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.9rem;
-        transition: var(--transition); border: none; margin: 1rem 0; width: fit-content; cursor: pointer;
+        transition: var(--transition); border: none; margin: 1rem 0; width: fit-content;
     }
     .btn-add-son:hover { background-color: var(--primary-green-dark); transform: translateY(-2px); }
+
+    @@media (max-width: 768px) { .grid-row { grid-template-columns: 1fr !important; } }
 </style>
-     <div class="form-container">
+
+<div class="form-container">
     <div class="form-header">
-        <h2><i class="bi bi-person-plus-fill"></i> @(Id == null ? "إضافة ولي أمر جديد" : "تعديل بيانات ولي الأمر")</h2>
+        <h2><i class="bi bi-person-plus-fill"></i> إضافة / تعديل بيانات</h2>
     </div>
 
-    <EditForm Model="parentModel" OnValidSubmit="SaveParent">
+    <form>
         <div class="grid-row">
             <div class="input-group">
                 <label>الاسم الكامل</label>
                 <div class="input-wrapper">
                     <i class="bi bi-person"></i>
-                    <input type="text" @bind="parentModel.Name" placeholder="أدخل الاسم">
+                    <input type="text" placeholder="أدخل الاسم">
                 </div>
             </div>
             <div class="input-group">
                 <label>رقم الهاتف</label>
                 <div class="input-wrapper">
                     <i class="bi bi-telephone"></i>
-                    <input type="tel" @bind="parentModel.Phone" placeholder="أدخل رقم الهاتف">
+                    <input type="tel">
                 </div>
             </div>
         </div>
@@ -103,14 +166,14 @@
                 <label>البريد الإلكتروني</label>
                 <div class="input-wrapper">
                     <i class="bi bi-envelope"></i>
-                    <input type="email" @bind="parentModel.Email" placeholder="example@mail.com">
+                    <input type="email">
                 </div>
             </div>
             <div class="input-group">
                 <label>كلمة المرور</label>
                 <div class="input-wrapper">
                     <i class="bi bi-lock"></i>
-                    <input type="password" @bind="parentModel.Password" placeholder="**">
+                    <input type="password">
                 </div>
             </div>
         </div>
@@ -119,88 +182,40 @@
             <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ البيانات</button>
             <a href="/parents" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
         </div>
-    </EditForm>
+    </form>
 </div>
 
-@if (Id != null)
-{
-    <section class="management-container">
-        <h3 style="color: var(--primary-green);">الأبناء المرتبطون</h3>
-        <div class="table-responsive">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>اسم الابن</th>
-                        <th class="text-center">الإجراء</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (sonsList.Any())
-                    {
-                        @foreach (var son in sonsList)
-                        {
-                            <tr>
-                                <td>@son.StudentName</td>
-                                <td class="actions-cell">
-                                    <button class="btn-icon delete" title="فك الارتباط" @onclick="() => RemoveSon(son.StudentId)"><i class="bi bi-trash"></i></button>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="2" class="text-center p-2">لا يوجد أبناء مرتبطون بعد</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+<section class="management-container">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>اسم الابن</th>
+                    <th class="text-center">الإجراء</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>عمر العلي</td>
+                    <td class="actions-cell">
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>أحمد العلي</td>
+                    <td class="actions-cell">
+                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-        <button type="button" class="btn-add-son" @onclick="AddSonLink">
-            <i class="bi bi-plus-lg"></i> ربط ابن جديد
-        </button>
-    </section>
-}
+    <a href="/owner/Form" class="btn-add-son">
+        <i class="bi bi-plus-lg"></i> إضافة ابن
+    </a>
+</section>
 
 @code {
-    [Parameter] public Guid? Id { get; set; }
-    // استخدمنا كائن ريكويست افتراضي لإرسال البيانات
-    private RegisterParentRequest parentModel = new RegisterParentRequest();
-    private List<ParentDto> sonsList = new List<ParentDto>();
-
-    protected override async Task OnInitializedAsync()
-    {
-        if (Id != null)
-        {
-            // في حالة التعديل، نجلب البيانات الحالية من الـ API
-            // مثال: var profile = await EnrollmentService.GetMemberProfileAsync(Id.Value);
-            // وتعبئة الـ parentModel بالبيانات الراجعة للـ Form
-        }
-    }
-    private async Task SaveParent()
-    {
-        // استدعاء ميثود الحفظ أو التحديث بالباك إند
-        var response = await EnrollmentService.RegisterStudentAsync(new RegisterStudentRequest()); // استبدليها بميثود الأهل الحقيقية
-        mgr.NavigateTo("/parents");
-    }
-
-    private void RemoveSon(Guid studentId)
-    {
-        sonsList.RemoveAll(x => x.StudentId == studentId);
-    }
-
-    private void AddSonLink()
-    {
-        // منطق فتح نافذة أو الانتقال لربط ابن جديد
-    }
-
-    // كائن محلي لتفادي الأخطاء أثناء التطوير والربط
-    public class RegisterParentRequest
-    {
-        public string Name { get; set; }
-        public string Phone { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
-    }
+    // منطق البرمجة هنا
 }
