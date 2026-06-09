@@ -31,23 +31,6 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
 
-        public async Task<GeneralResponse> GetStudentPointsBreakdownAsync(GetStudentPointsBreakdownRequest request)
-        {
-            var queryParts = new List<string>();
-
-            if (request.FromDate.HasValue)
-                queryParts.Add($"FromDate={HttpUtility.UrlEncode(request.FromDate.Value.ToString("O"))}");
-
-            if (request.ToDate.HasValue)
-                queryParts.Add($"ToDate={HttpUtility.UrlEncode(request.ToDate.Value.ToString("O"))}");
-
-            var queryString = queryParts.Count > 0 ? "?" + string.Join("&", queryParts) : string.Empty;
-            var url = ApiRoutes.GetStudentPointsBreakdownAsyncRoute(request.StudentId) + queryString;
-
-            var response = await _httpClient.GetAsync(url);
-            return await response.Content.ReadFromJsonAsync<GeneralResponse>();
-        }
-
         public async Task<GeneralResponse> GetPointsLeaderboardAsync(GetLeaderboardRequest request)
         {
             // بما أن الـ Controller بيستقبل البيانات من الـ Query (FromQuery)، بنجهز الرابط مع البارامترات

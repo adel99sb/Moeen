@@ -27,11 +27,6 @@ namespace Moeen.Dashboard.Services.Implementations
             return await _apiClient.GetStudentPointsAsync(studentId);
         }
 
-        public async Task<GeneralResponse> GetStudentPointsBreakdownAsync(GetStudentPointsBreakdownRequest request)
-        {
-            return await _apiClient.GetStudentPointsBreakdownAsync(request);
-        }
-
         public async Task<GeneralResponse> GetPointsLeaderboardAsync(GetLeaderboardRequest request)
         {
             return await _apiClient.GetPointsLeaderboardAsync(request);

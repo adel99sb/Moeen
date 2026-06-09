@@ -1,8 +1,4 @@
-﻿using System;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
-using Moeen.Shared.Requests.Mosuq;
+﻿using Moeen.Shared.Requests.Mosuq;
 using Moeen.Shared.Responses;
 
 namespace Moeen.Dashboard.Infrastructure.Http.Clients
@@ -26,14 +22,14 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
         public async Task<GeneralResponse> GetAllMosqusAsync(GetAllMosqusRequest request)
         {
             string quryString = $"?Page={request.Page}&PageSize={request.PageSize}";
-            var response = await _httpClient.GetAsync(ApiRoutes.GetAllMosqusAsyncRoute+quryString);
+            var response = await _httpClient.GetAsync(ApiRoutes.GetAllMosqusAsyncRoute + quryString);
             return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
 
         public async Task<GeneralResponse> GetMosqueByIdAsync(Guid mosqueId)
         {
             string quryString = $"?mosqueId={mosqueId}";
-            var response = await _httpClient.GetAsync(ApiRoutes.GetMosqueByIdAsyncRoute+quryString);
+            var response = await _httpClient.GetAsync(ApiRoutes.GetMosqueByIdAsyncRoute + quryString);
             var res = await response.Content.ReadFromJsonAsync<GeneralResponse>();
             return res;
         }
@@ -70,9 +66,9 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
 
         public async Task<GeneralResponse> DeleteMosqueAsync(DeleteMosqueRequest request)
         {
-           var quryString = $"?MosqueId={request.MosqueId}";
+            var quryString = $"?MosqueId={request.MosqueId}";
 
-            var response = await _httpClient.DeleteAsync(ApiRoutes.DeleteMosqueAsyncRoute+quryString);
+            var response = await _httpClient.DeleteAsync(ApiRoutes.DeleteMosqueAsyncRoute + quryString);
             return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
 

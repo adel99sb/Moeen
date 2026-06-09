@@ -1,8 +1,15 @@
 ﻿@page "/Mend-m"
+@page "/Mend-m/{Id:guid?}"
+@using Moeen.Dashboard.Services.Abstractions
+@using Moeen.Shared.Requests.Mosuq
+
+@inject IMosquService MosquService
+@rendermode InteractiveServer
 @inject NavigationManager mgr
 
 
-   <style>
+
+<style>
     :root {
         --primary-green: #1a4d3e;
         --bg-light: #f8f5f0;
@@ -50,15 +57,15 @@
         align-items: flex-start; /* محاذاة الليبل لليمين */
     }
 
-    .input-group label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 10px;
-        color: var(--text-color);
-        font-size: 0.95rem;
-        width: 100%;
-        text-align: right;
-    }
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            width: 100%;
+            text-align: right;
+        }
 
     .input-wrapper {
         position: relative;
@@ -66,26 +73,26 @@
         width: 100%;
     }
 
-    .input-wrapper input, 
-    .input-wrapper textarea {
-        width: 100%;
-        padding: 15px 45px 15px 15px;
-        background-color: var(--bg-light);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        outline: none;
-        font-size: 14px;
-        font-family: inherit;
-        text-align: right;
-    }
+        .input-wrapper input,
+        .input-wrapper textarea {
+            width: 100%;
+            padding: 15px 45px 15px 15px;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            outline: none;
+            font-size: 14px;
+            font-family: inherit;
+            text-align: right;
+        }
 
-    .input-wrapper i {
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--icon-color);
-    }
+        .input-wrapper i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--icon-color);
+        }
 
     /* تعديل مكان أيقونة الوصف */
     .input-group.full-width i {
@@ -127,72 +134,165 @@
     }
 
     @@media (max-width: 768px) {
-        .input-grid { grid-template-columns: 1fr; }
-        .full-width { grid-column: span 1; }
+        .input-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .full-width {
+            grid-column: span 1;
+        }
     }
 </style>
 
+<EditForm Model="Model" FormName="f1">
+    <DataAnnotationsValidator />
+    <div class="form-container">
+        <div class="form-header"></div>
+        <div class="form-body">
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>اسم الجامع</label>
+                    <div class="input-wrapper">
+                        <InputText @bind-Value="Model.name" placeholder="أدخل الاسم" />
+                        <ValidationMessage For="@(() => Model.name)" />
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
 
-<div class="form-container">
-    <div class="form-header"></div>
-    <div class="form-body">
-        <div class="input-grid">
-            <div class="input-group">
-                <label>اسم الجامع</label>
-                <div class="input-wrapper">
-                    <input type="text" placeholder="أدخل الاسم">
-                    <i class="fas fa-user"></i>
+                <div class="input-group">
+                    <label>رقم الهاتف</label>
+                    <div class="input-wrapper">
+                        <InputText @bind-Value="Model.contact_phone" type="tel" placeholder="09xxxxxxxx" />
+                        <ValidationMessage For="@(() => Model.contact_phone)" />
+                        <i class="fas fa-phone"></i>
+                    </div>
+                </div>
+
+                <div class="input-group full-width">
+                    <label>العنوان</label>
+                    <div class="input-wrapper">
+                        <InputText @bind-Value="Model.address" placeholder="أدخل العنوان بالتفصيل" />
+                        <ValidationMessage For="@(() => Model.address)" />
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                </div>
+
+                <div class="input-group full-width">
+                    <label>الوصف</label>
+                    <div class="input-wrapper">
+                        <InputText @bind-Value="Model.Description" placeholder="اكتب وصفاً تفصيلياً هنا..." />
+                        <ValidationMessage For="@(() => Model.Description)" />
+                        <i class="fas fa-align-right"></i>
+                    </div>
                 </div>
             </div>
 
-            <div class="input-group">
-                <label>رقم الهاتف</label>
-                <div class="input-wrapper">
-                    <input type="tel" placeholder="09xxxxxxxx">
-                    <i class="fas fa-phone"></i>
-                </div>
+            <div class="form-footer">
+                <button class="btn-save" @onclick="moveTopage">
+                    <span>إضافة مشرف</span>
+                </button>
+                <button class="btn-save" @onclick="HandleSaveMosqe">
+                    <span>@(IsEditMode ? "تحديث البيانات" : "حفظ البيانات")</span>
+                    <i class="fas fa-check-double"></i>
+                </button>
+                <button class="btn-cancel" @onclick="Cancel">
+                    <span>إلغاء</span>
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-
-            <div class="input-group full-width">
-                <label>العنوان</label>
-                <div class="input-wrapper">
-                    <input type="text" placeholder="أدخل العنوان بالتفصيل">
-                    <i class="fas fa-map-marker-alt"></i>
-                </div>
-            </div>
-
-            <div class="input-group full-width">
-                <label>الوصف</label>
-                <div class="input-wrapper">
-                    <textarea placeholder="اكتب وصفاً تفصيلياً هنا..." rows="4"></textarea>
-                    <i class="fas fa-align-right"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-footer">
-             <button class="btn-save" @onclick="moveTopage">
-                <span>إضافة مشرف</span>
-            </button>
-            <button class="btn-save">
-                <span>حفظ البيانات</span>
-                <i class="fas fa-check-double"></i>
-            </button>
-            <button class="btn-cancel">
-                <span>إلغاء</span>
-                <i class="fas fa-times"></i>
-            </button>
         </div>
     </div>
-</div>
+</EditForm>
+<!-- Error Message -->
+@if (ShowMessage)
+{
+    if (Succees)
+    {
+        <div class="alert alert-success">
+            @Message
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            @Message
+        </div>
+    }
+}
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 @code {
-     private void moveTopage()
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsEditMode && Id.HasValue)
+        {
+            var res = await MosquService.GetMosqueByIdAsync(Id.Value);
+
+            Model = new AddMosquReq
+            {
+                name = res.name,
+                address = res.address,
+                contact_phone = res.contactPhone,
+                Description = res.Description
+            };
+        }
+    }
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    private bool IsEditMode => Id.HasValue;
+
+    private AddMosquReq Model = new();
+
+    private bool ShowMessage;
+    private bool Succees = false;
+    private string Message;
+
+    private void moveTopage()
     {
         mgr.NavigateTo("/owner/Form");
     }
+    private async Task HandleSaveMosqe()
+    {
+        ShowMessage = true;
 
+        try
+        {
+            if (IsEditMode)
+            {
+                var req = new UpdateMosqueInfoRequest
+                {
+                    MosqueId = Id.Value,
+                    Name = Model.name,
+                    Address = Model.address,
+                    ContactPhone = Model.contact_phone,
+                    Description = Model.Description
+                };
+
+                var res = await MosquService.UpdateMosqueInfoAsync(req);
+
+                Message = res.Message;
+                Succees = res.Success;
+            }
+            else
+            {
+                var res = await MosquService.AddMosqu(Model);
+
+                Message = res.Message;
+                Succees = res.Success;
+            }
+        }
+        catch (Exception ex)
+        {
+            Succees = false;
+            Message = ex.Message;
+        }
+
+    }
+    private void Cancel()
+    {
+        mgr.NavigateTo("/management/mosques-management");
+    }
 }
-  
