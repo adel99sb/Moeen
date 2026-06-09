@@ -1,4 +1,5 @@
-﻿using Moeen.Shared.Requests.Mosuq;
+﻿using Moeen.Shared.Requests.Identity;
+using Moeen.Shared.Requests.Mosuq;
 using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.Mosuq;
 namespace Moeen.Dashboard.Services.Abstractions
@@ -12,7 +13,7 @@ namespace Moeen.Dashboard.Services.Abstractions
         Task<GeneralResponse> GetTeachersByMosqueAsync(GetTeachersByMosqueRequest request);
         Task<GeneralResponse> GetMosqueStatisticsAsync(GetMosqueStatisticsRequest request);
         Task<GeneralResponse> UpdateMosqueInfoAsync(UpdateMosqueInfoRequest request);
-        Task<GeneralResponse> AssignMosqueAdminAsync(AssignMosqueAdminRequest request);
+        Task<GeneralResponse> AssignMosqueAdminAsync(AssignMosqueAdminRequest request, RegisterRequest register);
         Task<GeneralResponse> DeleteMosqueAsync(DeleteMosqueRequest request);
         Task<GeneralResponse> UnassignMosqueAdminAsync(UnassignMosqueAdminRequest request);
     }

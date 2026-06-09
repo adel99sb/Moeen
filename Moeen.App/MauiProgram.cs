@@ -1,4 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
+using Moeen.App.Infrastructure.Http;
+using Moeen.App.Infrastructure.Http.Clients;
+using Moeen.App.Services.Abstractions;
+using Moeen.App.Services.Implementations;
 
 namespace Moeen.App
 {
@@ -15,9 +19,17 @@ namespace Moeen.App
                 });
 
             builder.Services.AddMauiBlazorWebView();
+            builder.Services.AddHttpClient();
+            builder.Services.AddHttpClient<ContentShaeringApiClient>(client =>
+            {
+                client.BaseAddress = new Uri(ApiRoutes.BaseUrl);
+            });
+
+            builder.Services.AddScoped<IContentShaeringService,
+                ContentShaeringService>();
 
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
+            builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
 

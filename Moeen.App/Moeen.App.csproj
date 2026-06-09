@@ -60,6 +60,7 @@
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFiles="Resources\AppIcon\appiconfg.svg" Color="#195042" ForegroundScale="0.5" />
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.16" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.100" />
@@ -70,5 +71,11 @@
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
 	  </None>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Infrastructure\Http\Handlers\" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Moeen.Shared\Moeen.Shared.csproj" />
 	</ItemGroup>
 </Project> 

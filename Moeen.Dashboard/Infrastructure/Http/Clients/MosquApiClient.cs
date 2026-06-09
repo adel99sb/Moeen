@@ -58,11 +58,12 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
 
-        public async Task<GeneralResponse> AssignMosqueAdminAsync(AssignMosqueAdminRequest request)
+        public async Task<GeneralResponse> MosquAssignAdmin(AssignMosqueAdminRequest request)
         {
-            var response = await _httpClient.PutAsJsonAsync(ApiRoutes.AssignMosqueAdminAsyncRoute, request);
+            var response = await _httpClient.PutAsJsonAsync(ApiRoutes.MosquAssignAdmin, request);
             return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
+
 
         public async Task<GeneralResponse> DeleteMosqueAsync(DeleteMosqueRequest request)
         {

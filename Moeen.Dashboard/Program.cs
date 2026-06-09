@@ -34,7 +34,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpClient<PostApiClient>(client =>
 {
     // هنا بنخليه ياخذ نفس الرابط الأساسي المتخزن بملف الإعدادات عندكِ
-    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7220/");
+    client.BaseAddress = new Uri(ApiRoutes.BaseUrl);
 });
 builder.Services.AddScoped<IPostService, PostService>();
 //خدمة الاختبارات

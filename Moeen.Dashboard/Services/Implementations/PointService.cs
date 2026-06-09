@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Moeen.Dashboard.Infrastructure.Http.Clients;
+﻿using Moeen.Dashboard.Infrastructure.Http.Clients;
 using Moeen.Dashboard.Services.Abstractions;
 using Moeen.Shared.Requests.Points;
 using Moeen.Shared.Responses;
