@@ -370,3 +370,4 @@ FodyWeavers.xsd
 /.gitignore
 /Moeen.Dashboard/appsettings.json
 /Moeen.Api/Properties/launchSettings.json
+/Moeen.Api/appsettings.json
