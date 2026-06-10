@@ -1,5 +1,8 @@
-﻿@page "/settings"
-@inject NavigationManager NavManager
+@page "/settings"
+@using Moeen.Frontend.Services.Abstractions
+@using Moeen.Shared.Requests.Feedback
+@using Moeen.Shared.Requests
+@inject IFeedbackService FeedbackService
 @rendermode InteractiveServer
     <style>
          :root {
@@ -176,6 +179,7 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
     <!-- كارد الشكاوي -->
     <div>
         <h3>الشكاوي </h3>
+        <button class="btn-pprimary" @onclick="LoadComplaintsAsync">عرض الشكاوي</button>
            <table class="table">
             <thead>
                 <tr>
@@ -184,29 +188,57 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>بطء في التحميل</td>
-
-                 <td class="actions-cell">
-                        <button class="btn-icon edit" title="تم الحل"><i class="bi bi-check2-all"></i></button>
-                        <button class="btn-icon edit" title="قيد الحل"><i class="bi bi-arrow-down-up"></i></button>
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>وجود مشاكل في تسجيل الدخول</td>
-                  <td class="actions-cell">
-                        <button class="btn-icon edit" title="تم الحل"><i class="bi bi-check2-all"></i></button>
-                        <button class="btn-icon edit" title="قيد الحل"><i class="bi bi-arrow-down-up"></i></button>
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
+                @if (complaints.Count == 0)
+                {
+                    <tr>
+                        <td colspan="2">لا توجد شكاوى</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var complaint in complaints)
+                    {
+                        <tr>
+                            <td>@complaint.Content</td>
+                            <td class="actions-cell">غير متاح</td>
+                        </tr>
+                    }
+                }
 			</tbody>
             </table>
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <p>@errorMessage</p>
+            }
     </div>
 </div>
     </div>
 
 @code {
+    private List<ComplaintDto> complaints = new();
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadComplaintsAsync();
+    }
+
+    private async Task LoadComplaintsAsync()
+    {
+        try
+        {
+            errorMessage = null;
+            complaints = await FeedbackService.GetComplaintsAsync(new PaginationRequest
+            {
+                Page = 1,
+                PageSize = 10
+            });
+        }
+        catch (Exception ex)
+        {
+            complaints = new();
+            errorMessage = ex.Message;
+        }
+    }
 
 }

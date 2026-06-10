@@ -188,9 +188,13 @@
             </div>
 
             <div class="form-footer">
+                @if (!IsEditMode)
+                {
                 <button class="btn-save" @onclick="moveTopage">
                     <span>إضافة مشرف</span>
                 </button>
+                    
+                }
                 <button class="btn-save" @onclick="HandleSaveMosqe">
                     <span>@(IsEditMode ? "تحديث البيانات" : "حفظ البيانات")</span>
                     <i class="fas fa-check-double"></i>

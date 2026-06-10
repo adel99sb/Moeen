@@ -1,11 +1,14 @@
-﻿using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Moeen.Dashboard.Infrastructure.Http.Clients;
 using Moeen.Frontend.Services.Abstractions;
 using Moeen.Shared.Requests;
 using Moeen.Shared.Requests.Feedback;
 using Moeen.Shared.Responses;
-namespace Moeen.Dashboard.Services.Implementations
 
+namespace Moeen.Dashboard.Services.Implementations
 {
     public class FeedbackService : IFeedbackService
     {
@@ -41,9 +44,21 @@ namespace Moeen.Dashboard.Services.Implementations
             return await _apiClient.UpdateSuggestionStatusAsync(request);
         }
 
-        public async Task<GeneralResponse> GetComplaintsAsync(PaginationRequest request)
+        public async Task<List<ComplaintDto>> GetComplaintsAsync(PaginationRequest request)
         {
-            return await _apiClient.GetComplaintsAsync(request);
+            var res = await _apiClient.GetComplaintsAsync(request);
+            if (res == null || !res.Success)
+                throw new Exception(res?.Message ?? "Unknown error");
+
+            var json = JsonSerializer.Serialize(res.Data);
+            var data = JsonSerializer.Deserialize<List<ComplaintDto>>(
+                json,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            return data ?? new List<ComplaintDto>();
         }
 
         public async Task<GeneralResponse> GetSuggestionsAsync(PaginationRequest request)

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Moeen.Shared.Requests;
 using Moeen.Shared.Requests.Feedback;
 using Moeen.Shared.Responses;
@@ -12,7 +13,7 @@ namespace Moeen.Frontend.Services.Abstractions
         Task<GeneralResponse> ManageFeedbackAsync(ManageFeedbackRequest request);
         Task<GeneralResponse> UpdateComplaintStatusAsync(UpdateComplaintStatusRequest request);
         Task<GeneralResponse> UpdateSuggestionStatusAsync(UpdateSuggestionStatusRequest request);
-        Task<GeneralResponse> GetComplaintsAsync(PaginationRequest request);
+        Task<List<ComplaintDto>> GetComplaintsAsync(PaginationRequest request);
         Task<GeneralResponse> GetSuggestionsAsync(PaginationRequest request);
     }
 }

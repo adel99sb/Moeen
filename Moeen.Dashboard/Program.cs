@@ -53,7 +53,10 @@ builder.Services.AddScoped<IExamPhaseService, ExamPhaseService>();
 builder.Services.AddScoped<ExamQueryApiClient>();
 builder.Services.AddScoped<IExamQueryService, ExamQueryService>();
 //حقن ادارة الشكاوي والافتراحات feedback
-builder.Services.AddScoped<FeedbackApiClient>();
+builder.Services.AddHttpClient<FeedbackApiClient>(client =>
+{
+    client.BaseAddress = new Uri(ApiRoutes.BaseUrl);
+});
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 //goal trackingخدمة المتابعة اليومية
 builder.Services.AddScoped<GoalApiClient>();
