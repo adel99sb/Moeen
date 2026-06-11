@@ -78,6 +78,7 @@ builder.Services.AddScoped<IFileService, FileService>();
 // Application Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMosqueService, MosqueService>();
+builder.Services.AddScoped<IParentStudentService, ParentStudentService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
