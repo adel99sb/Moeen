@@ -1,4 +1,7 @@
 ﻿@page "/Guest/Book"
+@using Moeen.App.Services.Abstractions
+@using Moeen.Shared.Responses.Library
+@inject ILibraryService LibraryService
 
 <style>
 
@@ -231,104 +234,49 @@
 
     <!-- شبكة الكتب -->
     <div class="container">
-        <div class="row g-4">
-
-            <!-- الكتاب الأول -->
-            <div class="col-lg-6">
-                <div class="book-card">
-                    <div class="book-cover">
-                        <i class="bi bi-book book-icon"></i>
-                    </div>
-                    <div class="book-content">
-                        <h3 class="book-title">رياض الصالحين</h3>
-                        <p class="book-desc">كتاب شامل في الآداب والأخلاق الإسلامية، يحتوي على أحاديث نبوية شريفة مختارة تغطي مختلف أبواب الدين والدنيا.</p>
-                        <div class="book-footer">
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span class="book-meta"><i class="bi bi-file-text me-2"></i>450 صفحة</span>
-                                <span class="book-date"><i class="bi bi-calendar3 me-1"></i>نشر: 2023</span>
+        @if (books is null)
+        {
+            <p><em>...جاري التحميل</em></p>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var book in books)
+                {
+                    <div class="col-lg-6">
+                        <div class="book-card">
+                            <div class="book-cover">
+                                <i class="bi bi-book book-icon"></i>
                             </div>
-                            <button class="btn-download" title="تحميل الكتاب">
-                                <i class="bi bi-download"></i> تحميل
-                            </button>
+                            <div class="book-content">
+                                <h3 class="book-title">@book.Title</h3>
+                                <p class="book-desc">@book.Description</p>
+                                <div class="book-footer">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <span class="book-meta"><i class="bi bi-file-text me-2"></i>@book.Title صفحة</span>
+                                        <span class="book-date"><i class="bi bi-calendar3 me-1"></i>نشر: @book.PublicationYear</span>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(book.CoverImageUrl))
+                                    {
+                                        <a href="@book." class="btn-download" title="تحميل الكتاب" target="_blank">
+                                            <i class="bi bi-download"></i> تحميل
+                                        </a>
+                                    }
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                }
             </div>
-
-            <!-- الكتاب الثاني -->
-            <div class="col-lg-6">
-                <div class="book-card">
-                    <div class="book-cover">
-                        <i class="bi bi-journal-text book-icon"></i>
-                    </div>
-                    <div class="book-content">
-                        <h3 class="book-title">قصص الأنبياء</h3>
-                        <p class="book-desc">سرد قصص الأنبياء والرسل عليهم السلام بأسلوب شيق ومبسط، مستمد مباشرة من القرآن الكريم والسنة النبوية الشريفة.</p>
-                        <div class="book-footer">
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span class="book-meta"><i class="bi bi-file-text me-2"></i>380 صفحة</span>
-                                <span class="book-date"><i class="bi bi-calendar3 me-1"></i>نشر: 2022</span>
-                            </div>
-                            <button class="btn-download" title="تحميل الكتاب">
-                                <i class="bi bi-download"></i> تحميل
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- الكتاب الثالث -->
-            <div class="col-lg-6">
-                <div class="book-card">
-                    <div class="book-cover">
-                        <i class="bi bi-journal-text book-icon"></i>
-                    </div>
-                    <div class="book-content">
-                        <h3 class="book-title">العقيدة الإسلامية</h3>
-                        <p class="book-desc">شرح مبسط وواضح لعقيدة أهل السنة والجماعة، يتناول أصول الإيمان وأركانه الستة بطريقة منهجية سهلة الفهم.</p>
-                        <div class="book-footer">
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span class="book-meta"><i class="bi bi-file-text me-2"></i>320 صفحة</span>
-                                <span class="book-date"><i class="bi bi-calendar3 me-1"></i>نشر: 2023</span>
-                            </div>
-                            <button class="btn-download" title="تحميل الكتاب">
-                                <i class="bi bi-download"></i> تحميل
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- الكتاب الرابع -->
-            <div class="col-lg-6">
-                <div class="book-card">
-                    <div class="book-cover">
-                        <i class="bi bi-book-half book-icon"></i>
-                    </div>
-                    <div class="book-content">
-                        <h3 class="book-title">الأربعون النووية</h3>
-                        <p class="book-desc">مجموعة جامعة من الأحاديث النبوية الأساسية التي تضم أصول الدين وقواعده، مقدمة مع شروح موجزة وافية.</p>
-                        <div class="book-footer">
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span class="book-meta"><i class="bi bi-file-text me-2"></i>180 صفحة</span>
-                                <span class="book-date"><i class="bi bi-calendar3 me-1"></i>نشر: 2021</span>
-                            </div>
-                            <button class="btn-download" title="تحميل الكتاب">
-                                <i class="bi bi-download"></i> تحميل
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+        }
     </div>
 </div>
 
 @code {
+    private List<BookResponseDto>? books;
 
-}
-
-@code {
-
+    protected override async Task OnInitializedAsync()
+    {
+        books = await LibraryService.GetAllBooksAsync();
+    }
 }

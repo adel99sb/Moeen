@@ -1,4 +1,12 @@
 ﻿@page "/Student/Profile"
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.JSInterop
+@using Moeen.App.Services.Abstractions
+@using Moeen.Shared.Responses.Identity
+
 
 <style>
     :root {
@@ -281,59 +289,41 @@
                 <div class="profile-card">
                     <h2 class="profile-title"><i class="bi bi-person-circle ms-2"></i> البيانات الشخصية</h2>
                     <div class="info-grid">
-                        <div class="data-item">
-                            <i class="bi bi-person data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">اسم الطالب</span>
-                                <span class="data-value">احمد محمد العبدالله</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-calendar data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">العمر</span>
-                                <span class="data-value">14</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-people data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">اسم الفوج</span>
-                                <span class="data-value">فوج الصباحي</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-book data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">الحلقة / المستوى</span>
-                                <span class="data-value">حلقة المتوسطين</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-shield-check data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">ولي الأمر</span>
-                                <span class="data-value">خالد العلي</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-telephone data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">رقم التواصل</span>
-                                <span class="data-value">+966 55 123 4567</span>
-                            </div>
-                        </div>
-                        <div class="data-item full-width">
-                            <i class="bi bi-trophy data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">الإنجازات والحفظ</span>
-                                <div class="data-value">
-                                    - حفظ 5 أجزاء كاملة
-                                    - المركز الثاني في مسابقة التلاوة المحلية
-                                    - الالتزام الكامل بالحضور منذ بداية العام
+                        @if (user != null)
+                        {
+                            <div class="data-item">
+                                <i class="bi bi-person data-icon"></i>
+                                <div class="data-content">
+                                    <span class="data-label">اسم المستخدم</span>
+                                    <span class="data-value">@user.Name</span>
                                 </div>
                             </div>
-                        </div>
+                            <div class="data-item">
+                                <i class="bi bi-calendar data-icon"></i>
+                                <div class="data-content">
+                                    <span class="data-label">انضم منذ</span>
+                                    <span class="data-value">@user.JoinedAt.ToShortDateString()</span>
+                                </div>
+                            </div>
+                            <div class="data-item">
+                                <i class="bi bi-people data-icon"></i>
+                                <div class="data-content">
+                                    <span class="data-label">البريد الإلكتروني</span>
+                                    <span class="data-value">@user.Email</span>
+                                </div>
+                            </div>
+                            <div class="data-item">
+                                <i class="bi bi-telephone data-icon"></i>
+                                <div class="data-content">
+                                    <span class="data-label">الهاتف</span>
+                                    <span class="data-value">@user.Phone</span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-12">لم يتم تحديد معرف المستخدم في الـ query string.</div>
+                        }
                     </div>
                 </div>
 
@@ -374,4 +364,27 @@
 </div>
 
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "userId")]
+    public Guid? userId { get; set; }
+
+    [Inject]
+    public IUserService UserService { get; set; }
+
+    private Moeen.Shared.Responses.Identity.UserDto? user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (userId.HasValue)
+        {
+            try
+            {
+                user = await UserService.GetUserByIdAsync(userId.Value);
+            }
+            catch
+            {
+                user = null;
+            }
+        }
+    }
 }

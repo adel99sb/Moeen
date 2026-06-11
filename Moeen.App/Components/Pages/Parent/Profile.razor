@@ -1,4 +1,9 @@
 ﻿@page "/Parent/Profile"
+@using Moeen.App.Services.Abstractions
+@using Moeen.Shared.Responses.Enrollment
+@using Moeen.Shared.Requests.Feedback
+@inject IEnrollmentService EnrollmentService
+@inject IFeedbackService FeedbackService
 
 <style>
     :root {
@@ -212,99 +217,138 @@
     </header>
 
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-12">
-                <!-- بطاقة بيانات ولي الأمر -->
-                <div class="profile-card">
-                    <h2 class="profile-title"><i class="bi bi-person-badge ms-2"></i> بيانات ولي الأمر</h2>
-                    <div class="info-grid">
-                        <div class="data-item">
-                            <i class="bi bi-person data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">الاسم الكامل</span>
-                                <span class="data-value">محمد العبدالله</span>
+        @if (parentProfile is null)
+        {
+            <p><em>...جاري تحميل الملف الشخصي</em></p>
+        }
+        else
+        {
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-12">
+                    <!-- بطاقة بيانات ولي الأمر -->
+                    <div class="profile-card">
+                        <h2 class="profile-title"><i class="bi bi-person-badge ms-2"></i> بيانات ولي الأمر</h2>
+                        <div class="info-grid">
+                            <div class="data-item">
+                                <i class="bi bi-person data-icon"></i>
+                                <div class="data-content">
+                                    <span class="data-label">الاسم الكامل</span>
+                                    <span class="data-value">@parentProfile.Name</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-phone data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">رقم الجوال</span>
-                                <span class="data-value">+966 55 123 4567</span>
+                            <div class="data-item">
+                                <i class="bi bi-phone data-icon"></i>
+                                <div class="data-content">
+                                    <span class="data-label">رقم الجوال</span>
+                                    <span class="data-value">@parentProfile.Phone</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-envelope data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">البريد الإلكتروني</span>
-                                <span class="data-value">khaled@example.com</span>
+                            <div class="data-item">
+                                <i class="bi bi-envelope data-icon"></i>
+                                <div class="data-content">
+                                    <span class="data-label">البريد الإلكتروني</span>
+                                    <span class="data-value">@parentProfile.Email</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-geo-alt data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">العنوان</span>
-                                <span class="data-value">الرياض، حي النرجس</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- بطاقة الأبناء المسجلين -->
-                <div class="profile-card">
-                    <h2 class="profile-title"><i class="bi bi-people ms-2"></i> معلومات تخص الابن</h2>
-                    <div class="info-grid">
-                        <div class="data-item">
-                            <i class="bi bi-person-check data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">اسم الابن/الابنة</span>
-                                <span class="data-value"> احمد محمد العبدالله</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-bookmark data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">المرحلة / الحلقة</span>
-                                <span class="data-value">حلقة المتوسطين</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-person-badge ms-2"></i>
-                            <div class="data-content">
-                                <span class="data-label">اسم المعلم</span>
-                                <span class="data-value">محمد الاحمد</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-phone data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">رقم التواصل</span>
-                                <span class="data-value">+966 55 123 4567</span>
+                            <div class="data-item">
+                                <i class="bi bi-geo-alt data-icon"></i>
+                                <div class="data-content">
+                                    <span class="data-label">العنوان</span>
+                                    <span class="data-value">@parentProfile.Email</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- بطاقة التواصل والاستفسار -->
-                <div class="profile-card">
-                    <h2 class="profile-title"><i class="bi bi-chat-dots ms-2"></i> تواصل مع الإدارة</h2>
-                    <form>
-                        <div class="form-group">
-                            <label class="form-label" for="feedback"><i class="bi bi-pencil-square ms-1"></i> ملاحظة أو استفسار</label>
-                            <textarea id="feedback" class="form-control-custom" style="resize: none;" placeholder="اكتب استفسارك أو ملاحظتك بخصوص الأبناء أو الخدمات التعليمية..."></textarea>
+                    <!-- بطاقة الأبناء المسجلين -->
+                    @if (selectedChild is not null)
+                    {
+                        <div class="profile-card">
+                            <h2 class="profile-title"><i class="bi bi-people ms-2"></i> معلومات تخص الابن</h2>
+                            <div class="info-grid">
+                                <div class="data-item">
+                                    <i class="bi bi-person-check data-icon"></i>
+                                    <div class="data-content">
+                                        <span class="data-label">اسم الابن/الابنة</span>
+                                        <span class="data-value">@selectedChild.Name</span>
+                                    </div>
+                                </div>
+                                <div class="data-item">
+                                    <i class="bi bi-bookmark data-icon"></i>
+                                    <div class="data-content">
+                                        <span class="data-label">المرحلة / الحلقة</span>
+                                        <span class="data-value">@selectedChild.SaturdayHalqeName</span>
+                                    </div>
+                                </div>
+                                <div class="data-item">
+                                    <i class="bi bi-person-badge ms-2"></i>
+                                    <div class="data-content">
+                                        <span class="data-label">اسم المعلم</span>
+                                        <span class="data-value">@selectedChild.MosqueName</span>
+                                    </div>
+                                </div>
+                                <div class="data-item">
+                                    <i class="bi bi-phone data-icon"></i>
+                                    <div class="data-content">
+                                        <span class="data-label">رقم التواصل</span>
+                                        <span class="data-value">@selectedChild.Phone</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary"><i class="bi bi-send-fill"></i> إرسال</button>
-                        </div>
-                    </form>
+                    }
+
+                    <!-- بطاقة التواصل والاستفسار -->
+                    <div class="profile-card">
+                        <h2 class="profile-title"><i class="bi bi-chat-dots ms-2"></i> تواصل مع الإدارة</h2>
+                        <EditForm Model="@feedbackRequest.ComplaintData" OnValidSubmit="HandleSubmit">
+                            <DataAnnotationsValidator />
+                            <div class="form-group">
+                                <label class="form-label" for="feedback"><i class="bi bi-pencil-square ms-1"></i> ملاحظة أو استفسار</label>
+                                <InputTextArea @bind-Value="feedbackRequest.ComplaintData.Content" id="feedback" class="form-control-custom" style="resize: none;" placeholder="اكتب استفسارك أو ملاحظتك بخصوص الأبناء أو الخدمات التعليمية..."></InputTextArea>
+                                <ValidationMessage For="() => feedbackRequest.ComplaintData.Content" />
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary" disabled="@isSubmitting"><i class="bi bi-send-fill"></i> @(isSubmitting ? "جاري الإرسال..." : "إرسال")</button>
+                            </div>
+                        </EditForm>
+                    </div>
                 </div>
             </div>
-        </div>
+        }
     </div>
 </div>
 
 @code {
+    private MemberProfileDto? parentProfile;
+    private List<StudentDto>? children;
+    private StudentDto? selectedChild;
+    private SubmitComplaintRequest feedbackRequest = new();
+    private bool isSubmitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // TODO: Replace with the actual logged-in user's ID
+        var parentId = "11111111-1111-1111-1111-111111111111";
+        parentProfile = await EnrollmentService.GetMemberProfileAsync(parentId);
+        if (parentProfile is not null)
+        {
+            children = await EnrollmentService.GetChildrenByParentAsync(parentProfile.Id);
+            selectedChild = children?.FirstOrDefault(); // Select the first child by default
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        isSubmitting = true;
+        if (parentProfile is not null)
+        {
+            feedbackRequest.ComplaintData.UserId = parentProfile.Id;
+            await FeedbackService.SubmitComplaintAsync(feedbackRequest);
+            feedbackRequest = new(); // Reset form
+        }
+        isSubmitting = false;
+        // TODO: Show a success message to the user
+    }
 }
 
-@code {
-
-}

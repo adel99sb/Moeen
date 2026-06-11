@@ -1,4 +1,5 @@
 ﻿@page "/Student/StudentDashboard"
+@using Moeen.App.Services.Abstractions
 <style>
     :root {
         --theme-primary: #195042;
@@ -172,10 +173,10 @@
             <div class="row g-3">
                 <div class="col-6 col-md-3">
                     <div class="stat-box text-center h-100">
-                        <div class="icon-wrapper mb-2 mx-auto"><i class="bi bi-trophy-fill"></i></div>
-                        <div class="small text-muted mb-1">مجموع النقاط</div>
-                        <div class="stat-value">2,450</div>
-                    </div>
+                            <div class="icon-wrapper mb-2 mx-auto"><i class="bi bi-trophy-fill"></i></div>
+                            <div class="small text-muted mb-1">مجموع النقاط</div>
+                            <div class="stat-value">@points</div>
+                        </div>
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="stat-box text-center h-100">
@@ -187,8 +188,8 @@
                 <div class="col-6 col-md-3">
                     <div class="stat-box text-center h-100">
                         <div class="icon-wrapper mb-2 mx-auto"><i class="bi bi-arrow-counterclockwise"></i></div>
-                        <div class="small text-muted mb-1">المراجعات المنجزة</div>
-                        <div class="stat-value">12 جزء</div>
+                        <div class="small text-muted mb-1">نسبة الحضور</div>
+                        <div class="stat-value">@attendanceRatePercent%</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
@@ -327,5 +328,41 @@
 </div>
 
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "studentId")]
+    public Guid? studentId { get; set; }
 
+    [Inject]
+    public IPointsService PointsService { get; set; }
+
+    [Inject]
+    public IAttendanceService AttendanceService { get; set; }
+
+    private int points = 0;
+    private double attendanceRate = 0;
+    private int attendanceRatePercent => (int)Math.Round(attendanceRate * 100);
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (studentId.HasValue)
+        {
+            try
+            {
+                points = await PointsService.GetStudentPointsAsync(studentId.Value);
+            }
+            catch
+            {
+                points = 0;
+            }
+
+            try
+            {
+                attendanceRate = AttendanceService.GetStudentAttendanceRateAsync(studentId.Value).Result.Rate;
+            }
+            catch
+            {
+                attendanceRate = 0;
+            }
+        }
+    }
 }

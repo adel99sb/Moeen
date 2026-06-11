@@ -1,4 +1,9 @@
 ﻿@page "/Guest/Post"
+@using Moeen.App.Services.Abstractions
+@using Moeen.Shared.Responses.ContentSharing
+
+@inject IContentShaeringService ContentShaeringService
+@inject NavigationManager mgr
 
 <style>
     /* 1. متغيرات الصفحة (مركزية بالكامل للألوان، الخطوط، والأحجام) */
@@ -220,90 +225,48 @@
     <div class="container">
         <div class="row g-4">
 
-            <!-- الإعلان الأول -->
-            <div class="col-lg-6 col-md-12">
-                <article class="ad-card">
-                    <div class="ad-image">
-                        <img src="" loading="lazy">
-                    </div>
-                    <div class="ad-content">
-                        <h3 class="ad-title">دعوة لحضور محاضرة مناسك الحج</h3>
-                        <p class="ad-desc">سيتم اعطاء محاضرة بما تخص مناسك الحج يوم السبت للمعلم احمد الساعة عاشرة صباحا لليافعين.</p>
-                        <div class="ad-footer">
-                            <span class="ad-date"><i class="bi bi-calendar-event me-2"></i>2023-11-15</span>
+            @foreach (var item in data)
+            {
+                <div class="col-lg-6 col-md-12">
+                    <article class="ad-card">
+                        <div class="ad-image">
+                            <img src="@item.ImageUrl" loading="lazy">
                         </div>
-                        <div class="ad-actions">
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-up"></i> أعجبني</button>
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-down"></i> لم يعجبني</button>
+                        <div class="ad-content">
+                            <h3 class="ad-title">@item.Title</h3>
+                            <p class="ad-desc">@item.Body</p>
+                            <div class="ad-footer">
+                                <span class="ad-date"><i class="bi bi-calendar-event me-2"></i>@item.CreatedAt</span>
+                            </div>
+                            <div class="ad-actions">
+                                <button class="ad-action-btn"><i class="bi bi-hand-thumbs-up"></i> أعجبني</button>
+                                <button class="ad-action-btn"><i class="bi bi-hand-thumbs-down"></i> لم يعجبني</button>
+                            </div>
                         </div>
-                    </div>
-                </article>
-            </div>
-
-            <!-- الإعلان الثاني -->
-            <div class="col-lg-6 col-md-12">
-                <article class="ad-card">
-                    <div class="ad-image">
-                        <img src="" loading="lazy">
-                    </div>
-                    <div class="ad-content">
-                        <h3 class="ad-title">اعلان فتح حلقات تحفيظ جديدة</h3>
-                        <p class="ad-desc">سيتم فتح تسجيل على حلقات تحفيظ جديدة.</p>
-                        <div class="ad-footer">
-                            <span class="ad-date"><i class="bi bi-calendar-event me-2"></i>2023-11-10</span>
-                        </div>
-                        <div class="ad-actions">
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-up"></i> أعجبني</button>
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-down"></i> لم يعجبني</button>
-                        </div>
-                    </div>
-                </article>
-            </div>
-
-            <!-- الإعلان الثالث -->
-            <div class="col-lg-6 col-md-12">
-                <article class="ad-card">
-                    <div class="ad-image">
-                        <img src="" loading="lazy">
-                    </div>
-                    <div class="ad-content">
-                        <h3 class="ad-title">احياء حفل للمتفوقين</h3>
-                        <p class="ad-desc">يقام حفل للمتفوقين الذين نجحو في الاختبارات يوم الخميس لطلاب الفوج الاول.</p>
-                        <div class="ad-footer">
-                            <span class="ad-date"><i class="bi bi-calendar-event me-2"></i>2023-11-05</span>
-                        </div>
-                        <div class="ad-actions">
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-up"></i> أعجبني</button>
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-down"></i> لم يعجبني</button>
-                        </div>
-                    </div>
-                </article>
-            </div>
-
-            <!-- الإعلان الرابع -->
-            <div class="col-lg-6 col-md-12">
-                <article class="ad-card">
-                    <div class="ad-image">
-                        <img src="" loading="lazy">
-                    </div>
-                    <div class="ad-content">
-                        <h3 class="ad-title">اعلان موعد اختبار</h3>
-                        <p class="ad-desc">نعلن عن اقامة اختبار يوم الاربعاء لحلقة الاستاذ محمد ف</p>
-                        <div class="ad-footer">
-                            <span class="ad-date"><i class="bi bi-calendar-event me-2"></i>2023-10-28</span>
-                        </div>
-                        <div class="ad-actions">
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-up"></i> أعجبني</button>
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-down"></i> لم يعجبني</button>
-                        </div>
-                    </div>
-                </article>
-            </div>
-
+                    </article>
+                </div>
+            }
         </div>
     </div>
 </div>
 
 @code {
+    private List<PostDto> data = new List<PostDto>();
+    protected override async Task OnInitializedAsync()
+    {
 
+        await LoadDataAsync();
+    }
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            data = await ContentShaeringService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            
+            throw new Exception(ex.Message);
+        }
+    }
 }

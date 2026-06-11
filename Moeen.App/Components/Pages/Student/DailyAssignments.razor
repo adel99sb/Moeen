@@ -1,0 +1,62 @@
+@page "/Student/DailyAssignments/{studentId:guid}"
+@using Moeen.App.Services.Abstractions
+@using Moeen.Shared.Responses.DailyAssignments
+
+@inject IDailyAssignmentsService DailyAssignmentsService
+
+<h3 class="mb-3">الواجبات اليومية</h3>
+
+@if (loading)
+{
+    <p>جاري التحميل...</p>
+}
+else if (!assignments.Any())
+{
+    <p>لا توجد واجبات لعرضها.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var a in assignments)
+        {
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>Juz:</strong> @a.JuzNumber - <strong>Pages:</strong> @a.FromPage - @a.ToPage
+                        <div><small>حالة: @a.Status</small></div>
+                    </div>
+                    <div class="text-muted">@a.Date.ToShortDateString()</div>
+                </div>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    [Parameter]
+    public Guid studentId { get; set; }
+
+    private List<DailyAssignmentDto> assignments = new();
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            assignments = await DailyAssignmentsService.GetDailyAssignmentsAsync(studentId);
+        }
+        catch (Exception ex)
+        {
+            assignments = new List<DailyAssignmentDto>();
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

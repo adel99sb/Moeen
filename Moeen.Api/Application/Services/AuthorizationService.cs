@@ -171,8 +171,8 @@ namespace Moeen.Api.Application.Services
 
         public async Task<GeneralResponse> AssignRoleToUserAsync(AssignRoleRequest request)
         {
-            var auth = await EnsureOwnerAsync();
-            if (auth != null) return auth;
+            //var auth = await EnsureOwnerAsync();
+            //if (auth != null) return auth;
 
             if (request == null)
                 return GeneralResponse.BadRequest("Invalid request.");

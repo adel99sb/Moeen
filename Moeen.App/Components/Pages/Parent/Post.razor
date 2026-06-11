@@ -1,4 +1,9 @@
-﻿@page "/Parent/Post"
+@page "/Parent/Post"
+@using Moeen.App.Services.Abstractions
+@using Moeen.Shared.Responses.ContentSharing
+@using Moeen.Shared.Requests.ContentSharing
+@using Moeen.Shared.Constants
+@inject IContentShaeringService ContentShaeringService
 
 <style>
     /* 1. متغيرات الصفحة (مركزية بالكامل للألوان، الخطوط، والأحجام) */
@@ -218,102 +223,57 @@
 
     <!-- شبكة الإعلانات (كاردان في كل صف) -->
     <div class="container">
-        <div class="row g-4">
-
-            <!-- الإعلان الأول -->
-            <div class="col-lg-6 col-md-12">
-                <article class="ad-card">
-                    <div class="ad-image">
-                        <img src="" loading="lazy">
+        @if (posts is null)
+        {
+            <p><em>...جاري التحميل</em></p>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var post in posts)
+                {
+                    <div class="col-lg-6 col-md-12">
+                        <article class="ad-card">
+                            <div class="ad-image">
+                                <img src="@post.ImageUrl" loading="lazy">
+                            </div>
+                            <div class="ad-content">
+                                <h3 class="ad-title">@post.Title</h3>
+                                <p class="ad-desc">@post.Body</p>
+                                <div class="ad-footer">
+                                    <span class="ad-date"><i class="bi bi-calendar-event me-2"></i>@post.CreatedAt.ToShortDateString()</span>
+                                </div>
+                                <div class="ad-actions">
+                                    <button class="ad-action-btn" @onclick="() => Interact(post.Id, InteractionType.Like)"><i class="bi bi-hand-thumbs-up"></i> أعجبني</button>
+                                    <button class="ad-action-btn" @onclick="() => Interact(post.Id, InteractionType.Like)"><i class="bi bi-hand-thumbs-down"></i> لم يعجبني</button>
+                                </div>
+                            </div>
+                        </article>
                     </div>
-                    <div class="ad-content">
-                        <h3 class="ad-title">دعوة لحضور محاضرة مناسك الحج</h3>
-                        <p class="ad-desc">سيتم اعطاء محاضرة بما تخص مناسك الحج يوم السبت للمعلم احمد الساعة عاشرة صباحا لليافعين.</p>
-                        <div class="ad-footer">
-                            <span class="ad-date"><i class="bi bi-calendar-event me-2"></i>2023-11-15</span>
-                        </div>
-                        <div class="ad-actions">
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-up"></i> أعجبني</button>
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-down"></i> لم يعجبني</button>
-                        </div>
-                    </div>
-                </article>
+                }
             </div>
-
-            <!-- الإعلان الثاني -->
-            <div class="col-lg-6 col-md-12">
-                <article class="ad-card">
-                    <div class="ad-image">
-                        <img src="" loading="lazy">
-                    </div>
-                    <div class="ad-content">
-                        <h3 class="ad-title">اعلان فتح حلقات تحفيظ جديدة</h3>
-                        <p class="ad-desc">سيتم فتح تسجيل على حلقات تحفيظ جديدة.</p>
-                        <div class="ad-footer">
-                            <span class="ad-date"><i class="bi bi-calendar-event me-2"></i>2023-11-10</span>
-                        </div>
-                        <div class="ad-actions">
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-up"></i> أعجبني</button>
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-down"></i> لم يعجبني</button>
-                        </div>
-                    </div>
-                </article>
-            </div>
-
-            <!-- الإعلان الثالث -->
-            <div class="col-lg-6 col-md-12">
-                <article class="ad-card">
-                    <div class="ad-image">
-                        <img src="" loading="lazy">
-                    </div>
-                    <div class="ad-content">
-                        <h3 class="ad-title">احياء حفل للمتفوقين</h3>
-                        <p class="ad-desc">يقام حفل للمتفوقين الذين نجحو في الاختبارات يوم الخميس لطلاب الفوج الاول.</p>
-                        <div class="ad-footer">
-                            <span class="ad-date"><i class="bi bi-calendar-event me-2"></i>2023-11-05</span>
-                        </div>
-                        <div class="ad-actions">
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-up"></i> أعجبني</button>
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-down"></i> لم يعجبني</button>
-                        </div>
-                    </div>
-                </article>
-            </div>
-
-            <!-- الإعلان الرابع -->
-            <div class="col-lg-6 col-md-12">
-                <article class="ad-card">
-                    <div class="ad-image">
-                        <img src="" loading="lazy">
-                    </div>
-                    <div class="ad-content">
-                        <h3 class="ad-title">اعلان موعد اختبار</h3>
-                        <p class="ad-desc">نعلن عن اقامة اختبار يوم الاربعاء لحلقة الاستاذ محمد ف</p>
-                        <div class="ad-footer">
-                            <span class="ad-date"><i class="bi bi-calendar-event me-2"></i>2023-10-28</span>
-                        </div>
-                        <div class="ad-actions">
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-up"></i> أعجبني</button>
-                            <button class="ad-action-btn"><i class="bi bi-hand-thumbs-down"></i> لم يعجبني</button>
-                        </div>
-                    </div>
-                </article>
-            </div>
-
-        </div>
+        }
     </div>
 </div>
 
 @code {
+    private List<PostDto>? posts;
 
-}
+    protected override async Task OnInitializedAsync()
+    {
+        posts = await ContentShaeringService.GetAllAsync();
+    }
 
-
-@code {
-
-}
-
-
-@code {
-
+    private async Task Interact(Guid postId, InteractionType type)
+    {
+        // TODO: Replace with the actual logged-in user's ID
+        var userId = new Guid("11111111-1111-1111-1111-111111111111"); 
+        var request = new InteractWithPostRequest
+        {
+            PostId = postId,
+            Type = type
+        };
+        await ContentShaeringService.InteractWithPostAsync(request);
+        // Optionally, you can give user feedback here, like a toast notification.
+    }
 }
