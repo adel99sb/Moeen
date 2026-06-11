@@ -1,7 +1,7 @@
-﻿@page "/management/mosques-management"
-
+@page "/management/mosques-management"
 @rendermode InteractiveServer
 @inject NavigationManager mgr
+@inject IMosqueApiService MosqueApiService
 
 <style>
     @@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -59,7 +59,7 @@
         color: white !important;
         border-radius: 10px;
         padding: 10px 25px;
-        font-weight: 700; /* وزن عريض للخط */
+        font-weight: 700;
         text-decoration: none;
         display: flex;
         align-items: center;
@@ -118,16 +118,16 @@
         transition: 0.3s;
     }
 
-        .btn-action:hover {
-            background-color: #e0d8d0;
-        }
+    .btn-action:hover {
+        background-color: #e0d8d0;
+    }
 </style>
 
 <div class="page-container">
     <div class="top-bar">
         <div class="search-wrapper">
             <i class="bi bi-search search-icon"></i>
-            <input type="text" class="search-input" placeholder="ابحث عن جامع...">
+            <input type="text" class="search-input" placeholder="ابحث عن جامع..." @bind="SearchText" @bind:event="oninput">
         </div>
         <button class="btn-add-mosque" @onclick="moveTopageAdd">
             إضافة جامع +
@@ -135,38 +135,87 @@
     </div>
 
     <div class="row g-4">
-            <p>لا يوجد مساجد</p>
-       
+        @if (IsLoading)
+        {
+            <div class="col-12"><p>جاري التحميل...</p></div>
+        }
+        else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+        {
+            <div class="col-12"><p>@ErrorMessage</p></div>
+        }
+        else if (!FilteredMosques.Any())
+        {
+            <div class="col-12"><p>لا يوجد مساجد</p></div>
+        }
+        else
+        {
+            @foreach (var mosque in FilteredMosques)
+            {
                 <div class="col-12 col-md-4">
                     <div class="mosque-card">
-                        <button class="btn btn-danger">
+                        <button class="btn btn-danger" @onclick="() => DeleteMosqueAsync(mosque.Id)">
                             <i class="bi bi-trash3"></i>
                         </button>
-                        <h3 class="mosque-title">name</h3>
+                        <h3 class="mosque-title">@mosque.Name</h3>
 
                         <div class="mosque-details">
                             العنوان <br />
-                            address
-                            رقم التواصل <br />
-                            contactPhone
-                            الوصف
-                            Description
+                            @mosque.Address
                         </div>
 
                         <div class="card-actions">
-                            <button class="btn-action" @onclick="moveTopage">عرض</button>
-                    <button class="btn-action" @onclick="moveTopageE">تعديل</button>
+                            <button class="btn-action" @onclick="() => moveTopage(mosque.Id)">عرض</button>
+                            <button class="btn-action" @onclick="() => moveTopageE(mosque.Id)">تعديل</button>
                         </div>
                     </div>
                 </div>
             }
         }
-
     </div>
 </div>
 
 @code {
-    private void moveTopage() => mgr.NavigateTo("/details");
-    private void moveTopageE() => mgr.NavigateTo("/Mend-mE");
+    private List<MosqueResponse> MosqueItems = [];
+    private string SearchText = string.Empty;
+    private string? ErrorMessage;
+    private bool IsLoading = true;
+
+    private IEnumerable<MosqueResponse> FilteredMosques =>
+        MosqueItems.Where(mosque =>
+            string.IsNullOrWhiteSpace(SearchText) ||
+            (mosque.Name ?? string.Empty).Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+            (mosque.Address ?? string.Empty).Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMosquesAsync();
+    }
+
+    private async Task LoadMosquesAsync()
+    {
+        try
+        {
+            IsLoading = true;
+            ErrorMessage = null;
+            MosqueItems = (await MosqueApiService.GetAllMosquesAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"تعذر جلب المساجد: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task DeleteMosqueAsync(Guid mosqueId)
+    {
+        await MosqueApiService.DeleteMosqueAsync(mosqueId);
+        await LoadMosquesAsync();
+    }
+
+    private void moveTopage(Guid mosqueId) => mgr.NavigateTo($"/details/{mosqueId}");
+    private void moveTopageE(Guid mosqueId) => mgr.NavigateTo($"/Mend-mE/{mosqueId}");
     private void moveTopageAdd() => mgr.NavigateTo("/Mend-m");
-   }
+}

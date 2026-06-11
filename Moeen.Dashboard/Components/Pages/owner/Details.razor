@@ -1,9 +1,9 @@
-﻿@page "/details"
+@page "/details/{MosqueId:guid}"
 @inject NavigationManager mgr
+@inject IMosqueApiService MosqueApiService
 
 <style>
     :root {
-        /* الهوية البصرية الأساسية */
         --primary-green: #195042;
         --primary-green-dark: #123d32;
         --accent-beige: #d6cabc;
@@ -42,7 +42,12 @@
         font-size: 1.5rem;
     }
 
-    /* تنسيق الزر العلوي */
+    .button-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: -40px;
+    }
+
     .btn-primary {
         background-color: var(--primary-green);
         border: none;
@@ -50,18 +55,12 @@
         border-radius: 10px;
         transition: 0.3s;
     }
-    .button-wrapper {
-    display: flex;
-    justify-content: flex-end; /* يدفع الزر لأقصى اليسار في وضعية RTL */
-    margin-bottom: -40px; /* لسحب الزر للأعلى بمحاذاة العنوان أو فوقه قليلاً */
-}
 
-        .btn-primary:hover {
-            background-color: var(--primary-green-dark);
-            transform: translateY(-2px);
-        }
+    .btn-primary:hover {
+        background-color: var(--primary-green-dark);
+        transform: translateY(-2px);
+    }
 
-    /* الجدول الموحد */
     .table-responsive {
         width: 100%;
         overflow-x: auto;
@@ -74,30 +73,29 @@
         border-spacing: 0 8px;
     }
 
-        .data-table th {
-            background-color: var(--light-beige);
-            color: var(--primary-green);
-            padding: 15px;
-            text-align: right;
-            border-radius: 0;
-        }
+    .data-table th {
+        background-color: var(--light-beige);
+        color: var(--primary-green);
+        padding: 15px;
+        text-align: right;
+        border-radius: 0;
+    }
 
-        .data-table tbody tr {
-            background-color: var(--white);
-            transition: 0.3s;
-        }
+    .data-table tbody tr {
+        background-color: var(--white);
+        transition: 0.3s;
+    }
 
-            .data-table tbody tr td {
-                padding: 15px;
-                border-top: 1px solid var(--border-gray);
-                border-bottom: 1px solid var(--border-gray);
-            }
+    .data-table tbody tr td {
+        padding: 15px;
+        border-top: 1px solid var(--border-gray);
+        border-bottom: 1px solid var(--border-gray);
+    }
 
-            .data-table tbody tr:hover {
-                background-color: var(--bg-row-hover);
-            }
+    .data-table tbody tr:hover {
+        background-color: var(--bg-row-hover);
+    }
 
-    /*badges الحالات */
     .status-badge {
         padding: 5px 12px;
         border-radius: var(--radius-badge);
@@ -105,17 +103,16 @@
         display: inline-block;
     }
 
-        .status-badge.active {
-            background-color: rgba(46, 204, 113, 0.1);
-            color: var(--status-green);
-        }
+    .status-badge.active {
+        background-color: rgba(46, 204, 113, 0.1);
+        color: var(--status-green);
+    }
 
-        .status-badge.inactive {
-            background-color: rgba(231, 76, 60, 0.1);
-            color: var(--danger-red);
-        }
+    .status-badge.inactive {
+        background-color: rgba(231, 76, 60, 0.1);
+        color: var(--danger-red);
+    }
 
-    /* الأزرار */
     .btn-icon {
         background: none;
         border: none;
@@ -125,84 +122,107 @@
         transition: 0.3s;
     }
 
-        .btn-icon:hover {
-            transform: scale(1.2);
-        }
+    .btn-icon:hover {
+        transform: scale(1.2);
+    }
 </style>
+
 <section class="management-container">
-    
     <div class="button-wrapper">
         <button class="btn btn-primary" @onclick="moveTopage">إضافة مشرف +</button>
     </div>
 
-    <h2>الفوج الأول</h2>
-    <div class="table-responsive">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>اسم الأستاذ</th>
-                    <th>الحالة</th>
-                    <th>المشرف</th>
-                    <th style="text-align: center;">الإجراء</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>محمود جاسم</td>
-                    <td><span class="status-badge active">نشط</span></td>
-                    <td>مصطفى علي</td>
-                    <td style="text-align: center;">
-                        <button class="btn-icon" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>أحمد العبدالله</td>
-                    <td><span class="status-badge inactive">متوقف</span></td>
-                    <td>مصطفى علي</td>
-                    <td style="text-align: center;">
-                        <button class="btn-icon" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <h2>أعضاء الجامع</h2>
+    
+
+    @if (IsLoading)
+    {
+        <p>جاري التحميل...</p>
+    }
+    else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <p>@ErrorMessage</p>
+    }
+    else if (!FilteredUsers.Any())
+    {
+        <p>لا يوجد مشرفون أو أساتذة لهذا الجامع.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>الدور</th>
+                        <th>الحالة</th>
+                        <th style="text-align: center;">الإجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in FilteredUsers)
+                    {
+                        <tr>
+                            <td>@user.FullName</td>
+                            <td>@GetRoleLabel(user.UserRole)</td>
+                            <td>
+                                <span class="status-badge @(user.EmailConfirmed ? "active" : "inactive")">
+                                    @(user.EmailConfirmed ? "نشط" : "متوقف")
+                                </span>
+                            </td>
+                            <td style="text-align: center;">
+                                <button class="btn-icon" title="حذف"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 
     <hr />
-
-    <h2>الفوج الثاني</h2>
-    <div class="table-responsive">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>اسم الأستاذ</th>
-                    <th>الحالة</th>
-                    <th>المشرف</th>
-                    <th style="text-align: center;">الإجراء</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>ياسين محمد</td>
-                    <td><span class="status-badge active">نشط</span></td>
-                    <td>عمر الخطيب</td>
-                    <td style="text-align: center;">
-                        <button class="btn-icon" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>علي محمد</td>
-                    <td><span class="status-badge active">نشط</span></td>
-                    <td>عمر الخطيب</td>
-                    <td style="text-align: center;">
-                        <button class="btn-icon" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
 </section>
 
 @code {
+    [Parameter] public Guid MosqueId { get; set; }
+
+    private List<UserResponse> Users = [];
+    private bool IsLoading = true;
+    private string? ErrorMessage;
+
+    private IEnumerable<UserResponse> FilteredUsers =>
+        Users.Where(user => user.UserRole is UserRole.Supervisor or UserRole.Teacher);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadUsersAsync();
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        try
+        {
+            IsLoading = true;
+            ErrorMessage = null;
+            Users = (await MosqueApiService.GetMosqueUsersAsync(MosqueId)).ToList();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"تعذر جلب أعضاء الجامع: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private string GetRoleLabel(UserRole role) => role switch
+    {
+        UserRole.Supervisor => "مشرف",
+        UserRole.Teacher => "أستاذ",
+        _ => role.ToString()
+    };
+
     private void moveTopage()
     {
         mgr.NavigateTo("/owner/Form");
