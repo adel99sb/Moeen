@@ -4,10 +4,17 @@ using Moeen.Dashboard.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7023/";
+
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("MoeenApi", client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("MoeenApi"));
+builder.Services.AddScoped<Moeen.Dashboard.Services.Abstractions.IUserApiService, Moeen.Dashboard.Services.Implementations.UserApiService>();
 
 
 

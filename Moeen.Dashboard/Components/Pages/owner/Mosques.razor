@@ -129,7 +129,7 @@
             <i class="bi bi-search search-icon"></i>
             <input type="text" class="search-input" placeholder="ابحث عن جامع...">
         </div>
-        <button class="btn-add-mosque" @onclick="moveTopage">
+        <button class="btn-add-mosque" @onclick="moveTopageAdd">
             إضافة جامع +
         </button>
     </div>
@@ -155,7 +155,7 @@
 
                         <div class="card-actions">
                             <button class="btn-action" @onclick="moveTopage">عرض</button>
-                    <button class="btn-action" @onclick="moveTopage">تعديل</button>
+                    <button class="btn-action" @onclick="moveTopageE">تعديل</button>
                         </div>
                     </div>
                 </div>
@@ -167,4 +167,6 @@
 
 @code {
     private void moveTopage() => mgr.NavigateTo("/details");
+    private void moveTopageE() => mgr.NavigateTo("/Mend-mE");
+    private void moveTopageAdd() => mgr.NavigateTo("/Mend-m");
    }
