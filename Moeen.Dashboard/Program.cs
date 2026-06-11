@@ -18,6 +18,7 @@ builder.Services.AddScoped<Moeen.Dashboard.Services.Abstractions.IUserApiService
 builder.Services.AddScoped<Moeen.Dashboard.Services.Abstractions.IMosqueApiService, Moeen.Dashboard.Services.Implementations.MosqueApiService>();
 builder.Services.AddScoped<Moeen.Dashboard.Services.Abstractions.IComplaintApiService, Moeen.Dashboard.Services.Implementations.ComplaintApiService>();
 builder.Services.AddScoped<Moeen.Dashboard.Services.Abstractions.IAuthApiService, Moeen.Dashboard.Services.Implementations.AuthApiService>();
+builder.Services.AddScoped<Moeen.Dashboard.Services.Abstractions.IAuthSessionService, Moeen.Dashboard.Services.Implementations.AuthSessionService>();
 
 
 

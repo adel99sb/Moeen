@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject NavigationManager Nav
 @inject IAuthApiService AuthApiService
+@inject IAuthSessionService AuthSession
 
 <PageTitle>Login</PageTitle>
 
@@ -23,7 +24,7 @@
     }
 
     .auth-shell {
-ا        max-width: 920px;
+        max-width: 980px;
         margin: 24px auto;
         padding: 24px;
         background: linear-gradient(180deg, #fff 0%, #fbfaf8 100%);
@@ -81,12 +82,6 @@
         font-weight: 600;
     }
 
-    .muted-link {
-        color: var(--primary-green);
-        cursor: pointer;
-        text-decoration: underline;
-    }
-
     .alert-box {
         margin-top: 12px;
         padding: 12px 14px;
@@ -105,7 +100,7 @@
         background: #f7f3ef;
         padding: 12px 14px;
         border-radius: 12px;
-        margin-bottom: 14px;
+        margin-top: 14px;
     }
 
     .token-box {
@@ -146,9 +141,9 @@
                     <button class="btn-primary" type="submit" disabled="@IsBusy">
                         @(IsBusy ? "جاري تسجيل الدخول..." : "تسجيل الدخول")
                     </button>
-                    <button class="btn-secondary" type="button" @onclick="GoToRegister">
-                        إنشاء حساب
-                    </button>
+                    <button class="btn-secondary" type="button" @onclick="GoToRegister">إنشاء حساب</button>
+                    <button class="btn-secondary" type="button" @onclick="GoToVerifyEmail">تأكيد البريد</button>
+                    <button class="btn-secondary" type="button" @onclick="GoToResetPassword">إعادة التعيين</button>
                 </div>
             </EditForm>
 
@@ -160,7 +155,7 @@
             @if (!string.IsNullOrWhiteSpace(AccessToken))
             {
                 <div class="status-note">
-                    <div class="mb-2"><strong>Access Token</strong></div>
+                    <strong>Access Token</strong>
                     <div class="token-box">@AccessToken</div>
                 </div>
             }
@@ -168,83 +163,30 @@
             @if (ShowConfirmNotice)
             {
                 <div class="status-note">
-                    هذا الحساب غير مؤكد. أدخل كود التحقق لإكمال التفعيل.
-                </div>
-            }
-
-            @if (ShowResetNotice)
-            {
-                <div class="status-note">
-                    يمكن إعادة تعيين كلمة المرور من الأسفل.
+                    هذا الحساب غير مؤكد. انتقل إلى صفحة تأكيد البريد لإدخال الكود.
                 </div>
             }
         </div>
 
         <div class="panel">
-            <h3 class="title">تأكيد البريد</h3>
-            <EditForm Model="VerifyModel" OnValidSubmit="VerifyEmailAsync">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-                <label>البريد الإلكتروني</label>
-                <InputText class="input" @bind-Value="VerifyModel.email" />
-                <label>كود التحقق</label>
-                <InputText class="input" @bind-Value="VerifyModel.verificationCode" />
-                <div class="d-flex gap-2 flex-wrap mt-2">
-                    <button class="btn-primary" type="submit" disabled="@IsVerifyBusy">
-                        @(IsVerifyBusy ? "جاري التأكيد..." : "تأكيد الآن")
-                    </button>
-                    <button class="btn-secondary" type="button" @onclick="SendVerifyCodeAsync" disabled="@IsVerifyBusy">
-                        إرسال الكود
-                    </button>
-                </div>
-            </EditForm>
-
-            <hr class="my-4" />
-
-            <h3 class="title">إعادة تعيين كلمة المرور</h3>
-            <EditForm Model="ResetModel" OnValidSubmit="ResetPasswordAsync">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-                <label>معرّف المستخدم</label>
-                <InputText class="input" @bind-Value="ResetUserIdText" />
-                <label>كلمة المرور الجديدة</label>
-                <InputText class="input" type="password" @bind-Value="ResetModel.NewPassword" />
-                <button class="btn-primary mt-2" type="submit" disabled="@IsResetBusy">
-                    @(IsResetBusy ? "جاري التحديث..." : "تحديث كلمة المرور")
-                </button>
-            </EditForm>
-
-            @if (!string.IsNullOrWhiteSpace(VerifyMessage))
-            {
-                <div class="alert-box @(VerifySuccess ? string.Empty : "error")">@VerifyMessage</div>
-            }
-
-            @if (!string.IsNullOrWhiteSpace(ResetMessage))
-            {
-                <div class="alert-box @(ResetSuccess ? string.Empty : "error")">@ResetMessage</div>
-            }
+            <h3 class="title">ملاحظات</h3>
+            <div class="status-note">
+                بعد نجاح تسجيل الدخول يتم حفظ التوكن في المتصفح لاستخدامه لاحقًا في الاختبار.
+            </div>
+            <div class="status-note">
+                إذا كان الحساب غير مؤكد، استخدم صفحة تأكيد البريد لإدخال الكود المرسل.
+            </div>
         </div>
     </div>
 </div>
 
 @code {
     private LoginRequest LoginModel { get; set; } = new();
-    private VerifyEmailRequest VerifyModel { get; set; } = new();
-    private ResetPasswordRequest ResetModel { get; set; } = new();
-    private string ResetUserIdText { get; set; } = string.Empty;
-
     private string? LoginMessage;
     private string? AccessToken;
     private bool LoginSuccess;
     private bool IsBusy;
-    private bool IsVerifyBusy;
-    private bool IsResetBusy;
     private bool ShowConfirmNotice;
-    private bool ShowResetNotice;
-    private string? VerifyMessage;
-    private bool VerifySuccess;
-    private string? ResetMessage;
-    private bool ResetSuccess;
 
     private async Task LoginAsync()
     {
@@ -258,12 +200,14 @@
             if (result.Success && !string.IsNullOrWhiteSpace(result.Data?.AccessToken))
             {
                 AccessToken = result.Data.AccessToken;
+                await AuthSession.SetTokenAsync(AccessToken);
+
                 var claims = JwtHelper.ReadClaims(result.Data.AccessToken);
-                ShowConfirmNotice = claims.EmailConfirmed is false;
-                ShowResetNotice = false;
-                if (claims.EmailConfirmed is false)
+                ShowConfirmNotice = !claims.EmailConfirmed;
+
+                if (!ShowConfirmNotice)
                 {
-                    VerifyModel.email = LoginModel.email;
+                    NavigateByRole(AuthSession.Role);
                 }
             }
         }
@@ -278,106 +222,49 @@
         }
     }
 
-    private async Task VerifyEmailAsync()
-    {
-        try
-        {
-            IsVerifyBusy = true;
-            var result = await AuthApiService.VerifyEmailAsync(VerifyModel);
-            VerifySuccess = result.Success;
-            VerifyMessage = result.Message;
-            ShowConfirmNotice = !result.Success;
-            if (result.Success)
-            {
-                AccessToken = AccessToken;
-                ShowConfirmNotice = false;
-            }
-        }
-        catch (Exception ex)
-        {
-            VerifySuccess = false;
-            VerifyMessage = $"فشل التحقق: {ex.Message}";
-        }
-        finally
-        {
-            IsVerifyBusy = false;
-        }
-    }
-
-    private async Task SendVerifyCodeAsync()
-    {
-        try
-        {
-            IsVerifyBusy = true;
-            var result = await AuthApiService.SendVerifyCodeAsync(new SendVerifyEmailCodeRequest
-            {
-                email = string.IsNullOrWhiteSpace(VerifyModel.email) ? LoginModel.email : VerifyModel.email
-            });
-            VerifySuccess = result.Success;
-            VerifyMessage = result.Message;
-        }
-        catch (Exception ex)
-        {
-            VerifySuccess = false;
-            VerifyMessage = $"فشل إرسال كود التحقق: {ex.Message}";
-        }
-        finally
-        {
-            IsVerifyBusy = false;
-        }
-    }
-
-    private async Task ResetPasswordAsync()
-    {
-        try
-        {
-            IsResetBusy = true;
-            if (!Guid.TryParse(ResetUserIdText, out var uid))
-            {
-                ResetSuccess = false;
-                ResetMessage = "معرّف المستخدم غير صالح.";
-                return;
-            }
-
-            ResetModel.Uid = uid;
-            var result = await AuthApiService.ResetPasswordAsync(ResetModel);
-            ResetSuccess = result.Success;
-            ResetMessage = result.Message;
-        }
-        catch (Exception ex)
-        {
-            ResetSuccess = false;
-            ResetMessage = $"فشل إعادة تعيين كلمة المرور: {ex.Message}";
-        }
-        finally
-        {
-            IsResetBusy = false;
-        }
-    }
-
     private void GoToRegister() => Nav.NavigateTo("/register");
+    private void GoToVerifyEmail() => Nav.NavigateTo("/verify-email");
+    private void GoToResetPassword() => Nav.NavigateTo("/reset-password");
+
+    private void NavigateByRole(string? role)
+    {
+        switch (role?.ToLowerInvariant())
+        {
+            case "owner":
+                Nav.NavigateTo("/owner/AccountManagement");
+                break;
+            case "supervisor":
+                Nav.NavigateTo("/supervisor/SupervisorDashboard");
+                break;
+            case "teacher":
+                Nav.NavigateTo("/Teacher/TeacherDashboard");
+                break;
+            case "examer":
+                Nav.NavigateTo("/Examer/Dashboard");
+                break;
+            default:
+                Nav.NavigateTo("/");
+                break;
+        }
+    }
 
     private sealed class JwtHelper
     {
         public static JwtClaims ReadClaims(string token)
         {
             var parts = token.Split('.');
-            if (parts.Length < 2)
-            {
-                return new JwtClaims();
-            }
+            if (parts.Length < 2) return new JwtClaims();
 
-            var payload = parts[1];
-            payload = payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '=').Replace('-', '+').Replace('_', '/');
+            var payload = parts[1].PadRight(parts[1].Length + (4 - parts[1].Length % 4) % 4, '=')
+                                  .Replace('-', '+')
+                                  .Replace('_', '/');
             var json = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(payload));
             using var doc = System.Text.Json.JsonDocument.Parse(json);
             var root = doc.RootElement;
 
             return new JwtClaims
             {
-                EmailConfirmed = ParseBool(root, "EmailConfirmed"),
-                Role = ParseString(root, "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"),
-                UserIdentifier = ParseString(root, "UserIdentifier")
+                EmailConfirmed = ParseBool(root, "EmailConfirmed")
             };
         }
 
@@ -387,15 +274,10 @@
                    bool.TryParse(prop.GetString(), out var value) &&
                    value;
         }
-
-        private static string? ParseString(System.Text.Json.JsonElement root, string key)
-            => root.TryGetProperty(key, out var prop) ? prop.GetString() : null;
     }
 
     private sealed class JwtClaims
     {
         public bool EmailConfirmed { get; set; }
-        public string? Role { get; set; }
-        public string? UserIdentifier { get; set; }
     }
 }

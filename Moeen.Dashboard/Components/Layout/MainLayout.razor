@@ -1,10 +1,10 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
+@inject IAuthSessionService AuthSession
 
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
-
 
     <main>
         <div class="top-row px-4">
@@ -22,3 +22,14 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await AuthSession.InitializeAsync();
+            StateHasChanged();
+        }
+    }
+}

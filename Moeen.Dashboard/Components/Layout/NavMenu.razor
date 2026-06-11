@@ -1,16 +1,10 @@
-﻿@rendermode InteractiveServer
-
+@rendermode InteractiveServer
+@inject IAuthSessionService AuthSession
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div>
-        <label style="color:red; margin-left: 10px;">اختر الدور:</label>
-        <select @bind="userRole" style="padding: 5px; border-radius: 5px;">
-            <option value="owner"> مالك</option>
-            <option value="supervisor"> مشرف</option>
-            <option value="teacher"> معلم</option>
-            <option value="examer"> مختبر</option>
-
-        </select>
+        <label style="color:red; margin-left: 10px;">الدور الحالي:</label>
+        <strong>@CurrentRoleLabel</strong>
     </div>
     <div class="container-fluid">
         <a class="navbar-brand" href="">Dashboard</a>
@@ -21,10 +15,8 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
-        
-        @if (userRole == "owner")
+        @if (CurrentRole == "owner")
         {
-            <!-- قائمة المالك -->
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                     <span class="bi bi-house-door-fill"></span> Home
@@ -35,16 +27,9 @@
                     <span class="bi bi-person-lines-fill"></span> حسابات المستخدمين
                 </NavLink>
             </div>
-
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/management/mosques-management">
                     <span class="bi bi-building"></span> إدارة المساجد
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="style-guide">
-                    <span class="bi bi-palette-fill nav-menu" aria-hidden="true"></span>
-                    <span>نموذج</span>
                 </NavLink>
             </div>
             <div class="nav-item px-3">
@@ -53,35 +38,32 @@
                     <span>إعدادات</span>
                 </NavLink>
             </div>
-
         }
-        else if (userRole == "supervisor")
+        else if (CurrentRole == "supervisor")
         {
-            <!-- قائمة المشرف -->
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/supervisor/SupervisorDashboard" Match="NavLinkMatch.All">
                     <span class="bi bi-house-door-fill"></span> إحصائيات رئيسية
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="supervisor/student">
+                <NavLink class="nav-link" href="/supervisor/student">
                     <span class="bi bi-mortarboard-fill"></span> إدارة طلاب
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="supervisor/teacher">
+                <NavLink class="nav-link" href="/supervisor/teacher">
                     <span class="bi bi-person-workspace"></span> إدارة معلمين
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-
                 <NavLink class="nav-link" href="/supervisor/managementfouj">
                     <span class="bi bi-diagram-3 nav-menu"></span>
                     <span>الأفواج والحلقات</span>
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="supervisor/book">
+                <NavLink class="nav-link" href="/supervisor/book">
                     <span class="bi bi-book-fill"></span> إدارة الكتب
                 </NavLink>
             </div>
@@ -91,91 +73,64 @@
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="supervisor/posts">
-                    <span class="bi bi-megaphone-fill nav-menu"></span>
-                    <span>المنشورات</span>
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="supervisor/complaint-and-suggestions">
+                <NavLink class="nav-link" href="/supervisor/complaint-and-suggestions">
                     <span class="bi bi-chat-dots-fill nav-menu"></span>
                     <span>الشكاوي</span>
                 </NavLink>
             </div>
-            
-
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="supervisor/saturdaylesson">
-                    <span class="bi bi-calendar-week-fill nav-menu"></span>
-                    <span>دروس السبت</span>
-                </NavLink>
-            </div>
-
-
         }
-        else if (userRole == "teacher")
+        else if (CurrentRole == "teacher")
         {
-            <!-- قائمة المعلم -->
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="Teacher/TeacherDashboard" Match="NavLinkMatch.All">
+                <NavLink class="nav-link" href="/Teacher/TeacherDashboard" Match="NavLinkMatch.All">
                     <span class="bi bi-house-door-fill"></span> الرئيسية
                 </NavLink>
             </div>
-
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="Teacher/Halaka">
+                <NavLink class="nav-link" href="/Teacher/Halaka">
                     <span class="bi bi-graph-up-arrow"></span> تقدم حلقاتي
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="Teacher/WeekSessions">
-                    <span class="bi bi-calendar-check-fill"></span>  الدروس الاسبوعية
+                <NavLink class="nav-link" href="/Teacher/WeekSessions">
+                    <span class="bi bi-calendar-check-fill"></span> الدروس الاسبوعية
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="Teacher/Library">
+                <NavLink class="nav-link" href="/Teacher/Library">
                     <span class="bi bi-journals"></span> المكتبة
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="Teacher/Post">
-                    <span class="bi bi-megaphone-fill"></span>  الاعلانات
-                </NavLink>
-            </div>
-            
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="Teacher/Profile">
+                <NavLink class="nav-link" href="/Teacher/Profile">
                     <span class="bi bi-person-circle"></span> ملفي الشخصي
                 </NavLink>
             </div>
-
         }
-        else if (userRole == "examer")
+        else if (CurrentRole == "examer")
         {
-            <!-- قائمة المختبر -->
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/Examer/Dashboard" Match="NavLinkMatch.All">
                     <span class="bi bi-house-door-fill"></span> الرئيسية
                 </NavLink>
             </div>
-
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="examer/exam">
+                <NavLink class="nav-link" href="/examer/exam">
                     <span class="bi bi-mortarboard-fill"></span> إدارة طلاب
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="examer/postexamer">
-                    <span class="bi bi-megaphone-fill"></span>  الاعلانات
+                <NavLink class="nav-link" href="/examer/postexamer">
+                    <span class="bi bi-megaphone-fill"></span> الاعلانات
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="examer/bookexamer">
+                <NavLink class="nav-link" href="/examer/bookexamer">
                     <span class="bi bi-journals"></span> المكتبة
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="examer/profileexamer">
+                <NavLink class="nav-link" href="/examer/profileexamer">
                     <span class="bi bi-person-circle"></span> ملفي الشخصي
                 </NavLink>
             </div>
@@ -183,15 +138,22 @@
         else
         {
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="Teacher/Profile">
+                <NavLink class="nav-link" href="/Teacher/Profile">
                     <span class="bi bi-person-circle"></span> ملفي الشخصي
                 </NavLink>
             </div>
         }
-
     </nav>
 </div>
 
 @code {
-    private string userRole = "owner";
+    private string CurrentRole => AuthSession.Role?.ToLowerInvariant() ?? "owner";
+    private string CurrentRoleLabel => CurrentRole switch
+    {
+        "owner" => "مالك",
+        "supervisor" => "مشرف",
+        "teacher" => "معلم",
+        "examer" => "مختبر",
+        _ => "غير محدد"
+    };
 }

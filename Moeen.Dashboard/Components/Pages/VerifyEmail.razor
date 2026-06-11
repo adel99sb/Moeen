@@ -1,0 +1,99 @@
+@page "/verify-email"
+@rendermode InteractiveServer
+@inject NavigationManager Nav
+@inject IAuthApiService AuthApiService
+
+<PageTitle>Verify Email</PageTitle>
+
+<style>
+    :root {
+        --primary-green: #195042;
+        --primary-green-dark: #123d32;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --danger-red: #e74c3c;
+    }
+
+    body { direction: rtl; background: #f9f9f9; font-family: 'Tajawal', sans-serif; }
+    .shell { max-width: 720px; margin: 24px auto; padding: 24px; background: #fff; border-radius: 24px; box-shadow: 0 14px 40px rgba(0,0,0,0.08); }
+    .title { color: var(--primary-green); margin-bottom: 16px; font-weight: 700; }
+    .input { width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 10px; margin-top: 8px; margin-bottom: 14px; }
+    .btn-primary { background: var(--primary-green); color: #fff; border: none; border-radius: 10px; padding: 12px 18px; font-weight: 600; }
+    .btn-secondary { background: var(--light-beige); color: var(--primary-green); border: none; border-radius: 10px; padding: 12px 18px; font-weight: 600; }
+    .alert-box { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: #f4f7f4; border: 1px solid #e3ece3; }
+    .alert-box.error { background: #fff4f4; border-color: #f0cccc; color: var(--danger-red); }
+</style>
+
+<div class="shell">
+    <h3 class="title">تأكيد البريد</h3>
+    <EditForm Model="Model" OnValidSubmit="SubmitAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <label>البريد الإلكتروني</label>
+        <InputText class="input" @bind-Value="Model.email" />
+
+        <label>كود التحقق</label>
+        <InputText class="input" @bind-Value="Model.verificationCode" />
+
+        <div class="d-flex gap-2 flex-wrap">
+            <button class="btn-primary" type="submit" disabled="@IsBusy">@(IsBusy ? "جاري التأكيد..." : "تأكيد البريد")</button>
+            <button class="btn-secondary" type="button" @onclick="SendCodeAsync" disabled="@IsBusy">إرسال الكود</button>
+            <button class="btn-secondary" type="button" @onclick="GoBack">رجوع</button>
+        </div>
+    </EditForm>
+
+    @if (!string.IsNullOrWhiteSpace(Message))
+    {
+        <div class="alert-box @(Success ? string.Empty : "error")">@Message</div>
+    }
+</div>
+
+@code {
+    private VerifyEmailRequest Model { get; set; } = new();
+    private string? Message;
+    private bool Success;
+    private bool IsBusy;
+
+    private async Task SubmitAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            var result = await AuthApiService.VerifyEmailAsync(Model);
+            Success = result.Success;
+            Message = result.Message;
+        }
+        catch (Exception ex)
+        {
+            Success = false;
+            Message = $"فشل تأكيد البريد: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task SendCodeAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            var result = await AuthApiService.SendVerifyCodeAsync(new SendVerifyEmailCodeRequest { email = Model.email });
+            Success = result.Success;
+            Message = result.Message;
+        }
+        catch (Exception ex)
+        {
+            Success = false;
+            Message = $"فشل إرسال كود التحقق: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void GoBack() => Nav.NavigateTo("/");
+}
