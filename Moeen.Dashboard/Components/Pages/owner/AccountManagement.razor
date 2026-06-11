@@ -451,7 +451,7 @@
                             <td>-</td>
                             <td><span class="status-badge @(user.EmailConfirmed ? "active" : "inactive")">@(user.EmailConfirmed ? "نشط" : "غير نشط")</span></td>
                             <td class="actions-cell">
-                                <a href="/owner/Form"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+                                <a href="/owner/Form" class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></a>
                                 <button class="btn-icon delete" title="حذف" @onclick="() => DeleteUserAsync(user.Id)"><i class="bi bi-trash"></i></button>
                             </td>
                         </tr>

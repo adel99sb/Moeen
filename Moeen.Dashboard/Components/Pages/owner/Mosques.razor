@@ -164,8 +164,8 @@
                         </div>
 
                         <div class="card-actions">
-                            <button class="btn-action" @onclick="moveTopage">عرض</button>
-                            <button class="btn-action" @onclick="moveTopageE">تعديل</button>
+                            <button class="btn-action" @onclick="() => moveTopage(mosque.Id)">عرض</button>
+                            <button class="btn-action" @onclick="() => moveTopageE(mosque.Id)">تعديل</button>
                         </div>
                     </div>
                 </div>
@@ -215,7 +215,7 @@
         await LoadMosquesAsync();
     }
 
-    private void moveTopage() => mgr.NavigateTo("/details");
-    private void moveTopageE() => mgr.NavigateTo("/Mend-mE");
+    private void moveTopage(Guid mosqueId) => mgr.NavigateTo($"/details/{mosqueId}");
+    private void moveTopageE(Guid mosqueId) => mgr.NavigateTo($"/Mend-mE/{mosqueId}");
     private void moveTopageAdd() => mgr.NavigateTo("/Mend-m");
 }
