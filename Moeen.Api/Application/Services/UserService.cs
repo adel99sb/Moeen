@@ -38,19 +38,20 @@ namespace Moeen.Api.Application.Services
         {
             try
             {
-                var users = await _userManager.Users
-                    .Select(user => new UserResponse
-                    {
-                        Id = user.Id.ToString(),
-                        FullName = user.FullName,
-                        Email = user.Email,
-                        Phone = user.PhoneNumber,
-                        ProfileImageUrl = user.ProfileImageUrl,
-                        EmailConfirmed = user.EmailConfirmed
-                    })
-                    .ToListAsync();
+                var usersFromDb = await _userManager.Users.ToListAsync();
 
-                return GeneralResponse.Ok("Users retrieved successfully.", users);
+                var users = await Task.WhenAll(usersFromDb.Select(async user => new UserResponse
+                {
+                    Id = user.Id.ToString(),
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    Phone = user.PhoneNumber,
+                    ProfileImageUrl = !string.IsNullOrEmpty(user.ProfileImageUrl) ? await _fileService.GetFileUrlAsync(user.ProfileImageUrl) ?? "" : "",
+                    EmailConfirmed = user.EmailConfirmed,
+                    UserRole = user.UserRole
+                }));
+
+                return GeneralResponse.Ok("Users retrieved successfully.", users.ToList());
             }
             catch (Exception ex)
             {
@@ -109,11 +110,13 @@ namespace Moeen.Api.Application.Services
 
             var user = new User
             {
+                Id = Guid.NewGuid(),
                 Email = registerRequest.email,
                 PhoneNumber = registerRequest.Phone,
                 EmailConfirmed = false,
                 FullName = registerRequest.fullName,
                 UserName = Guid.NewGuid().ToString(),
+                UserRole = registerRequest.userType
             };
             if (registerRequest.Picture != null)
             {
@@ -200,6 +203,24 @@ namespace Moeen.Api.Application.Services
             }
 
             return GeneralResponse.Ok("Email successfully verified.");
+        }
+
+        public async Task<GeneralResponse> GetUserByIdAsync(Guid userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+                return GeneralResponse.NotFound("User not found.");
+
+            return GeneralResponse.Ok("User retrieved successfully.", new UserResponse
+            {
+                Id = user.Id.ToString(),
+                FullName = user.FullName,
+                Email = user.Email,
+                Phone = user.PhoneNumber,
+                ProfileImageUrl = !string.IsNullOrEmpty(user.ProfileImageUrl) ? await _fileService.GetFileUrlAsync(user.ProfileImageUrl) ?? "" : "",
+                EmailConfirmed = user.EmailConfirmed,
+                UserRole = user.UserRole
+            });
         }
     }
 }

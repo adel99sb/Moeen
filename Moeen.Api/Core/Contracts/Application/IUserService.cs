@@ -12,5 +12,6 @@ namespace Moeen.Api.Core.Contracts.Application
         Task<GeneralResponse> ResetPasswordAsync(ResetPasswordRequest resetPasswordRequest);
         Task<GeneralResponse> DeleteUserAsync(Guid userId);
         Task<GeneralResponse> GetAllUsersAsync();
+        Task<GeneralResponse> GetUserByIdAsync(Guid userId);
     }
 }

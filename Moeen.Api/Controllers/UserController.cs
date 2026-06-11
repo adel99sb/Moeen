@@ -154,5 +154,21 @@ namespace Moeen.Api.Controllers
                 return BadRequest($"An error occurred while retrieving users: {ex.Message}");
             }
         }
+        /// <summary>
+        /// جلب قائمة بجميع المستخدمين المسجلين في النظام. GET api/user
+        /// </summary>
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUserById(Guid userId)
+        {
+            try
+            {
+                var result = await _userService.GetUserByIdAsync(userId);
+                return result.ToActionResult();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred while retrieving users: {ex.Message}");
+            }
+        }
     }
 }

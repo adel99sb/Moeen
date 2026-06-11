@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Moeen.Shared.Constants;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,5 +15,6 @@ namespace Moeen.Shared.Requests.User
         public string Phone { get; set; }
         public string ProfileImageUrl { get; set; }
         public bool EmailConfirmed { get; set; }
+        public UserRole UserRole { get; set; }
     }
 }

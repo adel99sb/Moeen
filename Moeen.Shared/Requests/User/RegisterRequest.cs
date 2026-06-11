@@ -15,6 +15,7 @@ namespace Moeen.Shared.Requests.User
         public string email { get; set; }
 
         [Required(ErrorMessage = "Phone is required")]
+        [Phone(ErrorMessage = "Invalid Phone format")]
         public string Phone { get; set; }
 
         [Required(ErrorMessage = "Password is required.")]
