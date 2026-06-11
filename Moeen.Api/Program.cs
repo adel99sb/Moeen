@@ -80,6 +80,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMosqueService, MosqueService>();
 builder.Services.AddScoped<IParentStudentService, ParentStudentService>();
 builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<IComplaintService, ComplaintService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
