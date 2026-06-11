@@ -1,116 +1,98 @@
-﻿@page "/settings"
-@inject NavigationManager NavManager
+@page "/settings"
 @rendermode InteractiveServer
-    <style>
-         :root {
---primary-green: #195042;
---accent-beige: #d6cabc;
---light-beige: #f4f1ee;
---white: #ffffff;
---text-dark: #2d3436;
---status-green: #2ecc71;
---danger-red: #e74c3c;
+@inject NavigationManager NavManager
+@inject IComplaintApiService ComplaintApiService
+
+<style>
+    :root {
+        --primary-green: #195042;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --text-dark: #2d3436;
+        --status-green: #2ecc71;
+        --danger-red: #e74c3c;
         --transition: all 0.3s ease;
-    --shadow-md: 0 6px 15px rgba(0,0,0,0.12);
-
-
-}
-body {
-font-family: 'Tajawal', sans-serif;
-background-color: #f9f9f9;
-direction: rtl;
-}
-.management-container {
-background: var(--white);
-margin: 20px;
-padding: 30px;
-border-radius: 20px;
-box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-/* العنوان */
-.page-title {
-color: var(--primary-green);
-position: relative;
-padding-bottom: 10px; /* مسافة بين النص والخط */
-border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
-display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
-}
-     /* الكاردات */
-             .card-container{
-                display:flex;
-                gap:20px;
-                flex-wrap:wrap;
-             }
-           .card {
-               flex:1 1 calc(50%-20px);
-    grid-template-columns: repeat(2,1fr);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-    padding: 20px;
-    background-color: #efebe9;
-    transition: var(--transition);
-    align-content:center;
-}
-
-    .card:hover {
-        transform: translateY(-5px);
-            border-color: #195042;
+        --shadow-md: 0 6px 15px rgba(0,0,0,0.12);
     }
-                /* اسم الفوج */
-                .card h3 {
-                    margin-bottom: 10px;
-                    padding-right:10px;
-                }
 
-            /* الحلقات */
-            .sessions {
-                width:auto;
-                margin-right:20px;
-                padding-right:30px;
-                background: #d6cabc;
-                padding: 8px;
-                font-size:20px;
-                border-radius: 10px;
-        border-color: #195042;
-                margin-bottom: 3px;
-            }
-              .btn-pprimary {
-    background-color: var(--primary-green);
-    font-size: 15px;
-    padding: 10px 20px;
-    color: var(--white);
-    border-radius: 12px;
-    display: inline;
-    transition: 0.3s;
-}
-
-    .btn-pprimary:hover {
-        background-color: #123d32;
-        transform: translateY(-2px);
+    body {
+        font-family: 'Tajawal', sans-serif;
+        background-color: #f9f9f9;
+        direction: rtl;
     }
-     .table th {
+
+    .management-container {
+        background: var(--white);
+        margin: 20px;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .page-title {
+        color: var(--primary-green);
+        position: relative;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #d6cabc;
+        display: inline-block;
+    }
+
+    .table th {
         background-color: var(--light-beige);
         color: var(--primary-green);
         padding: 12px;
     }
+
     .table td {
         background-color: var(--white);
         padding: 10px;
         border-bottom: 1px solid #eee;
-
+        vertical-align: middle;
     }
+
     .table tbody tr:hover {
         background-color: #fafafa;
         transform: scale(1.01);
     }
-    .table-wrapper{
-		overflow-x: auto;
-		width: 100%;
-		border-radius: var(--radius-md);
-	}
+
     .actions-cell {
-        text-align: center; /* توسيط المحتوى داخل الخلية */
-        min-width: 100px; /* نضمن مساحة كافية للأيقونات */
+        text-align: center;
+        min-width: 160px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        background: #eee;
+        color: var(--text-dark);
+        margin-left: 8px;
+    }
+
+    .status-pending {
+        background: rgba(241, 196, 15, 0.15);
+        color: #9a7b00;
+    }
+
+    .status-resolved {
+        background: rgba(46, 204, 113, 0.1);
+        color: var(--status-green);
+    }
+
+    .status-rejected {
+        background: rgba(231, 76, 60, 0.1);
+        color: var(--danger-red);
+    }
+
+    .btn-icon {
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: 1.05rem;
+        margin: 0 4px;
     }
 
     .btn-icon.edit {
@@ -124,89 +106,135 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
     .btn-icon:hover {
         transform: scale(1.2);
     }
+</style>
 
-    </style>
-    <div class="management-container">
-         <header class="page-header">
+<div class="management-container">
+    <header class="page-header">
         <h2 class="page-title">الإعدادات</h2>
     </header>
- <!-- كارد النسخ الاحتياطي -->
-    <div class="card-container">
-    <div class="card">
-        <h3>لنسخ الاحتياطي </h3>
-        <br />
-        <p>آخر نسخ احتياطي :أبدا</p>
-        <br />
-        <p>قم بعمل نسخة احتياطية لبياناتك هنا.</p>
-        <br />
-        
-        <button class="btn-pprimary">نسخ احتياطي</button>
-    </div>
-<hr>
-    <!-- كارد المظهر -->
-    <div class="card">
-        <h3>المظهر</h3>
-        <br />
-        <!-- تغيير السمة -->
-         <div class="card">
-        <label class="label">تغيير السمة:</label>
-         <select class="select">
-            <option value="light">فاتح</option>
-            <option value="dark">داكن</option>
-        </select>
-        </div>
-        <br />
-        <!-- حجم الخط -->
-        <div class="card">
-        <label class="label">حجم الخط:</label>
-        <select class="select">
-            <option value="large">كبير</option>
-            <option value="medium">وسط</option>
-            <option value="small">صغير</option>
-        </select>
-         </div>
-    </div>
-    </div>
 
-
-
-<hr>
-
-<div >
-    <!-- كارد الشكاوي -->
     <div>
-        <h3>الشكاوي </h3>
-           <table class="table">
-            <thead>
-                <tr>
-                    <th>الشكوى</th>
-                    <th>حالة الشكوى</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>بطء في التحميل</td>
+        <h3>الشكاوي</h3>
 
-                 <td class="actions-cell">
-                        <button class="btn-icon edit" title="تم الحل"><i class="bi bi-check2-all"></i></button>
-                        <button class="btn-icon edit" title="قيد الحل"><i class="bi bi-arrow-down-up"></i></button>
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>وجود مشاكل في تسجيل الدخول</td>
-                  <td class="actions-cell">
-                        <button class="btn-icon edit" title="تم الحل"><i class="bi bi-check2-all"></i></button>
-                        <button class="btn-icon edit" title="قيد الحل"><i class="bi bi-arrow-down-up"></i></button>
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-			</tbody>
-            </table>
+        @if (IsLoading)
+        {
+            <p>جاري التحميل...</p>
+        }
+        else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+        {
+            <p>@ErrorMessage</p>
+        }
+        else if (!Complaints.Any())
+        {
+            <p>لا توجد شكاوى.</p>
+        }
+        else
+        {
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>الشكوى</th>
+                            <th>الاسم</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var complaint in Complaints)
+                        {
+                            <tr>
+                                <td>
+                                    <div>@complaint.Title</div>
+                                </td>
+                                <td>
+                                    <div>@complaint.UserFullName</div>
+
+                                </td>
+                                <td>
+                                    <span class="status-badge @GetStatusClass(complaint.Status)">
+                                        @complaint.StatusName
+                                    </span>
+                                </td>
+                                <td class="actions-cell">
+                                    <button class="btn-icon edit" title="تم الحل" @onclick="() => UpdateStatusAsync(complaint.Id, ComplaintStatus.Resolved)">
+                                        <i class="bi bi-check2-all"></i>
+                                    </button>
+                                    <button class="btn-icon edit" title="رفض" @onclick="() => UpdateStatusAsync(complaint.Id, ComplaintStatus.Rejected)">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                    <button class="btn-icon delete" title="حذف" @onclick="() => DeleteComplaintAsync(complaint.Id)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
     </div>
 </div>
-    </div>
 
 @code {
+    private List<ComplaintResponse> Complaints = [];
+    private string? ErrorMessage;
+    private bool IsLoading = true;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadComplaintsAsync();
+    }
+
+    private async Task LoadComplaintsAsync()
+    {
+        try
+        {
+            IsLoading = true;
+            ErrorMessage = null;
+            Complaints = (await ComplaintApiService.GetAllComplaintsAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"تعذر جلب الشكاوى: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task UpdateStatusAsync(Guid complaintId, ComplaintStatus status)
+    {
+        try
+        {
+            await ComplaintApiService.UpdateComplaintStatusAsync(complaintId, status);
+            await LoadComplaintsAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"تعذر تحديث حالة الشكوى: {ex.Message}";
+        }
+    }
+
+    private async Task DeleteComplaintAsync(Guid complaintId)
+    {
+        try
+        {
+            await ComplaintApiService.DeleteComplaintAsync(complaintId);
+            await LoadComplaintsAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"تعذر حذف الشكوى: {ex.Message}";
+        }
+    }
+
+    private static string GetStatusClass(ComplaintStatus status) => status switch
+    {
+        ComplaintStatus.Pending => "status-pending",
+        ComplaintStatus.Resolved => "status-resolved",
+        ComplaintStatus.Rejected => "status-rejected",
+        _ => string.Empty
+    };
 }

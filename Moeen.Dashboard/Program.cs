@@ -16,6 +16,8 @@ builder.Services.AddHttpClient("MoeenApi", client =>
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("MoeenApi"));
 builder.Services.AddScoped<Moeen.Dashboard.Services.Abstractions.IUserApiService, Moeen.Dashboard.Services.Implementations.UserApiService>();
 builder.Services.AddScoped<Moeen.Dashboard.Services.Abstractions.IMosqueApiService, Moeen.Dashboard.Services.Implementations.MosqueApiService>();
+builder.Services.AddScoped<Moeen.Dashboard.Services.Abstractions.IComplaintApiService, Moeen.Dashboard.Services.Implementations.ComplaintApiService>();
+builder.Services.AddScoped<Moeen.Dashboard.Services.Abstractions.IAuthApiService, Moeen.Dashboard.Services.Implementations.AuthApiService>();
 
 
 

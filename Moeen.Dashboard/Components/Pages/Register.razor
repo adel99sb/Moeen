@@ -1,0 +1,173 @@
+@page "/register"
+@rendermode InteractiveServer
+@inject NavigationManager Nav
+@inject IAuthApiService AuthApiService
+
+<PageTitle>Register</PageTitle>
+
+<style>
+    :root {
+        --primary-green: #195042;
+        --primary-green-dark: #123d32;
+        --accent-beige: #d6cabc;
+        --light-beige: #f4f1ee;
+        --white: #ffffff;
+        --danger-red: #e74c3c;
+    }
+
+    body {
+        direction: rtl;
+        background: #f9f9f9;
+        font-family: 'Tajawal', sans-serif;
+    }
+
+    .auth-shell {
+        max-width: 820px;
+        margin: 24px auto;
+        padding: 24px;
+        background: #fff;
+        border-radius: 24px;
+        box-shadow: 0 14px 40px rgba(0,0,0,0.08);
+    }
+
+    .title {
+        color: var(--primary-green);
+        margin-bottom: 16px;
+        font-weight: 700;
+    }
+
+    .input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        outline: none;
+        margin-top: 8px;
+        margin-bottom: 14px;
+    }
+
+    .btn-primary {
+        background: var(--primary-green);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 18px;
+        font-weight: 600;
+    }
+
+    .btn-secondary {
+        background: var(--light-beige);
+        color: var(--primary-green);
+        border: none;
+        border-radius: 10px;
+        padding: 12px 18px;
+        font-weight: 600;
+    }
+
+    .alert-box {
+        margin-top: 12px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: #f4f7f4;
+        border: 1px solid #e3ece3;
+    }
+
+    .alert-box.error {
+        background: #fff4f4;
+        border-color: #f0cccc;
+        color: var(--danger-red);
+    }
+</style>
+
+<div class="auth-shell">
+    <h3 class="title">إنشاء حساب</h3>
+
+    <EditForm Model="RegisterModel" OnValidSubmit="RegisterAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <label>الاسم الكامل</label>
+        <InputText class="input" @bind-Value="RegisterModel.fullName" />
+
+        <label>البريد الإلكتروني</label>
+        <InputText class="input" @bind-Value="RegisterModel.email" />
+
+        <label>رقم الهاتف</label>
+        <InputText class="input" @bind-Value="RegisterModel.Phone" />
+
+        <label>كلمة المرور</label>
+        <InputText class="input" type="password" @bind-Value="RegisterModel.password" />
+
+        <label>نوع المستخدم</label>
+        <InputSelect class="input" @bind-Value="RegisterModel.userType">
+            @foreach (var role in Enum.GetValues<UserRole>())
+            {
+                <option value="@role">@role</option>
+            }
+        </InputSelect>
+
+        <label>الصورة الشخصية (اختياري)</label>
+        <InputFile OnChange="OnFileChanged" class="input" />
+
+        <div class="d-flex gap-2 flex-wrap mt-3">
+            <button class="btn-primary" type="submit" disabled="@IsBusy">
+                @(IsBusy ? "جاري الإنشاء..." : "إنشاء الحساب")
+            </button>
+            <button class="btn-secondary" type="button" @onclick="GoToLogin">رجوع لتسجيل الدخول</button>
+        </div>
+    </EditForm>
+
+    @if (!string.IsNullOrWhiteSpace(Message))
+    {
+        <div class="alert-box @(Success ? string.Empty : "error")">@Message</div>
+    }
+
+    <div class="alert-box">
+        لا يوجد حقل لإدخال كود التحقق هنا. التحقق يتم بعد تسجيل الدخول إذا كان البريد غير مؤكد.
+    </div>
+</div>
+
+@code {
+    private RegisterRequest RegisterModel { get; set; } = new() { userType = UserRole.Student };
+    private IBrowserFile? SelectedFile;
+    private bool IsBusy;
+    private string? Message;
+    private bool Success;
+
+    private void OnFileChanged(InputFileChangeEventArgs e) => SelectedFile = e.File;
+
+    private async Task RegisterAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            RegisterModel.Picture = SelectedFile is null ? null : await ToFormFileAsync(SelectedFile);
+            var result = await AuthApiService.RegisterAsync(RegisterModel);
+            Success = result.Success;
+            Message = result.Message;
+        }
+        catch (Exception ex)
+        {
+            Success = false;
+            Message = $"فشل إنشاء الحساب: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task<IFormFile> ToFormFileAsync(IBrowserFile file)
+    {
+        var ms = new MemoryStream();
+        await file.OpenReadStream(maxAllowedSize: 10_000_000).CopyToAsync(ms);
+        ms.Position = 0;
+        return new FormFile(ms, 0, ms.Length, file.Name, file.Name)
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = file.ContentType
+        };
+    }
+
+    private void GoToLogin() => Nav.NavigateTo("/");
+}
