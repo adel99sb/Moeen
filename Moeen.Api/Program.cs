@@ -78,6 +78,8 @@ builder.Services.AddScoped<IFileService, FileService>();
 // Application Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMosqueService, MosqueService>();
+builder.Services.AddScoped<IExamService, ExamService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IParentStudentService, ParentStudentService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
