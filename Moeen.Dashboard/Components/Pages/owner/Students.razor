@@ -1,4 +1,5 @@
 ﻿@page "/owner/Students"
+@inject IUserApiService UserApiService
 <style>
     /*AccountManagement style*/
     :root {
@@ -409,7 +410,7 @@
     <div class="action-bar">
         <div class="search-wrapper">
             <i class="bi bi-search"></i>
-            <input type="text" class="search-input" placeholder="ابحث عن طالب...">
+            <input type="text" class="search-input" placeholder="ابحث عن طالب..." @bind="SearchText" @bind:event="oninput">
         </div>
        
     </div>
@@ -426,31 +427,82 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>أحمد العلي</td>
-                    <td>جامع التوبة</td>
-                    <td>الفوج الأول</td>
-                    <td><span class="status-badge active">نشط</span></td>
-                    <td class="actions-cell">
-                        <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button>
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>محمد العلي</td>
-                    <td>جامع أبي حنيفة</td>
-                    <td>الفوج الثاني</td>
-                    <td><span class="status-badge inactive">غير نشط</span></td>
-                    <td class="actions-cell">
-                        <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button>
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
+                @if (IsLoading)
+                {
+                    <tr><td colspan="5">جاري التحميل...</td></tr>
+                }
+                else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+                {
+                    <tr><td colspan="5">@ErrorMessage</td></tr>
+                }
+                else if (!FilteredUsers.Any())
+                {
+                    <tr><td colspan="5">لا توجد بيانات لعرضها.</td></tr>
+                }
+                else
+                {
+                    @foreach (var user in FilteredUsers)
+                    {
+                        <tr>
+                            <td>@user.FullName</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td><span class="status-badge @(user.EmailConfirmed ? "active" : "inactive")">@(user.EmailConfirmed ? "نشط" : "غير نشط")</span></td>
+                            <td class="actions-cell">
+                                <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button>
+                                <button class="btn-icon delete" title="حذف" @onclick="() => DeleteUserAsync(user.Id)"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                    }
+                }
             </tbody>
         </table>
     </div>
 </section>
 
 @code {
+    private List<UserResponse> Users = [];
+    private string SearchText = string.Empty;
+    private string? ErrorMessage;
+    private bool IsLoading = true;
 
+    private IEnumerable<UserResponse> FilteredUsers =>
+        Users.Where(user =>
+            user.UserRole == UserRole.Student &&
+            (string.IsNullOrWhiteSpace(SearchText) ||
+             (user.FullName ?? string.Empty).Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+             (user.Email ?? string.Empty).Contains(SearchText, StringComparison.OrdinalIgnoreCase)));
+
+    protected override async Task OnInitializedAsync() => await LoadUsersAsync();
+
+    private async Task LoadUsersAsync()
+    {
+        try
+        {
+            IsLoading = true;
+            ErrorMessage = null;
+            Users = (await UserApiService.GetUsersByRoleAsync(UserRole.Student)).ToList();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"تعذر جلب البيانات: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task DeleteUserAsync(string userId)
+    {
+        if (!Guid.TryParse(userId, out var guid))
+        {
+            ErrorMessage = "معرّف المستخدم غير صالح.";
+            return;
+        }
+
+        await UserApiService.DeleteUserAsync(guid);
+        await LoadUsersAsync();
+    }
 }
+
