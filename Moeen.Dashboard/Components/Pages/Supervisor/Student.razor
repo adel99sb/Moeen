@@ -2,486 +2,650 @@
 @rendermode InteractiveServer
 @inject NavigationManager NavManager
 
-<h3>Student</h3>
 <style>
-	:root {
---primary-green: #195042;
---accent-beige: #d6cabc;
---light-beige: #f4f1ee;
---white: #ffffff;
---text-dark: #2d3436;
---status-green: #2ecc71;
---danger-red: #e74c3c;
-        --transition: all 0.3s ease;
+  :root {
+    --primary-green: #195042;
+    --accent-beige: #d6cabc;
+    --light-beige: #f4f1ee;
+    --white: #ffffff;
+    --text-dark: #2d3436;
+    --status-green: #2ecc71;
+    --danger-red: #e74c3c;
+    --transition: all 0.3s ease;
+  }
 
-}
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background-color: #f9f9f9;
+    direction: rtl;
+  }
 
-body {
-font-family: 'Tajawal', sans-serif;
-background-color: #f9f9f9;
-direction: rtl;
-}
+  .management-container {
+    background: var(--white);
+    margin: 20px;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  }
 
-.management-container {
-background: var(--white);
-margin: 20px;
-padding: 30px;
-border-radius: 20px;
-box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-/* العنوان */
-.page-title {
-color: var(--primary-green);
-position: relative;
-padding-bottom: 10px; /* مسافة بين النص والخط */
-border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
-display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
-}
+  .page-title {
+    color: var(--primary-green);
+    position: relative;
+    padding-bottom: 10px; 
+    border-bottom: 3px solid #d6cabc; 
+    display: inline-block; 
+  }
 
-.search-wrapper {
+  .search-wrapper {
     position: relative;
     flex: 1;
     max-width: 400px;
-}
+  }
 
-.search-input {
+  .search-input {
     width: 100%;
     padding: 12px 45px 12px 15px;
     border: 1.5px solid var(--accent-beige);
     border-radius: 12px;
     outline: none;
     transition: 0.3s;
-}
+  }
 
-    .search-input:focus {
-        border-color: var(--primary-green);
-        box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
-    }
+  .search-input:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
+  }
 
-.search-wrapper i {
+  .search-wrapper i {
     position: absolute;
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--primary-green);
-}
-.table {
+  }
+
+  .table {
     width: 100%;
     table-layout: fixed;
-    border-radius: var(--radius-md);
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
-     font-family: 'Tajawal', sans-serif;
-        font-size: clamp(0.95rem,2.5vw,1.5rem);
-        text-align: center;
-}
-    .table th {
-        background-color: var(--light-beige);
-        color: var(--primary-green);
-        padding: 12px;
-    }
-    .table td {
-        background-color: var(--white);
-        padding: 10px;
-        border-bottom: 1px solid #eee;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    font-family: 'Tajawal', sans-serif;
+    font-size: clamp(0.95rem,2.5vw,1.5rem);
+    text-align: center;
+  }
 
-    }
-    .table tbody tr:hover {
-        background-color: #fafafa;
-        transform: scale(1.01);
-    }
-	.table-wrapper{
-		overflow-x: auto;
-		width: 100%;
-		border-radius: var(--radius-md);
-	}
+  .table th {
+    background-color: var(--light-beige);
+    color: var(--primary-green);
+    padding: 12px;
+  }
 
-	.btn-pprimary {
+  .table td {
+    background-color: var(--white);
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .table tbody tr:hover {
+    background-color: #fafafa;
+    transform: scale(1.01);
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  .btn-pprimary {
     background-color: var(--primary-green);
     font-size: 15px;
     padding: 10px 20px;
     color: var(--white);
     border-radius: 12px;
-    display: inline;
+    display: inline-block;
     transition: 0.3s;
-}
+    cursor: pointer;
+    border: none;
+  }
 
-    .btn-pprimary:hover {
-        background-color: #123d32;
-        transform: translateY(-2px);
-    }
+  .btn-pprimary:hover {
+    background-color: #123d32;
+    transform: translateY(-2px);
+  }
    
   .form-container, .form-container * {
-        box-sizing: border-box;
-    }
-
+    box-sizing: border-box;
+  }
     
-    .form-container {
-        max-width: 850px;
-        margin: 2rem auto;
-        background: var(--white);
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        direction: rtl; 
-        overflow: hidden;
-    }
+  .form-container {
+    max-width: 850px;
+    margin: 2rem auto;
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    direction: rtl; 
+    overflow: hidden;
+  }
 
-    .form-header {
-        background: var(--accent-beige);
-        color: var(--white);
-        padding: 1.2rem;
-        text-align: center;
-    }
+  .form-header {
+    background: var(--accent-beige);
+    color: var(--white);
+    padding: 1.2rem;
+    text-align: center;
+  }
 
-    form {
-        padding: 2rem;
-    }
+  form {
+    padding: 2rem;
+  }
 
+  .grid-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 1.5rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .input-group label {
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-align: right;
+  }
+
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .input-wrapper i {
+    position: absolute;
+    right: 12px; 
+    color: var(--primary-green);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .input-wrapper input,
+  .input-wrapper select {
+    width: 100%;
+    padding: 10px 35px 10px 10px;
+    border: 1px solid var(--accent-beige);
+    border-radius: 8px;
+    background: var(--light-beige);
+    font-size: 0.9rem;
+    height: 45px; 
+    outline: none;
+    transition: var(--transition);
+  }
+
+  .input-wrapper input:focus,
+  .input-wrapper select:focus {
+    border-color: var(--primary-green);
+    background: #fff;
+  }
+
+  .actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+  }
+ .actions button, .actions a {
+    flex: 1;
+    height: 48px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .actions .save {
+    background: var(--primary-green);
+    color: white;
+  }
+
+  .actions .parent {
+    background: var(--accent-beige);
+    color: white;
+  }
+
+  .actions .cancel {
+    background: #f8f9fa;
+    color: #dc3545;
+  }
+
+  .btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: var(--transition);
+  }
+  .btn-icon.edit { color: #3498db; }
+  .btn-icon.delete { color: var(--danger-red); }
+  .btn-icon:hover { transform: scale(1.1); }
+    
+  @@media (max-width: 768px) {
     .grid-row {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr); 
-        gap: 1.5rem;
-        margin-bottom: 1.2rem;
+      grid-template-columns: 1fr !important;
     }
-        .grid-row:nth-of-type(4) {
-            grid-template-columns: repeat(3, 1fr);
-        }
-
-    .input-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-        .input-group label {
-            color: var(--text-dark);
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-align: right;
-        }
-
-    /* حل مشكلة الأيقونات والمحاذاة */
-    .input-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-        width: 100%;
-    }
-
-        .input-wrapper i {
-            position: absolute;
-            right: 12px; /* تثبيت الأيقونة جهة اليمين */
-            color: var(--primary-green);
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        .input-wrapper input,
-        .input-wrapper select {
-            width: 100%;
-            padding: 10px 35px 10px 10px;
-            border: 1px solid var(--accent-beige);
-            border-radius: 8px;
-            background: var(--light-beige);
-            font-size: 0.9rem;
-            height: 45px; 
-            outline: none;
-            transition: var(--transition);
-        }
-
-            .input-wrapper input:focus,
-            .input-wrapper select:focus {
-                border-color: var(--primary-green);
-                background: #fff;
-            }
-    .actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #eee;
-    }
-
-        .actions button, .actions a {
-            flex: 1;
-            height: 48px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .actions .save {
-            background: var(--primary-green);
-            color: white;
-        }
-         .actions .parent {
-            background: var(--accent-beige);
-            color: white;
-        }
-
-        .actions .cancel {
-            background: #f8f9fa;
-            color: #dc3545;
-        }
-
-    
-    @@media (max-width: 768px) {
-    .grid-row, .grid-row:nth-of-type(4) {
-        grid-template-columns: 1fr !important;
-    }
-	}
+  }
 </style>
+
 <section class="management-container">
-<header class="page-header mb-3">
-  <h2 class="page-title">إدارة الطلاب</h2>
-</header>
-<br />
-<div class="search-wrapper mb-3">
-  <form>
-	<i class="bi bi-search"></i>
+  <header class="page-header mb-3">
+    <h2 class="page-title">إدارة الطلاب</h2>
+  </header>
+  <br />
 
-	<input type="text" class="search-input" placeholder="ابحث عن طالب...">
-    <button type="submit" style="display: none;"></button>
-    </form>
-</div>
-    <div class="text-center my-3">
-        <span class="spinner-border text-success" role="status"></span>
-        <p>جاري البحث...</p>
-    </div>
+  <div class="search-wrapper mb-3">
+    <i class="bi bi-search"></i>
+    <input type="text" class="search-input" placeholder="ابحث عن طالب بالاسم..." @oninput="HandleSearch" />
+  </div>
 
+  @if (ShowMessage)
+  {
+    <div class="alert alert-success mt-3">@Message</div>
+  }
 
-<div class="table-wrapper">
+  <div class="table-wrapper mb-4">
     <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th class="table th">اسم الطالب</th>
-                    <th class="table th">أداء الطالب</th>
-                    <th class="table th">حذف الطالب</th>
-                </tr>
-            </thead>
-            <tbody>
-                        <tr>
-                            <td class="table td">student.Name</td>
-                            <td>
-                                <a><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-                                <a><button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-                            </td>
-                            <td class="table td">
-                                <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                            </td>
-                        </tr>
-                    <tr>
-                        <td colspan="3" class="text-center p-3">
-                             اكتب اسماً واضغط بحث لعرض الطلاب" : "لا يوجد طلاب يطابقون هذا البحث
-                        </td>
-                    </tr>
-            </tbody>
-        </table>
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="table th">اسم الطالب</th>
+            <th class="table th">أداء الطالب</th>
+            <th class="table th">حذف الطالب</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredStudentList == null || filteredStudentList.Count == 0)
+          {
+            <tr>
+              <td colspan="3" class="text-center p-3" style="color: gray;">
+                لا يوجد طلاب يطابقون هذا البحث
+              </td>
+            </tr>
+          }
+          else
+          {
+            @foreach (var student in filteredStudentList)
+            {
+              <tr>
+                <td class="table td fw-bold">@student.FullName</td>
+                <td>
+                  <button class="btn-icon" title="عرض" @onclick="viewStudent1">
+                    <i class="bi bi-info-circle" style="color: #2ecc71;"></i>
+                  </button>
+                  <button class="btn-icon edit" title="تعديل" @onclick="() => EnableEditMode(student)">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                </td>
+                <td class="table td">
+                  <button class="btn-icon delete" title="حذف" @onclick="() => DeleteStudent(student.Id)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
     </div>
-</div>
-<div class="table-wrapper">
-<div class="table-responsive">
-<table class="table">
-	<thead>
-		<tr>
-			<th class="table th">اسم الطالب</th>
-			<th class="table th">أداء الطالب</th>
-			<th class="table th">حذف الطالب</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td class="table td">آلاء قاسم </td>
-			<td >
-				<a @onclick="viewStudent1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-        <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-				</td>
-			<td class="table td">
-				  <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-			</td>
-		</tr>
-		<tr>
-			<td class="table td">ماريا العبد السلام </td>
-			<td>
-				<a @onclick="viewStudent1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-        <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>     
-			</td>
-			<td class="table td">
-			 <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-			</td>
-		</tr>
-		<tr>
-			<td class="table td">آية دعبول </td>
-			<td>
-				<a @onclick="viewStudent1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-        <a @onclick="editStudent"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>     
-			</td>
-			<td class="table td">
-			 <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-			</td>
-		</tr>
-	</tbody>
-	</table>
-	</div></div>
-	<br />
-	<details>
-		<summary class="btn-pprimary">إضافة طالب جديد</summary>
-		<div class="form-container">
-    <div class="form-header">
-        <h2><i class="bi bi-person-plus-fill"></i> إضافة طالب</h2>
-    </div>
-  <form>
+  </div>
+
+  <details class="mt-4" open="@_isDetailsOpen">
+    <summary class="btn-pprimary" @onclick="ToggleDetails">
+      @(isEditMode ? "تعديل بيانات الطالب الحالي" : "إضافة طالب جديد")
+    </summary>
+    <div class="form-container">
+      <div class="form-header">
+        <h2>
+          <i class="@(isEditMode ? "bi bi-pencil-square" : "bi bi-person-plus-fill")"></i> 
+          @(isEditMode ? "تعديل بيانات الطالب" : "إضافة طالب جديد")
+        </h2>
+      </div>
+      <EditForm Model="_model" OnValidSubmit="HandleSubmit">
         <div class="grid-row">
-            <div class="input-group">
-                <label>الاسم الكامل</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-person"></i>
-                  <input type="text" placeholder="أدخل الاسم" />
-                </div>
+          <div class="input-group">
+            <label>الاسم الكامل</label>
+            <div class="input-wrapper">
+              <i class="bi bi-person"></i>
+              <InputText @bind-Value="_model.FullName" placeholder="أدخل الاسم" class="form-control" />
             </div>
-             <div class="input-group">
-                <label>رقم الهاتف</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-telephone"></i>
-                    <input type="tel" placeholder="أدخل رقم الهاتف">
-                </div>
+          </div>
+          <div class="input-group">
+            <label>رقم الهاتف</label>
+            <div class="input-wrapper">
+              <i class="bi bi-telephone"></i>
+              <InputText @bind-Value="_model.Phone" placeholder="أدخل رقم الهاتف" class="form-control" />
             </div>
-            </div>
-	    <div class="grid-row">
-             <div class="input-group">
-                <label>تاريخ التسجيل</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-calendar-event"></i>
-                    <input type="date" placeholder="أدخل تاريخ التسجيل">
-                </div>
-            </div>
-               <div class="input-group">
-                <label>تاريخ الميلاد</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-calendar-event"></i>
-                    <input type="date" placeholder="أدخل تاريخ الميلاد">
-                </div>
-            </div> 
-        </div>
-	    <div class="grid-row">
-		 <div class="input-group">
-                <label>العنوان</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-alphabet"></i>
-                    <input type="text" placeholder="أدخل العنوان">
-                </div>
-            </div>
-             <div class="input-group">
-                <label>البريد الإلكتروني</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-envelope"></i>
-                    <input type="email" placeholder="أدخل البرييد الالكتروني">
-                </div>
-            </div>
+          </div>
         </div>
          <div class="grid-row">
-			   <div class="input-group">
-                <label>الجامع التابع له</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-houses"></i>
-                    <input type="text" placeholder="أدخل الجامع">
-                </div>
+          <div class="input-group">
+            <label>تاريخ التسجيل</label>
+            <div class="input-wrapper">
+              <i class="bi bi-calendar-event"></i>
+              <input type="date" @bind="_model.RegisterDate" class="form-control" />
             </div>
-             <div class="input-group">
-                <label>الجنس</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-gender-ambiguous"></i>
-                    <select>
-                        <option value="" disabled selected>اختر الجنس</option>
-                        <option value="male">ذكر</option>
-                        <option value="female">أنثى</option>
-                    </select>
-                </div>
+          </div>
+          <div class="input-group">
+            <label>تاريخ الميلاد</label>
+            <div class="input-wrapper">
+              <i class="bi bi-calendar-event"></i>
+              <input type="date" @bind="_model.BirthDate" class="form-control" />
             </div>
-            </div>
-             <div class="grid-row">
-                     <div class="input-group">
-                <label>اسم ولي الامر </label>
-                <div class="input-wrapper">
-                    <i class="bi bi-person"></i>
-                    <input type="text" placeholder="أدخل الاسم">
-                </div>
-            </div>
-                  <div class="input-group">
-                <label>رقم ولي الامر</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-telephone"></i>
-                    <input type="tel" placeholder="أدخل الرقم">
-                </div>
-            </div>
-		        </div>
-                 <div class="grid-row">
-            <div class="input-group">
-                <label>الفوج</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-layers"></i>
-                    <select>
-                        <option>الفوج الأول</option>
-                        <option>الفوج الثاني</option>
-                    </select>
-                </div>
-            </div>
-				 <div class="input-group">
-                <label>الحلقة</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-layers"></i>
-                    <select>
-                        <option>الحلقة الاولى</option>
-                        <option>الحلقة الثانية</option>
-                    </select>
-                </div>
-                </div>
-                </div>
-				 <div class="grid-row">
-              <div class="input-group">
-                <label>حالة الحساب</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-check-circle"></i>
-                    <select>
-                        <option value="active">نشط</option>
-                        <option value="inactive">متوقف</option>
-                    </select>
-                </div>
-            </div>
-            <div class="input-group">
-                <label>كلمة المرور</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-lock"></i>
-                    <input type="password" placeholder="أدخل كلمة المرور">
-                </div>
-            </div>
+          </div> 
         </div>
-		 <div class="actions">
-            <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ الطالب</button>
-            <button type="submit" class="parent"><i class="bi bi-check2-all"></i> ربط بولي الامر </button>
-            <a href="/supervisor/student" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+
+        <div class="grid-row">
+          <div class="input-group">
+            <label>العنوان</label>
+            <div class="input-wrapper">
+              <i class="bi bi-geo-alt"></i>
+              <InputText @bind-Value="_model.Address" placeholder="أدخل العنوان" class="form-control" />
+            </div>
+          </div>
+          <div class="input-group">
+            <label>البريد الإلكتروني</label>
+            <div class="input-wrapper">
+              <i class="bi bi-envelope"></i>
+              <InputText @bind-Value="_model.Email" placeholder="أدخل البريد الإلكتروني" class="form-control" />
+            </div>
+          </div>
         </div>
-		</form>
-                </div>
-	</details>
-	</section>
+
+        <div class="grid-row">
+          <div class="input-group">
+            <label>الجامع التابع له</label>
+            <div class="input-wrapper">
+              <i class="bi bi-houses"></i>
+              <InputText @bind-Value="_model.Mosque" placeholder="أدخل الجامع" class="form-control" />
+            </div>
+          </div>
+          <div class="input-group">
+            <label>الجنس</label>
+            <div class="input-wrapper">
+              <i class="bi bi-gender-ambiguous"></i>
+              <InputSelect @bind-Value="_model.Gender" class="form-control">
+                <option value="">اختر الجنس</option>
+                <option value="male">ذكر</option>
+                <option value="female">أنثى</option>
+              </InputSelect>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-row">
+          <div class="input-group">
+            <label>اسم ولي الأمر</label>
+            <div class="input-wrapper">
+              <i class="bi bi-person"></i>
+              <InputText @bind-Value="_model.ParentName" placeholder="أدخل الاسم" class="form-control" />
+            </div>
+          </div>
+          <div class="input-group">
+            <label>رقم ولي الأمر</label>
+            <div class="input-wrapper">
+              <i class="bi bi-telephone"></i>
+              <InputText @bind-Value="_model.ParentPhone" placeholder="أدخل الرقم" class="form-control" />
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-row">
+          <div class="input-group">
+            <label>الفوج</label>
+            <div class="input-wrapper">
+              <i class="bi bi-layers"></i>
+              <InputSelect @bind-Value="_model.Group" class="form-control">
+                <option value="الفوج الأول">الفوج الأول</option>
+                <option value="الفوج الثاني">الفوج الثاني</option>
+              </InputSelect>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>الحلقة</label>
+            <div class="input-wrapper">
+              <i class="bi bi-layers"></i>
+              <InputSelect @bind-Value="_model.ClassLevel" class="form-control">
+                <option value="الحلقة الأولى">الحلقة الأولى</option>
+                <option value="الحلقة الثانية">الحلقة الثانية</option>
+              </InputSelect>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-row">
+          <div class="input-group">
+            <label>حالة الحساب</label>
+            <div class="input-wrapper">
+              <i class="bi bi-check-circle"></i>
+              <InputSelect @bind-Value="_model.Status" class="form-control">
+                <option value="active">نشط</option>
+                <option value="inactive">متوقف</option>
+              </InputSelect>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>كلمة المرور</label>
+            <div class="input-wrapper">
+              <i class="bi bi-lock"></i>
+              <input type="password" @bind="_model.Password" placeholder="أدخل كلمة المرور" class="form-control" />
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="save">
+            <i class="bi bi-check2-all"></i> 
+            @(isEditMode ? "حفظ التعديلات" : "حفظ الطالب")
+          </button>
+          <button type="button" class="parent" @onclick="HandleParentLink">
+            <i class="bi bi-link-45deg"></i> ربط بولي الأمر
+          </button>
+          <button type="button" class="cancel" @onclick="ResetForm">
+            <i class="bi bi-x-lg"></i> إلغاء
+          </button>
+        </div>
+      </EditForm>
+    </div>
+  </details>
+</section>
+
 @code {
-	private void editStudent()
-	{
-		NavManager.NavigateTo("/supervisor/edit");
-		// Logic to edit student information
-	}
-	private void viewStudent1()
-	{
-		NavManager.NavigateTo("/supervisor/alaa_info");
-		// Logic to edit student information
-	}
+    // كلاس داخلي ذكي لحفظ حقول الطالب كاملة محلياً
+    public class LocalStudent
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string FullName { get; set; } = "";
+        public string Phone { get; set; } = "";
+        public DateTime RegisterDate { get; set; } = DateTime.Now;
+        public DateTime BirthDate { get; set; } = DateTime.Now.AddYears(-15);
+        public string Address { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Mosque { get; set; } = "";
+        public string Gender { get; set; } = "";
+        public string ParentName { get; set; } = "";
+        public string ParentPhone { get; set; } = "";
+        public string Group { get; set; } = "الفوج الأول";
+        public string ClassLevel { get; set; } = "الحلقة الأولى";
+        public string Status { get; set; } = "active";
+        public string Password { get; set; } = "";
+    }
+
+    private List<LocalStudent> masterStudentList = new();
+    private List<LocalStudent> filteredStudentList = new();
+    
+    private LocalStudent _model = new();
+    private string searchQuery = "";
+    private bool isEditMode = false;
+    private bool _isDetailsOpen = false;
+    private bool ShowMessage = false;
+    private string Message = "";
+
+    protected override void OnInitialized()
+    {
+        // تثبيت الثلاث طالبات الأصليات اللي بملفكِ عشان يظهروا فوراً بالجدول
+        masterStudentList = new List<LocalStudent>
+        {
+            new LocalStudent { FullName = "آلاء قاسم", Mosque = "جامع الإيمان" },
+            new LocalStudent { FullName = "ماريا العبد السلام", Mosque = "جامع التوبة" },
+            new LocalStudent { FullName = "آية دعبول", Mosque = "جامع الهدى" }
+        };
+        
+        filteredStudentList = new List<LocalStudent>(masterStudentList);
+    }
+
+    private void HandleSubmit()
+    {
+        if (isEditMode)
+        {
+            var target = masterStudentList.FirstOrDefault(s => s.Id == _model.Id);
+            if (target != null)
+            {
+                // تحديث البيانات
+                target.FullName = _model.FullName;
+                target.Phone = _model.Phone;
+                target.RegisterDate = _model.RegisterDate;
+                target.BirthDate = _model.BirthDate;
+                target.Address = _model.Address;
+                target.Email = _model.Email;
+                target.Mosque = _model.Mosque;
+                target.Gender = _model.Gender;
+                target.ParentName = _model.ParentName;
+                target.ParentPhone = _model.ParentPhone;
+                target.Group = _model.Group;
+                target.ClassLevel = _model.ClassLevel;
+                target.Status = _model.Status;
+                target.Password = _model.Password;
+                Message = "تم تعديل بيانات الطالبة بنجاح!";
+                ShowMessage = true;
+            }
+        }
+        else
+        {
+            // إضافة جديدة لأعلى الجدول
+            masterStudentList.Insert(0, new LocalStudent
+            {
+                FullName = _model.FullName,
+                Phone = _model.Phone,
+                RegisterDate = _model.RegisterDate,
+                BirthDate = _model.BirthDate,
+                Address = _model.Address,
+                Email = _model.Email,
+                Mosque = _model.Mosque,
+                Gender = _model.Gender,
+                ParentName = _model.ParentName,
+                ParentPhone = _model.ParentPhone,
+                Group = _model.Group,
+                ClassLevel = _model.ClassLevel,
+                Status = _model.Status,
+                Password = _model.Password
+            });
+            Message = "تم إضافة الطالبة بنجاح!";
+            ShowMessage = true;
+        }
+
+        ResetForm();
+        ApplyFilter();
+    }
+
+    private void EnableEditMode(LocalStudent student)
+    {
+        isEditMode = true;
+        _model = new LocalStudent
+        {
+            Id = student.Id,
+            FullName = student.FullName,
+            Phone = student.Phone,
+            RegisterDate = student.RegisterDate,
+            BirthDate = student.BirthDate,
+            Address = student.Address,
+            Email = student.Email,
+            Mosque = student.Mosque,
+            Gender = student.Gender,
+            ParentName = student.ParentName,
+            ParentPhone = student.ParentPhone,
+            Group = student.Group,
+            ClassLevel = student.ClassLevel,
+            Status = student.Status,
+            Password = student.Password
+        };
+        _isDetailsOpen = true;
+        ShowMessage = false;
+    }
+
+    private void DeleteStudent(Guid id)
+    {
+        var target = masterStudentList.FirstOrDefault(s => s.Id == id);
+        if (target != null)
+        {
+            masterStudentList.Remove(target);
+            Message = "تم حذف الطالبة من النظام المحلي!";
+            ShowMessage = true;
+        }
+        ApplyFilter();
+    }
+
+    // ميثود البحث الفوري التفاعلي الذكي أثناء الكتابة
+    private void HandleSearch(ChangeEventArgs e)
+    {
+        searchQuery = e.Value?.ToString() ?? "";
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        if (string.IsNullOrWhiteSpace(searchQuery))
+        {
+            filteredStudentList = new List<LocalStudent>(masterStudentList);
+        }
+        else
+        {
+            filteredStudentList = masterStudentList
+                .Where(s => s.FullName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    private void HandleParentLink()
+    {
+        Message = $"تم ربط الطالبة بولي الأمر ({_model.ParentName}) بنجاح!";
+        ShowMessage = true;
+    }
+
+    private void ToggleDetails()
+    {
+        _isDetailsOpen = !_isDetailsOpen;
+        if (!_isDetailsOpen) isEditMode = false;
+    }
+
+    private void ResetForm()
+    {
+        _model = new LocalStudent();
+        isEditMode = false;
+        _isDetailsOpen = false;
+    }
+
+    private void editStudent() => NavManager.NavigateTo("/supervisor/edit");
+    private void viewStudent1() => NavManager.NavigateTo("/supervisor/alaa_info");
 }

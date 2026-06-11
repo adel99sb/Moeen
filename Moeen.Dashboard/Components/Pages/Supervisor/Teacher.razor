@@ -1,241 +1,249 @@
 ﻿@page "/supervisor/teacher"
 @rendermode InteractiveServer
-
 @inject NavigationManager NavManager
 
 <h3>Teacher</h3>
 <style>
-	:root {
---primary-green: #195042;
---accent-beige: #d6cabc;
---light-beige: #f4f1ee;
---white: #ffffff;
---text-dark: #2d3436;
---status-green: #2ecc71;
---danger-red: #e74c3c;
-}
+  :root {
+    --primary-green: #195042;
+    --accent-beige: #d6cabc;
+    --light-beige: #f4f1ee;
+    --white: #ffffff;
+    --text-dark: #2d3436;
+    --status-green: #2ecc71;
+    --danger-red: #e74c3c;
+  }
 
-body {
-font-family: 'Tajawal', sans-serif;
-background-color: #f9f9f9;
-direction: rtl;
-}
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background-color: #f9f9f9;
+    direction: rtl;
+  }
 
-.management-container {
-background: var(--white);
-margin: 20px;
-padding: 30px;
-border-radius: 20px;
-box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-/* العنوان */
-.page-title {
-color: var(--primary-green);
-position: relative;
-padding-bottom: 10px; /* مسافة بين النص والخط */
-border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
-display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
-}
+  .management-container {
+    background: var(--white);
+    margin: 20px;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  }
 
-.search-wrapper {
+  /* العنوان */
+  .page-title {
+    color: var(--primary-green);
+    position: relative;
+    padding-bottom: 10px; /* مسافة بين النص والخط */
+    border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
+    display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
+  }
+
+  .search-wrapper {
     position: relative;
     flex: 1;
     max-width: 400px;
-}
+  }
 
-.search-input {
+  .search-input {
     width: 100%;
     padding: 12px 45px 12px 15px;
     border: 1.5px solid var(--accent-beige);
     border-radius: 12px;
     outline: none;
     transition: 0.3s;
-}
+  }
 
-    .search-input:focus {
-        border-color: var(--primary-green);
-        box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
-    }
+  .search-input:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
+  }
 
-.search-wrapper i {
+  .search-wrapper i {
     position: absolute;
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--primary-green);
-}
-.table {
+  }
+
+  .table {
     width: 100%;
     table-layout: fixed;
     border-radius: var(--radius-md);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
     font-family: 'Tajawal', sans-serif;
-    font-size: clamp(1rem,2.5vw,1.5rem);
-	text-align: center;
-}
-    .table th {
-        background-color: var(--light-beige);
-        color: var(--primary-green);
-        padding: 12px;
-    }
-    .table td {
-        background-color: var(--white);
-        padding: 10px;
-        border-bottom: 1px solid #eee;
+    font-size: clamp(0.5rem,1.5vw,1rem);
+    text-align: center;
+  }
 
-    }
-    .table tbody tr:hover {
-        background-color: #fafafa;
-        transform: scale(1.01);
-    }
-	.btn-pprimary {
+  .table th {
+    background-color: var(--light-beige);
+    color: var(--primary-green);
+    padding: 12px;
+  }
+
+  .table td {
+    background-color: var(--white);
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .table tbody tr:hover {
+    background-color: #fafafa;
+    transform: scale(1.01);
+  }
+
+  .btn-pprimary {
     background-color: var(--primary-green);
     font-size: 15px;
     padding: 10px 20px;
     color: var(--white);
     border-radius: 12px;
-    display: inline;
+    display: inline-block;
     transition: 0.3s;
-}
+    cursor: pointer;
+    border: none;
+  }
 
-    .btn-pprimary:hover {
-        background-color: #123d32;
-        transform: translateY(-2px);
-    }
+  .btn-pprimary:hover {
+    background-color: #123d32;
+    transform: translateY(-2px);
+  }
    
   .form-container, .form-container * {
-        box-sizing: border-box;
-    }
+    box-sizing: border-box;
+  }
 
-    :root {
-        --primary-green: #195042;
-        --accent-beige: #d6cabc;
-        --light-beige: #f4f1ee;
-        --white: #ffffff;
-        --text-dark: #2d3436;
-        --transition: all 0.3s ease;
-    }
+  .form-container {
+    max-width: 850px;
+    margin: 2rem auto;
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    direction: rtl; 
+    overflow: hidden;
+  }
 
-    .form-container {
-        max-width: 850px;
-        margin: 2rem auto;
-        background: var(--white);
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        direction: rtl; 
-        overflow: hidden;
-    }
+  .form-header {
+    background: var(--accent-beige);
+    color: var(--white);
+    padding: 1.2rem;
+    text-align: center;
+  }
 
-    .form-header {
-        background: var(--accent-beige);
-        color: var(--white);
-        padding: 1.2rem;
-        text-align: center;
-    }
+  form {
+    padding: 2rem;
+  }
 
-    form {
-        padding: 2rem;
-    }
+  .grid-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 1.5rem;
+    margin-bottom: 1.2rem;
+  }
 
-    .grid-row {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr); 
-        gap: 1.5rem;
-        margin-bottom: 1.2rem;
-    }
-        .grid-row:nth-of-type(4) {
-            grid-template-columns: repeat(3, 1fr);
-        }
+  .grid-row:nth-of-type(4) {
+    grid-template-columns: repeat(3, 1fr);
+  }
 
-    .input-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
 
-        .input-group label {
-            color: var(--text-dark);
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-align: right;
-        }
+  .input-group label {
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-align: right;
+  }
 
-    /* حل مشكلة الأيقونات والمحاذاة */
-    .input-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-        width: 100%;
-    }
+  /* حل مشكلة الأيقونات والمحاذاة */
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
 
-        .input-wrapper i {
-            position: absolute;
-            right: 12px; /* تثبيت الأيقونة جهة اليمين */
-            color: var(--primary-green);
-            z-index: 2;
-            pointer-events: none;
-        }
+  .input-wrapper i {
+    position: absolute;
+    right: 12px; /* تثبيت الأيقونة جهة اليمين */
+    color: var(--primary-green);
+    z-index: 2;
+    pointer-events: none;
+  }
 
-        .input-wrapper input,
-        .input-wrapper select {
-            width: 100%;
-            padding: 10px 35px 10px 10px;
-            border: 1px solid var(--accent-beige);
-            border-radius: 8px;
-            background: var(--light-beige);
-            font-size: 0.9rem;
-            height: 45px; 
-            outline: none;
-            transition: var(--transition);
-        }
+  .input-wrapper input,
+  .input-wrapper select {
+    width: 100%;
+    padding: 10px 35px 10px 10px;
+    border: 1px solid var(--accent-beige);
+    border-radius: 8px;
+    background: var(--light-beige);
+    font-size: 0.9rem;
+    height: 45px; 
+    outline: none;
+    transition: var(--transition);
+  }
 
-            .input-wrapper input:focus,
-            .input-wrapper select:focus {
-                border-color: var(--primary-green);
-                background: #fff;
-            }
-    .actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #eee;
-    }
+  .input-wrapper input:focus,
+  .input-wrapper select:focus {
+    border-color: var(--primary-green);
+    background: #fff;
+  }
 
-        .actions button, .actions a {
-            flex: 1;
-            height: 48px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-        }
+  .actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+  }
+ .actions button, .actions a {
+    flex: 1;
+    height: 48px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+  }
 
-        .actions .save {
-            background: var(--primary-green);
-            color: white;
-        }
+  .actions .save {
+    background: var(--primary-green);
+    color: white;
+  }
         
-        .actions .cancel {
-            background: #f8f9fa;
-            color: #dc3545;
-        }
+  .actions .cancel {
+    background: #f8f9fa;
+    color: #dc3545;
+  }
 
+  .btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: var(--transition);
+  }
+  .btn-icon.edit { color: #3498db; }
+  .btn-icon.delete { color: var(--danger-red); }
+  .btn-icon:hover { transform: scale(1.1); }
     
-    @@media (max-width: 768px) {
+  @@media (max-width: 768px) {
     .grid-row, .grid-row:nth-of-type(4) {
-        grid-template-columns: 1fr !important;
+      grid-template-columns: 1fr !important;
     }
-	}
-		
-		.attendance-options label {
+  }
+    
+  .attendance-options label {
     margin: 0 10px;
     cursor: pointer;
     font-family: 'Tajawal', sans-serif;
@@ -243,228 +251,405 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
     padding: 4px 8px;
     border-radius: 6px;
     transition: background 0.2s;
-}
+  }
 
-	/* تغيير لون الخلفية عند اختيار الحالة */
-.attendance-options input[type="radio"]:checked + span {
-    color:var(--primary-green);
+  /* تغيير لون الخلفية عند اختيار الحالة */
+  .attendance-options input[type="radio"]:checked + span {
+    color: var(--primary-green);
     font-weight: bold;
     padding: 4px 8px;
     border-radius: 6px;
-}
-	
-.attendance-options input[type="radio"] {
+  }
+  
+  .attendance-options input[type="radio"] {
     width: 20px; /* تكبير الدائرة */
-    height: 20px;/*تكبير الدائرة */
+    height: 20px; /* تكبير الدائرة */
     margin-right: 5px;
     cursor: pointer;
-}
+  }
 </style>
+
 <section class="management-container">
-<header class="page-header">
-	<h2 class="page-title">إدارة المعلمين</h2>
-</header>
-<br />
-<div class="search-wrapper">
-	<i class="bi bi-search"></i>
-	<input type="text" class="search-input" placeholder="ابحث عن معلم...">
-</div>
-<br />
+  <header class="page-header">
+    <h2 class="page-title">إدارة المعلمين</h2>
+  </header>
+  <br />
 
-	<table class="table">
-	<thead>
-		<tr>
-			<th class="table th">اسم المعلم</th>
-			<th class="table th">حضور </th>
-			<th class="table th">معلومات المعلم</th>
-            <th class="table th">حذف  المعلم</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td class="table td"> آلاء قاسم </td>
-			<td class="table td">
-				<div class="attendance-options">
-					<label><input type="radio" name="attend1" value="حاضر"> حاضر</label>
-					<label><input type="radio" name="attend1" value="غائب"> غائب</label>
-					<label><input type="radio" value="غياب مبرر" name="attend1"> مبرر</label>
-				</div>
-			</td>
-			<td>
-				<a @onclick="viewTeacher1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-				<a @onclick="editTeacher"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-			</td>
-			<td>
-			<button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-			</td>
-		</tr>
-		<tr>
-			<td class="table td">  ماريا العبدالسلام </td>
-			<td class="table td">
-				<div class="attendance-options">
-					<label><input type="radio" name="attend1" value="حاضر"> حاضر</label>
-					<label><input type="radio" name="attend1" value="غائب"> غائب</label>
-					<label><input type="radio" value="غياب مبرر" name="attend1"> مبرر</label>
-				</div>
-			</td>
-			<td>
-				<a @onclick="viewTeacher1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-				<a @onclick="editTeacher"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-			</td>
-			 <td><button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-			</td>
-		</tr>
-		<tr>
-			<td class="table td">آية دعبول </td>
-			<td class="table td">
-				<div class="attendance-options">
-					<label><input type="radio" name="attend1" value="حاضر"> حاضر</label>
-					<label><input type="radio" name="attend1" value="غائب"> غائب</label>
-					<label><input type="radio" value="غياب مبرر" name="attend1"> مبرر</label>
-				</div>
-			</td>
-			<td>
-				<a @onclick="viewTeacher1"><button title="عرض"><i class="bi bi-info-circle"></i></button></a>
-				<a @onclick="editTeacher"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
-			</td>
-			<td>
-			<button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-			</td>
-		</tr>
-		</tbody>
-		</table>
-		<details>
-	<summary class="btn-pprimary">إضافة معلم جديد</summary>
-		<div class="form-container">
-    <div class="form-header">
-        <h2><i class="bi bi-person-plus-fill"></i> إضافة معلم</h2>
-    </div>
-    <form>
+  <!-- ربط حقل البحث تفاعلياً -->
+  <div class="search-wrapper">
+    <i class="bi bi-search"></i>
+    <input type="text" class="search-input" placeholder="ابحث عن معلم..." @oninput="HandleSearch">
+  </div>
+  <br />
+
+  @if (ShowMessage)
+  {
+    <div class="alert alert-success mb-3">@Message</div>
+  }
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th class="table th">اسم المعلم</th>
+        <th class="table th">حضور</th>
+        <th class="table th">معلومات المعلم</th>
+        <th class="table th">حذف المعلم</th>
+      </tr>
+    </thead>
+    <tbody>
+      @if (filteredTeacherList == null || filteredTeacherList.Count == 0)
+      {
+        <tr>
+          <td colspan="4" class="text-center p-3" style="color: gray;">
+            لا يوجد معلمين يطابقون هذا البحث
+          </td>
+        </tr>
+      }
+      else
+      {
+        @foreach (var teacher in filteredTeacherList)
+        {
+          <tr>
+            <td class="table td fw-bold">@teacher.FullName</td>
+            <td class="table td">
+              <div class="attendance-options">
+                <!-- حل مشكلة اسم الراديو ليكون فريد لكل معلم باستخدام الـ Id -->
+                <label>
+                  <input type="radio" name="attend_@teacher.Id" value="حاضر" 
+                         checked="@(teacher.AttendanceStatus == "حاضر")" 
+                         @onchange="@(() => MarkAttendance(teacher, "حاضر"))"> 
+                  <span>حاضر</span>
+                </label>
+                <label>
+                  <input type="radio" name="attend_@teacher.Id" value="غائب" 
+                         checked="@(teacher.AttendanceStatus == "غائب")" 
+                         @onchange="@(() => MarkAttendance(teacher, "غائب"))"> 
+                  <span>غائب</span>
+                </label>
+                <label>
+                  <input type="radio" name="attend_@teacher.Id" value="غياب مبرر" 
+                         checked="@(teacher.AttendanceStatus == "غياب مبرر")" 
+                         @onchange="@(() => MarkAttendance(teacher, "غياب مبرر"))"> 
+                  <span>مبرر</span>
+                </label>
+              </div>
+            </td>
+            <td>
+              <button class="btn-icon" title="عرض" @onclick="viewTeacher1"><i class="bi bi-info-circle" style="color: #2ecc71;"></i></button>
+       <button class="btn-icon edit" title="تعديل" @onclick="() => EnableEditMode(teacher)"><i class="bi bi-pencil-square"></i></button>
+            </td>
+            <td>
+              <button class="btn-icon delete" title="حذف" @onclick="() => DeleteTeacher(teacher.Id)"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+
+  <!-- ربط الـ Details والـ Form تفاعلياً للحفظ والتعديل -->
+  <details open="@_isDetailsOpen">
+    <summary class="btn-pprimary" @onclick="ToggleDetails">
+      @(isEditMode ? "تعديل بيانات المعلم الحالي" : "إضافة معلم جديد")
+    </summary>
+    <div class="form-container">
+      <div class="form-header">
+        <h2>
+          <i class="@(isEditMode ? "bi bi-pencil-square" : "bi bi-person-plus-fill")"></i> 
+          @(isEditMode ? "تعديل بيانات المعلم" : "إضافة معلم")
+        </h2>
+      </div>
+      <EditForm Model="_model" OnValidSubmit="HandleSubmit">
         <div class="grid-row">
-            <div class="input-group">
-                <label>الاسم الكامل</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-person"></i>
-                    <input type="text" placeholder="أدخل الاسم">
-                </div>
+          <div class="input-group">
+            <label>الاسم الكامل</label>
+            <div class="input-wrapper">
+              <i class="bi bi-person"></i>
+              <InputText @bind-Value="_model.FullName" placeholder="أدخل الاسم" />
             </div>
-             <div class="input-group">
-                <label>رقم الهاتف</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-telephone"></i>
-                    <input type="tel" placeholder="أدخل الرقم">
-                </div>
+          </div>
+          <div class="input-group">
+            <label>رقم الهاتف</label>
+            <div class="input-wrapper">
+              <i class="bi bi-telephone"></i>
+              <InputText @bind-Value="_model.Phone" placeholder="أدخل الرقم" />
             </div>
-            </div>
-	    <div class="grid-row">
-             <div class="input-group">
-                <label>تاريخ التسجيل</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-calendar-event"></i>
-                    <input type="date" placeholder="أدخل تاريخ التسجيل">
-                </div>
-            </div>
-               <div class="input-group">
-                <label>تاريخ الميلاد</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-calendar-event"></i>
-                    <input type="date" placeholder="أدخل تاريخ الميلاد">
-                </div>
-            </div> 
+          </div>
         </div>
-	    <div class="grid-row">
-               <div class="input-group">
-                <label>البريد الإلكتروني</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-envelope"></i>
-                    <input type="email" placeholder="أدخل البريد الالكتروني">
-                </div>
+
+        <div class="grid-row">
+          <div class="input-group">
+            <label>تاريخ التسجيل</label>
+            <div class="input-wrapper">
+              <i class="bi bi-calendar-event"></i>
+              <input type="date" @bind="_model.RegisterDate" />
             </div>
-		         <div class="input-group">
-                <label>كلمة المرور</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-lock"></i>
-                    <input type="password" placeholder="أدخل كلمة المرور">
-                </div>
+          </div>
+          <div class="input-group">
+            <label>تاريخ الميلاد</label>
+            <div class="input-wrapper">
+              <i class="bi bi-calendar-event"></i>
+              <input type="date" @bind="_model.BirthDate" />
             </div>
+          </div> 
         </div>
-		        <div class="grid-row">
-            <div class="input-group">
-                <label>الفوج</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-layers"></i>
-                    <select>
-                        <option value="" disabled selected>اختر الفوج</option>
 
-                        <option>الفوج الأول</option>
-                        <option>الفوج الثاني</option>
-                    </select>
-                </div>
+        <div class="grid-row">
+          <div class="input-group">
+            <label>البريد الإلكتروني</label>
+            <div class="input-wrapper">
+              <i class="bi bi-envelope"></i>
+              <InputText @bind-Value="_model.Email" type="email" placeholder="أدخل البريد الالكتروني" />
             </div>
-				 <div class="input-group">
-                <label>الحلقة</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-layers"></i>
-                    <select>
-                        <option value="" disabled selected>اختر الحلقة</option>
+          </div>
+          <div class="input-group">
+            <label>كلمة المرور</label>
+            <div class="input-wrapper">
+              <i class="bi bi-lock"></i>
+              <input type="password" @bind="_model.Password" placeholder="أدخل كلمة المرور" class="form-control" />
+            </div>
+          </div>
+        </div>
 
-                        <option>الحلقة الاولى</option>
-                        <option>الحلقة الثانية</option>
-                    </select>
-                </div>
-                </div>
-                </div>
-		        <div class="grid-row">
-		       <div class="input-group">
-                <label>الجنس</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-gender-ambiguous"></i>
-                    <select>
-                        <option value="" disabled selected>اختر الجنس</option>
-                        <option value="male">ذكر</option>
-                        <option value="female">أنثى</option>
-                    </select>
-                </div>
+        <div class="grid-row">
+          <div class="input-group">
+            <label>الفوج</label>
+            <div class="input-wrapper">
+              <i class="bi bi-layers"></i>
+              <InputSelect @bind-Value="_model.Group">
+                <option value="" disabled selected>اختر الفوج</option>
+                <option value="الفوج الأول">الفوج الأول</option>
+                <option value="الفوج الثاني">الفوج الثاني</option>
+              </InputSelect>
             </div>
-              <div class="input-group">
-                <label>حالة الحساب</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-check-circle"></i>
-                    <select>
-                        <option value="active">نشط</option>
-                        <option value="inactive">متوقف</option>
-                    </select>
-                </div>
+          </div>
+          <div class="input-group">
+            <label>الحلقة</label>
+            <div class="input-wrapper">
+              <i class="bi bi-layers"></i>
+              <InputSelect @bind-Value="_model.ClassLevel">
+                <option value="" disabled selected>اختر الحلقة</option>
+                <option value="الحلقة الأولى">الحلقة الأولى</option>
+                <option value="الحلقة الثانية">الحلقة الثانية</option>
+              </InputSelect>
             </div>
+          </div>
+        </div>
+            <div class="grid-row">
+          <div class="input-group">
+            <label>الجنس</label>
+            <div class="input-wrapper">
+              <i class="bi bi-gender-ambiguous"></i>
+              <InputSelect @bind-Value="_model.Gender">
+                <option value="" disabled selected>اختر الجنس</option>
+                <option value="male">ذكر</option>
+                <option value="female">أنثى</option>
+              </InputSelect>
             </div>
+          </div>
+          <div class="input-group">
+            <label>حالة الحساب</label>
+            <div class="input-wrapper">
+              <i class="bi bi-check-circle"></i>
+              <InputSelect @bind-Value="_model.Status">
+                <option value="active">نشط</option>
+                <option value="inactive">متوقف</option>
+              </InputSelect>
+            </div>
+          </div>
+        </div>
 
-             <div class="grid-row">
+        <div class="grid-row">
+          <div class="input-group">
+            <label>لمحة عن الخبرات</label>
+            <div class="input-wrapper">
+              <i class="bi bi-person-workspace"></i>
+              <InputText @bind-Value="_model.Experience" placeholder="اكتب هنا..." />
+            </div>
+          </div>
+        </div>
 
-		          <div class="input-group">
-                <label>لمحة عن الخبرات </label>
-                <div class="input-wrapper">
-                    <i class="bi bi-person-workspace"></i>
-                    <input type="text" placeholder="اكتب هنا...">
-                </div>
-            </div>
-            </div>
         <div class="actions">
-            <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ المعلم</button>
-            <a href="/supervisor/teache" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+          <button type="submit" class="save">
+            <i class="bi bi-check2-all"></i> 
+            @(isEditMode ? "حفظ التعديلات" : "حفظ المعلم")
+          </button>
+          <button type="button" class="cancel" @onclick="ResetForm"><i class="bi bi-x-lg"></i> إلغاء</button>
         </div>
-		</form>
-       </div>
-</details>
+      </EditForm>
+    </div>
+  </details>
 </section>
+
 @code {
-	private void viewTeacher1()
-	{
-		NavManager.NavigateTo("/supervisor/teacher1");
-	}
-	
-	private void editTeacher()
-	{
-		NavManager.NavigateTo("/supervisor/editinfo_teacher");
-		// Logic to edit student information
-	}
+    // كلاس داخلي ذكي لحفظ حقول المعلم محلياً دون أي تعديل بالديزاين
+    public class LocalTeacher
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string FullName { get; set; } = "";
+        public string Phone { get; set; } = "";
+        public DateTime RegisterDate { get; set; } = DateTime.Now;
+        public DateTime BirthDate { get; set; } = DateTime.Now.AddYears(-25);
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+        public string Group { get; set; } = "";
+        public string ClassLevel { get; set; } = "";
+        public string Gender { get; set; } = "";
+        public string Status { get; set; } = "active";
+        public string Experience { get; set; } = "";
+        public string AttendanceStatus { get; set; } = ""; // لتخزين حالة الحضور (حاضر/غائب/مبرر) لكل معلم
+    }
+
+    private List<LocalTeacher> masterTeacherList = new();
+    private List<LocalTeacher> filteredTeacherList = new();
+    
+    private LocalTeacher _model = new();
+    private string searchQuery = "";
+    private bool isEditMode = false;
+    private bool _isDetailsOpen = false;
+    private bool ShowMessage = false;
+    private string Message = "";
+
+    protected override void OnInitialized()
+    {
+        // تثبيت الثلاث معلمات الأصليات اللي بملفكِ عشان يظهروا بالجدول فوراً بنفس أسمائهم
+        masterTeacherList = new List<LocalTeacher>
+        {
+            new LocalTeacher { FullName = "آلاء قاسم" },
+            new LocalTeacher { FullName = "ماريا العبدالسلام" },
+            new LocalTeacher { FullName = "آية دعبول" }
+        };
+        
+        filteredTeacherList = new List<LocalTeacher>(masterTeacherList);
+    }
+
+    private void HandleSubmit()
+    {
+        if (isEditMode)
+        {
+            var target = masterTeacherList.FirstOrDefault(t => t.Id == _model.Id);
+            if (target != null)
+            {
+                target.FullName = _model.FullName;
+                target.Phone = _model.Phone;
+                target.RegisterDate = _model.RegisterDate;
+                target.BirthDate = _model.BirthDate;
+                target.Email = _model.Email;
+                target.Password = _model.Password;
+                target.Group = _model.Group;
+                target.ClassLevel = _model.ClassLevel;
+                target.Gender = _model.Gender;
+                target.Status = _model.Status;
+                target.Experience = _model.Experience;
+                Message = "تم تعديل بيانات المعلم بنجاح!";
+                ShowMessage = true;
+            }
+        }
+        else
+        {
+            masterTeacherList.Insert(0, new LocalTeacher
+            {
+                FullName = _model.FullName,
+                Phone = _model.Phone,
+                RegisterDate = _model.RegisterDate,
+                BirthDate = _model.BirthDate,
+                Email = _model.Email,
+                Password = _model.Password,
+                Group = _model.Group,
+                ClassLevel = _model.ClassLevel,
+                Gender = _model.Gender,
+                Status = _model.Status,
+                Experience = _model.Experience
+            });
+            Message = "تم إضافة المعلم بنجاح!";
+            ShowMessage = true;
+        }
+
+        ResetForm();
+        ApplyFilter();
+    }
+
+    private void EnableEditMode(LocalTeacher teacher)
+    {
+        isEditMode = true;
+        _model = new LocalTeacher
+        {
+            Id = teacher.Id,
+            FullName = teacher.FullName,
+            Phone = teacher.Phone,
+            RegisterDate = teacher.RegisterDate,
+            BirthDate = teacher.BirthDate,
+            Email = teacher.Email,
+            Password = teacher.Password,
+            Group = teacher.Group,
+            ClassLevel = teacher.ClassLevel,
+            Gender = teacher.Gender,
+            Status = teacher.Status,
+            Experience = teacher.Experience
+        };
+        _isDetailsOpen = true;
+        ShowMessage = false;
+    }
+
+    private void DeleteTeacher(Guid id)
+    {
+        var target = masterTeacherList.FirstOrDefault(t => t.Id == id);
+        if (target != null)
+        {
+            masterTeacherList.Remove(target);
+            Message = "تم حذف المعلم محلياً!";
+            ShowMessage = true;
+        }
+        ApplyFilter();
+    }
+
+    private void MarkAttendance(LocalTeacher teacher, string status)
+    {
+        teacher.AttendanceStatus = status;
+        Message = $"تم تسجيل ({teacher.FullName}) بـ {status}";
+        ShowMessage = true;
+    }
+
+    private void HandleSearch(ChangeEventArgs e)
+    {
+        searchQuery = e.Value?.ToString() ?? "";
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        if (string.IsNullOrWhiteSpace(searchQuery))
+        {
+            filteredTeacherList = new List<LocalTeacher>(masterTeacherList);
+        }
+        else
+        {
+            filteredTeacherList = masterTeacherList
+                .Where(t => t.FullName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    private void ToggleDetails()
+    {
+        _isDetailsOpen = !_isDetailsOpen;
+        if (!_isDetailsOpen) isEditMode = false;
+    }
+
+    private void ResetForm()
+    {
+        _model = new LocalTeacher();
+        isEditMode = false;
+        _isDetailsOpen = false;
+    }
+
+    private void viewTeacher1()
+    {
+        NavManager.NavigateTo("/supervisor/teacher1");
+    }
+
+    private void editTeacher()
+    {
+        NavManager.NavigateTo("/supervisor/editinfo_teacher");
+    }
 }
