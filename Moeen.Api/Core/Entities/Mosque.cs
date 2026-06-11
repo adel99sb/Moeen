@@ -1,23 +1,22 @@
-﻿namespace Moeen.Api.Core.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Moeen.Api.Core.Entities
 {
-     public class Mosque
+    public class Mosque
     {
-        public Guid Id  { get; set; }
-        public string name{ get; set; }
-         public string address { get; set; }
-        public string contact_phone { get; set; }
-        public string Description { get; set; }
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
+        [Key]
+        public Guid Id { get; set; }
 
-        public ICollection <Fouj> foujs { get; set; }
-        public ICollection<Teacher> Teachers { get; set; }
-        public ICollection<TeacherExam> TeacherExams { get; set; }
+        [Required]
+        [StringLength(150)]
+        public string Name { get; set; }
 
-        public ICollection<PdfFile> pdfFiles { get; set; }
-        public ICollection<SaturdayLesson> SaturdayLessons { get; set; }
-        public ICollection<Post> posts { get; set; }
-        public ICollection<Supervisor> supervisors { get; set; }
-        public ICollection<Student> Students { get; set; }
+        [Required]
+        [StringLength(250)]
+        public string Address { get; set; }
+
+        public ICollection<MosqueUser> MosqueUsers { get; set; } = new List<MosqueUser>();
+        public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
+        public ICollection<Post> Posts { get; set; } = new List<Post>();
     }
 }

@@ -1,16 +1,26 @@
-﻿namespace Moeen.Api.Core.Entities
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Moeen.Api.Core.Entities
 {
     public class Post
     {
-        public Guid Id {  get; set; }
+        [Key]
+        public Guid Id { get; set; }
+
+        [Required]
         public Guid MosqueId { get; set; }
-        public string title { get; set; }
-        public string body { get; set; }
-        public string imageUrl { get; set; }
-        public DateTime created_at { get; set; }
+
+        [ForeignKey("MosqueId")]
         public Mosque Mosque { get; set; }
-        public ICollection<PosInteraction> PosInteractions { get; set; }
 
+        [Required]
+        [StringLength(200)]
+        public string Title { get; set; }
 
+        [Required]
+        public string Body { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

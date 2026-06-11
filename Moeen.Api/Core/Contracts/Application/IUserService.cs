@@ -1,5 +1,4 @@
-﻿using Moeen.Shared.Requests;
-using Moeen.Shared.Requests.Identity;
+﻿using Moeen.Shared.Requests.User;
 using Moeen.Shared.Responses;
 
 namespace Moeen.Api.Core.Contracts.Application
@@ -8,12 +7,10 @@ namespace Moeen.Api.Core.Contracts.Application
     {
         Task<GeneralResponse> RegisterAsync(RegisterRequest registerRequest);
         Task<GeneralResponse> LoginAsync(LoginRequest loginRequest);
-        Task<GeneralResponse> GetAllUsersAsync(PaginationRequest paginationRequest, string? keyword);
-        Task<GeneralResponse> ChangeUserEmailAsync(string email);
-        Task<GeneralResponse> GetUserByIdAsync(Guid userId);
         Task<GeneralResponse> SendVerifyEmailCodeAsync(SendVerifyEmailCodeRequest sendVerifyEmailCodeRequest);
         Task<GeneralResponse> VerifyEmailAsync(VerifyEmailRequest verifyEmailRequest);
-        Task<GeneralResponse> SendPasswordResetUrlAsync(SendPasswordResetUrlRequest sendPasswordResetUrlRequest);
-        Task<GeneralResponse> ResetPasswordAsync(ChangePasswordRequest changePasswordRequest);
+        Task<GeneralResponse> ResetPasswordAsync(ResetPasswordRequest resetPasswordRequest);
+        Task<GeneralResponse> DeleteUserAsync(Guid userId);
+        Task<GeneralResponse> GetAllUsersAsync();
     }
 }

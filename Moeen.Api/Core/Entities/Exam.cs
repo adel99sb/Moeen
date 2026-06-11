@@ -1,21 +1,29 @@
-﻿namespace Moeen.Api.Core.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Moeen.Api.Core.Entities
 {
     public class Exam
     {
-        public Guid Id {  get; set; }
+        [Key]
+        public Guid Id { get; set; }
+
+        [Required]
         public Guid StudentId { get; set; }
+        public User Student { get; set; }
+
+        [Required]
         public Guid TeacherId { get; set; }
-        public int juz_form {  get; set; }
-        public int juz_to { get; set; }
-        public int score { get; set; }
-        public DateTime date { get; set; }
+        public User Teacher { get; set; }
 
-        public string notes { get; set; }
-        public int mark { get; set; }
-        public Student Student { get; set; }
-        public Teacher Teacher { get; set; }
-        public Guid TeacherExamId { get; set; }
-        public TeacherExam TeacherExams { get; set; }
+        [Required]
+        public int JuzForm { get; set; }
 
+        [Required]
+        public int JuzTo { get; set; }
+
+        [Required]
+        public int Mark { get; set; }
+
+        public DateTime Date { get; set; } = DateTime.Now;
     }
 }

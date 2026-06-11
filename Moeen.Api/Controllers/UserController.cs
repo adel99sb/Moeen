@@ -2,16 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Application;
 using Moeen.Api.Core.Contracts.Application;
-using Moeen.Shared.Requests;
-using Moeen.Shared.Requests.Identity;
+using Moeen.Shared.Requests.User;
 
 namespace Moeen.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class UserController : ControllerBase
-    {   
+    {
         private readonly IUserService _userService;
 
         public UserController(IUserService userService)
@@ -20,11 +18,11 @@ namespace Moeen.Api.Controllers
         }
 
         /// <summary>
-        /// Register (moved here). POST api/user/register
+        /// إنشاء مستخدم جديد وتحديد نوعه مع إمكانية رفع صورة شخصية
         /// </summary>
         [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
+        public async Task<IActionResult> Register([FromForm] RegisterRequest registerRequest)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -34,14 +32,14 @@ namespace Moeen.Api.Controllers
                 var result = await _userService.RegisterAsync(registerRequest);
                 return result.ToActionResult();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest("An error occurred while registering.");
+                return BadRequest($"An error occurred while registering: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Login (moved here). POST api/user/login
+        /// تسجيل الدخول والحصول على الـ Access Token
         /// </summary>
         [AllowAnonymous]
         [HttpPost("login")]
@@ -55,92 +53,106 @@ namespace Moeen.Api.Controllers
                 var result = await _userService.LoginAsync(loginRequest);
                 return result.ToActionResult();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest("An error occurred while logging in.");
+                return BadRequest($"An error occurred while logging in: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// جلب مستخدمين مع تصفح (body: PaginationRequest, optional query: keyword)
-        /// </summary>
-        [HttpPost("search")]
-        public async Task<IActionResult> GetAllUsers([FromBody] PaginationRequest paginationRequest, [FromQuery] string? keyword = null)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await _userService.GetAllUsersAsync(paginationRequest, keyword);
-            return result.ToActionResult();
-        }
-
-        /// <summary>
-        /// جلب بيانات مستخدم بواسطة المعرف
-        /// </summary>
-        [HttpGet("{userId:guid}")]
-        public async Task<IActionResult> GetUserById([FromRoute] Guid userId)
-        {
-            var result = await _userService.GetUserByIdAsync(userId);
-            return result.ToActionResult();
-        }
-
-        /// <summary>
-        /// تعديل إيميل المستخدم الحالي (body: string email)
-        /// </summary>
-        [HttpPut("change-email")]
-        public async Task<IActionResult> ChangeEmail([FromBody] string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-                return BadRequest("Email is required.");
-
-            var result = await _userService.ChangeUserEmailAsync(email);
-            return result.ToActionResult();
-        }
-
-        /// <summary>
-        /// إرسال رابط إعادة كلمة السر إلى الإيميل (يسمح للمجهولين)
+        /// طلب إرسال كود التحقق إلى البريد الإلكتروني (نسيت كلمة المرور / تأكيد الحساب)
         /// </summary>
         [AllowAnonymous]
-        [HttpPost("send-reset-url")]
-        public async Task<IActionResult> SendPasswordResetUrl([FromBody] SendPasswordResetUrlRequest request)
-        {
-            var result = await _userService.SendPasswordResetUrlAsync(request);
-            return result.ToActionResult();
-        }
-
-        /// <summary>
-        /// إعادة تعيين كلمة السر (body: ChangePasswordRequest) — يجب تزويد Token في الطلب
-        /// </summary>
-        [AllowAnonymous]
-        [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] ChangePasswordRequest request)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await _userService.ResetPasswordAsync(request);
-            return result.ToActionResult();
-        }
-
-        /// <summary>
-        /// إرسال كود تحقق للإيميل (يمكن أن يستقبل Email داخل الطلب أو يستخدم المستخدم الحالي)
-        /// </summary>
         [HttpPost("send-verify-code")]
         public async Task<IActionResult> SendVerifyEmailCode([FromBody] SendVerifyEmailCodeRequest request)
         {
-            var result = await _userService.SendVerifyEmailCodeAsync(request);
-            return result.ToActionResult();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var result = await _userService.SendVerifyEmailCodeAsync(request);
+                return result.ToActionResult();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred while sending verification code: {ex.Message}");
+            }
         }
 
         /// <summary>
-        /// تحقق من كود التفعيل (body: VerifyEmailRequest)
+        /// التحقق من كود التأكيد المرسل للإيميل وتفعيل الحساب
         /// </summary>
         [AllowAnonymous]
         [HttpPost("verify-email")]
         public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request)
         {
-            var result = await _userService.VerifyEmailAsync(request);
-            return result.ToActionResult();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var result = await _userService.VerifyEmailAsync(request);
+                return result.ToActionResult();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred while verifying email: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// إعادة تعيين كلمة المرور بشكل مبسط عبر الـ Uid والكلمة الجديدة
+        /// </summary>
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var result = await _userService.ResetPasswordAsync(request);
+                return result.ToActionResult();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred while resetting password: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// حذف حساب المستخدم نهائياً مع صورته الشخصية من السيرفر
+        /// </summary>
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> DeleteUser(Guid userId)
+        {
+            try
+            {
+                var result = await _userService.DeleteUserAsync(userId);
+                return result.ToActionResult();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred while deleting user: {ex.Message}");
+            }
+        }
+        /// <summary>
+        /// جلب قائمة بجميع المستخدمين المسجلين في النظام. GET api/user
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            try
+            {
+                var result = await _userService.GetAllUsersAsync();
+                return result.ToActionResult();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred while retrieving users: {ex.Message}");
+            }
         }
     }
 }

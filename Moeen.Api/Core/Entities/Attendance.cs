@@ -1,21 +1,34 @@
 ﻿using Moeen.Shared.Constants;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Moeen.Api.Core.Entities
 {
     public class Attendance
     {
+        [Key]
         public Guid Id { get; set; }
-        public Guid SaturdayLessonId { get; set; }
+
+        [Required]
         public Guid StudentId { get; set; }
-        public Guid HalqeSessionId { get; set; }
-        public Guid TeacherId { get; set; }
 
+        [ForeignKey("StudentId")]
+        public User Student { get; set; }
+
+        [Required]
+        public Guid MosqueId { get; set; }
+
+        [ForeignKey("MosqueId")]
+        public Mosque Mosque { get; set; }
+
+        [Required]
+        [DataType(DataType.Date)]
+        public DateTime AttendanceDate { get; set; }
+
+        [Required]
         public AttendanceStatus Status { get; set; }
-        public string? Note { get; set; }
 
-        public SaturdayLesson SaturdayLesson { get; set; }
-        public Teacher Teacher { get; set; }
-        public HalqaSession HalqeSession { get; set; }
-        public Student Student { get; set; }
+        [StringLength(250)]
+        public string? Note { get; set; }
     }
 }

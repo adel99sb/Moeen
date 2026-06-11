@@ -75,32 +75,7 @@ builder.Services.AddScoped<IVerificationService, VerificationService>();
 builder.Services.AddScoped<IFileService, FileService>();
 
 // Application Services
-builder.Services.AddScoped<IMosquService, MosquService>();
-builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
-builder.Services.AddScoped<IHalqaCommandService, HalqaCommandService>();
-builder.Services.AddScoped<IRegistrationService, RegistrationService>();
-builder.Services.AddScoped<IHalqaQueryService, HalqaQueryService>();
-builder.Services.AddScoped<IHalqaTeacherAssignmentService , HalqaTeacherAssignmentService>();
-builder.Services.AddScoped<IMemorizationService, MemorizationService>();
-builder.Services.AddScoped<IReviewService, ReviewService>();
-builder.Services.AddScoped<IPointsService, PointsService>();
-builder.Services.AddScoped<IExamCommandService, ExamCommandService>();
-builder.Services.AddScoped<IExamQueryService, ExamQueryService>();
-builder.Services.AddScoped<IGoalService, GoalService>();
-builder.Services.AddScoped<ILessonManagementService, LessonManagementService>();
-builder.Services.AddScoped<IAttendanceService, AttendanceService>();
-builder.Services.AddScoped<IContentSharingService, ContentSharingService>();
-builder.Services.AddScoped<IFeedbackService, FeedbackService>();
-builder.Services.AddScoped<ILibraryService, LibraryService>();
-builder.Services.AddScoped<IReportingService, ReportingService>();
-builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
-builder.Services.AddScoped<IExamHalqaService, ExamHalqaService>();
-builder.Services.AddScoped<IBackupService, BackupService>();
-builder.Services.AddScoped<IFoujService, FoujService>();
-builder.Services.AddScoped<IStudentNotesService, StudentNotesService>();
-builder.Services.AddScoped<IDailyAssignmentService, DailyAssignmentService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 

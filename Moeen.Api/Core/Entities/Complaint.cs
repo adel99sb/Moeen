@@ -1,19 +1,30 @@
 ﻿using Moeen.Shared.Constants;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Moeen.Api.Core.Entities
 {
     public class Complaint
     {
+        [Key]
         public Guid Id { get; set; }
+
+        [Required]
         public Guid UserId { get; set; }
-        public string? Title { get; set; } // اختياري للاقتراحات
-        public string content { get; set; }
-        public DateTime created_at { get; set; }
-        public FeedbackType Type { get; set; } // لتمييز الشكوى من الاقتراح
-        public ComplaintStatus? Status { get; set; } // للشكاوى
-        public SuggestionStatus? SuggestionStatus { get; set; } // للاقتراحات
-        public string? Response { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+
+        [ForeignKey("UserId")]
         public User User { get; set; }
+
+        [Required]
+        [StringLength(200)]
+        public string Title { get; set; }
+
+        [Required]
+        public string Content { get; set; }
+
+        [Required]
+        public ComplaintStatus Status { get; set; } = ComplaintStatus.Pending;
+
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

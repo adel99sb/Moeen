@@ -1,22 +1,26 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations.Schema;
+using Moeen.Shared.Constants;
+using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Api.Core.Entities
 {
     public class User : IdentityUser<Guid>
     {
-        public string name { get; set; }
-        public string? gender { get; set; }
-        public int font_size { get; set; }
-        public int role { get; set; }
-        public string? theme { get; set; }
-        public string? profile_imageUrl { get; set; }
-        public DateTime created_at { get; set; }
+        [StringLength(50)]
+        public string? PhoneNumber { get; set; }
+        [StringLength(50)]
+        public string? FullName { get; set; }
+        public string? Gender { get; set; }
+        public string? ProfileImageUrl { get; set; }
 
-        [Column("joinef_at")]
-        public DateTime JoinedAt { get; set; }
+        [Required]
+        public UserRole UserRole { get; set; }
 
-        public ICollection<Complaint> complaints { get; set; }
-        public ICollection<PosInteraction> PosInteractions { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        // جداول الكسر والعلاقات المتبادلة
+        public ICollection<MosqueUser> MosqueUsers { get; set; } = new List<MosqueUser>();
+        public ICollection<ParentStudent> AsParentStudents { get; set; } = new List<ParentStudent>();
+        public ICollection<ParentStudent> AsChildStudents { get; set; } = new List<ParentStudent>();
     }
 }

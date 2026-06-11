@@ -1,10 +1,10 @@
-namespace Moeen.Shared.Constants
+﻿namespace Moeen.Shared.Constants
 {
     public enum ComplaintStatus
     {
-        
-        InProgress = 1,
-        Resolved = 2,
-        Delete=3
+        Pending = 1,
+        InReview = 2,
+        Resolved = 3,
+        Rejected = 4
     }
 }

@@ -1,82 +1,35 @@
 ﻿<!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>التحقق من البريد الإلكتروني - مُعِين</title>
-    <!-- خط كوفي من Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>تأكيد البريد الإلكتروني</title>
+
     <style>
         :root {
-            /* الألوان الأساسية - المحسّنة */
-            --color-primary: #1a5f50;
-            --color-secondary: #2d4743;
-            --color-accent: #a8956d;
-            --color-accent-light: #d4c5a9;
-            /* خلفيات */
-            --color-bg: #f5f3f0;
-            --color-white: #ffffff;
-            --color-danger: #d32f2f;
-            --color-success: #2e7d32;
-            /* تدرجات */
-            --gradient-primary: linear-gradient(135deg, #1a5f50 0%, #2d4743 100%);
-            --gradient-accent: linear-gradient(135deg, #a8956d 0%, #92805a 100%);
-            --gradient-light: linear-gradient(135deg, #f5f3f0 0%, #ebe5dc 100%);
-            /* انحناءات وظلال */
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 16px;
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-            --shadow-md: 0 8px 20px rgba(0,0,0,0.1);
-            --shadow-lg: 0 12px 32px rgba(0,0,0,0.15);
-            /* متغيرات أخرى */
-            --transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-fast: all 0.2s ease;
-            --border-color: rgba(26, 95, 80, 0.12);
+            --primary-color: #4a90e2;
+            --accent-color: #66ccff;
+            --text-color: #ffffff;
+            --card-bg: #1b2a33;
+            --bg-gradient: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
         }
 
         body {
             margin: 0;
-            padding: 20px;
-            font-family: 'Noto Kufi Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--gradient-light);
-            color: var(--color-secondary);
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-color);
             -webkit-text-size-adjust: 100%;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .container {
-            max-width: 600px;
-            width: 100%;
+            max-width: 650px;
             margin: auto;
-            background: var(--color-white);
-            border-radius: var(--radius-lg);
-            padding: 40px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border-color);
-            animation: slideUp 0.5s var(--transition);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
-            }
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 35px;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
         }
 
         .header {
@@ -85,868 +38,104 @@
         }
 
         .logo-box {
-            width: 80px;
-            height: 80px;
-            background: var(--gradient-primary);
+            width: 85px;
+            height: 85px;
+            background-color: rgba(255, 255, 255, 0.1);
             border-radius: 50%;
-            margin: 0 auto 20px;
+            margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
-            font-weight: bold;
-            color: var(--color-white);
-            overflow: hidden;
-            box-shadow: 0 8px 16px rgba(26, 95, 80, 0.2);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 8px 16px rgba(26, 95, 80, 0.2);
-            }
-
-            50% {
-                box-shadow: 0 8px 24px rgba(26, 95, 80, 0.35);
-            }
-        }
-
-        .logo-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
 
         h1 {
-            font-size: 28px;
-            margin: 0 0 8px 0;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .subtitle {
-            font-size: 14px;
-            color: var(--color-accent);
-            font-weight: 500;
-            letter-spacing: 1px;
+            font-size: 26px;
             margin: 0;
+            color: var(--accent-color);
         }
 
         p {
-            line-height: 1.8;
-            font-size: 15px;
-            margin-bottom: 18px;
-            color: var(--color-secondary);
-            opacity: 0.9;
-        }
-
-        strong {
-            color: var(--color-primary);
-            font-weight: 600;
+            line-height: 1.7;
+            font-size: 16px;
+            margin-bottom: 20px;
+            opacity: 0.95;
         }
 
         .code-box {
             text-align: center;
-            margin: 40px 0;
-            padding: 25px 0;
+            margin: 35px 0;
         }
 
         .code {
             display: inline-block;
-            padding: 14px 28px;
-            font-size: 22px;
-            letter-spacing: 1px;
-            font-weight: 700;
-            color: var(--color-white);
-            background: var(--gradient-primary);
-            border: none;
+            padding: 14px 32px;
+            font-size: 28px;
+            letter-spacing: 8px;
+            font-weight: bold;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
             border-radius: 10px;
-            box-shadow: 0 6px 14px rgba(26, 95, 80, 0.22);
-            transition: var(--transition);
-            cursor: default;
-        }
-
-            .code:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 8px 20px rgba(26, 95, 80, 0.28);
-            }
-
-        .code-subtitle {
-            margin-top: 12px;
-            font-size: 13px;
-            color: var(--color-secondary);
-            opacity: 0.65;
-            font-weight: 500;
-        }
-
-        .footer {
-            margin-top: 40px;
-            font-size: 12px;
-            text-align: center;
-            color: var(--color-secondary);
-            opacity: 0.6;
-            border-top: 1px solid var(--border-color);
-            padding-top: 25px;
-            line-height: 1.6;
-        }
-
-            .footer a {
-                font-weight: 500;
-                opacity: 0.8;
-            }
-
-        a {
-            color: var(--color-primary);
-            text-decoration: none;
-            transition: var(--transition-fast);
-            position: relative;
-        }
-
-            a:hover {
-                color: var(--color-accent);
-            }
-
-            a::after {
-                content: '';
-                position: absolute;
-                width: 0;
-                height: 2px;
-                bottom: -2px;
-                right: 0;
-                background: var(--color-accent);
-                transition: width 0.3s ease;
-            }
-
-            a:hover::after {
-                width: 100%;
-                right: auto;
-                left: 0;
-            }
-
-        /* Social Links Styling */
-        .social-links {
-            margin: 8px 0;
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .social-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 14px;
-            background: linear-gradient(135deg, rgba(26, 95, 80, 0.08) 0%, rgba(168, 149, 109, 0.06) 100%);
-            border-radius: var(--radius-sm);
-            font-weight: 500;
-            font-size: 12px;
-            color: var(--color-primary);
-            border: 1px solid var(--border-color);
-            text-decoration: none;
-            transition: var(--transition-fast);
-            white-space: nowrap;
-        }
-
-            .social-link:hover {
-                background: var(--gradient-primary);
-                color: var(--color-white);
-                border-color: transparent;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(26, 95, 80, 0.2);
-            }
-
-        .social-label {
-            font-size: 12px;
-            font-weight: 600;
-            display: block;
-            margin: 12px 0 8px 0;
-            color: var(--color-primary);
-            letter-spacing: 0.5px;
-        }
-
-        .social-row {
-            margin: 12px 0;
-        }
-
-        /* Social Media Section - Improved Design */
-        .social-section {
-            margin-top: 35px;
-            padding-top: 25px;
-            border-top: 2px solid var(--border-color);
-        }
-
-        .social-section-title {
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--color-secondary);
-            opacity: 0.7;
-            text-align: center;
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-            .social-section-title::before,
-            .social-section-title::after {
-                content: '';
-                flex: 1;
-                height: 1px;
-                background: linear-gradient(to right, var(--border-color), transparent);
-            }
-
-            .social-section-title::after {
-                background: linear-gradient(to left, var(--border-color), transparent);
-            }
-
-        .social-icons {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .social-icon-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            text-decoration: none;
-            transition: var(--transition);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border: 2px solid transparent;
             position: relative;
             overflow: hidden;
         }
 
-            .social-icon-btn::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: -100%;
-                width: 100%;
-                height: 100%;
-                background: rgba(255,255,255,0.2);
-                transition: left 0.3s ease;
-                z-index: -1;
-            }
-
-            .social-icon-btn:hover::before {
-                left: 100%;
-            }
-
-            /* Facebook */
-            .social-icon-btn.facebook {
-                background: #1877F2;
-                color: #fff;
-                border: none;
-            }
-
-                .social-icon-btn.facebook:hover {
-                    background: #1451a3;
-                    color: #fff;
-                    transform: translateY(-4px);
-                    box-shadow: 0 8px 20px rgba(24,119,242,0.3);
-                }
-
-                .social-icon-btn.facebook svg {
-                    color: #fff;
-                }
-
-            .social-icon-btn.instagram {
-                background: linear-gradient(135deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%);
-                color: #fff;
-                border: none;
-            }
-
-                .social-icon-btn.instagram:hover {
-                    filter: brightness(0.92) saturate(1.2);
-                    color: #fff;
-                    transform: translateY(-4px) scale(1.06);
-                    box-shadow: 0 8px 20px rgba(238,42,123,0.18);
-                }
-
-                .social-icon-btn.instagram svg {
-                    color: #fff;
-                }
-
-        .social-links-alternative {
-            display: none;
+        .footer {
+            margin-top: 35px;
+            font-size: 13px;
+            text-align: center;
+            color: #bbbbbb;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            padding-top: 20px;
         }
 
-        @media (max-width: 600px) {
-            .social-icon-btn {
-                width: 44px;
-                height: 44px;
-                font-size: 20px;
-            }
-
-            .social-icons {
-                gap: 12px;
-            }
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
 
         <div class="header">
             <div class="logo-box">
-                <!-- ضع شعارك هنا (صورة أو نص) -->
-                <img src="https://via.placeholder.com/80?text=🔐" alt="شعار معين">
+                <img src="logo.svg" alt="Logo" width="55">
             </div>
-            <h1>تطبيق مُعِين</h1>
-            <p class="subtitle">أتمتة جوامع حلب الذكية</p>
+            <h1>تأكيد بريدك الإلكتروني</h1>
+            <p>مرحباً بك في منصتك!</p>
         </div>
 
+        <p>مرحباً،</p>
+
         <p>
-            شكراً لتسجيلك في منصة <strong>مُعِين</strong> – الحل المتكامل لإدارة جوامع حلب.
+            شكراً لإنضمامك إلى منصتنا! لإكمال عملية التسجيل، يرجى إدخال رمز التحقق التالي في الموقع:
         </p>
 
         <div class="code-box">
-            <div class="code">تم تأكيد حسابك</div>
-            <p class="code-subtitle">✓ هذا الرمز صالح لمدة 10 دقائق فقط</p>
+            <div class="code">
+                {{verificationCode}}
+            </div>
+            <p style="margin-top: 10px; font-size: 14px; opacity: 0.7;">
+                هذا الرمز صالح لمدة 10 دقائق.
+            </p>
         </div>
 
         <p>
-            إذا لم تقم بهذا الطلب، يمكنك تجاهل هذه الرسالة بأمان.
+            إذا لم تقم بطلب هذا الإجراء، يمكنك تجاهل هذه الرسالة بكل أمان.
         </p>
 
         <p>
-            مع أطيب التحيات،<br>
-            <strong>فريق مُعِين</strong>
+            مع التحية،<br>
+            فريق المنصة
         </p>
 
         <div class="footer">
-            <p> تطبيق مُعِين.جميع</p>
-            <p style="margin: 10px 0 0 0; font-size: 11px; opacity: 0.5;">
-                هذه رسالة آلية، الرجاء عدم الرد عليها
-            </p>
-
-            <!-- Social Media Icons -->
-            <div class="social-section">
-                <div class="social-section-title">تابعنا</div>
-                <div class="social-icons">
-                    <a href="https://www.facebook.com/share/1AKgpZoToy/" target="_blank" rel="noopener noreferrer"
-                       class="social-icon-btn facebook" title="تابعنا على فيسبوك">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-label="Facebook">
-                            <path d="M22.675 0H1.325C0.593 0 0 0.593 0 1.325V22.676C0 23.407 0.593 24 1.325 24H12.82V14.706H9.692V11.174H12.82V8.418C12.82 5.333 14.766 3.69 17.523 3.69C18.845 3.69 19.985 3.78 20.297 3.82V6.97L18.33 6.971C16.722 6.971 16.412 7.774 16.412 8.877V11.17H20.16L19.679 14.702H16.412V24H22.675C23.407 24 24 23.407 24 22.675V1.325C24 0.593 23.407 0 22.675 0Z" />
-                        </svg>
-                    </a>
-                    <a href="https://www.instagram.com/moeen21557?igsh=MXBxbmRxczYzMGc2dg==" target="_blank" rel="noopener noreferrer"
-                       class="social-icon-btn instagram" title="تابعنا على إنستغرام">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-label="Instagram">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.17.054 1.97.24 2.427.405a4.92 4.92 0 0 1 1.754 1.14 4.92 4.92 0 0 1 1.14 1.754c.165.457.35 1.257.405 2.427.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.054 1.17-.24 1.97-.405 2.427a4.92 4.92 0 0 1-1.14 1.754 4.92 4.92 0 0 1-1.754 1.14c-.457.165-1.257.35-2.427.405-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.17-.054-1.97-.24-2.427-.405a4.92 4.92 0 0 1-1.754-1.14 4.92 4.92 0 0 1-1.14-1.754c-.165-.457-.35-1.257-.405-2.427C2.175 15.747 2.163 15.367 2.163 12s.012-3.584.07-4.85c.054-1.17.24-1.97.405-2.427a4.92 4.92 0 0 1 1.14-1.754 4.92 4.92 0 0 1 1.754-1.14c.457-.165 1.257-.35 2.427-.405C8.416 2.175 8.796 2.163 12 2.163Zm0-2.163C8.736 0 8.332.013 7.052.072 5.765.132 4.78.332 4.01.61A6.917 6.917 0 0 0 1.982 1.98a6.917 6.917 0 0 0-1.37 2.028c-.278.77-.478 1.755-.538 3.042C.013 8.332 0 8.736 0 12c0 3.264.013 3.668.072 4.948.06 1.287.26 2.272.538 3.042a6.917 6.917 0 0 0 1.37 2.028 6.917 6.917 0 0 0 2.028 1.37c.77.278 1.755.478 3.042.538 1.28.059 1.684.072 4.948.072s3.668-.013 4.948-.072c1.287-.06 2.272-.26 3.042-.538a6.917 6.917 0 0 0 2.028-1.37 6.917 6.917 0 0 0 1.37-2.028c.278-.77.478-1.755.538-3.042.059-1.28.072-1.684.072-4.948s-.013-3.668-.072-4.948c-.06-1.287-.26-2.272-.538-3.042a6.917 6.917 0 0 0-1.37-2.028A6.917 6.917 0 0 0 19.032.61c-.77-.278-1.755-.478-3.042-.538C15.668.013 15.264 0 12 0Zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324Zm0 10.162a3.999 3.999 0 1 1 0-7.998 3.999 3.999 0 0 1 0 7.998Zm6.406-11.845a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88Z" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Alternative: Text links (hidden by default) -->
-            <div class="social-links-alternative">
-                <div class="social-row">
-                    <span class="social-label">📘 تابعنا على فيسبوك:</span>
-                    <a href="https://www.facebook.com/share/1AKgpZoToy/" target="_blank" class="social-link">
-                        https://www.facebook.com/share/1AKgpZoToy/
-                    </a>
-                </div>
-                <div class="social-row">
-                    <span class="social-label">📸 تابعنا على إنستغرام:</span>
-                    <a href="https://www.instagram.com/moeen21557?igsh=MXBxbmRxczYzMGc2dg==" target="_blank" class="social-link">
-                        https://www.instagram.com/moeen21557
-                    </a>
-                </div>
-            </div>
+            <p>هذه رسالة مرسلة تلقائياً. الرجاء عدم الرد عليها مباشرة.</p>
+            <p>للمساعدة: <a href="mailto:support@example.com">support@example.com</a></p>
+            <p><a href="https://your-website.com">منصتك</a></p>
         </div>
-    </div>
-
-    </div>
-
-</body>
-</html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>التحقق من البريد الإلكتروني - مُعِين</title>
-    <!-- خط كوفي من Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            /* الألوان الأساسية - المحسّنة */
-            --color-primary: #1a5f50;
-            --color-secondary: #2d4743;
-            --color-accent: #a8956d;
-            --color-accent-light: #d4c5a9;
-            /* خلفيات */
-            --color-bg: #f5f3f0;
-            --color-white: #ffffff;
-            --color-danger: #d32f2f;
-            --color-success: #2e7d32;
-            /* تدرجات */
-            --gradient-primary: linear-gradient(135deg, #1a5f50 0%, #2d4743 100%);
-            --gradient-accent: linear-gradient(135deg, #a8956d 0%, #92805a 100%);
-            --gradient-light: linear-gradient(135deg, #f5f3f0 0%, #ebe5dc 100%);
-            /* انحناءات وظلال */
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 16px;
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-            --shadow-md: 0 8px 20px rgba(0,0,0,0.1);
-            --shadow-lg: 0 12px 32px rgba(0,0,0,0.15);
-            /* متغيرات أخرى */
-            --transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-fast: all 0.2s ease;
-            --border-color: rgba(26, 95, 80, 0.12);
-        }
-
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: 'Noto Kufi Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--gradient-light);
-            color: var(--color-secondary);
-            -webkit-text-size-adjust: 100%;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .container {
-            max-width: 600px;
-            width: 100%;
-            margin: auto;
-            background: var(--color-white);
-            border-radius: var(--radius-lg);
-            padding: 40px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border-color);
-            animation: slideUp 0.5s var(--transition);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
-            }
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .logo-box {
-            width: 80px;
-            height: 80px;
-            background: var(--gradient-primary);
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            font-weight: bold;
-            color: var(--color-white);
-            overflow: hidden;
-            box-shadow: 0 8px 16px rgba(26, 95, 80, 0.2);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 8px 16px rgba(26, 95, 80, 0.2);
-            }
-
-            50% {
-                box-shadow: 0 8px 24px rgba(26, 95, 80, 0.35);
-            }
-        }
-
-        .logo-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        h1 {
-            font-size: 28px;
-            margin: 0 0 8px 0;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .subtitle {
-            font-size: 14px;
-            color: var(--color-accent);
-            font-weight: 500;
-            letter-spacing: 1px;
-            margin: 0;
-        }
-
-        p {
-            line-height: 1.8;
-            font-size: 15px;
-            margin-bottom: 18px;
-            color: var(--color-secondary);
-            opacity: 0.9;
-        }
-
-        strong {
-            color: var(--color-primary);
-            font-weight: 600;
-        }
-
-        .code-box {
-            text-align: center;
-            margin: 40px 0;
-            padding: 25px 0;
-        }
-
-        .code {
-            display: inline-block;
-            padding: 14px 28px;
-            font-size: 22px;
-            letter-spacing: 1px;
-            font-weight: 700;
-            color: var(--color-white);
-            background: var(--gradient-primary);
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 6px 14px rgba(26, 95, 80, 0.22);
-            transition: var(--transition);
-            cursor: default;
-        }
-
-            .code:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 8px 20px rgba(26, 95, 80, 0.28);
-            }
-
-        .code-subtitle {
-            margin-top: 12px;
-            font-size: 13px;
-            color: var(--color-secondary);
-            opacity: 0.65;
-            font-weight: 500;
-        }
-
-        .footer {
-            margin-top: 40px;
-            font-size: 12px;
-            text-align: center;
-            color: var(--color-secondary);
-            opacity: 0.6;
-            border-top: 1px solid var(--border-color);
-            padding-top: 25px;
-            line-height: 1.6;
-        }
-
-            .footer a {
-                font-weight: 500;
-                opacity: 0.8;
-            }
-
-        a {
-            color: var(--color-primary);
-            text-decoration: none;
-            transition: var(--transition-fast);
-            position: relative;
-        }
-
-            a:hover {
-                color: var(--color-accent);
-            }
-
-            a::after {
-                content: '';
-                position: absolute;
-                width: 0;
-                height: 2px;
-                bottom: -2px;
-                right: 0;
-                background: var(--color-accent);
-                transition: width 0.3s ease;
-            }
-
-            a:hover::after {
-                width: 100%;
-                right: auto;
-                left: 0;
-            }
-
-        /* Social Links Styling */
-        .social-links {
-            margin: 8px 0;
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .social-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 14px;
-            background: linear-gradient(135deg, rgba(26, 95, 80, 0.08) 0%, rgba(168, 149, 109, 0.06) 100%);
-            border-radius: var(--radius-sm);
-            font-weight: 500;
-            font-size: 12px;
-            color: var(--color-primary);
-            border: 1px solid var(--border-color);
-            text-decoration: none;
-            transition: var(--transition-fast);
-            white-space: nowrap;
-        }
-
-            .social-link:hover {
-                background: var(--gradient-primary);
-                color: var(--color-white);
-                border-color: transparent;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(26, 95, 80, 0.2);
-            }
-
-        .social-label {
-            font-size: 12px;
-            font-weight: 600;
-            display: block;
-            margin: 12px 0 8px 0;
-            color: var(--color-primary);
-            letter-spacing: 0.5px;
-        }
-
-        .social-row {
-            margin: 12px 0;
-        }
-
-        /* Social Media Section - Improved Design */
-        .social-section {
-            margin-top: 35px;
-            padding-top: 25px;
-            border-top: 2px solid var(--border-color);
-        }
-
-        .social-section-title {
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--color-secondary);
-            opacity: 0.7;
-            text-align: center;
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-            .social-section-title::before,
-            .social-section-title::after {
-                content: '';
-                flex: 1;
-                height: 1px;
-                background: linear-gradient(to right, var(--border-color), transparent);
-            }
-
-            .social-section-title::after {
-                background: linear-gradient(to left, var(--border-color), transparent);
-            }
-
-        .social-icons {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .social-icon-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            text-decoration: none;
-            transition: var(--transition);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border: 2px solid transparent;
-            position: relative;
-            overflow: hidden;
-        }
-
-            .social-icon-btn::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: -100%;
-                width: 100%;
-                height: 100%;
-                background: rgba(255,255,255,0.2);
-                transition: left 0.3s ease;
-                z-index: -1;
-            }
-
-            .social-icon-btn:hover::before {
-                left: 100%;
-            }
-
-            /* Facebook */
-            .social-icon-btn.facebook {
-                background: #1877F2;
-                color: #fff;
-                border: none;
-            }
-
-                .social-icon-btn.facebook:hover {
-                    background: #1451a3;
-                    color: #fff;
-                    transform: translateY(-4px);
-                    box-shadow: 0 8px 20px rgba(24,119,242,0.3);
-                }
-
-                .social-icon-btn.facebook svg {
-                    color: #fff;
-                }
-
-            .social-icon-btn.instagram {
-                background: linear-gradient(135deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%);
-                color: #fff;
-                border: none;
-            }
-
-                .social-icon-btn.instagram:hover {
-                    filter: brightness(0.92) saturate(1.2);
-                    color: #fff;
-                    transform: translateY(-4px) scale(1.06);
-                    box-shadow: 0 8px 20px rgba(238,42,123,0.18);
-                }
-
-                .social-icon-btn.instagram svg {
-                    color: #fff;
-                }
-
-        .social-links-alternative {
-            display: none;
-        }
-
-        @media (max-width: 600px) {
-            .social-icon-btn {
-                width: 44px;
-                height: 44px;
-                font-size: 20px;
-            }
-
-            .social-icons {
-                gap: 12px;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-
-        <div class="header">
-            <div class="logo-box">
-                <!-- ضع شعارك هنا (صورة أو نص) -->
-                <img src="https://via.placeholder.com/80?text=🔐" alt="شعار معين">
-            </div>
-            <h1>تطبيق مُعِين</h1>
-            <p class="subtitle">أتمتة جوامع حلب الذكية</p>
-        </div>
-
-        <p>
-            شكراً لتسجيلك في منصة <strong>مُعِين</strong> – الحل المتكامل لإدارة جوامع حلب.
-        </p>
-
-        <div class="code-box">
-            <div class="code">تم تأكيد حسابك</div>
-            <p class="code-subtitle">✓ هذا الرمز صالح لمدة 10 دقائق فقط</p>
-        </div>
-
-        <p>
-            إذا لم تقم بهذا الطلب، يمكنك تجاهل هذه الرسالة بأمان.
-        </p>
-
-        <p>
-            مع أطيب التحيات،<br>
-            <strong>فريق مُعِين</strong>
-        </p>
-
-        <div class="footer">
-            <p>تطبيق مُعِين.</p>
-            <p style="margin: 10px 0 0 0; font-size: 11px; opacity: 0.5;">
-                هذه رسالة آلية، الرجاء عدم الرد عليها
-            </p>
-
-            <!-- Social Media Icons -->
-            <div class="social-section">
-                <div class="social-section-title">تابعنا</div>
-                <div class="social-icons">
-                    <a href="https://www.facebook.com/share/1AKgpZoToy/" target="_blank" rel="noopener noreferrer"
-                       class="social-icon-btn facebook" title="تابعنا على فيسبوك">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-label="Facebook">
-                            <path d="M22.675 0H1.325C0.593 0 0 0.593 0 1.325V22.676C0 23.407 0.593 24 1.325 24H12.82V14.706H9.692V11.174H12.82V8.418C12.82 5.333 14.766 3.69 17.523 3.69C18.845 3.69 19.985 3.78 20.297 3.82V6.97L18.33 6.971C16.722 6.971 16.412 7.774 16.412 8.877V11.17H20.16L19.679 14.702H16.412V24H22.675C23.407 24 24 23.407 24 22.675V1.325C24 0.593 23.407 0 22.675 0Z" />
-                        </svg>
-                    </a>
-                    <a href="https://www.instagram.com/moeen21557?igsh=MXBxbmRxczYzMGc2dg==" target="_blank" rel="noopener noreferrer"
-                       class="social-icon-btn instagram" title="تابعنا على إنستغرام">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-label="Instagram">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.17.054 1.97.24 2.427.405a4.92 4.92 0 0 1 1.754 1.14 4.92 4.92 0 0 1 1.14 1.754c.165.457.35 1.257.405 2.427.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.054 1.17-.24 1.97-.405 2.427a4.92 4.92 0 0 1-1.14 1.754 4.92 4.92 0 0 1-1.754 1.14c-.457.165-1.257.35-2.427.405-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.17-.054-1.97-.24-2.427-.405a4.92 4.92 0 0 1-1.754-1.14 4.92 4.92 0 0 1-1.14-1.754c-.165-.457-.35-1.257-.405-2.427C2.175 15.747 2.163 15.367 2.163 12s.012-3.584.07-4.85c.054-1.17.24-1.97.405-2.427a4.92 4.92 0 0 1 1.14-1.754 4.92 4.92 0 0 1 1.754-1.14c.457-.165 1.257-.35 2.427-.405C8.416 2.175 8.796 2.163 12 2.163Zm0-2.163C8.736 0 8.332.013 7.052.072 5.765.132 4.78.332 4.01.61A6.917 6.917 0 0 0 1.982 1.98a6.917 6.917 0 0 0-1.37 2.028c-.278.77-.478 1.755-.538 3.042C.013 8.332 0 8.736 0 12c0 3.264.013 3.668.072 4.948.06 1.287.26 2.272.538 3.042a6.917 6.917 0 0 0 1.37 2.028 6.917 6.917 0 0 0 2.028 1.37c.77.278 1.755.478 3.042.538 1.28.059 1.684.072 4.948.072s3.668-.013 4.948-.072c1.287-.06 2.272-.26 3.042-.538a6.917 6.917 0 0 0 2.028-1.37 6.917 6.917 0 0 0 1.37-2.028c.278-.77.478-1.755.538-3.042.059-1.28.072-1.684.072-4.948s-.013-3.668-.072-4.948c-.06-1.287-.26-2.272-.538-3.042a6.917 6.917 0 0 0-1.37-2.028A6.917 6.917 0 0 0 19.032.61c-.77-.278-1.755-.478-3.042-.538C15.668.013 15.264 0 12 0Zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324Zm0 10.162a3.999 3.999 0 1 1 0-7.998 3.999 3.999 0 0 1 0 7.998Zm6.406-11.845a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88Z" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Alternative: Text links (hidden by default) -->
-            <div class="social-links-alternative">
-                <div class="social-row">
-                    <span class="social-label">📘 تابعنا على فيسبوك:</span>
-                    <a href="https://www.facebook.com/share/1AKgpZoToy/" target="_blank" class="social-link">
-                        https://www.facebook.com/share/1AKgpZoToy/
-                    </a>
-                </div>
-                <div class="social-row">
-                    <span class="social-label">📸 تابعنا على إنستغرام:</span>
-                    <a href="https://www.instagram.com/moeen21557?igsh=MXBxbmRxczYzMGc2dg==" target="_blank" class="social-link">
-                        https://www.instagram.com/moeen21557
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
 
     </div>
 

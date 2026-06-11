@@ -38,7 +38,7 @@ namespace Moeen.Api.infrastructure.Providers
                 if (user == null)
                     return null;
 
-                return user.IsInRole(Roles.Owner.ToString());
+                return user.IsInRole(UserRole.Owner.ToString());
             }
         }
 

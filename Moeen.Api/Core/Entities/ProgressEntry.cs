@@ -1,45 +1,26 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Api.Core.Entities
 {
     public class ProgressEntry
     {
-        //internal object studentId;
-
+        [Key]
         public Guid Id { get; set; }
 
-        [Column("studentId")]
+        [Required]
         public Guid StudentId { get; set; }
+        public User Student { get; set; }
 
-        public Guid HalqaId { get; set; }
+        [Required]
         public Guid TeacherId { get; set; }
+        public User Teacher { get; set; }
 
-        [Column("juz_number")]
+        [Required]
         public int JuzNumber { get; set; }
 
-        [Column("page_number")]
+        [Required]
         public int PageNumber { get; set; }
 
-        [Column("memorized_until")]
-        public int MemorizedUntil { get; set; }
-
-        [Column("next_target")]
-        public int NextTarget { get; set; }
-
-        [Column("level_score")]
-        public int LevelScore { get; set; }
-
-        [Column("date")]
-        public DateTime Date { get; set; }
-
-        [Column("is_deleted")]
-        public bool IsDeleted { get; set; }
-
-        [Column("deleted_at")]
-        public DateTime? DeletedAt { get; set; }
-
-        public Student Student { get; set; }
-        public Halqa Halqa { get; set; }
-        public Teacher Teacher { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now;
     }
 }

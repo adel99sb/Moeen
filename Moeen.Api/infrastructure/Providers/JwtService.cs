@@ -29,10 +29,16 @@ namespace Moeen.Api.infrastructure.Providers
                 var claims = new List<Claim>
                 {
                     new Claim("UserIdentifier", user.Id.ToString()),
-                    new Claim("FullName", user.name),
+                    new Claim("FullName", user.FullName),
                     new Claim("Email", user.Email == null ? string.Empty : user.Email),
-                    new Claim("EmailConfirmed",user.EmailConfirmed.ToString())
+                    new Claim("EmailConfirmed",user.EmailConfirmed.ToString()),
+                    new Claim("Phone",user.PhoneNumber)
                 };
+                var imagePath = await _fileService.GetFileUrlAsync(user.ProfileImageUrl);
+                if (user.ProfileImageUrl != null)
+                    claims.Add(new Claim("ImagePath", imagePath));
+                else
+                    claims.Add(new Claim("ImagePath", string.Empty));
 
 
                 var roles = await userManager.GetRolesAsync(user);
