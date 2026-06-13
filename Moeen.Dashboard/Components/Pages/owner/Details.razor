@@ -1,5 +1,6 @@
 ﻿@page "/details"
-@inject NavigationManager mgr
+@inject NavigationManager NavManager
+
 
 <style>
     :root {
@@ -205,6 +206,6 @@
 @code {
     private void moveTopage()
     {
-        mgr.NavigateTo("/owner/Form");
+        NavManager.NavigateTo("/owner/Form");
     }
 }

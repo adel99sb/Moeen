@@ -1,6 +1,7 @@
 ﻿@page "/parents"
 @rendermode InteractiveServer
-@inject NavigationManager mgr
+@inject NavigationManager NavManager
+
 
 <style>
     :root {
@@ -54,63 +55,218 @@
     }
 
     /* الجدول بتنسيقه الجديد */
-    .table-responsive { width: 100%; overflow-x: auto; }
     
-    .data-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 8px; /* تباعد الصفوف */
-    }
+  .table {
+    width: 100%;
+    table-layout: fixed;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    font-family: 'Tajawal', sans-serif;
+    font-size: clamp(0.95rem,2.5vw,1.5rem);
+    text-align: center;
+  }
 
-    .data-table th {
-        background-color: var(--light-beige);
-        color: var(--primary-green);
-        padding: 15px;
-        text-align: right;
-    }
+  .table th {
+    background-color: var(--light-beige);
+    color: var(--primary-green);
+    padding: 12px;
+  }
 
-    .data-table tbody tr {
-        background-color: var(--white);
-        transition: 0.3s;
-    }
+  .table td {
+    background-color: var(--white);
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
 
-    .data-table tbody tr td {
-        padding: 15px;
-        border-top: 1px solid var(--border-gray);
-        border-bottom: 1px solid var(--border-gray);
-    }
+  .table tbody tr:hover {
+    background-color: #fafafa;
+  .btn-pprimary {
+    background-color: var(--primary-green);
+    font-size: 15px;
+    padding: 10px 20px;
+    color: var(--white);
+    border-radius: 12px;
+    display: inline-block;
+    transition: 0.3s;
+    cursor: pointer;
+    border: none;
+  }
 
-    .data-table tbody tr:hover {
-        background-color: var(--bg-row-hover);
-        transform: scale(1.005);
-    }
+  .btn-pprimary:hover {
+    background-color: #123d32;
+    transform: translateY(-2px);
+  }
+   
+    transform: scale(1.01);
+  }
 
-    /* أزرار الإجراءات */
-    .actions-cell {
-        text-align: center;
-        white-space: nowrap;
-    }
+  .table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+    border-radius: 12px;
+  }
+     .btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: var(--transition);
+  }
+  .btn-icon.edit { color: #3498db; }
+  .btn-icon.delete { color: var(--danger-red); }
+  .btn-icon:hover { transform: scale(1.1); }
+    
+  .btn-pprimary {
+    background-color: var(--primary-green);
+    font-size: 15px;
+    padding: 10px 20px;
+    color: var(--white);
+    border-radius: 12px;
+    display: inline-block;
+    transition: 0.3s;
+    cursor: pointer;
+    border: none;
+  }
 
-    .btn-icon {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 8px;
-        margin: 0 2px;
-        border-radius: var(--radius-icon);
-        transition: 0.3s;
-        display: inline-flex;
-        align-items: center;
-    }
+  .btn-pprimary:hover {
+    background-color: #123d32;
+    transform: translateY(-2px);
+  }
+   
+   
+  .form-container, .form-container * {
+    box-sizing: border-box;
+  }
+    
+  .form-container {
+    max-width: 850px;
+    margin: 2rem auto;
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    direction: rtl; 
+    overflow: hidden;
+  }
 
-    .btn-icon.info { color: var(--primary-green); }
-    .btn-icon.edit { color: var(--primary-green); }
-    .btn-icon.delete { color: var(--danger-red); }
+  .form-header {
+    background: var(--accent-beige);
+    color: var(--white);
+    padding: 1.2rem;
+    text-align: center;
+  }
 
-    .btn-icon:hover {
-        transform: scale(1.2);
-        background-color: var(--light-beige);
+  form {
+    padding: 2rem;
+  }
+
+  .grid-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 1.5rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .input-group label {
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-align: right;
+  }
+
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .input-wrapper i {
+    position: absolute;
+    right: 12px; 
+    color: var(--primary-green);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .input-wrapper input,
+  .input-wrapper select {
+    width: 100%;
+    padding: 10px 35px 10px 10px;
+    border: 1px solid var(--accent-beige);
+    border-radius: 8px;
+    background: var(--light-beige);
+    font-size: 0.9rem;
+    height: 45px; 
+    outline: none;
+    transition: var(--transition);
+  }
+
+  .input-wrapper input:focus,
+  .input-wrapper select:focus {
+    border-color: var(--primary-green);
+    background: #fff;
+  }
+
+  .actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+  }
+ .actions button, .actions a {
+    flex: 1;
+    height: 48px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .actions .save {
+    background: var(--primary-green);
+    color: white;
+  }
+
+  .actions .parent {
+    background: var(--accent-beige);
+    color: white;
+  }
+
+  .actions .cancel {
+    background: #f8f9fa;
+    color: #dc3545;
+  }
+
+  .btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: var(--transition);
+  }
+  .btn-icon.edit { color: #3498db; }
+  .btn-icon.delete { color: var(--danger-red); }
+  .btn-icon:hover { transform: scale(1.1); }
+    
+  @@media (max-width: 768px) {
+    .grid-row {
+      grid-template-columns: 1fr !important;
     }
+  }
 </style>
 
 <section class="management-container">
@@ -121,47 +277,148 @@
     <div class="action-bar">
         <div class="search-wrapper">
             <i class="bi bi-search"></i>
-            <input type="text" class="search-input" placeholder="ابحث عن ولي أمر...">
+            <input type="text" class="search-input" placeholder="ابحث عن ولي أمر..." @oninput="HandleSearch" />
         </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="data-table">
-            <thead>
+       
+    <table class="table">
+        <thead>
+            <tr><th>الاسم</th>><th>الهاتف</th><th class="text-center">الإجراء</th></tr>
+        </thead>
+        <tbody>
+          @foreach (var p in parentsList.Where(x => x.FullName.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)))
+            {
                 <tr>
-                    <th>الاسم</th>
-                    <th class="text-center">الإجراءات</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>مصطفى المحمد</td>
-                    <td class="actions-cell">
-                        <button class="btn-icon info" title="عرض" @onclick="moveTopage2"><i class="bi bi-info-circle"></i></button>
-                        <button class="btn-icon edit" title="تعديل" @onclick="moveTopage"><i class="bi bi-pencil-square"></i></button>
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>محمد العلي</td>
-                    <td class="actions-cell">
-                        <button class="btn-icon info" title="عرض" @onclick="moveTopage2"><i class="bi bi-info-circle"></i></button>
-                        <button class="btn-icon edit" title="تعديل" @onclick="moveTopage"><i class="bi bi-pencil-square"></i></button>
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</section>
+                    <td class="table td">@p.FullName</td>
+                    <td class="table td">@p.Phone</td>
+                    <td class="table td" >
+                                         <button class="btn-icon" title="عرض" @onclick="viewDetails">
+                    <i class="bi bi-info-circle" style="color: #2ecc71;"></i>
 
+                                         </button>
+
+                                   <button class="btn-icon edit" title="تعديل" @onclick="() => EditParent(p)">
+                    <i class="bi bi-pencil-square"></i>
+
+                                   </button>
+                  <button class="btn-icon delete" title="حذف" @onclick="() => DeleteParent(p.Id)">
+                    <i class="bi bi-trash"></i>
+
+                  </button>
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+   <details class="mt-4" open="@_isDetailsOpen">
+  <summary class="btn-pprimary" @onclick="ToggleDetails">
+    @(isEditMode ? "تعديل بيانات ولي الأمر الحالي" : "إضافة ولي أمر جديد")
+  </summary>
+  
+  <div class="form-container">
+    <div class="form-header">
+      <h2>
+        <i class="@(isEditMode ? "bi bi-pencil-square" : "bi bi-person-plus-fill")"></i> 
+        @(isEditMode ? "تعديل بيانات ولي الأمر" : "إضافة ولي أمر جديد")
+      </h2>
+    </div>
+
+    <EditForm Model="_parentModel" OnValidSubmit="SaveParent">
+      <div class="grid-row">
+        <div class="input-group">
+          <label>الاسم الكامل</label>
+          <div class="input-wrapper">
+            <i class="bi bi-person"></i>
+            <InputText @bind-Value="_parentModel.FullName" placeholder="أدخل الاسم" class="form-control" />
+          </div>
+        </div>
+        <div class="input-group">
+          <label>المهنة</label>
+          <div class="input-wrapper">
+            <i class="bi bi-briefcase"></i>
+            <InputText @bind-Value="_parentModel.Job" placeholder="أدخل المهنة" class="form-control" />
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-row">
+        <div class="input-group">
+          <label>رقم الهاتف</label>
+          <div class="input-wrapper">
+            <i class="bi bi-telephone"></i>
+            <InputText @bind-Value="_parentModel.Phone" placeholder="أدخل الهاتف" class="form-control" />
+          </div>
+        </div>
+        <div class="input-group">
+          <label>البريد الإلكتروني</label>
+          <div class="input-wrapper">
+            <i class="bi bi-envelope"></i>
+            <InputText @bind-Value="_parentModel.Email" placeholder="أدخل البريد" class="form-control" />
+          </div>
+        </div>
+      </div>
+
+      <div class="input-group" style="margin-bottom: 1.2rem;">
+        <label>العنوان</label>
+        <div class="input-wrapper">
+          <i class="bi bi-geo-alt"></i>
+          <InputText @bind-Value="_parentModel.Address" placeholder="أدخل العنوان" class="form-control" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="save">
+          <i class="bi bi-check2-all"></i> 
+          @(isEditMode ? "حفظ التعديلات" : "حفظ ولي الأمر")
+        </button>
+        <button type="button" class="cancel" @onclick="ResetForm">
+          <i class="bi bi-x-lg"></i> إلغاء
+        </button>
+      </div>
+    </EditForm>
+  </div>
+</details>
+</section>
 @code {
-    private void moveTopage()
-    {
-        mgr.NavigateTo("/form-p");
+    private bool _isDetailsOpen = false;
+    private bool isEditMode = false;
+    private string _searchTerm = ""; // إضافة متغير البحث
+    private Parent _parentModel = new();
+    private List<Parent> parentsList = new() { new Parent { FullName = "مصطفى المحمد",  Phone = "0987462657" } };
+
+    public class Parent {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string FullName { get; set; } = "";
+        public string Job { get; set; } = "";
+        public string Phone { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Address { get; set; } = "";
     }
-    private void moveTopage2()
-    {
-        mgr.NavigateTo("/details-p");
+
+    private void ToggleDetails() => _isDetailsOpen = !_isDetailsOpen;
+    
+    // ميثود البحث
+    private void HandleSearch(ChangeEventArgs e) => _searchTerm = e.Value?.ToString() ?? "";
+    
+    private void SaveParent() {
+        if (isEditMode) {
+            var existing = parentsList.FirstOrDefault(p => p.Id == _parentModel.Id);
+            if (existing != null) { 
+                existing.FullName = _parentModel.FullName; existing.Job = _parentModel.Job;
+                existing.Phone = _parentModel.Phone; existing.Email = _parentModel.Email; existing.Address = _parentModel.Address; 
+            }
+        } else {
+            parentsList.Add(new Parent { Id = Guid.NewGuid(), FullName = _parentModel.FullName, Job = _parentModel.Job, Phone = _parentModel.Phone, Email = _parentModel.Email, Address = _parentModel.Address });
+        }
+        ResetForm();
     }
+
+    private void EditParent(Parent p) { _parentModel = new Parent { Id = p.Id, FullName = p.FullName, Job = p.Job, Phone = p.Phone, Email = p.Email, Address = p.Address }; isEditMode = true; _isDetailsOpen = true; }
+    private void DeleteParent(Guid id) => parentsList.RemoveAll(p => p.Id == id);
+    private void ResetForm() { _parentModel = new Parent(); isEditMode = false; _isDetailsOpen = false; }
+    private void viewDetails() => NavManager.NavigateTo("/details-p");
+
 }
