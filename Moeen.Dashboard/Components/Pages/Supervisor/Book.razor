@@ -1,4 +1,7 @@
 ﻿@page "/supervisor/book"
+@rendermode InteractiveServer
+@inject NavigationManager NavManager
+
 	<style>
    :root {
 --primary-green: #195042;
@@ -214,85 +217,142 @@ display: inline-block; /* ليصبح طول الخط على قدر الكلمة 
         }
     }
 </style>
+
+
 <section class="management-container">
-<header class="page-header">
-	<h2 class="page-title">إدارة الكتب</h2>
-</header>
-<br />
-<div class="search-wrapper mb-3">
-	<i class="bi bi-search"></i>
-	<input type="text" class="search-input" placeholder="ابحث عن كتاب...">
-</div>
-<br>
-<div class="table-wrapper">
-<table class="table">
-	<thead>
-		<tr>
-			<th class="table th">اسم الكتاب</th>
-			<th class="table th">وصف</th>
-			<th class="table th">رابط التحميل </th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td class="table td">كتاب التجويد </td>
-			<td class="table td">كتاب لتعلم قواعد التجويد </td>
-			<td class="table td">
-				<a href="https://example.com/tafsir.pdf" target="_blank" title="تحميل"><i class="bi bi-save"></i></a>
-			</td>
-		</tr>
-		<tr>
-			<td class="table td">كتاب التفسير </td>
-			<td class="table td">كتاب لتعلم تفسير القرآن الكريم </td>
-			<td class="table td">
-				<a href="https://example.com/tafsir.pdf" target="_blank" title="تحميل"><i class="bi bi-save"></i></a>
-			</td>
-		</tr>
-		</tbody>
-		</table>
+    <header><h2 class="page-title">إدارة الكتب</h2></header>
+    
+  <div class="search-wrapper mb-3">
+    <i class="bi bi-search"></i>
+           <input type="text" class="search-input" placeholder="ابحث عن كتاب..." @oninput="HandleSearch" />
+
+  </div>
+
+    @if (ShowMessage) { <div class="alert alert-success">@Message</div> }
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>اسم الكتاب</th>
+                <th>الوصف</th>
+                <th>الرابط</th>
+                <th>الإجراء</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in filteredBookList)
+            {
+                <tr>
+                    <td>@book.Name</td>
+                    <td>@book.Wasef</td>
+                    <td><a href="@book.Link" target="_blank">رابط الكتاب</a></td>
+                    <td>
+                           <button class="btn-icon delete" title="حذف" @onclick="() => DeleteBook(book.Id)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                       
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <details class="mt-4" open="@_isDetailsOpen">
+        <summary class="btn-pprimary" @onclick="ToggleDetails">إضافة كتاب جديد</summary>
+        <div class="form-container">
+      <div class="form-header">
+          <h2>
+          <i class="bi bi-person-plus-fill"></i> 
+         إضافة كتاب جديد
+        </h2>
+            </div>
+            <EditForm Model="_model" OnValidSubmit="HandleSubmit">
+                  <div class="grid-row">
+          <div class="input-group">
+               <label>الاسم الكامل</label>
+            <div class="input-wrapper">
+              <i class="bi bi-person"></i>
+               <InputText @bind-Value="_model.Name" class="form-control" placeholder="اسم الكتاب" />
+
+            </div>
+          </div>
+                    <div class="input-group">
+            <label>وصف الكتاب</label>
+            <div class="input-wrapper">
+              <i class="bi bi-telephone"></i>
+                    <InputText @bind-Value="_model.Wasef" class="form-control" placeholder="وصف الكتاب" />
+
+            </div>
+          </div>
+        
+                </div>
+                 <div class="grid-row">
+          <div class="input-group">
+            <label>العنوان</label>
+            <div class="input-wrapper">
+              <i class="bi bi-geo-alt"></i>
+                <InputText @bind-Value="_model.Link" class="form-control" placeholder="رابط التحميل" />
+            </div>
+
+            </div>
+          </div>
+              <div class="actions">
+          <button type="submit" class="save">
+            <i class="bi bi-check2-all"></i> 
+            رفع الكتاب
+          </button>
+          
+          <button type="button" class="cancel" @onclick="ResetForm">
+            <i class="bi bi-x-lg"></i> إلغاء
+          </button>
         </div>
-		<br />
-		<details>
-	<summary class="btn-pprimary">إضافة كتاب جديد</summary>
-    <div class="form-container">
-    <div class="form-header">
-        <h2><i class="bi bi-plus-circle-dotted"></i> إضافة كتاب</h2>
-    </div>
-                <form>
-        <div class="grid-row">
-            <div class="input-group">
-         <label>اسم الكتاب </label>
-                <div class="input-wrapper">
-                    <i class="bi bi-fonts"></i>
-                    <input type="text" placeholder="أدخل الاسم">
-                </div>
-            </div>
-             <div class="input-group">
-                <label> وصف الكتاب</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-pencil"></i>
-                    <input type="text" placeholder="اكتب هنا...">
-                </div>
-            </div>
-            </div>
-        <div class="grid-row">
-			 <div class="input-group">
-                <label> رابط لتحميل الكتاب</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-pencil"></i>
-                    <input type="text" placeholder="اكتب هنا...">
-                </div>
-            </div>
-            </div>
-			  <div class="actions">
-            <button type="submit" class="save"><i class="bi bi-check2-all"></i> رفع الكتب</button>
-            <a href="/supervisor/book" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
+
+            </EditForm>
         </div>
-</form>
-    </div>
-</details>
+    </details>
 </section>
-
+  
 @code {
+   
+    public class MoeenBook {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string Name { get; set; } = "";
+        public string Wasef { get; set; } = "";
+        public string Link { get; set; } = "";
+    }
 
+    private List<MoeenBook> masterBookList = new();
+    private List<MoeenBook> filteredBookList = new();
+    private MoeenBook _model = new();
+    private bool _isDetailsOpen = false;
+    private bool ShowMessage = false;
+    private string Message = "";
+
+    protected override void OnInitialized() {
+        masterBookList = new List<MoeenBook> { new MoeenBook { Name = "كتاب التجويد", Wasef = "قواعد", Link = "href=https://example.com/tafsir.pdf" } };
+        filteredBookList = new List<MoeenBook>(masterBookList);
+    }
+
+    private void HandleSubmit() {
+        masterBookList.Add(new MoeenBook { Name = _model.Name, Wasef = _model.Wasef, Link = _model.Link });
+        Message = "تم إضافة الكتاب بنجاح!";
+        ShowMessage = true;
+        ResetForm();
+        ApplyFilter();
+    }
+
+    private void DeleteBook(Guid id) { masterBookList.RemoveAll(b => b.Id == id); ApplyFilter(); }
+    
+    private void HandleSearch(ChangeEventArgs e) {
+        var query = e.Value?.ToString() ?? "";
+        filteredBookList = string.IsNullOrWhiteSpace(query) 
+            ? masterBookList 
+            : masterBookList.Where(b => b.Name.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    private void ApplyFilter() => filteredBookList = new List<MoeenBook>(masterBookList);
+    private void ToggleDetails() => _isDetailsOpen = !_isDetailsOpen;
+    private void ResetForm() { _model = new MoeenBook(); _isDetailsOpen = false; }
 }
+
+	 	
