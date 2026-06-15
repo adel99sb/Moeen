@@ -1,17 +1,22 @@
 ﻿@inherits LayoutComponentBase
+@using Moeen.Dashboard.Services.Abstractions
+@inject ITokenService TokenService
+@inject NavigationManager Nav
 
-<div class="page">
-    <div class="sidebar">
+<div class="page dashboard-shell" dir="rtl">
+    <aside class="sidebar">
         <NavMenu />
-    </div>
+    </aside>
 
+    <main class="dashboard-main">
+        <header class="dashboard-topbar">
+            <button class="dashboard-logout-button" type="button" @onclick="Logout">
+                <span class="bi bi-box-arrow-left" aria-hidden="true"></span>
+                <span>تسجيل الخروج</span>
+            </button>
+        </header>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
+        <article class="content dashboard-content">
             @Body
         </article>
     </main>
@@ -22,3 +27,11 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@code {
+    private async Task Logout()
+    {
+        await TokenService.Clear();
+        Nav.NavigateTo("/", replace: true);
+    }
+}

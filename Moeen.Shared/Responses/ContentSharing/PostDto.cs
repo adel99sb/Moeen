@@ -1,6 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-
 namespace Moeen.Shared.Responses.ContentSharing
 {
     public class PostDto
@@ -17,13 +14,10 @@ namespace Moeen.Shared.Responses.ContentSharing
         public string? HalqaName { get; set; }
 
         public DateTime CreatedAt { get; set; }
+        public bool IsAnnouncement { get; set; }
         public int InteractionsCount { get; set; }
 
         public List<string> MediaUrls { get; set; } = new();
-
-        /// <summary>
-        /// تفاصيل التفاعلات (اختياري حسب الطلب)
-        /// </summary>
         public List<InteractionDto> Interactions { get; set; } = new();
     }
 }

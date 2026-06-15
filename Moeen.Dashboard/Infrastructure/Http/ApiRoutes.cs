@@ -25,17 +25,21 @@
             => $"api/User/{id}";
         ///
         //Post  
+        public static string GetAllPostsRoute { get; } = "api/ContentSharing/all";
         public static string PublishPostRoute { get; } = "api/ContentSharing/publish";
-        public static string ApdatePostRoute { get; } = "api/ContentSharing/posts/{postId}";
-        public static string DeletePostRoute { get; } = "api/ContentSharing/posts/{postId}";
-        public static string GetPostByIdRoute { get; } = "api/ContentSharing/posts/{postId}";
-        public static string GetInteractionPostByIdRoute { get; } = "api/ContentSharing/posts/{postId}/interactions";
+        public static string GetPostHalqasBriefRoute { get; } = "api/ContentSharing/halqas/brief";
         public static string IntractPostRoute { get; } = "api/ContentSharing/interact";
         public static string ManagAnnoucmentRoute { get; } = "api/ContentSharing/manage-announcement";
         public static string DeleteOldRoute { get; } = "api/ContentSharing/delete-old";
         public static string AddMultiMediaRoute { get; } = "api/ContentSharing/add-multimedia";
         public static string SearchPostRoute { get; } = "api/ContentSharing/search";
         public static string GetSearchPostRoute { get; } = "api/ContentSharing/search";
+        public static string UpdatePostRoute(Guid postId) => $"api/ContentSharing/posts/{postId}";
+        public static string DeletePostRoute(Guid postId) => $"api/ContentSharing/posts/{postId}";
+        public static string GetPostByIdRoute(Guid postId, bool includeInteractions = true)
+            => $"api/ContentSharing/posts/{postId}?includeInteractions={includeInteractions.ToString().ToLowerInvariant()}";
+        public static string GetPostInteractionsRoute(Guid postId, int pageNumber = 1, int pageSize = 20)
+            => $"api/ContentSharing/posts/{postId}/interactions?pageNumber={pageNumber}&pageSize={pageSize}";
         //exam command
         public static string RegisterExamRoute { get; } = "api/ExamCommand/register";
         public static string AddFeedbackOnExamRoute { get; } = "api/ExamCommand/add-feedback";

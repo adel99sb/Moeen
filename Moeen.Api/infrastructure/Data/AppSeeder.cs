@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Data;
 using Moeen.Shared.Constants;
@@ -7,7 +8,11 @@ namespace Moeen.Api.Infrastructure.Data
 {
     public static class AppSeeder
     {
-        // ================= [الدالة القديمة - ما تغير شي] =================
+        private static readonly Guid DevelopmentMosqueId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        private static readonly Guid DevelopmentSupervisorId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        public const string DevelopmentSupervisorEmail = "supervisor@moeen.local";
+        private const string DevelopmentSupervisorPasswordConfigurationKey = "SeedUsers:DevelopmentSupervisorPassword";
+
         public static async Task SeedRolesAsync(RoleManager<IdentityRole<Guid>> roleManager)
         {
             foreach (var role in Enum.GetNames(typeof(Roles)))
@@ -18,174 +23,139 @@ namespace Moeen.Api.Infrastructure.Data
                     {
                         Id = Guid.NewGuid(),
                         Name = role,
-                        NormalizedName = role.ToUpper()
+                        NormalizedName = role.ToUpperInvariant()
                     });
                 }
             }
         }
 
-        // ================= [الدالة الجديدة الكاملة] =================
-        public static async Task SeedDataAsync(IServiceProvider serviceProvider)
+        public static async Task SeedDevelopmentDataAsync(IServiceProvider serviceProvider, IConfiguration configuration)
         {
             using var scope = serviceProvider.CreateScope();
-
-            // 1. الحصول على الخدمات اللازمة
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>(); // تأكد إن اسم الكونتكست صحيح عندك
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+            var developmentSupervisorPassword = "MoeenDevOnly123!";
 
-            // 2. إنشاء مسجد وهمي (ضروري عشان الـ Foreign Key ما يضلّع)
-            var mosqueId = Guid.NewGuid();
-            var mosque = new Mosque
+            if (string.IsNullOrWhiteSpace(developmentSupervisorPassword))
             {
-                Id = mosqueId,
-                name = "المسجد الكبير", // تأكد من اسم الخاصية في كلاس Mosque
-                // أي خصائص تانية مطلوبة للـ Mosque حطها هنا
-            };
-            await context.Mosques.AddAsync(mosque);
-            await context.SaveChangesAsync(); // حفظ عشان ينولد الـ ID
+                throw new InvalidOperationException($"Missing required development seed setting: {DevelopmentSupervisorPasswordConfigurationKey}");
+            }
 
-            // 3. إنشاء حلقة يوم سبت (ضرورية للطالب)
-            var halqaId = Guid.NewGuid();
-            var saturdayHalqa = new SaturdayHalqa
+            await SeedRolesAsync(roleManager);
+            await SeedDevelopmentMosqueAsync(context);
+            await SeedDevelopmentSupervisorAsync(context, userManager, developmentSupervisorPassword);
+        }
+
+        private static async Task SeedDevelopmentMosqueAsync(AppDbContext context)
+        {
+            var mosque = await context.Mosques.FirstOrDefaultAsync(x => x.Id == DevelopmentMosqueId);
+
+            if (mosque == null)
             {
-                Id = halqaId,
-                MosqueId = mosqueId, // ربط الحلقة بالمسجد
-                // أي خصائص تانية مطلوبة
-            };
-            await context.Set<SaturdayHalqa>().AddAsync(saturdayHalqa);
-            await context.SaveChangesAsync();
-
-            // 4. إنشاء المستخدمين
-            // ---------------- أ) المعلم (Teacher) ----------------
-            var teacher = new Teacher
+                mosque = new Mosque
+                {
+                    Id = DevelopmentMosqueId,
+                    name = "مسجد معين التجريبي",
+                    address = "عنوان تجريبي لاختبار لوحة التحكم",
+                    contact_phone = "0000000000",
+                    Description = "مسجد seed محلي لاختبار المشرف والمنشورات.",
+                    Latitude = 0,
+                    Longitude = 0,
+                    foujs = new List<Fouj>(),
+                    Teachers = new List<Teacher>(),
+                    TeacherExams = new List<TeacherExam>(),
+                    pdfFiles = new List<PdfFile>(),
+                    SaturdayLessons = new List<SaturdayLesson>(),
+                    posts = new List<Post>(),
+                    supervisors = new List<Supervisor>(),
+                    Students = new List<Student>()
+                };
+                await context.Mosques.AddAsync(mosque);
+            }
+            else
             {
-                Id = Guid.NewGuid(),
-                UserName = "teacher@moeen.com",
-                Email = "teacher@moeen.com",
-                name = "الأستاذ أحمد",
-                gender = "Male",
-                MosqueId = mosqueId, // ✅ استخدام الـ ID الحقيقي
-                Bio = "معلم قرآن كريم",
-                assigned_at = DateTime.UtcNow.ToString(),
-                created_at = DateTime.UtcNow,
-                JoinedAt = DateTime.UtcNow,
-                // تهيئة القوائم لتجنب الأخطاء
-                halaqas = new List<Halqa>(),
-                ProgressEntrys = new List<ProgressEntry>(),
-                Attendances = new List<Attendance>()
-            };
+                mosque.name = "مسجد معين التجريبي";
+                mosque.address = "عنوان تجريبي لاختبار لوحة التحكم";
+                mosque.contact_phone = "0000000000";
+                mosque.Description = "مسجد seed محلي لاختبار المشرف والمنشورات.";
+            }
 
-            // ---------------- ب) الطالب (Student) ----------------
-            var student = new Student
-            {
-                Id = Guid.NewGuid(),
-                UserName = "student@moeen.com",
-                Email = "student@moeen.com",
-                name = "الطفل محمد",
-                gender = "Male", // ✅ Student.gender مطلوب وليس اختياري
-                age = 10,
-                MosqueId = mosqueId, // ✅ استخدام الـ ID الحقيقي
-                SaturdayHalqeId = halqaId, // ✅ استخدام الـ ID الحقيقي
-                EnrollmentDate = DateTime.UtcNow,
-                status = 1,
-                score = 85,
-                created_at = DateTime.UtcNow,
-                JoinedAt = DateTime.UtcNow,
-                progressEntrys = new List<ProgressEntry>(),
-                Exams = new List<Exam>(),
-                Attendances = new List<Attendance>(),
-                Children = new List<Student>()
-            };
-
-            // ---------------- ج) ولي الأمر (Parent) ----------------
-            var parent = new Student // ولي الأمر هو أيضاً Student
-            {
-                Id = Guid.NewGuid(),
-                UserName = "parent@moeen.com",
-                Email = "parent@moeen.com",
-                name = "والد محمد",
-                gender = "Male",
-                MosqueId = mosqueId,
-                SaturdayHalqeId = halqaId,
-                EnrollmentDate = DateTime.UtcNow,
-                created_at = DateTime.UtcNow,
-                JoinedAt = DateTime.UtcNow,
-                status = 1,
-                age = 35,
-                score = 0,
-                progressEntrys = new List<ProgressEntry>(),
-                Exams = new List<Exam>(),
-                Attendances = new List<Attendance>(),
-                Children = new List<Student>()
-            };
-
-            // ربط الطالب بولي الأمر
-            student.ParentId = parent.Id;
-            parent.Children.Add(student);
-
-            // حفظ المستخدمين في قاعدة البيانات (مع تشفير كلمة المرور)
-            await CreateUserIfNotExists(userManager, teacher, "Password123!");
-            await CreateUserIfNotExists(userManager, student, "Password123!");
-            await CreateUserIfNotExists(userManager, parent, "Password123!");
-
-            // 5. إنشاء منشورات (Posts)
-            var post1 = new Post
-            {
-                Id = Guid.NewGuid(),
-                MosqueId = mosqueId, // ✅ استخدام الـ ID الحقيقي
-                title = "جدول الامتحانات الشهري",
-                body = "السلام عليكم، نرفق لكم جدول الامتحانات...",
-                imageUrl = "https://via.placeholder.com/150",
-                created_at = DateTime.UtcNow,
-                PosInteractions = new List<PosInteraction>()
-            };
-
-            var post2 = new Post
-            {
-                Id = Guid.NewGuid(),
-                MosqueId = mosqueId, // ✅ استخدام الـ ID الحقيقي
-                title = "رحلة المسجد الشهرية",
-                body = "تعلن إدارة المسجد عن رحلة ترفيهية...",
-                imageUrl = "https://via.placeholder.com/150",
-                created_at = DateTime.UtcNow,
-                PosInteractions = new List<PosInteraction>()
-            };
-
-            await context.Posts.AddRangeAsync(post1, post2);
-            await context.SaveChangesAsync();
-
-            // 6. إنشاء تفاعلات (PosInteractions)
-            var interaction1 = new PosInteraction
-            {
-                Id = Guid.NewGuid(),
-                PostId = post1.Id, // ✅ ربط بالمنشور الأول
-                UserId = student.Id, // ✅ ربط بالطالب
-                date = DateTime.UtcNow
-            };
-
-            var interaction2 = new PosInteraction
-            {
-                Id = Guid.NewGuid(),
-                PostId = post2.Id, // ✅ ربط بالمنشور الثاني
-                UserId = teacher.Id, // ✅ ربط بالمعلم
-                date = DateTime.UtcNow
-            };
-
-            await context.PosInteractions.AddRangeAsync(interaction1, interaction2);
             await context.SaveChangesAsync();
         }
 
-        // ================= [دالة مساعدة] =================
-        private static async Task CreateUserIfNotExists(UserManager<User> userManager, User user, string password)
+        private static async Task SeedDevelopmentSupervisorAsync(AppDbContext context, UserManager<User> userManager, string developmentSupervisorPassword)
         {
-            var existingUser = await userManager.FindByIdAsync(user.Id.ToString());
-            if (existingUser == null)
+            var supervisor = await context.Supervisors.FirstOrDefaultAsync(x => x.Id == DevelopmentSupervisorId);
+
+            if (supervisor == null)
             {
-                var result = await userManager.CreateAsync(user, password);
+                supervisor = new Supervisor
+                {
+                    Id = DevelopmentSupervisorId,
+                    UserName = DevelopmentSupervisorEmail,
+                    Email = DevelopmentSupervisorEmail,
+                    EmailConfirmed = true,
+                    name = "مشرف معين التجريبي",
+                    gender = "Male",
+                    font_size = 16,
+                    role = (int)Roles.Admin,
+                    theme = "light",
+                    profile_imageUrl = null,
+                    created_at = DateTime.UtcNow,
+                    JoinedAt = DateTime.UtcNow,
+                    MosqueId = DevelopmentMosqueId,
+                    assigned_at = DateTime.UtcNow,
+                    complaints = new List<Complaint>(),
+                    PosInteractions = new List<PosInteraction>()
+                };
+
+                var result = await userManager.CreateAsync(supervisor, developmentSupervisorPassword);
                 if (!result.Succeeded)
                 {
                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                    throw new Exception($"Failed to create user {user.UserName}: {errors}");
+                    throw new InvalidOperationException($"Failed to seed development supervisor: {errors}");
+                }
+            }
+            else
+            {
+                supervisor.UserName = DevelopmentSupervisorEmail;
+                supervisor.Email = DevelopmentSupervisorEmail;
+                supervisor.EmailConfirmed = true;
+                supervisor.name = "مشرف معين التجريبي";
+                supervisor.role = (int)Roles.Admin;
+                supervisor.MosqueId = DevelopmentMosqueId;
+                supervisor.assigned_at = supervisor.assigned_at == default ? DateTime.UtcNow : supervisor.assigned_at;
+                await context.SaveChangesAsync();
+            }
+
+            if (!await userManager.CheckPasswordAsync(supervisor, developmentSupervisorPassword))
+            {
+                if (await userManager.HasPasswordAsync(supervisor))
+                {
+                    var removePasswordResult = await userManager.RemovePasswordAsync(supervisor);
+                    if (!removePasswordResult.Succeeded)
+                    {
+                        var errors = string.Join(", ", removePasswordResult.Errors.Select(e => e.Description));
+                        throw new InvalidOperationException($"Failed to remove development supervisor password: {errors}");
+                    }
+                }
+
+                var addPasswordResult = await userManager.AddPasswordAsync(supervisor, developmentSupervisorPassword);
+                if (!addPasswordResult.Succeeded)
+                {
+                    var errors = string.Join(", ", addPasswordResult.Errors.Select(e => e.Description));
+                    throw new InvalidOperationException($"Failed to set development supervisor password: {errors}");
+                }
+            }
+
+            if (!await userManager.IsInRoleAsync(supervisor, Roles.Admin.ToString()))
+            {
+                var roleResult = await userManager.AddToRoleAsync(supervisor, Roles.Admin.ToString());
+                if (!roleResult.Succeeded)
+                {
+                    var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                    throw new InvalidOperationException($"Failed to assign development supervisor role: {errors}");
                 }
             }
         }

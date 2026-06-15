@@ -14,6 +14,7 @@ namespace Moeen.Api.Core.Contracts.Application
         /// نشر منشور عام أو للحلقات
         /// </summary>
         Task<GeneralResponse> PublishPostAsync(PublishPostRequest request);
+        Task<GeneralResponse> GetAvailableHalqasBriefAsync(string? query);
 
         /// <summary>
         /// التفاعل مع منشور (إعجاب، دعم، إلخ)

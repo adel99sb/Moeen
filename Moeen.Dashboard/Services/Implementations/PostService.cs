@@ -1,8 +1,9 @@
-﻿using Moeen.Dashboard.Infrastructure.Http.Clients;
+using Moeen.Dashboard.Infrastructure.Http.Clients;
 using Moeen.Dashboard.Services.Abstractions;
-using Moeen.Shared.Requests;
 using Moeen.Shared.Requests.ContentSharing;
 using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.ContentSharing;
+using System.Text.Json;
 
 namespace Moeen.Dashboard.Services.Implementations
 {
@@ -13,6 +14,20 @@ namespace Moeen.Dashboard.Services.Implementations
         public PostService(PostApiClient postApiClient)
         {
             _postApiClient = postApiClient;
+        }
+
+        public async Task<List<PostDto>> GetAllPostsAsync()
+        {
+            var res = await _postApiClient.GetAllPosts();
+            if (res == null || !res.Success) throw new Exception(res?.Message ?? "فشلت عملية جلب المنشورات");
+            return ExtractPostList(res.Data);
+        }
+
+        public async Task<List<HalqaBriefDto>> GetHalqasBriefAsync(string? query = null)
+        {
+            var res = await _postApiClient.GetHalqasBrief(query);
+            if (res == null || !res.Success) throw new Exception(res?.Message ?? "فشلت عملية جلب الحلقات");
+            return ExtractHalqaList(res.Data);
         }
 
         public async Task<GeneralResponse> PublishPostAsync(PublishPostRequest request)
@@ -77,6 +92,7 @@ namespace Moeen.Dashboard.Services.Implementations
             if (res == null || !res.Success) throw new Exception(res?.Message ?? "فشلت عملية البحث (GET)");
             return res;
         }
+
         public async Task<GeneralResponse> DeleteOldContentAsync(DeleteOldContentRequest request)
         {
             var res = await _postApiClient.DeleteOldContent(request);
@@ -89,6 +105,36 @@ namespace Moeen.Dashboard.Services.Implementations
             var res = await _postApiClient.AddMultimedia(request);
             if (res == null || !res.Success) throw new Exception(res?.Message ?? "فشلت عملية إضافة الوسائط");
             return res;
+        }
+
+        private static List<HalqaBriefDto> ExtractHalqaList(object? data)
+        {
+            if (data == null)
+                return new List<HalqaBriefDto>();
+
+            if (data is IEnumerable<HalqaBriefDto> halqas)
+                return halqas.ToList();
+
+            var json = JsonSerializer.Serialize(data);
+            return JsonSerializer.Deserialize<List<HalqaBriefDto>>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }) ?? new List<HalqaBriefDto>();
+        }
+
+        private static List<PostDto> ExtractPostList(object? data)
+        {
+            if (data == null)
+                return new List<PostDto>();
+
+            if (data is IEnumerable<PostDto> posts)
+                return posts.ToList();
+
+            var json = JsonSerializer.Serialize(data);
+            return JsonSerializer.Deserialize<List<PostDto>>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }) ?? new List<PostDto>();
         }
     }
 }

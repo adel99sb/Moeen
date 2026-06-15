@@ -149,6 +149,8 @@ using (var scope = app.Services.CreateScope())
 
 if (app.Environment.IsDevelopment())
 {
+    await AppSeeder.SeedDevelopmentDataAsync(app.Services, app.Configuration);
+
     app.UseSwagger();
     app.UseSwaggerUI();
 }

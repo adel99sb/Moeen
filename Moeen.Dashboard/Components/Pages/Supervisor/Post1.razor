@@ -1,110 +1,102 @@
-﻿@page "/supervisor/post1/{Id:guid}"
+@page "/supervisor/post1/{Id:guid}"
 @rendermode InteractiveServer
+@using System.Text.Json
+@using Moeen.Shared.Requests.ContentSharing
+@using Moeen.Shared.Responses.ContentSharing
 @inject NavigationManager NavManager
+@inject Moeen.Dashboard.Services.Abstractions.IPostService PostService
 
 <style>
-   :root {
-        --primary-green: #195042;
-        --accent-beige: #d6cabc;
-        --light-beige: #f4f1ee;
-        --white: #ffffff;
-        --text-dark: #2d3436;
-        --transition: all 0.3s ease;
-   }
-   body {
-        font-family: 'Tajawal', sans-serif;
-        background-color: #f9f9f9;
-        direction: rtl;
-   }
-   .details-container {
-        background: var(--white);
+    .details-container {
+        background: #fff;
         margin: 30px auto;
         padding: 40px;
         max-width: 800px;
         border-radius: 20px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-   }
-   .post-header {
-        border-bottom: 3px solid var(--accent-beige);
+        direction: rtl;
+    }
+
+    .post-header {
+        border-bottom: 3px solid #d6cabc;
         padding-bottom: 15px;
         margin-bottom: 25px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-   }
-   .post-title {
-        color: var(--primary-green);
+        gap: 16px;
+    }
+
+    .post-title {
+        color: #195042;
         margin: 0;
         font-weight: bold;
-   }
-   .post-meta {
-        font-size: 0.9rem;
-        color: #7f8c8d;
-   }
-   .post-body {
+    }
+
+    .post-body {
         font-size: 1.1rem;
         line-height: 1.8;
-        color: var(--text-dark);
+        color: #2d3436;
         white-space: pre-wrap;
-        background: var(--light-beige);
+        background: #f4f1ee;
         padding: 25px;
         border-radius: 12px;
         margin-bottom: 30px;
         min-height: 150px;
-   }
-   .interaction-badge {
+    }
+
+    .interaction-badge {
         display: inline-flex;
         align-items: center;
         gap: 8px;
         background: #f0f0f0;
         padding: 8px 16px;
         border-radius: 20px;
-        font-size: 1rem;
-        color: var(--text-dark);
         font-weight: bold;
-   }
-   .btn-back {
-        background-color: var(--primary-green);
-        color: var(--white);
+    }
+
+    .btn-back {
+        background-color: #195042;
+        color: #fff;
         font-size: 15px;
         padding: 10px 25px;
         border-radius: 12px;
         border: none;
         cursor: pointer;
-        transition: var(--transition);
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        text-decoration: none;
-   }
-   .btn-back:hover {
-        background-color: #123d32;
-        transform: translateY(-2px);
-        color: var(--white);
-   }
+    }
 </style>
 
 <section class="details-container">
+    @if (isLoading)
+    {
         <div class="text-center p-5">
             <div class="spinner-border text-success" role="status"></div>
-            <p class="mt-3" style="color: var(--primary-green);">جاري تحميل تفاصيل المنشور...</p>
+            <p class="mt-3" style="color: #195042;">جاري تحميل تفاصيل المنشور...</p>
         </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
         <div class="alert alert-danger text-center">
-            <i class="bi bi-exclamation-triangle-fill"></i> errorMessage
+            <i class="bi bi-exclamation-triangle-fill"></i> @errorMessage
         </div>
         <div class="text-center mt-4">
-            <button class="btn-back" @onclick="GoBack"><i class="bi bi-arrow-right"></i> العودة للمنشورات</button>
+            <button class="btn-back" @onclick="GoBack">
+                <i class="bi bi-arrow-right"></i> العودة للمنشورات
+            </button>
         </div>
-   
+    }
+    else if (currentPost != null)
+    {
         <header class="post-header">
-            <h2 class="post-title">currentPost.Title</h2>
-            <div class="post-meta">
-                <span class="interaction-badge">👍 currentPost.InteractionsCount تفاعل</span>
-            </div>
+            <h2 class="post-title">@currentPost.Title</h2>
+            <span class="interaction-badge">@currentPost.InteractionsCount تفاعل</span>
         </header>
 
         <article class="post-body">
-            currentPost.Body
+            @currentPost.Body
         </article>
 
         <footer class="text-start">
@@ -116,10 +108,54 @@
 </section>
 
 @code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private bool isLoading = true;
+    private string? errorMessage;
+    private PostDto? currentPost;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var response = await PostService.GetPostByIdAsync(new GetPostByIdRequest
+            {
+                PostId = Id,
+                IncludeInteractions = true
+            });
+
+            currentPost = ExtractPost(response.Data);
+            if (currentPost == null)
+                errorMessage = "لم يتم العثور على المنشور.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private static PostDto? ExtractPost(object? data)
+    {
+        if (data == null)
+            return null;
+
+        if (data is PostDto post)
+            return post;
+
+        var json = JsonSerializer.Serialize(data);
+        return JsonSerializer.Deserialize<PostDto>(json, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+    }
 
     private void GoBack()
     {
         NavManager.NavigateTo("/supervisor/posts");
     }
-}
 }

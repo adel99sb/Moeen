@@ -1,11 +1,13 @@
-﻿using Moeen.Shared.Requests;
 using Moeen.Shared.Requests.ContentSharing;
 using Moeen.Shared.Responses;
+using Moeen.Shared.Responses.ContentSharing;
 
 namespace Moeen.Dashboard.Services.Abstractions
 {
     public interface IPostService
     {
+        Task<List<PostDto>> GetAllPostsAsync();
+        Task<List<HalqaBriefDto>> GetHalqasBriefAsync(string? query = null);
         Task<GeneralResponse> PublishPostAsync(PublishPostRequest request);
         Task<GeneralResponse> UpdatePostAsync(UpdatePostRequest request);
         Task<GeneralResponse> DeletePostAsync(DeletePostRequest request);

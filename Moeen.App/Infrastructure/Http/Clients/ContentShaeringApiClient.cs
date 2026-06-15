@@ -1,5 +1,6 @@
 ﻿using Moeen.Shared.Responses;
 using System.Net.Http.Json;
+using Moeen.Shared.Requests.ContentSharing;
 
 namespace Moeen.App.Infrastructure.Http.Clients
 {
@@ -14,6 +15,12 @@ namespace Moeen.App.Infrastructure.Http.Clients
         {
             var response = await _httpClient.GetAsync(ApiRoutes.GetAllContentSharingRoute);
             response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<GeneralResponse>();
+        }
+
+        public async Task<GeneralResponse?> InteractAsync(InteractWithPostRequest request)
+        {
+            var response = await _httpClient.PostAsJsonAsync(ApiRoutes.InteractWithPostRoute, request);
             return await response.Content.ReadFromJsonAsync<GeneralResponse>();
         }
     }

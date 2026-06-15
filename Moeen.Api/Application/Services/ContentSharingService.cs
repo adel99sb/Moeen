@@ -44,7 +44,9 @@ namespace Moeen.Api.Application.Services
                 Body = post.body,
                 ImageUrl = string.IsNullOrWhiteSpace(post.imageUrl) ? null : await _file_service_GetUrlSafe(post.imageUrl),
                 MosqueId = post.MosqueId == Guid.Empty ? null : post.MosqueId,
-                HalqaId = post.MosqueId == Guid.Empty ? null : null,
+                HalqaId = post.HalqaId,
+                HalqaName = await GetHalqaNameAsync(post.HalqaId),
+                IsAnnouncement = !post.HalqaId.HasValue,
                 CreatedAt = post.created_at,
                 InteractionsCount = post.PosInteractions?.Count ?? 0
             };
@@ -88,35 +90,45 @@ namespace Moeen.Api.Application.Services
         public async Task<GeneralResponse> PublishPostAsync(PublishPostRequest request)
         {
             if (request?.PostData == null)
-                return GeneralResponse.BadRequest("بيانات المنشور مطلوبة.");
+                return GeneralResponse.BadRequest("Post data is required.");
 
-            var currentUserId = _currentUserService.CurrentUserId;
-            var isAdmin = _currentUserService.IsAdmin ?? false;
+            if (string.IsNullOrWhiteSpace(request.PostData.Title))
+                return GeneralResponse.BadRequest("Post title is required.");
 
-            Guid mosqueId;
+            if (string.IsNullOrWhiteSpace(request.PostData.Body))
+                return GeneralResponse.BadRequest("Post body is required.");
 
-            if (isAdmin)
+            var mosqueResult = await GetCurrentSupervisorMosqueIdAsync();
+            if (!mosqueResult.Success)
+                return mosqueResult.Error!;
+
+            Guid? halqaId = null;
+            if (!request.IsPublic)
             {
-                mosqueId = request.PostData.MosqueId ?? Guid.Empty;
-            }
-            else
-            {
-                if (!currentUserId.HasValue)
-                    return GeneralResponse.Unauthorized("المستخدم غير مصادق عليه.");
+                if (!request.PostData.HalqaId.HasValue)
+                    return GeneralResponse.BadRequest("Halqa is required for private posts.");
 
-                var supervisor = await _unitOfWork.Repository<Supervisor>().GetByIdAsync(currentUserId.Value);
-                if (supervisor == null)
-                    return GeneralResponse.Unauthorized("ملف المشرف غير موجود.");
+                var halqaSpec = Spec.ForChain<Halqa>(
+                    h => h.Id == request.PostData.HalqaId.Value,
+                    q => q.Include(h => h.Fouj));
 
-                mosqueId = supervisor.MosqueId;
+                var halqa = (await _unitOfWork.Repository<Halqa>().GetAllAsync(halqaSpec)).FirstOrDefault();
+                if (halqa == null)
+                    return GeneralResponse.BadRequest("Selected halqa was not found.");
+
+                if (halqa.Fouj == null || halqa.Fouj.MosqueId != mosqueResult.MosqueId)
+                    return GeneralResponse.Unauthorized("Selected halqa does not belong to your mosque.");
+
+                halqaId = halqa.Id;
             }
 
             var post = new Post
             {
                 Id = Guid.NewGuid(),
-                MosqueId = mosqueId,
-                title = request.PostData.Title,
-                body = request.PostData.Body,
+                MosqueId = mosqueResult.MosqueId,
+                HalqaId = halqaId,
+                title = request.PostData.Title.Trim(),
+                body = request.PostData.Body.Trim(),
                 imageUrl = request.PostData.ImageUrl,
                 created_at = DateTime.UtcNow
             };
@@ -124,13 +136,12 @@ namespace Moeen.Api.Application.Services
             await _unitOfWork.Repository<Post>().AddAsync(post);
             await _unitOfWork.CompleteAsync();
 
-            // ✅ استخراج الـ DTO من الـ GeneralResponse
             var mapResponse = await MapPostToDtoAsync(post, includeInteractions: false);
             if (!mapResponse.Success)
                 return mapResponse;
 
             var dto = mapResponse.Data as PostDto;
-            return GeneralResponse.Ok("تم نشر المنشور بنجاح.", dto);
+            return GeneralResponse.Ok("Post published successfully.", dto);
         }
 
         public async Task<GeneralResponse> UpdatePostAsync(UpdatePostRequest request)
@@ -421,6 +432,56 @@ namespace Moeen.Api.Application.Services
             return GeneralResponse.Ok("تمت إضافة الوسائط بنجاح.", response);
         }
 
+        private async Task<(bool Success, Guid MosqueId, GeneralResponse? Error)> GetCurrentSupervisorMosqueIdAsync()
+        {
+            var currentUserId = _currentUserService.CurrentUserId;
+            if (!currentUserId.HasValue)
+                return (false, Guid.Empty, GeneralResponse.Unauthorized("You must be logged in to publish a post."));
+
+            var supervisor = await _unitOfWork.Repository<Supervisor>().GetByIdAsync(currentUserId.Value);
+            if (supervisor == null)
+                return (false, Guid.Empty, GeneralResponse.Unauthorized("Current user is not a mosque supervisor."));
+
+            if (supervisor.MosqueId == Guid.Empty)
+                return (false, Guid.Empty, GeneralResponse.BadRequest("Current supervisor is not linked to a mosque."));
+
+            return (true, supervisor.MosqueId, null);
+        }
+
+        private async Task<string?> GetHalqaNameAsync(Guid? halqaId)
+        {
+            if (!halqaId.HasValue)
+                return null;
+
+            var halqa = await _unitOfWork.Repository<Halqa>().GetByIdAsync(halqaId.Value);
+            return halqa?.Name;
+        }
+
+        public async Task<GeneralResponse> GetAvailableHalqasBriefAsync(string? query)
+        {
+            var mosqueResult = await GetCurrentSupervisorMosqueIdAsync();
+            if (!mosqueResult.Success)
+                return mosqueResult.Error!;
+
+            var normalizedQuery = query?.Trim();
+            var spec = Spec.ForChain<Halqa>(
+                h => h.Fouj.MosqueId == mosqueResult.MosqueId &&
+                     (string.IsNullOrEmpty(normalizedQuery) || h.Name.Contains(normalizedQuery)),
+                q => q.Include(h => h.Fouj));
+
+            var halqas = (await _unitOfWork.Repository<Halqa>().GetAllAsync(spec))
+                .OrderBy(h => h.Name)
+                .Select(h => new HalqaBriefDto
+                {
+                    Id = h.Id,
+                    Name = h.Name,
+                    FoujId = h.FoujId,
+                    FoujName = h.Fouj != null ? h.Fouj.name : string.Empty
+                })
+                .ToList();
+
+            return GeneralResponse.Ok("Available halqas retrieved successfully.", halqas);
+        }
         public async Task<GeneralResponse> GetAllPostsAsync()
         {
             try
@@ -450,3 +511,5 @@ namespace Moeen.Api.Application.Services
         }
     }
 }
+
+

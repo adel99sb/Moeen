@@ -4,6 +4,8 @@
 @using Moeen.Shared.Requests.ContentSharing
 @using Moeen.Shared.Responses.ContentSharing
 @inject NavigationManager NavManager
+@inject Moeen.Dashboard.Services.Abstractions.IPostService PostService
+@inject Moeen.Dashboard.Services.Abstractions.ITokenService TokenService
 
 <style>
    :root {
@@ -289,10 +291,12 @@
         </tbody>
     </table>
 
-    <details class="mt-4" open="@_isDetailsOpen">
-        <summary class="btn-pprimary">
-            @(isEditMode ? "تعديل المنشور الحالي" : "إضافة منشور جديد")
-        </summary>
+    <button type="button" class="btn-pprimary mt-4" @onclick="OpenCreateFormAsync">
+        إضافة منشور جديد
+    </button>
+
+    @if (_isDetailsOpen)
+    {
         <div class="form-container">
             <div class="form-header">
                 <h2>
@@ -330,10 +334,33 @@
                             </InputSelect>
                         </div>
                     </div>
-                    <div class="input-group"></div>
+                    @if (!_publishModel.IsPublic)
+                    {
+                        <div class="input-group">
+                            <label>الحلقة</label>
+                            <div class="input-wrapper">
+                                <i class="bi bi-search"></i>
+                                <input class="form-control" placeholder="ابحث باسم الحلقة" @bind="halqaSearchQuery" @bind:event="oninput" />
+                            </div>
+                            <div class="input-wrapper mt-2">
+                                <i class="bi bi-diagram-3"></i>
+                                <InputSelect TValue="Guid?" @bind-Value="_publishModel.PostData.HalqaId" class="form-control">
+                                    <option value="">اختر الحلقة</option>
+                                    @foreach (var halqa in FilteredHalqas)
+                                    {
+                                        <option value="@halqa.Id">@halqa.Name @(string.IsNullOrWhiteSpace(halqa.FoujName) ? string.Empty : $"- {halqa.FoujName}")</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="input-group"></div>
+                    }
                 </div>
                 <div class="actions">
-                    <button type="submit" class="save">
+                    <button type="submit" class="save" disabled="@isPublishing">
                         <span>
                             <i class="bi bi-check2-all"></i> 
                             @(isEditMode ? "حفظ التعديلات" : "نشر")
@@ -343,7 +370,7 @@
                 </div>
             </EditForm>
         </div>
-    </details>
+    }
 </section>
 
 @code {
@@ -360,22 +387,21 @@
     private bool isEditMode = false;
     private Guid selectedPostId;
     private string searchQuery = "";
+    private string halqaSearchQuery = "";
+    private bool isPublishing = false;
+    private List<HalqaBriefDto> availableHalqas = new();
+
+    private IEnumerable<HalqaBriefDto> FilteredHalqas => string.IsNullOrWhiteSpace(halqaSearchQuery)
+        ? availableHalqas
+        : availableHalqas.Where(h => h.Name.Contains(halqaSearchQuery, StringComparison.OrdinalIgnoreCase)
+            || (!string.IsNullOrWhiteSpace(h.FoujName) && h.FoujName.Contains(halqaSearchQuery, StringComparison.OrdinalIgnoreCase)));
 
     private PublishPostRequest _publishModel = new PublishPostRequest();
 
     protected override async Task OnInitializedAsync()
     {
         InitializePublishModel();
- // تثبيت المنشورات الأساسية في القائمة الأصلية
-        masterPostList = new List<PostDto>
-        {
-            new PostDto { Id = Guid.NewGuid(), Title = "أهمية القراءة", Body = "تعليم وتثقيف المجتمع", InteractionsCount = 5 },
-            new PostDto { Id = Guid.NewGuid(), Title = "منشور تجريبي", Body = "محتوى المنشور التجريبي لإدارة النظام", InteractionsCount = 0 }
-        };
-        
-        // شحن القائمة المصفاة في البداية بكامل البيانات
-        ApplyFilter();
-        isLoading = false;
+        await LoadPostsAsync();
     }
 
     private void InitializePublishModel()
@@ -383,44 +409,145 @@
         _publishModel = new PublishPostRequest
         {
             IsPublic = true,
-            PostData = new RequstePostDto() 
+            PostData = new RequstePostDto()
         };
     }
 
-    private void HandleSubmit()
+    private async Task<bool> HasSavedTokenAsync()
+    {
+        try
+        {
+            var token = await TokenService.Get();
+            return !string.IsNullOrWhiteSpace(token);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private async Task OpenCreateFormAsync()
+    {
+        if (!await HasSavedTokenAsync())
+        {
+            Message = "يجب تسجيل الدخول أولاً قبل إضافة منشور.";
+            Success = false;
+            ShowMessage = true;
+            return;
+        }
+
+        isEditMode = false;
+        InitializePublishModel();
+        halqaSearchQuery = string.Empty;
+
+        if (availableHalqas.Count == 0)
+            await LoadHalqasAsync(showMessageOnError: false);
+
+        _isDetailsOpen = true;
+        ShowMessage = false;
+    }
+
+    private async Task LoadHalqasAsync(bool showMessageOnError = true)
+    {
+        try
+        {
+            availableHalqas = await PostService.GetHalqasBriefAsync();
+        }
+        catch (Exception ex)
+        {
+            availableHalqas = new List<HalqaBriefDto>();
+            if (showMessageOnError)
+            {
+                Message = ex.Message;
+                Success = false;
+                ShowMessage = true;
+            }
+        }
+    }
+
+    private async Task LoadPostsAsync(bool showLoading = true)
+    {
+        if (showLoading)
+            isLoading = true;
+
+        try
+        {
+            masterPostList = await PostService.GetAllPostsAsync();
+            ApplyFilter();
+        }
+        catch (Exception ex)
+        {
+            masterPostList = new List<PostDto>();
+            filteredPostList = new List<PostDto>();
+            Message = ex.Message;
+            Success = false;
+            ShowMessage = true;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleSubmit()
     {
         if (isEditMode)
         {
-            HandleUpdatePost();
+            await HandleUpdatePost();
         }
         else
         {
-            HandleCreatePost();
+            await HandleCreatePost();
         }
     }
 
-    // 1. الإضافة المحلية مع دعم التحديث الفوري للبحث
-    private void HandleCreatePost()
+    private async Task HandleCreatePost()
     {
         ShowMessage = true;
 
-        var newPost = new PostDto
+        if (!await HasSavedTokenAsync())
         {
-            Id = Guid.NewGuid(),
-            Title = string.IsNullOrEmpty(_publishModel.PostData?.Title) ? "عنوان افتراضي" : _publishModel.PostData.Title,
-            Body = string.IsNullOrEmpty(_publishModel.PostData?.Body) ? "محتوى افتراضي" : _publishModel.PostData.Body,
-            InteractionsCount = 0
-        };
-        
-        masterPostList.Insert(0, newPost);
+            Message = "يجب تسجيل الدخول أولاً قبل نشر منشور.";
+            Success = false;
+            return;
+        }
 
-        Message = "تم نشر المنشور بنجاح!";
-        Success = true;
-        _isDetailsOpen = false;
-        
-        InitializePublishModel();
-        ApplyFilter(); // تحديث البحث ليعكس الإضافة فوراً
-        StateHasChanged();
+        if (_publishModel.PostData == null)
+            _publishModel.PostData = new RequstePostDto();
+
+
+        if (_publishModel.IsPublic)
+        {
+            _publishModel.PostData.HalqaId = null;
+        }
+        else if (!_publishModel.PostData.HalqaId.HasValue)
+        {
+            Message = "يجب اختيار الحلقة عند نشر منشور خاص.";
+            Success = false;
+            return;
+        }
+
+        isPublishing = true;
+        try
+        {
+            await PostService.PublishPostAsync(_publishModel);
+            Message = "تم نشر المنشور بنجاح!";
+            Success = true;
+            _isDetailsOpen = false;
+
+            InitializePublishModel();
+            halqaSearchQuery = string.Empty;
+            await LoadPostsAsync(showLoading: false);
+        }
+        catch (Exception ex)
+        {
+            Message = ex.Message;
+            Success = false;
+        }
+        finally
+        {
+            isPublishing = false;
+        }
     }
 
     private void EnableEditMode(PostDto post)
@@ -436,41 +563,51 @@
         StateHasChanged();
     }
 
-    // 2. التعديل المحلي مع دعم التحديث الفوري للبحث
-    private void HandleUpdatePost()
+    private async Task HandleUpdatePost()
     {
         ShowMessage = true;
-        
-        var postToUpdate = masterPostList.FirstOrDefault(p => p.Id == selectedPostId);
-        if (postToUpdate != null)
+
+        try
         {
-            postToUpdate.Title = _publishModel.PostData.Title;
-            postToUpdate.Body = _publishModel.PostData.Body;
-            
+            await PostService.UpdatePostAsync(new UpdatePostRequest
+            {
+                PostId = selectedPostId,
+                Title = _publishModel.PostData?.Title,
+                Body = _publishModel.PostData?.Body
+            });
+
+            ResetForm();
             Message = "تم تعديل المنشور بنجاح!";
             Success = true;
+            ShowMessage = true;
+            await LoadPostsAsync(showLoading: false);
         }
-
-        ResetForm(); 
-        ApplyFilter(); // تحديث البحث ليعكس التعديل فوراً
-        StateHasChanged();
+        catch (Exception ex)
+        {
+            Message = ex.Message;
+            Success = false;
+        }
     }
 
-    // 3. الحذف المحلي مع دعم التحديث الفوري للبحث
-    private void DeletePost(Guid id)
+    private async Task DeletePost(Guid id)
     {
         ShowMessage = true;
-        var postToRemove = masterPostList.FirstOrDefault(p => p.Id == id);
-        if (postToRemove != null)
+
+        try
         {
-            masterPostList.Remove(postToRemove);
+            await PostService.DeletePostAsync(new DeletePostRequest { PostId = id });
+            if (isEditMode && selectedPostId == id) ResetForm();
+
             Message = "تم حذف المنشور بنجاح!";
             Success = true;
+            ShowMessage = true;
+            await LoadPostsAsync(showLoading: false);
         }
-        
-        if(isEditMode && selectedPostId == id) ResetForm(); 
-        ApplyFilter(); // تحديث البحث ليعكس الحذف فوراً
-        StateHasChanged();
+        catch (Exception ex)
+        {
+            Message = ex.Message;
+            Success = false;
+        }
     }
 
     // 4. ميثود معالجة إدخال نص البحث أثناء الكتابة

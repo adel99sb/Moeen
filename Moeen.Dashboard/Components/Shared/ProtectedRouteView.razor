@@ -1,0 +1,103 @@
+@namespace Moeen.Dashboard.Components.Shared
+@using Microsoft.AspNetCore.Components.Routing
+@using Moeen.Dashboard.Services.Abstractions
+@inject ITokenService TokenService
+@inject NavigationManager Nav
+
+@if (!_ready)
+{
+    <LayoutView Layout="DefaultLayout">
+        <div class="d-flex align-items-center justify-content-center p-5">
+            <div class="spinner-border text-success" role="status"></div>
+            <span class="ms-3">جاري التحقق من تسجيل الدخول...</span>
+        </div>
+    </LayoutView>
+}
+else if (_allowRender)
+{
+    <RouteView RouteData="RouteData" DefaultLayout="DefaultLayout" />
+}
+
+@code {
+    [Parameter, EditorRequired] public RouteData RouteData { get; set; } = default!;
+    [Parameter] public Type? DefaultLayout { get; set; }
+
+    private bool _ready;
+    private bool _allowRender;
+    private string? _lastEvaluatedPath;
+
+    protected override void OnParametersSet()
+    {
+        var path = CurrentPath();
+        if (!string.Equals(path, _lastEvaluatedPath, StringComparison.OrdinalIgnoreCase))
+        {
+            _ready = false;
+            _allowRender = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var path = CurrentPath();
+        if (_ready && string.Equals(path, _lastEvaluatedPath, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        _lastEvaluatedPath = path;
+
+        var session = await TokenService.GetSession();
+        var isLoginPage = IsLoginPage(path);
+
+        if (!session.IsAuthenticated)
+        {
+            if (!isLoginPage)
+                Nav.NavigateTo("/", replace: true);
+
+            _allowRender = isLoginPage;
+            _ready = true;
+            StateHasChanged();
+            return;
+        }
+
+        if (isLoginPage)
+        {
+            Nav.NavigateTo(session.HomeRoute, replace: true);
+            return;
+        }
+
+        if (!IsRouteAllowedForRole(path, session.PrimaryRole))
+        {
+            Nav.NavigateTo(session.HomeRoute, replace: true);
+            return;
+        }
+
+        _allowRender = true;
+        _ready = true;
+        StateHasChanged();
+    }
+
+    private string CurrentPath()
+        => "/" + Nav.ToBaseRelativePath(Nav.Uri).Split('?', '#')[0].Trim('/');
+
+    private static bool IsLoginPage(string path)
+        => string.Equals(path, "/", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsRouteAllowedForRole(string path, string? role)
+    {
+        var normalizedPath = path.ToLowerInvariant();
+
+        if (normalizedPath == "/settings" || normalizedPath == "/error")
+            return true;
+
+        return role switch
+        {
+            "owner" => normalizedPath.StartsWith("/owner")
+                       || normalizedPath.StartsWith("/management")
+                       || normalizedPath == "/style-guide",
+            "supervisor" => normalizedPath.StartsWith("/supervisor")
+                            || normalizedPath == "/parents",
+            "teacher" => normalizedPath.StartsWith("/teacher"),
+            "examer" => normalizedPath.StartsWith("/examer"),
+            _ => false
+        };
+    }
+}

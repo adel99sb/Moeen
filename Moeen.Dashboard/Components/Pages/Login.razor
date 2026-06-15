@@ -1,231 +1,278 @@
 ﻿@page "/"
+@layout Moeen.Dashboard.Components.Layout.LoginLayout
 
 @using Moeen.Dashboard.Services.Abstractions
 @using Moeen.Shared.Requests.Identity
 @inject IAuthService AuthService
 @inject ITokenService TokenService
 @inject NavigationManager Nav
-@inject ILogger<Login> Logger
 @rendermode InteractiveServer
 
-<PageTitle>Login</PageTitle>
+<PageTitle>تسجيل الدخول - معين</PageTitle>
 
-<h3 class="mb-4">Login</h3>
+<div class="moeen-login-page" dir="rtl">
+    <header class="moeen-login-header">
+        <div class="moeen-login-brand">معين</div>
+    </header>
 
-<EditForm Model="_model">
+    <main class="moeen-login-main">
+        <section class="moeen-login-card" aria-labelledby="login-title">
+            <div class="moeen-login-icon" aria-hidden="true">
+                <span class="bi bi-shield-lock"></span>
+            </div>
 
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+            <h1 id="login-title">تسجيل الدخول</h1>
+            <p class="moeen-login-subtitle">
+                أهلاً بك، سجّل دخولك للوصول إلى لوحة التحكم المناسبة لصلاحياتك.
+            </p>
 
-    <!-- Email -->
-    <div class="mb-3">
-        <label class="form-label">Email</label>
-        <InputText @bind-Value="_model.Email" class="form-control" />
-        <ValidationMessage For="@(() => _model.Email)" />
-    </div>
+            <EditForm Model="_model" OnValidSubmit="HandleLogin" class="moeen-login-form">
+                <DataAnnotationsValidator />
 
-    <!-- Password -->
-    <div class="mb-3">
-        <label class="form-label">Password</label>
-        <InputText @bind-Value="_model.Password"
-                   type="password"
-                   class="form-control" />
-        <ValidationMessage For="@(() => _model.Password)" />
-    </div>
+                <div class="moeen-field">
+                    <label for="email">البريد الإلكتروني</label>
+                    <InputText id="email"
+                               @bind-Value="_model.Email"
+                               type="email"
+                               class="moeen-input"
+                               placeholder="name@example.com" />
+                    <ValidationMessage For="@(() => _model.Email)" />
+                </div>
 
-    <!-- Error Message -->
-    @if (ShowMessage)
-    {
-        <div class="alert alert-danger">
-            @Message
-        </div>
-    }
+                <div class="moeen-field">
+                    <label for="password">كلمة المرور</label>
+                    <InputText id="password"
+                               @bind-Value="_model.Password"
+                               type="password"
+                               class="moeen-input"
+                               placeholder="••••••••" />
+                    <ValidationMessage For="@(() => _model.Password)" />
+                </div>
 
-    <!-- Submit -->
-    <div class="d-flex align-items-center mt-3">
-        <button class="btn btn-primary" type="button"
-                @onclick="HandleLogin"
-                disabled="@_isLoading">
-            @if (_isLoading)
-            {
-                <span class="spinner-border spinner-border-sm"></span>
-                <span class="ms-2">Logging in...</span>
-            }
-            else
-            {
-                <span>Login</span>
-            }
-        </button>
+                @if (ShowMessage && !string.IsNullOrWhiteSpace(Message))
+                {
+                    <div class="moeen-login-alert" role="alert">
+                        @Message
+                    </div>
+                }
 
-        <button class="btn btn-link ms-3" type="button"
-                @onclick="HandleSendVerificationCode"
-                disabled="@(_isLoading || _isSendingCode)">
-            إرسال كود التفعيل؟
-        </button>
-    </div>
-</EditForm>
-@if (IsVerificationSuccess)
-{
-    <div class="card mt-4 border-success">
-        <div class="card-body">
-            <h5 class="card-title text-success">تأكيد الحساب</h5>
-            <p class="small text-muted">يرجى إدخال الكود الذي وصلك على الإيميل:</p>
-            
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" placeholder="000000" @bind="_verifyModel.Code" />
-                <button class="btn btn-success" type="button" @onclick="HandleVerifyEmail" disabled="_isVerifying">
-                    @if (_isVerifying)
+                <button class="moeen-login-button" type="submit" disabled="@_isLoading">
+                    @if (_isLoading)
                     {
-                        <span class="spinner-border spinner-border-sm"></span>
+                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                        <span>جاري تسجيل الدخول...</span>
                     }
                     else
                     {
-                        <span>تأكيد الآن</span>
+                        <span>دخول</span>
                     }
                 </button>
-            </div>
-            
-            @if (!string.IsNullOrEmpty(VerifyStatusMessage))
-            {
-                <div class="alert @(IsVerifyError ? "alert-danger" : "alert-success") py-1 small">
-                    @VerifyStatusMessage
-                </div>
-            }
-        </div>
-    </div>
-}
+            </EditForm>
+        </section>
+    </main>
+</div>
 
-@if (!string.IsNullOrEmpty(VerificationMessage) && !IsVerificationSuccess)
-{
-    <div class="alert @(IsVerificationSuccess ? "alert-success" : "alert-warning") mt-3">
-        @VerificationMessage
-    </div>
-}
+<style>
+    .moeen-login-page {
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at 22% 18%, rgba(25, 80, 66, 0.10), transparent 32%),
+            linear-gradient(135deg, #f7f3ed 0%, #f2ede5 52%, #eee7dd 100%);
+        color: #163f35;
+        font-family: inherit;
+    }
+
+    .moeen-login-header {
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 0 48px;
+        border-bottom: 1px solid rgba(25, 80, 66, 0.10);
+        background: rgba(255, 255, 255, 0.56);
+        backdrop-filter: blur(12px);
+    }
+
+    .moeen-login-brand {
+        font-size: 1.65rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        color: #195042;
+    }
+
+    .moeen-login-main {
+        min-height: calc(100vh - 72px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 20px;
+    }
+
+    .moeen-login-card {
+        width: min(100%, 520px);
+        padding: 42px 42px 36px;
+        border: 1px solid rgba(25, 80, 66, 0.12);
+        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 26px 80px rgba(25, 80, 66, 0.14);
+    }
+
+    .moeen-login-icon {
+        width: 58px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 22px;
+        border-radius: 18px;
+        background: #195042;
+        color: #fff;
+        font-size: 1.55rem;
+        box-shadow: 0 14px 26px rgba(25, 80, 66, 0.24);
+    }
+
+    .moeen-login-card h1 {
+        margin: 0;
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #195042;
+    }
+
+    .moeen-login-subtitle {
+        max-width: 360px;
+        margin: 12px auto 34px;
+        text-align: center;
+        color: #7b7067;
+        line-height: 1.8;
+    }
+
+    .moeen-login-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .moeen-field label {
+        display: block;
+        margin-bottom: 10px;
+        color: #263f37;
+        font-weight: 700;
+    }
+
+    .moeen-input {
+        width: 100%;
+        height: 54px;
+        padding: 0 16px;
+        border: 1px solid #ddd5cc;
+        border-radius: 13px;
+        background: #fff;
+        color: #173f35;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .moeen-input:focus {
+        border-color: #195042;
+        box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.12);
+    }
+
+    .moeen-input::placeholder {
+        color: #aaa19a;
+    }
+
+    .validation-message {
+        display: block;
+        margin-top: 8px;
+        color: #b42318;
+        font-size: 0.875rem;
+    }
+
+    .moeen-login-alert {
+        padding: 12px 14px;
+        border: 1px solid rgba(180, 35, 24, 0.20);
+        border-radius: 13px;
+        background: #fff3f1;
+        color: #9b1c13;
+        font-size: 0.95rem;
+    }
+
+    .moeen-login-button {
+        height: 56px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        border: 0;
+        border-radius: 14px;
+        background: #195042;
+        color: #fff;
+        font-size: 1.05rem;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 16px 32px rgba(25, 80, 66, 0.22);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .moeen-login-button:hover:not(:disabled) {
+        background: #123d32;
+        transform: translateY(-1px);
+        box-shadow: 0 18px 38px rgba(25, 80, 66, 0.26);
+    }
+
+    .moeen-login-button:disabled {
+        opacity: 0.72;
+        cursor: not-allowed;
+    }
+
+    @@media (max-width: 640px) {
+        .moeen-login-header {
+            padding: 0 22px;
+        }
+
+        .moeen-login-card {
+            padding: 34px 22px 28px;
+            border-radius: 22px;
+        }
+    }
+</style>
 
 @code {
-
     private LoginRequest _model = new();
 
-    private bool _isLoading = false;
+    private bool _isLoading;
     private bool ShowMessage;
-    private string Message;
+    private string? Message;
 
     private async Task HandleLogin()
     {
-        ShowMessage = true;
+        ShowMessage = false;
+        Message = null;
+
         try
         {
             _isLoading = true;
             var result = await AuthService.Login(_model);
-            if (result != null)
+            if (result != null && !string.IsNullOrWhiteSpace(result.Token))
             {
                 await TokenService.Save(result.Token);
-                Message = "Login successful";
-                Nav.NavigateTo("/counter");
-            }
-            else
-            {
-                Message = "Login failed. Please check your credentials.";
+                var session = await TokenService.GetSession();
+                Nav.NavigateTo(session.HomeRoute, replace: true);
+                return;
             }
 
+            ShowMessage = true;
+            Message = "فشل تسجيل الدخول، يرجى التأكد من البريد الإلكتروني وكلمة المرور.";
         }
         catch (Exception ex)
         {
+            ShowMessage = true;
             Message = ex.Message;
         }
         finally
         {
             _isLoading = false;
-        }
-    }
-    private string VerificationMessage;
-    private bool IsVerificationSuccess;
-    private bool _isSendingCode = false; // لمنع النقر المتكرر أثناء الإرسال
-    private async Task HandleSendVerificationCode()
-    {
-        if (string.IsNullOrEmpty(_model.Email))
-        {
-            VerificationMessage = "يرجى إدخال البريد الإلكتروني أولاً";
-            IsVerificationSuccess = false;
-            return;
-        }
-
-        try
-        {
-            _isSendingCode = true;
-            VerificationMessage = "جاري إرسال الكود...";
-
-            var sendRequest = new SendVerifyEmailCodeRequest { Email = _model.Email };
-            //var result = await AuthService.SendVerifyEmailCode(sendRequest);
-
-            // if (result.Success)
-            // {
-            //     VerificationMessage = "تم إرسال كود التفعيل إلى بريدك الإلكتروني.";
-            //     IsVerificationSuccess = true;
-            // }
-            // else
-            // {
-            //     VerificationMessage = "فشل الإرسال: " + result.Message;
-            //     IsVerificationSuccess = false;
-            // }
-        }
-        catch (Exception ex)
-        {
-            VerificationMessage = "حدث خطأ: " + ex.Message;
-            IsVerificationSuccess = false;
-        }
-        finally
-        {
-            _isSendingCode = false;
-        }
-    }
-
-    private VerifyEmailRequest _verifyModel = new();
-    private bool _isVerifying = false;
-    private string VerifyStatusMessage;
-    private bool IsVerifyError;
-
-    private async Task HandleVerifyEmail()
-    {
-        if (string.IsNullOrEmpty(_verifyModel.Code))
-        {
-            VerifyStatusMessage = "يرجى إدخال كود التحقق";
-            IsVerifyError = true;
-            return;
-        }
-
-        try
-        {
-            _isVerifying = true;
-            VerifyStatusMessage = "جاري التحقق...";
-            
-            // نأخذ الإيميل من حقل تسجيل الدخول نفسه
-            _verifyModel.Email = _model.Email;
-
-            // var result = await AuthService.VerifyEmail(_verifyModel);
-
-            // if (result.Success)
-            // {
-            //     VerifyStatusMessage = "تم تفعيل حسابك بنجاح! يمكنك الآن تسجيل الدخول.";
-            //     IsVerifyError = false;
-            //     // إخفاء واجهة الكود بعد نجاح العملية بثوانٍ
-            //     await Task.Delay(3000);
-            //     IsVerificationSuccess = false;
-            // }
-            // else
-            // {
-            //     VerifyStatusMessage = result.Message;
-            //     IsVerifyError = true;
-            // }
-        }
-        catch (Exception ex)
-        {
-            VerifyStatusMessage = "خطأ: " + ex.Message;
-            IsVerifyError = true;
-        }
-        finally
-        {
-            _isVerifying = false;
         }
     }
 }
