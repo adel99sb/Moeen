@@ -70,6 +70,8 @@ namespace Moeen.Api.Application.Services
                 status = request.Status,
                 score = request.Score,
                 MosqueId = request.MosqueId,
+                HalqaId = null,
+                Halqa = null,
                 SaturdayHalqeId = request.SaturdayHalqeId ?? Guid.Empty
             };
 

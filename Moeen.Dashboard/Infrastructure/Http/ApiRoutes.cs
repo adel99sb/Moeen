@@ -124,6 +124,8 @@
         public static string AwardPointsManuallyAsyncRoute { get; } = "api/Points/award";
         public static string RemovePointsManuallyAsyncRoute { get; } = "api/Points/remove";
         public static string EvaluateAutomaticPointsAsyncRoute { get; } = "api/Points/automatic-award";
+        // supervisor dashboard
+        public static string SupervisorDashboardOverviewRoute { get; } = "api/supervisor-dashboard/overview";
         public static string MosquAssignAdmin { get; } = "api/Mosqu/assign-admin";
     }
 }

@@ -6,7 +6,7 @@ namespace Moeen.Api.Core.Entities
     {
         public Guid SaturdayHalqeId { get; set; }
         public Guid MosqueId { get; set; }
-        public Halqa Halqa { get; set; } = new Halqa();
+        public Halqa? Halqa { get; set; }
         public int age { get; set; }
         public string gender { get; set; }
 
@@ -25,6 +25,6 @@ namespace Moeen.Api.Core.Entities
         public Student Parent { get; set; }
         public ICollection<Student> Children { get; set; }
         public Guid? SaturdayHalqaId { get; internal set; }
-        public Guid? HalqaId { get; internal set; } = Guid.Empty;
+        public Guid? HalqaId { get; set; }
     }
 }

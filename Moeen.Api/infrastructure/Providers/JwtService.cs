@@ -29,6 +29,7 @@ namespace Moeen.Api.infrastructure.Providers
                 var claims = new List<Claim>
                 {
                     new Claim("UserIdentifier", user.Id.ToString()),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim("FullName", user.name),
                     new Claim("Email", user.Email == null ? string.Empty : user.Email),
                     new Claim("EmailConfirmed",user.EmailConfirmed.ToString())

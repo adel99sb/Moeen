@@ -57,7 +57,56 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = AppSettings.Instance.JwtSettings.Issuer,
         ValidAudience = AppSettings.Instance.JwtSettings.Audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppSettings.Instance.JwtSettings.SecretKey)),
-        RoleClaimType = ClaimTypes.Role
+        RoleClaimType = ClaimTypes.Role,
+        NameClaimType = ClaimTypes.NameIdentifier
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>()
+                .CreateLogger("JwtDiagnostics");
+            logger.LogInformation(
+                "JWT message received. Path={Path}, HasAuthorizationHeader={HasAuthorizationHeader}",
+                context.HttpContext.Request.Path,
+                context.Request.Headers.ContainsKey("Authorization"));
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>()
+                .CreateLogger("JwtDiagnostics");
+            logger.LogWarning(
+                context.Exception,
+                "JWT authentication failed. Path={Path}, Error={Error}",
+                context.HttpContext.Request.Path,
+                context.Exception.Message);
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>()
+                .CreateLogger("JwtDiagnostics");
+            logger.LogInformation(
+                "JWT token validated. Path={Path}, UserId={UserId}, Roles={Roles}",
+                context.HttpContext.Request.Path,
+                context.Principal?.FindFirstValue("UserIdentifier") ?? context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier),
+                string.Join(",", context.Principal?.Claims.Where(c => c.Type == ClaimTypes.Role || c.Type.EndsWith("/role", StringComparison.OrdinalIgnoreCase)).Select(c => c.Value) ?? Array.Empty<string>()));
+            return Task.CompletedTask;
+        },
+        OnChallenge = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>()
+                .CreateLogger("JwtDiagnostics");
+            logger.LogWarning(
+                "JWT challenge. Path={Path}, Error={Error}, Description={Description}, HasAuthorizationHeader={HasAuthorizationHeader}",
+                context.HttpContext.Request.Path,
+                context.Error,
+                context.ErrorDescription,
+                context.Request.Headers.ContainsKey("Authorization"));
+            return Task.CompletedTask;
+        }
     };
 });
 

@@ -1,664 +1,907 @@
 ﻿@page "/supervisor/student"
-@rendermode InteractiveServer
-@inject NavigationManager NavManager
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.ComponentModel.DataAnnotations
+@using System.Text.Json
+@using Moeen.Dashboard.Application.Services.Abstractions
+@using Moeen.Dashboard.Services.Abstractions
+@using Moeen.Shared.Requests.Enrollment
+@using Moeen.Shared.Requests.Mosuq
+@using Moeen.Shared.Responses.Enrollment
+@using Moeen.Shared.Responses.Mosuq
+@inject IEnrollmentService EnrollmentService
+@inject IMosquService MosquService
+@inject IJSRuntime JS
 
 <style>
-  :root {
-    --primary-green: #195042;
-    --accent-beige: #d6cabc;
-    --light-beige: #f4f1ee;
-    --white: #ffffff;
-    --text-dark: #2d3436;
-    --status-green: #2ecc71;
-    --danger-red: #e74c3c;
-    --transition: all 0.3s ease;
-  }
-
-  body {
-    font-family: 'Tajawal', sans-serif;
-    background-color: #f9f9f9;
-    direction: rtl;
-  }
-
-  .management-container {
-    background: var(--white);
-    margin: 20px;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-  }
-
-  .page-title {
-    color: var(--primary-green);
-    position: relative;
-    padding-bottom: 10px; 
-    border-bottom: 3px solid #d6cabc; 
-    display: inline-block; 
-  }
-
-  .search-wrapper {
-    position: relative;
-    flex: 1;
-    max-width: 400px;
-  }
-
-  .search-input {
-    width: 100%;
-    padding: 12px 45px 12px 15px;
-    border: 1.5px solid var(--accent-beige);
-    border-radius: 12px;
-    outline: none;
-    transition: 0.3s;
-  }
-
-  .search-input:focus {
-    border-color: var(--primary-green);
-    box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
-  }
-
-  .search-wrapper i {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--primary-green);
-  }
-
-  .table {
-    width: 100%;
-    table-layout: fixed;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    font-family: 'Tajawal', sans-serif;
-    font-size: clamp(0.95rem,2.5vw,1.5rem);
-    text-align: center;
-  }
-
-  .table th {
-    background-color: var(--light-beige);
-    color: var(--primary-green);
-    padding: 12px;
-  }
-
-  .table td {
-    background-color: var(--white);
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-  }
-
-  .table tbody tr:hover {
-    background-color: #fafafa;
-  .btn-pprimary {
-    background-color: var(--primary-green);
-    font-size: 15px;
-    padding: 10px 20px;
-    color: var(--white);
-    border-radius: 12px;
-    display: inline-block;
-    transition: 0.3s;
-    cursor: pointer;
-    border: none;
-  }
-
-  .btn-pprimary:hover {
-    background-color: #123d32;
-    transform: translateY(-2px);
-  }
-   
-    transform: scale(1.01);
-  }
-
-  .table-wrapper {
-    overflow-x: auto;
-    width: 100%;
-    border-radius: 12px;
-  }
-  	.btn-pprimary {
-    background-color: var(--primary-green);
-    font-size: 15px;
-    padding: 10px 20px;
-    color: var(--white);
-    border-radius: 12px;
-    display: inline;
-    transition: 0.3s;
-}
-
-    .btn-pprimary:hover {
-        background-color: #123d32;
-        transform: translateY(-2px);
+    .students-page {
+        direction: rtl;
+        font-family: inherit;
+        color: #163f35;
     }
-  .form-container, .form-container * {
-    box-sizing: border-box;
-  }
-    
-  .form-container {
-    max-width: 850px;
-    margin: 2rem auto;
-    background: var(--white);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    direction: rtl; 
-    overflow: hidden;
-  }
 
-  .form-header {
-    background: var(--accent-beige);
-    color: var(--white);
-    padding: 1.2rem;
-    text-align: center;
-  }
-
-  form {
-    padding: 2rem;
-  }
-
-  .grid-row {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 1.5rem;
-    margin-bottom: 1.2rem;
-  }
-
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .input-group label {
-    color: var(--text-dark);
-    font-weight: 600;
-    font-size: 0.85rem;
-    text-align: right;
-  }
-
-  .input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-  }
-
-  .input-wrapper i {
-    position: absolute;
-    right: 12px; 
-    color: var(--primary-green);
-    z-index: 2;
-    pointer-events: none;
-  }
-
-  .input-wrapper input,
-  .input-wrapper select {
-    width: 100%;
-    padding: 10px 35px 10px 10px;
-    border: 1px solid var(--accent-beige);
-    border-radius: 8px;
-    background: var(--light-beige);
-    font-size: 0.9rem;
-    height: 45px; 
-    outline: none;
-    transition: var(--transition);
-  }
-
-  .input-wrapper input:focus,
-  .input-wrapper select:focus {
-    border-color: var(--primary-green);
-    background: #fff;
-  }
-
-  .actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #eee;
-  }
- .actions button, .actions a {
-    flex: 1;
-    height: 48px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    border: none;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-
-  .actions .save {
-    background: var(--primary-green);
-    color: white;
-  }
-
-  .actions .parent {
-    background: var(--accent-beige);
-    color: white;
-  }
-
-  .actions .cancel {
-    background: #f8f9fa;
-    color: #dc3545;
-  }
-
-  .btn-icon {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2rem;
-    transition: var(--transition);
-  }
-  .btn-icon.edit { color: #3498db; }
-  .btn-icon.delete { color: var(--danger-red); }
-  .btn-icon:hover { transform: scale(1.1); }
-    
-  @@media (max-width: 768px) {
-    .grid-row {
-      grid-template-columns: 1fr !important;
+    .students-card {
+        background: #fff;
+        border: 1px solid rgba(25, 80, 66, 0.10);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 22px 60px rgba(25, 80, 66, 0.08);
     }
-  }
+
+    .students-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 26px;
+    }
+
+    .students-title {
+        margin: 0;
+        color: #195042;
+        font-size: 1.65rem;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+    }
+
+    .students-subtitle {
+        margin: 7px 0 0;
+        color: #7b7067;
+        font-size: 0.95rem;
+    }
+
+    .students-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+    }
+
+    .search-wrapper {
+        position: relative;
+        width: min(100%, 430px);
+    }
+
+    .search-wrapper .bi {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #195042;
+    }
+
+    .search-input {
+        width: 100%;
+        height: 48px;
+        padding: 0 44px 0 16px;
+        border: 1px solid #ddd5cc;
+        border-radius: 15px;
+        outline: none;
+        background: #fbfaf8;
+        color: #163f35;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .search-input:focus {
+        border-color: #195042;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.10);
+    }
+
+    .btn-moeen-primary,
+    .btn-moeen-light,
+    .btn-moeen-danger {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 0 17px;
+        border-radius: 14px;
+        border: 0;
+        font-weight: 800;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .btn-moeen-primary {
+        background: #195042;
+        color: #fff;
+        box-shadow: 0 14px 28px rgba(25, 80, 66, 0.18);
+    }
+
+    .btn-moeen-primary:hover:not(:disabled) {
+        background: #123d32;
+        transform: translateY(-1px);
+    }
+
+    .btn-moeen-light {
+        background: #f4f1e8;
+        color: #195042;
+        border: 1px solid #e2dbd2;
+    }
+
+    .btn-moeen-danger {
+        background: #fff3f1;
+        color: #b42318;
+        border: 1px solid rgba(180, 35, 24, 0.18);
+    }
+
+    .btn-moeen-primary:disabled,
+    .btn-moeen-light:disabled,
+    .btn-moeen-danger:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .students-table-wrap {
+        overflow-x: auto;
+        border: 1px solid #eee8e0;
+        border-radius: 18px;
+    }
+
+    .students-table {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+        min-width: 860px;
+    }
+
+    .students-table th {
+        background: #f4f1e8;
+        color: #195042;
+        font-weight: 900;
+        padding: 15px 18px;
+        border-bottom: 1px solid rgba(25, 80, 66, 0.18);
+        white-space: nowrap;
+    }
+
+    .students-table td {
+        padding: 15px 18px;
+        border-bottom: 1px solid #f1ece6;
+        vertical-align: middle;
+        color: #263f37;
+    }
+
+    .students-table tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .students-table tbody tr:hover td {
+        background: #fbfaf8;
+    }
+
+    .student-name-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 900;
+        color: #163f35;
+    }
+
+    .student-avatar {
+        width: 38px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border-radius: 14px;
+        background: #195042;
+        color: #fff;
+        font-size: 1rem;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 30px;
+        padding: 0 11px;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 800;
+    }
+
+    .status-active { background: #ecfdf3; color: #027a48; }
+    .status-inactive { background: #fff3f1; color: #b42318; }
+    .status-graduated { background: #eef4ff; color: #3538cd; }
+
+    .row-actions {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .icon-btn {
+        width: 38px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e2dbd2;
+        border-radius: 12px;
+        background: #fff;
+        color: #195042;
+        transition: transform 0.18s ease, background 0.18s ease;
+    }
+
+    .icon-btn:hover {
+        background: #f4f1e8;
+        transform: translateY(-1px);
+    }
+
+    .icon-btn.danger {
+        color: #b42318;
+    }
+
+    .dialog-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 28px;
+        background: rgba(9, 30, 24, 0.42);
+        backdrop-filter: blur(7px);
+    }
+
+    .student-dialog {
+        width: min(100%, 820px);
+        max-height: calc(100vh - 56px);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        border-radius: 26px;
+        background: #fff;
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.24);
+    }
+
+    .student-dialog-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 24px 28px;
+        border-bottom: 1px solid #eee8e0;
+        background: linear-gradient(135deg, #f7f3ed 0%, #fff 100%);
+    }
+
+    .student-dialog-title {
+        margin: 0;
+        color: #195042;
+        font-size: 1.35rem;
+        font-weight: 900;
+    }
+
+    .student-dialog-subtitle {
+        margin: 6px 0 0;
+        color: #7b7067;
+        font-size: 0.92rem;
+    }
+
+    .dialog-close-btn {
+        width: 42px;
+        height: 42px;
+        border: 0;
+        border-radius: 14px;
+        background: #f4f1e8;
+        color: #195042;
+        font-size: 1.15rem;
+    }
+
+    .student-dialog-body {
+        overflow-y: auto;
+        padding: 26px 28px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .form-field label {
+        display: block;
+        margin-bottom: 9px;
+        color: #263f37;
+        font-weight: 800;
+        font-size: 0.92rem;
+    }
+
+    .form-control.moeen-control,
+    .moeen-control {
+        min-height: 48px;
+        border: 1px solid #ddd5cc;
+        border-radius: 13px;
+        background-color: #fbfaf8;
+        color: #163f35;
+    }
+
+    .moeen-control:focus {
+        border-color: #195042;
+        box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.10);
+        background-color: #fff;
+    }
+
+    .validation-message {
+        display: block;
+        margin-top: 7px;
+        color: #b42318;
+        font-size: 0.82rem;
+    }
+
+    .student-dialog-footer {
+        display: flex;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 20px 28px 24px;
+        border-top: 1px solid #eee8e0;
+        background: #fff;
+    }
+
+    .state-card {
+        padding: 22px;
+        border: 1px solid #eee8e0;
+        border-radius: 18px;
+        background: #fff;
+        color: #195042;
+    }
+
+    @@media (max-width: 760px) {
+        .students-card { padding: 20px; }
+        .students-header { flex-direction: column; }
+        .form-grid { grid-template-columns: 1fr; }
+        .dialog-backdrop { padding: 12px; }
+        .student-dialog-header,
+        .student-dialog-body,
+        .student-dialog-footer { padding-left: 18px; padding-right: 18px; }
+    }
 </style>
 
-<section class="management-container">
-  <header class="page-header mb-3">
-    <h2 class="page-title">إدارة الطلاب</h2>
-  </header>
-  <br />
+<section class="students-page">
+    <div class="students-card">
+        <header class="students-header">
+            <div>
+                <h2 class="students-title">إدارة الطلاب</h2>
+                <p class="students-subtitle">عرض الطلاب، إضافة طالب جديد، وتعديل البيانات مباشرة من لوحة المشرف.</p>
+            </div>
+            <button class="btn-moeen-primary" type="button" @onclick="OpenCreateDialog" disabled="@_isLoading">
+                <i class="bi bi-person-plus"></i>
+                <span>إضافة طالب جديد</span>
+            </button>
+        </header>
 
-  <div class="search-wrapper mb-3">
-    <i class="bi bi-search"></i>
-    <input type="text" class="search-input" placeholder="ابحث عن طالب بالاسم..." @oninput="HandleSearch" />
-  </div>
+        <div class="students-toolbar">
+            <div class="search-wrapper">
+                <i class="bi bi-search"></i>
+                <input class="search-input"
+                       value="@_searchText"
+                       placeholder="ابحث بالاسم أو البريد أو الرقم..."
+                       @oninput="HandleSearch" />
+            </div>
+            <button class="btn-moeen-light" type="button" @onclick="LoadStudentsAsync" disabled="@_isLoading">
+                <i class="bi bi-arrow-clockwise"></i>
+                <span>تحديث</span>
+            </button>
+        </div>
 
-  @if (ShowMessage)
-  {
-    <div class="alert alert-success mt-3">@Message</div>
-  }
+        @if (!string.IsNullOrWhiteSpace(_successMessage))
+        {
+            <div class="alert alert-success">@_successMessage</div>
+        }
 
-  <div class="table-wrapper mb-4">
-    <div class="table-responsive">
-      <table class="table">
-        <thead>
-          <tr>
-            <th class="table th">اسم الطالب</th>
-            <th class="table th">أداء الطالب</th>
-            <th class="table th">حذف الطالب</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (filteredStudentList == null || filteredStudentList.Count == 0)
-          {
-            <tr>
-              <td colspan="3" class="text-center p-3" style="color: gray;">
-                لا يوجد طلاب يطابقون هذا البحث
-              </td>
-            </tr>
-          }
-          else
-          {
-            @foreach (var student in filteredStudentList)
-            {
-              <tr>
-                <td class="table td fw-bold">@student.FullName</td>
-                <td>
-                  <button class="btn-icon" title="عرض" @onclick="viewStudent1">
-                    <i class="bi bi-info-circle" style="color: #2ecc71;"></i>
-                  </button>
-                  <button class="btn-icon edit" title="تعديل" @onclick="() => EnableEditMode(student)">
-                    <i class="bi bi-pencil-square"></i>
-                  </button>
-                </td>
-                <td class="table td">
-                  <button class="btn-icon delete" title="حذف" @onclick="() => DeleteStudent(student.Id)">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </td>
-              </tr>
-            }
-          }
-        </tbody>
-      </table>
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <div class="alert alert-danger">@_errorMessage</div>
+        }
+
+        @if (_isLoading)
+        {
+            <div class="state-card d-flex align-items-center gap-3">
+                <span class="spinner-border text-success" role="status"></span>
+                <span>جاري تحميل بيانات الطلاب...</span>
+            </div>
+        }
+        else
+        {
+            <div class="students-table-wrap">
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>اسم الطالب</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>رقم الهاتف</th>
+                            <th>العمر</th>
+                            <th>النقاط</th>
+                            <th>الحالة</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (_students.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">لا يوجد طلاب حالياً.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var student in _students)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="student-name-cell">
+                                            <span class="student-avatar"><i class="bi bi-person"></i></span>
+                                            <span>@student.Name</span>
+                                        </div>
+                                    </td>
+                                    <td>@student.Email</td>
+                                    <td>@(string.IsNullOrWhiteSpace(student.Phone) ? "—" : student.Phone)</td>
+                                    <td>@student.Age</td>
+                                    <td>@student.Score</td>
+                                    <td><span class="status-pill @GetStatusClass(student.Status)">@GetStatusLabel(student.Status)</span></td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="icon-btn" type="button" title="تعديل" @onclick="() => OpenEditDialog(student)">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                            <button class="icon-btn danger" type="button" title="حذف" @onclick="() => DeleteStudentAsync(student)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
     </div>
-  </div>
 
-  <details class="mt-4" open="@_isDetailsOpen">
-    <summary class="btn-pprimary" @onclick="ToggleDetails">
-      @(isEditMode ? "تعديل بيانات الطالب الحالي" : "إضافة طالب جديد")
-    </summary>
-    <div class="form-container">
-      <div class="form-header">
-        <h2>
-          <i class="@(isEditMode ? "bi bi-pencil-square" : "bi bi-person-plus-fill")"></i> 
-          @(isEditMode ? "تعديل بيانات الطالب" : "إضافة طالب جديد")
-        </h2>
-      </div>
-      <EditForm Model="_model" OnValidSubmit="HandleSubmit">
-        <div class="grid-row">
-          <div class="input-group">
-            <label>الاسم الكامل</label>
-            <div class="input-wrapper">
-              <i class="bi bi-person"></i>
-              <InputText @bind-Value="_model.FullName" placeholder="أدخل الاسم" class="form-control" />
-            </div>
-          </div>
-          <div class="input-group">
-            <label>رقم الهاتف</label>
-            <div class="input-wrapper">
-              <i class="bi bi-telephone"></i>
-              <InputText @bind-Value="_model.Phone" placeholder="أدخل رقم الهاتف" class="form-control" />
-            </div>
-          </div>
-        </div>
-         <div class="grid-row">
-          <div class="input-group">
-            <label>تاريخ التسجيل</label>
-            <div class="input-wrapper">
-              <i class="bi bi-calendar-event"></i>
-              <input type="date" @bind="_model.RegisterDate" class="form-control" />
-            </div>
-          </div>
-          <div class="input-group">
-            <label>تاريخ الميلاد</label>
-            <div class="input-wrapper">
-              <i class="bi bi-calendar-event"></i>
-              <input type="date" @bind="_model.BirthDate" class="form-control" />
-            </div>
-          </div> 
-        </div>
+    @if (_isDialogOpen)
+    {
+        <div class="dialog-backdrop" @onclick="CloseDialog">
+            <div class="student-dialog" @onclick:stopPropagation="true">
+                <div class="student-dialog-header">
+                    <div>
+                        <h3 class="student-dialog-title">
+                            <i class="@(_isEditMode ? "bi bi-pencil-square" : "bi bi-person-plus")"></i>
+                            @(_isEditMode ? "تعديل بيانات الطالب" : "إضافة طالب جديد")
+                        </h3>
+                        <p class="student-dialog-subtitle">املأ البيانات ثم اضغط تطبيق، سيتم تحديث الجدول تلقائياً بعد الحفظ.</p>
+                    </div>
+                    <button class="dialog-close-btn" type="button" @onclick="CloseDialog" disabled="@_isSaving">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
 
-        <div class="grid-row">
-          <div class="input-group">
-            <label>العنوان</label>
-            <div class="input-wrapper">
-              <i class="bi bi-geo-alt"></i>
-              <InputText @bind-Value="_model.Address" placeholder="أدخل العنوان" class="form-control" />
-            </div>
-          </div>
-          <div class="input-group">
-            <label>البريد الإلكتروني</label>
-            <div class="input-wrapper">
-              <i class="bi bi-envelope"></i>
-              <InputText @bind-Value="_model.Email" placeholder="أدخل البريد الإلكتروني" class="form-control" />
-            </div>
-          </div>
-        </div>
+                <EditForm Model="_form" OnValidSubmit="ApplyDialogAsync">
+                    <DataAnnotationsValidator />
+                    <div class="student-dialog-body">
+                        @if (!string.IsNullOrWhiteSpace(_dialogError))
+                        {
+                            <div class="alert alert-danger">@_dialogError</div>
+                        }
 
-        <div class="grid-row">
-          <div class="input-group">
-            <label>الجامع التابع له</label>
-            <div class="input-wrapper">
-              <i class="bi bi-houses"></i>
-              <InputText @bind-Value="_model.Mosque" placeholder="أدخل الجامع" class="form-control" />
-            </div>
-          </div>
-          <div class="input-group">
-            <label>الجنس</label>
-            <div class="input-wrapper">
-              <i class="bi bi-gender-ambiguous"></i>
-              <InputSelect @bind-Value="_model.Gender" class="form-control">
-                <option value="">اختر الجنس</option>
-                <option value="male">ذكر</option>
-                <option value="female">أنثى</option>
-              </InputSelect>
-            </div>
-          </div>
-        </div>
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label>الاسم الكامل</label>
+                                <InputText class="form-control moeen-control" @bind-Value="_form.Name" placeholder="مثال: أحمد محمد" />
+                                <ValidationMessage For="@(() => _form.Name)" />
+                            </div>
+                            <div class="form-field">
+                                <label>البريد الإلكتروني</label>
+                                <InputText class="form-control moeen-control" @bind-Value="_form.Email" placeholder="name@example.com" />
+                                <ValidationMessage For="@(() => _form.Email)" />
+                            </div>
+                            <div class="form-field">
+                                <label>رقم الهاتف</label>
+                                <InputText class="form-control moeen-control" @bind-Value="_form.Phone" placeholder="اختياري" />
+                                <ValidationMessage For="@(() => _form.Phone)" />
+                            </div>
+                            <div class="form-field">
+                                <label>الجنس</label>
+                                <InputSelect class="form-control moeen-control" @bind-Value="_form.Gender">
+                                    <option value="Male">ذكر</option>
+                                    <option value="Female">أنثى</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => _form.Gender)" />
+                            </div>
+                            <div class="form-field">
+                                <label>العمر</label>
+                                <InputNumber class="form-control moeen-control" @bind-Value="_form.Age" />
+                                <ValidationMessage For="@(() => _form.Age)" />
+                            </div>
+                            <div class="form-field">
+                                <label>تاريخ التسجيل</label>
+                                <InputDate class="form-control moeen-control" @bind-Value="_form.EnrollmentDate" />
+                                <ValidationMessage For="@(() => _form.EnrollmentDate)" />
+                            </div>
+                            <div class="form-field">
+                                <label>حالة الحساب</label>
+                                <InputSelect class="form-control moeen-control" @bind-Value="_form.Status">
+                                    <option value="0">نشط</option>
+                                    <option value="1">متوقف</option>
+                                    <option value="2">متخرج</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => _form.Status)" />
+                            </div>
+                            <div class="form-field">
+                                <label>النقاط</label>
+                                <InputNumber class="form-control moeen-control" @bind-Value="_form.Score" />
+                                <ValidationMessage For="@(() => _form.Score)" />
+                            </div>
+                            @if (!_isEditMode)
+                            {
+                                <div class="form-field">
+                                    <label>المسجد</label>
+                                    <InputSelect class="form-control moeen-control" @bind-Value="_form.MosqueId">
+                                        <option value="@Guid.Empty">اختر المسجد</option>
+                                        @foreach (var mosque in _mosques)
+                                        {
+                                            <option value="@mosque.Id">@mosque.name</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => _form.MosqueId)" />
+                                </div>
+                                <div class="form-field">
+                                    <label>كلمة المرور</label>
+                                    <InputText type="password" class="form-control moeen-control" @bind-Value="_form.Password" placeholder="كلمة مرور الطالب" />
+                                    <ValidationMessage For="@(() => _form.Password)" />
+                                </div>
+                            }
+                        </div>
+                    </div>
 
-        <div class="grid-row">
-          <div class="input-group">
-            <label>اسم ولي الأمر</label>
-            <div class="input-wrapper">
-              <i class="bi bi-person"></i>
-              <InputText @bind-Value="_model.ParentName" placeholder="أدخل الاسم" class="form-control" />
+                    <div class="student-dialog-footer">
+                        <button class="btn-moeen-primary" type="submit" disabled="@_isSaving">
+                            @if (_isSaving)
+                            {
+                                <span class="spinner-border spinner-border-sm"></span>
+                                <span>جاري التطبيق...</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-check2-circle"></i>
+                                <span>تطبيق</span>
+                            }
+                        </button>
+                        <button class="btn-moeen-light" type="button" @onclick="CloseDialog" disabled="@_isSaving">
+                            <i class="bi bi-x-circle"></i>
+                            <span>إلغاء</span>
+                        </button>
+                    </div>
+                </EditForm>
             </div>
-          </div>
-          <div class="input-group">
-            <label>رقم ولي الأمر</label>
-            <div class="input-wrapper">
-              <i class="bi bi-telephone"></i>
-              <InputText @bind-Value="_model.ParentPhone" placeholder="أدخل الرقم" class="form-control" />
-            </div>
-          </div>
         </div>
-
-        <div class="grid-row">
-          <div class="input-group">
-            <label>الفوج</label>
-            <div class="input-wrapper">
-              <i class="bi bi-layers"></i>
-              <InputSelect @bind-Value="_model.Group" class="form-control">
-                <option value="الفوج الأول">الفوج الأول</option>
-                <option value="الفوج الثاني">الفوج الثاني</option>
-              </InputSelect>
-            </div>
-          </div>
-          <div class="input-group">
-            <label>الحلقة</label>
-            <div class="input-wrapper">
-              <i class="bi bi-layers"></i>
-              <InputSelect @bind-Value="_model.ClassLevel" class="form-control">
-                <option value="الحلقة الأولى">الحلقة الأولى</option>
-                <option value="الحلقة الثانية">الحلقة الثانية</option>
-              </InputSelect>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid-row">
-          <div class="input-group">
-            <label>حالة الحساب</label>
-            <div class="input-wrapper">
-              <i class="bi bi-check-circle"></i>
-              <InputSelect @bind-Value="_model.Status" class="form-control">
-                <option value="active">نشط</option>
-                <option value="inactive">متوقف</option>
-              </InputSelect>
-            </div>
-          </div>
-          <div class="input-group">
-            <label>كلمة المرور</label>
-            <div class="input-wrapper">
-              <i class="bi bi-lock"></i>
-              <input type="password" @bind="_model.Password" placeholder="أدخل كلمة المرور" class="form-control" />
-            </div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button type="submit" class="save">
-            <i class="bi bi-check2-all"></i> 
-            @(isEditMode ? "حفظ التعديلات" : "حفظ الطالب")
-          </button>
-          <button type="button" class="parent" @onclick="HandleParentLink">
-            <i class="bi bi-link-45deg"></i> ربط بولي الأمر
-          </button>
-          <button type="button" class="cancel" @onclick="ResetForm">
-            <i class="bi bi-x-lg"></i> إلغاء
-          </button>
-        </div>
-      </EditForm>
-    </div>
-  </details>
+    }
 </section>
 
 @code {
-    // كلاس داخلي ذكي لحفظ حقول الطالب كاملة محلياً
-    public class LocalStudent
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private readonly List<StudentRow> _students = new();
+    private List<MosquDto> _mosques = new();
+    private StudentDialogModel _form = new();
+
+    private bool _isLoading = true;
+    private bool _isSaving;
+    private bool _isDialogOpen;
+    private bool _isEditMode;
+    private string _searchText = string.Empty;
+    private string? _errorMessage;
+    private string? _successMessage;
+    private string? _dialogError;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public string FullName { get; set; } = "";
-        public string Phone { get; set; } = "";
-        public DateTime RegisterDate { get; set; } = DateTime.Now;
-        public DateTime BirthDate { get; set; } = DateTime.Now.AddYears(-15);
-        public string Address { get; set; } = "";
-        public string Email { get; set; } = "";
-        public string Mosque { get; set; } = "";
-        public string Gender { get; set; } = "";
-        public string ParentName { get; set; } = "";
-        public string ParentPhone { get; set; } = "";
-        public string Group { get; set; } = "الفوج الأول";
-        public string ClassLevel { get; set; } = "الحلقة الأولى";
-        public string Status { get; set; } = "active";
-        public string Password { get; set; } = "";
+        if (!firstRender)
+            return;
+
+        await LoadInitialDataAsync();
+        StateHasChanged();
     }
 
-    private List<LocalStudent> masterStudentList = new();
-    private List<LocalStudent> filteredStudentList = new();
-    
-    private LocalStudent _model = new();
-    private string searchQuery = "";
-    private bool isEditMode = false;
-    private bool _isDetailsOpen = false;
-    private bool ShowMessage = false;
-    private string Message = "";
-
-    protected override void OnInitialized()
+    private async Task LoadInitialDataAsync()
     {
-        // تثبيت الثلاث طالبات الأصليات اللي بملفكِ عشان يظهروا فوراً بالجدول
-        masterStudentList = new List<LocalStudent>
-        {
-            new LocalStudent { FullName = "آلاء قاسم", Mosque = "جامع الإيمان" },
-            new LocalStudent { FullName = "ماريا العبد السلام", Mosque = "جامع التوبة" },
-            new LocalStudent { FullName = "آية دعبول", Mosque = "جامع الهدى" }
-        };
-        
-        filteredStudentList = new List<LocalStudent>(masterStudentList);
-    }
+        _isLoading = true;
+        _errorMessage = null;
 
-    private void HandleSubmit()
-    {
-        if (isEditMode)
+        try
         {
-            var target = masterStudentList.FirstOrDefault(s => s.Id == _model.Id);
-            if (target != null)
-            {
-                // تحديث البيانات
-                target.FullName = _model.FullName;
-                target.Phone = _model.Phone;
-                target.RegisterDate = _model.RegisterDate;
-                target.BirthDate = _model.BirthDate;
-                target.Address = _model.Address;
-                target.Email = _model.Email;
-                target.Mosque = _model.Mosque;
-                target.Gender = _model.Gender;
-                target.ParentName = _model.ParentName;
-                target.ParentPhone = _model.ParentPhone;
-                target.Group = _model.Group;
-                target.ClassLevel = _model.ClassLevel;
-                target.Status = _model.Status;
-                target.Password = _model.Password;
-                Message = "تم تعديل بيانات الطالبة بنجاح!";
-                ShowMessage = true;
-            }
+            await LoadMosquesAsync();
+            await LoadStudentsAsync();
         }
-        else
+        catch (Exception ex)
         {
-            // إضافة جديدة لأعلى الجدول
-            masterStudentList.Insert(0, new LocalStudent
+            _errorMessage = $"تعذر تحميل بيانات الطلاب: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadMosquesAsync()
+    {
+        try
+        {
+            _mosques = await MosquService.GetAllMosqus(new GetAllMosqusRequest { Page = 1, PageSize = 200 }) ?? new();
+        }
+        catch
+        {
+            _mosques = new();
+        }
+    }
+
+    private async Task LoadStudentsAsync()
+    {
+        _errorMessage = null;
+
+        try
+        {
+            var response = await EnrollmentService.GetAllStudentsAsync(new GetAllStudentsRequest
             {
-                FullName = _model.FullName,
-                Phone = _model.Phone,
-                RegisterDate = _model.RegisterDate,
-                BirthDate = _model.BirthDate,
-                Address = _model.Address,
-                Email = _model.Email,
-                Mosque = _model.Mosque,
-                Gender = _model.Gender,
-                ParentName = _model.ParentName,
-                ParentPhone = _model.ParentPhone,
-                Group = _model.Group,
-                ClassLevel = _model.ClassLevel,
-                Status = _model.Status,
-                Password = _model.Password
+                Name = string.IsNullOrWhiteSpace(_searchText) ? null : _searchText,
+                PageNumber = 1,
+                PageSize = 200
             });
-            Message = "تم إضافة الطالبة بنجاح!";
-            ShowMessage = true;
-        }
 
-        ResetForm();
-        ApplyFilter();
+            if (response == null || !response.Success)
+            {
+                _errorMessage = response?.Message ?? "فشل تحميل الطلاب.";
+                _students.Clear();
+                return;
+            }
+
+            var json = JsonSerializer.Serialize(response.Data);
+            var members = JsonSerializer.Deserialize<List<MemberProfileDto>>(json, JsonOptions) ?? new();
+
+            _students.Clear();
+            _students.AddRange(members.Select(StudentRow.FromMember));
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"تعذر تحميل الطلاب: {ex.Message}";
+            _students.Clear();
+        }
     }
 
-    private void EnableEditMode(LocalStudent student)
+    private async Task HandleSearch(ChangeEventArgs args)
     {
-        isEditMode = true;
-        _model = new LocalStudent
+        _searchText = args.Value?.ToString() ?? string.Empty;
+        await LoadStudentsAsync();
+    }
+
+    private void OpenCreateDialog()
+    {
+        _successMessage = null;
+        _dialogError = null;
+        _isEditMode = false;
+        _form = new StudentDialogModel
+        {
+            EnrollmentDate = DateTime.Today,
+            MosqueId = _mosques.FirstOrDefault()?.Id ?? Guid.Empty
+        };
+        _isDialogOpen = true;
+    }
+
+    private void OpenEditDialog(StudentRow student)
+    {
+        _successMessage = null;
+        _dialogError = null;
+        _isEditMode = true;
+        _form = new StudentDialogModel
         {
             Id = student.Id,
-            FullName = student.FullName,
-            Phone = student.Phone,
-            RegisterDate = student.RegisterDate,
-            BirthDate = student.BirthDate,
-            Address = student.Address,
+            Name = student.Name,
             Email = student.Email,
-            Mosque = student.Mosque,
-            Gender = student.Gender,
-            ParentName = student.ParentName,
-            ParentPhone = student.ParentPhone,
-            Group = student.Group,
-            ClassLevel = student.ClassLevel,
+            Phone = student.Phone,
+            Gender = string.Equals(student.Gender, "Female", StringComparison.OrdinalIgnoreCase) ? "Female" : "Male",
+            Age = student.Age <= 0 ? 12 : student.Age,
+            EnrollmentDate = student.EnrollmentDate == default ? DateTime.Today : student.EnrollmentDate,
             Status = student.Status,
-            Password = student.Password
+            Score = student.Score,
+            MosqueId = student.MosqueId
         };
-        _isDetailsOpen = true;
-        ShowMessage = false;
+        _isDialogOpen = true;
     }
 
-    private void DeleteStudent(Guid id)
+    private void CloseDialog()
     {
-        var target = masterStudentList.FirstOrDefault(s => s.Id == id);
-        if (target != null)
+        if (_isSaving)
+            return;
+
+        _isDialogOpen = false;
+        _dialogError = null;
+    }
+
+    private async Task ApplyDialogAsync()
+    {
+        _isSaving = true;
+        _dialogError = null;
+        _successMessage = null;
+
+        try
         {
-            masterStudentList.Remove(target);
-            Message = "تم حذف الطالبة من النظام المحلي!";
-            ShowMessage = true;
+            if (_isEditMode)
+            {
+                var response = await EnrollmentService.UpdateMemberInfoAsync(new UpdateMemberInfoRequest
+                {
+                    MemberId = _form.Id.ToString(),
+                    Name = _form.Name,
+                    Email = _form.Email,
+                    Phone = _form.Phone,
+                    Gender = _form.Gender,
+                    Age = _form.Age,
+                    Status = _form.Status,
+                    Score = _form.Score
+                });
+
+                if (response == null || !response.Success)
+                {
+                    _dialogError = response?.Message ?? "فشل تعديل بيانات الطالب.";
+                    return;
+                }
+
+                _successMessage = "تم تعديل بيانات الطالب بنجاح.";
+            }
+            else
+            {
+                if (_form.MosqueId == Guid.Empty)
+                {
+                    _dialogError = "يرجى اختيار المسجد قبل إضافة الطالب.";
+                    return;
+                }
+
+                var response = await EnrollmentService.RegisterStudentAsync(new RegisterStudentRequest
+                {
+                    Name = _form.Name,
+                    Email = _form.Email,
+                    Password = _form.Password,
+                    ConfirmPassword = _form.Password,
+                    Phone = _form.Phone,
+                    Gender = _form.Gender,
+                    Age = _form.Age,
+                    EnrollmentDate = _form.EnrollmentDate,
+                    Status = _form.Status,
+                    Score = _form.Score,
+                    MosqueId = _form.MosqueId
+                });
+
+                if (response == null || !response.Success)
+                {
+                    _dialogError = response?.Message ?? "فشل إضافة الطالب.";
+                    return;
+                }
+
+                _successMessage = "تم إضافة الطالب بنجاح.";
+            }
+
+            _isDialogOpen = false;
+            await LoadStudentsAsync();
         }
-        ApplyFilter();
-    }
-
-    // ميثود البحث الفوري التفاعلي الذكي أثناء الكتابة
-    private void HandleSearch(ChangeEventArgs e)
-    {
-        searchQuery = e.Value?.ToString() ?? "";
-        ApplyFilter();
-    }
-
-    private void ApplyFilter()
-    {
-        if (string.IsNullOrWhiteSpace(searchQuery))
+        catch (Exception ex)
         {
-            filteredStudentList = new List<LocalStudent>(masterStudentList);
+            _dialogError = ex.Message;
         }
-        else
+        finally
         {
-            filteredStudentList = masterStudentList
-                .Where(s => s.FullName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            _isSaving = false;
         }
     }
 
-    private void HandleParentLink()
+    private async Task DeleteStudentAsync(StudentRow student)
     {
-        Message = $"تم ربط الطالبة بولي الأمر ({_model.ParentName}) بنجاح!";
-        ShowMessage = true;
+        _successMessage = null;
+        _errorMessage = null;
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"هل تريد حذف الطالب {student.Name}؟");
+        if (!confirmed)
+            return;
+
+        try
+        {
+            var response = await EnrollmentService.DeleteStudentAsync(student.Id);
+            if (response == null || !response.Success)
+            {
+                _errorMessage = response?.Message ?? "فشل حذف الطالب.";
+                return;
+            }
+
+            _successMessage = "تم حذف الطالب بنجاح.";
+            await LoadStudentsAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
     }
 
-    private void ToggleDetails()
+    private static string GetStatusLabel(int status)
+        => status switch
+        {
+            0 => "نشط",
+            1 => "متوقف",
+            2 => "متخرج",
+            _ => "غير معروف"
+        };
+
+    private static string GetStatusClass(int status)
+        => status switch
+        {
+            0 => "status-active",
+            1 => "status-inactive",
+            2 => "status-graduated",
+            _ => "status-inactive"
+        };
+
+    private sealed class StudentRow
     {
-        _isDetailsOpen = !_isDetailsOpen;
-        if (!_isDetailsOpen) isEditMode = false;
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string? Phone { get; set; }
+        public string? Gender { get; set; }
+        public int Age { get; set; }
+        public DateTime EnrollmentDate { get; set; }
+        public int Status { get; set; }
+        public int Score { get; set; }
+        public Guid MosqueId { get; set; }
+        public string MosqueName { get; set; } = string.Empty;
+
+        public static StudentRow FromMember(MemberProfileDto member)
+            => new()
+            {
+                Id = member.Id,
+                Name = member.Name ?? string.Empty,
+                Email = member.Email ?? string.Empty,
+                Phone = member.Phone,
+                Gender = member.Gender,
+                Age = member.StudentDetails?.Age ?? 0,
+                EnrollmentDate = member.StudentDetails?.EnrollmentDate ?? member.JoinedAt,
+                Status = member.Status,
+                Score = member.StudentDetails?.Score ?? 0,
+                MosqueId = member.MosqueId ?? Guid.Empty,
+                MosqueName = member.MosqueName ?? string.Empty
+            };
     }
 
-    private void ResetForm()
+    private sealed class StudentDialogModel
     {
-        _model = new LocalStudent();
-        isEditMode = false;
-        _isDetailsOpen = false;
-    }
+        public Guid Id { get; set; }
 
-    private void editStudent() => NavManager.NavigateTo("/supervisor/edit");
-    private void viewStudent1() => NavManager.NavigateTo("/supervisor/alaa_info");
+        [Required(ErrorMessage = "اسم الطالب مطلوب")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "اسم الطالب يجب أن يكون بين 2 و 100 حرف")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "البريد الإلكتروني مطلوب")]
+        [EmailAddress(ErrorMessage = "البريد الإلكتروني غير صالح")]
+        public string Email { get; set; } = string.Empty;
+
+        [Phone(ErrorMessage = "رقم الهاتف غير صالح")]
+        public string? Phone { get; set; }
+
+        [Required(ErrorMessage = "الجنس مطلوب")]
+        public string Gender { get; set; } = "Male";
+
+        [Range(1, 100, ErrorMessage = "العمر يجب أن يكون بين 1 و 100")]
+        public int Age { get; set; } = 12;
+
+        public DateTime EnrollmentDate { get; set; } = DateTime.Today;
+
+        [Range(0, 2, ErrorMessage = "حالة الحساب غير صالحة")]
+        public int Status { get; set; }
+
+        [Range(0, 100, ErrorMessage = "النقاط يجب أن تكون بين 0 و 100")]
+        public int Score { get; set; }
+
+        public Guid MosqueId { get; set; }
+
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "كلمة المرور يجب أن تكون 6 أحرف على الأقل")]
+        public string Password { get; set; } = string.Empty;
+    }
 }

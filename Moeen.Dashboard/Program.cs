@@ -89,6 +89,12 @@ builder.Services.AddHttpClient<PointsApiClient>(client =>
 }).AddHttpMessageHandler<AuthHandler>();
 builder.Services.AddScoped<IPointsService, PointsService>();
 
+// supervisor dashboard overview
+builder.Services.AddHttpClient<SupervisorDashboardApiClient>(client =>
+{
+    client.BaseAddress = new Uri(ApiRoutes.BaseUrl);
+});
+
 // 1. تسجيل الـ HttpClient الخاص بالـ User وتحديد الرابط الأساسي من الـ ApiRoutes عندكِ
 builder.Services.AddHttpClient<UserApiClient>(client =>
 {
