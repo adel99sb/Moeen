@@ -25,6 +25,7 @@ namespace Moeen.Api.infrastructure.Data
         public DbSet<ProgressEntry> ProgressEntries { get; set; }
         public DbSet<SaturdayHalqa> SaturdayHalqes { get; set; }
         public DbSet<ParentSudent> ParentSudents { get; set; }
+        public DbSet<WeeklyLesson> WeeklyLessons { get; set; }
 
         public DbSet<Student> Students { get; set; }
         public DbSet<Supervisor> Supervisors { get; set; }

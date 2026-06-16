@@ -757,6 +757,12 @@
                     return;
                 }
 
+                if (string.IsNullOrWhiteSpace(_form.Password))
+                {
+                    _dialogError = "Password is required when creating a student.";
+                    return;
+                }
+
                 var response = await EnrollmentService.RegisterStudentAsync(new RegisterStudentRequest
                 {
                     Name = _form.Name,
@@ -902,6 +908,6 @@
         public Guid MosqueId { get; set; }
 
         [StringLength(100, MinimumLength = 6, ErrorMessage = "كلمة المرور يجب أن تكون 6 أحرف على الأقل")]
-        public string Password { get; set; } = string.Empty;
+        public string? Password { get; set; }
     }
 }

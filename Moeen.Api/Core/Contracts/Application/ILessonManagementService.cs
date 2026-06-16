@@ -1,5 +1,6 @@
 ﻿using Moeen.Shared.Requests.LessonManagement;
 using Moeen.Shared.Responses;
+using System;
 using System.Threading.Tasks;
 
 namespace Moeen.Api.Core.Contracts.Application
@@ -50,5 +51,13 @@ namespace Moeen.Api.Core.Contracts.Application
         /// [GET] الحصول على الدروس اليومية لطالب معين
         /// </summary>
         Task<GeneralResponse> GetStudentDailyLessonsAsync(GetStudentDailyLessonsRequest request);
+
+        Task<GeneralResponse> GetManagedWeeklyLessonsAsync();
+        Task<GeneralResponse> CreateWeeklyLessonAsync(CreateWeeklyLessonRequest request);
+        Task<GeneralResponse> UpdateWeeklyLessonAsync(UpdateWeeklyLessonRequest request);
+        Task<GeneralResponse> DeleteWeeklyLessonAsync(Guid weeklyLessonId);
+        Task<GeneralResponse> CreateWeeklyLessonAssignmentAsync(CreateWeeklyLessonAssignmentRequest request);
+        Task<GeneralResponse> UpdateWeeklyLessonAssignmentAsync(UpdateWeeklyLessonAssignmentRequest request);
+        Task<GeneralResponse> DeleteWeeklyLessonAssignmentAsync(Guid assignmentId);
     }
 }

@@ -65,6 +65,43 @@ namespace Moeen.Api.Controllers
         public async Task<ActionResult<GeneralResponse>> GetCirclesOverview([FromQuery] Guid? mosqueId)
             => Ok(await _lessonService.GetCirclesOverviewAsync(new GetCirclesOverviewRequest { MosqueId = mosqueId }));
 
+        [HttpGet("weekly-lessons")]
+        public async Task<ActionResult<GeneralResponse>> GetManagedWeeklyLessons()
+            => Ok(await _lessonService.GetManagedWeeklyLessonsAsync());
+
+        [HttpPost("weekly-lessons")]
+        public async Task<ActionResult<GeneralResponse>> CreateWeeklyLesson([FromBody] CreateWeeklyLessonRequest request)
+            => Ok(await _lessonService.CreateWeeklyLessonAsync(request));
+
+        [HttpPut("weekly-lessons/{weeklyLessonId:guid}")]
+        public async Task<ActionResult<GeneralResponse>> UpdateWeeklyLesson([FromRoute] Guid weeklyLessonId, [FromBody] UpdateWeeklyLessonRequest request)
+        {
+            request.Id = weeklyLessonId;
+            return Ok(await _lessonService.UpdateWeeklyLessonAsync(request));
+        }
+
+        [HttpDelete("weekly-lessons/{weeklyLessonId:guid}")]
+        public async Task<ActionResult<GeneralResponse>> DeleteWeeklyLesson([FromRoute] Guid weeklyLessonId)
+            => Ok(await _lessonService.DeleteWeeklyLessonAsync(weeklyLessonId));
+
+        [HttpPost("weekly-lessons/{weeklyLessonId:guid}/rows")]
+        public async Task<ActionResult<GeneralResponse>> CreateWeeklyLessonRow([FromRoute] Guid weeklyLessonId, [FromBody] CreateWeeklyLessonAssignmentRequest request)
+        {
+            request.WeeklyLessonId = weeklyLessonId;
+            return Ok(await _lessonService.CreateWeeklyLessonAssignmentAsync(request));
+        }
+
+        [HttpPut("weekly-lesson-rows/{rowId:guid}")]
+        public async Task<ActionResult<GeneralResponse>> UpdateWeeklyLessonRow([FromRoute] Guid rowId, [FromBody] UpdateWeeklyLessonAssignmentRequest request)
+        {
+            request.Id = rowId;
+            return Ok(await _lessonService.UpdateWeeklyLessonAssignmentAsync(request));
+        }
+
+        [HttpDelete("weekly-lesson-rows/{rowId:guid}")]
+        public async Task<ActionResult<GeneralResponse>> DeleteWeeklyLessonRow([FromRoute] Guid rowId)
+            => Ok(await _lessonService.DeleteWeeklyLessonAssignmentAsync(rowId));
+
         [HttpGet("students/{studentId:guid}/daily-lessons")]
         public async Task<ActionResult<GeneralResponse>> GetStudentDailyLessons(
             [FromRoute] Guid studentId,

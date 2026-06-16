@@ -65,5 +65,15 @@ namespace Moeen.Dashboard.Services.Implementations
         {
             return await _apiClient.GetSuggestionsAsync(request);
         }
+
+        public async Task<GeneralResponse> GetComplaintsResponseAsync(PaginationRequest request)
+        {
+            return await _apiClient.GetComplaintsAsync(request);
+        }
+
+        public async Task<GeneralResponse> DeleteFeedbackAsync(Guid complaintId)
+        {
+            return await _apiClient.DeleteFeedbackAsync(complaintId);
+        }
     }
 }

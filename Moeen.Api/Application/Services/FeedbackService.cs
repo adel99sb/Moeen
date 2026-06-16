@@ -138,16 +138,34 @@ namespace Moeen.Api.Application.Services
         /// </summary>
         public async Task<GeneralResponse> GetComplaintsAsync(PaginationRequest request)
         {
+            var page = request.Page > 0 ? request.Page : 1;
+            var pageSize = request.PageSize > 0 ? request.PageSize : 20;
+
             var query = _unitOfWork.Repository<Complaint>().GetAllQueryable()
+                .AsNoTracking()
                 .Where(c => c.Type == FeedbackType.Complaint);
+
             var total = await query.CountAsync();
             var complaints = await query
                 .OrderByDescending(c => c.created_at)
-                .Skip((request.Page - 1) * request.PageSize)
-                .Take(request.PageSize)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.UserId,
+                    c.Title,
+                    Content = c.content,
+                    CreatedAt = c.created_at,
+                    c.Type,
+                    c.Status,
+                    c.SuggestionStatus,
+                    c.Response,
+                    c.UpdatedAt
+                })
                 .ToListAsync();
 
-            return GeneralResponse.Ok("تم استرجاع الشكاوى بنجاح.", complaints, request.Page, request.PageSize, total);
+            return GeneralResponse.Ok("تم استرجاع الشكاوى بنجاح.", complaints, page, pageSize, total);
         }
 
         /// <summary>
@@ -155,16 +173,34 @@ namespace Moeen.Api.Application.Services
         /// </summary>
         public async Task<GeneralResponse> GetSuggestionsAsync(PaginationRequest request)
         {
+            var page = request.Page > 0 ? request.Page : 1;
+            var pageSize = request.PageSize > 0 ? request.PageSize : 20;
+
             var query = _unitOfWork.Repository<Complaint>().GetAllQueryable()
+                .AsNoTracking()
                 .Where(c => c.Type == FeedbackType.Suggestion);
+
             var total = await query.CountAsync();
             var suggestions = await query
                 .OrderByDescending(c => c.created_at)
-                .Skip((request.Page - 1) * request.PageSize)
-                .Take(request.PageSize)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.UserId,
+                    c.Title,
+                    Content = c.content,
+                    CreatedAt = c.created_at,
+                    c.Type,
+                    c.Status,
+                    c.SuggestionStatus,
+                    c.Response,
+                    c.UpdatedAt
+                })
                 .ToListAsync();
 
-            return GeneralResponse.Ok("تم استرجاع الاقتراحات بنجاح.", suggestions, request.Page, request.PageSize, total);
+            return GeneralResponse.Ok("تم استرجاع الاقتراحات بنجاح.", suggestions, page, pageSize, total);
         }
 
         /// <summary>

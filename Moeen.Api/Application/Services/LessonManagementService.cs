@@ -321,6 +321,158 @@ namespace Moeen.Api.Application.Services
             return GeneralResponse.Ok("تم جلب الحلقات.", result);
         }
 
+        public async Task<GeneralResponse> GetManagedWeeklyLessonsAsync()
+        {
+            var lessons = await _context.WeeklyLessons
+                .AsNoTracking()
+                .Include(l => l.Schedules)
+                    .ThenInclude(s => s.Teacher)
+                .Include(l => l.Schedules)
+                    .ThenInclude(s => s.Halqa)
+                        .ThenInclude(h => h.Fouj)
+                .Include(l => l.Schedules)
+                    .ThenInclude(s => s.Halqa)
+                        .ThenInclude(h => h.Students)
+                .OrderBy(l => l.Title)
+                .ToListAsync();
+
+            return GeneralResponse.Ok("تم جلب الدروس الأسبوعية.", lessons.Select(MapWeeklyLesson).ToList());
+        }
+
+        public async Task<GeneralResponse> CreateWeeklyLessonAsync(CreateWeeklyLessonRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Title))
+                return GeneralResponse.BadRequest("عنوان الدرس الأسبوعي مطلوب.");
+
+            var title = request.Title.Trim();
+            var exists = await _context.WeeklyLessons.AnyAsync(l => l.Title == title);
+            if (exists)
+                return GeneralResponse.BadRequest("يوجد درس أسبوعي بنفس الاسم مسبقاً.");
+
+            var lesson = new WeeklyLesson
+            {
+                Id = Guid.NewGuid(),
+                Title = title,
+                Description = request.Description?.Trim() ?? string.Empty,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _context.WeeklyLessons.AddAsync(lesson);
+            await _context.SaveChangesAsync();
+
+            return GeneralResponse.Ok("تم إنشاء الدرس الأسبوعي.", MapWeeklyLesson(lesson));
+        }
+
+        public async Task<GeneralResponse> UpdateWeeklyLessonAsync(UpdateWeeklyLessonRequest request)
+        {
+            if (request == null || request.Id == Guid.Empty || string.IsNullOrWhiteSpace(request.Title))
+                return GeneralResponse.BadRequest("بيانات الدرس الأسبوعي غير مكتملة.");
+
+            var lesson = await _context.WeeklyLessons.FindAsync(request.Id);
+            if (lesson == null)
+                return GeneralResponse.NotFound("الدرس الأسبوعي غير موجود.");
+
+            var title = request.Title.Trim();
+            var duplicate = await _context.WeeklyLessons.AnyAsync(l => l.Id != request.Id && l.Title == title);
+            if (duplicate)
+                return GeneralResponse.BadRequest("يوجد درس أسبوعي بنفس الاسم مسبقاً.");
+
+            lesson.Title = title;
+            lesson.Description = request.Description?.Trim() ?? string.Empty;
+            lesson.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return GeneralResponse.Ok("تم تعديل الدرس الأسبوعي.", MapWeeklyLesson(lesson));
+        }
+
+        public async Task<GeneralResponse> DeleteWeeklyLessonAsync(Guid weeklyLessonId)
+        {
+            if (weeklyLessonId == Guid.Empty)
+                return GeneralResponse.BadRequest("معرف الدرس الأسبوعي مطلوب.");
+
+            var lesson = await _context.WeeklyLessons
+                .Include(l => l.Schedules)
+                .FirstOrDefaultAsync(l => l.Id == weeklyLessonId);
+
+            if (lesson == null)
+                return GeneralResponse.NotFound("الدرس الأسبوعي غير موجود.");
+
+            if (lesson.Schedules.Count > 0)
+                _context.Set<SaturdayLesson>().RemoveRange(lesson.Schedules);
+
+            _context.WeeklyLessons.Remove(lesson);
+            await _context.SaveChangesAsync();
+
+            return GeneralResponse.Ok("تم حذف الدرس الأسبوعي.");
+        }
+
+        public async Task<GeneralResponse> CreateWeeklyLessonAssignmentAsync(CreateWeeklyLessonAssignmentRequest request)
+        {
+            var validation = await ValidateWeeklyLessonAssignmentAsync(request.WeeklyLessonId, request.TeacherId, request.HalqaId, request.StartTime, request.EndTime);
+            if (!validation.Success)
+                return validation;
+
+            var assignment = new SaturdayLesson
+            {
+                Id = Guid.NewGuid(),
+                WeeklyLessonId = request.WeeklyLessonId,
+                SaturdayHalqeId = request.HalqaId,
+                HalqaId = request.HalqaId,
+                TeacherId = request.TeacherId,
+                lesson_number = 1,
+                start_time = request.StartTime,
+                end_time = request.EndTime
+            };
+
+            await _context.Set<SaturdayLesson>().AddAsync(assignment);
+            await _context.SaveChangesAsync();
+
+            return GeneralResponse.Ok("تم إضافة موعد الحلقة للدرس الأسبوعي.");
+        }
+
+        public async Task<GeneralResponse> UpdateWeeklyLessonAssignmentAsync(UpdateWeeklyLessonAssignmentRequest request)
+        {
+            if (request == null || request.Id == Guid.Empty)
+                return GeneralResponse.BadRequest("معرف الموعد مطلوب.");
+
+            var assignment = await _context.Set<SaturdayLesson>().FirstOrDefaultAsync(l => l.Id == request.Id && l.WeeklyLessonId != null);
+            if (assignment == null)
+                return GeneralResponse.NotFound("موعد الحلقة غير موجود.");
+
+            var validation = await ValidateWeeklyLessonAssignmentAsync(request.WeeklyLessonId, request.TeacherId, request.HalqaId, request.StartTime, request.EndTime);
+            if (!validation.Success)
+                return validation;
+
+            assignment.WeeklyLessonId = request.WeeklyLessonId;
+            assignment.SaturdayHalqeId = request.HalqaId;
+            assignment.HalqaId = request.HalqaId;
+            assignment.TeacherId = request.TeacherId;
+            assignment.start_time = request.StartTime;
+            assignment.end_time = request.EndTime;
+
+            await _context.SaveChangesAsync();
+            return GeneralResponse.Ok("تم تعديل موعد الحلقة.");
+        }
+
+        public async Task<GeneralResponse> DeleteWeeklyLessonAssignmentAsync(Guid assignmentId)
+        {
+            if (assignmentId == Guid.Empty)
+                return GeneralResponse.BadRequest("معرف الموعد مطلوب.");
+
+            var hasAttendance = await _context.Attendances.AnyAsync(a => a.SaturdayLessonId == assignmentId);
+            if (hasAttendance)
+                return GeneralResponse.BadRequest("لا يمكن حذف الموعد لوجود سجل حضور مرتبط به.");
+
+            var assignment = await _context.Set<SaturdayLesson>().FirstOrDefaultAsync(l => l.Id == assignmentId && l.WeeklyLessonId != null);
+            if (assignment == null)
+                return GeneralResponse.NotFound("موعد الحلقة غير موجود.");
+
+            _context.Set<SaturdayLesson>().Remove(assignment);
+            await _context.SaveChangesAsync();
+
+            return GeneralResponse.Ok("تم حذف موعد الحلقة.");
+        }
+
         public async Task<GeneralResponse> GetStudentDailyLessonsAsync(GetStudentDailyLessonsRequest request)
         {
             if (request == null || request.StudentId == Guid.Empty)
@@ -358,6 +510,66 @@ namespace Moeen.Api.Application.Services
             };
 
             return GeneralResponse.Ok("تم جلب دروس الطالب لليوم.", dto);
+        }
+
+        private async Task<GeneralResponse> ValidateWeeklyLessonAssignmentAsync(Guid weeklyLessonId, Guid teacherId, Guid halqaId, TimeSpan startTime, TimeSpan endTime)
+        {
+            if (weeklyLessonId == Guid.Empty)
+                return GeneralResponse.BadRequest("يرجى اختيار الدرس الأسبوعي.");
+
+            if (teacherId == Guid.Empty)
+                return GeneralResponse.BadRequest("يرجى اختيار المعلم.");
+
+            if (halqaId == Guid.Empty)
+                return GeneralResponse.BadRequest("يرجى اختيار الحلقة.");
+
+            if (endTime <= startTime)
+                return GeneralResponse.BadRequest("وقت النهاية يجب أن يكون بعد وقت البداية.");
+
+            var lessonExists = await _context.WeeklyLessons.AnyAsync(l => l.Id == weeklyLessonId);
+            if (!lessonExists)
+                return GeneralResponse.NotFound("الدرس الأسبوعي غير موجود.");
+
+            var halqa = await _context.Halqas.AsNoTracking().FirstOrDefaultAsync(h => h.Id == halqaId);
+            if (halqa == null)
+                return GeneralResponse.NotFound("الحلقة غير موجودة.");
+
+            if (halqa.TeacherId != teacherId)
+                return GeneralResponse.BadRequest("الحلقة المختارة غير تابعة للمعلم المحدد.");
+
+            return GeneralResponse.Ok("Valid");
+        }
+
+        private static WeeklyLessonManagementDto MapWeeklyLesson(WeeklyLesson lesson)
+        {
+            var rows = lesson.Schedules?
+                .OrderBy(row => row.start_time)
+                .ThenBy(row => row.Halqa != null ? row.Halqa.Name : string.Empty)
+                .Select(row => new WeeklyLessonAssignmentDto
+                {
+                    Id = row.Id,
+                    WeeklyLessonId = row.WeeklyLessonId ?? Guid.Empty,
+                    TeacherId = row.TeacherId ?? Guid.Empty,
+                    TeacherName = row.Teacher != null ? row.Teacher.name : string.Empty,
+                    HalqaId = row.HalqaId ?? row.SaturdayHalqeId,
+                    HalqaName = row.Halqa != null ? row.Halqa.Name : string.Empty,
+                    FoujName = row.Halqa != null && row.Halqa.Fouj != null ? row.Halqa.Fouj.name : string.Empty,
+                    StudentsCount = 0,
+                    StartTime = row.start_time,
+                    EndTime = row.end_time
+                })
+                .ToList() ?? new List<WeeklyLessonAssignmentDto>();
+
+            return new WeeklyLessonManagementDto
+            {
+                Id = lesson.Id,
+                Title = lesson.Title,
+                Description = lesson.Description ?? string.Empty,
+                CreatedAt = lesson.CreatedAt,
+                UpdatedAt = lesson.UpdatedAt,
+                AssignmentsCount = rows.Count,
+                Assignments = rows
+            };
         }
 
         private static Guid ResolveHalqaId(Guid? fallbackHalqaId)

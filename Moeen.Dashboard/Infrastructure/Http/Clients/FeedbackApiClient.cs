@@ -59,5 +59,11 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             var url = $"{ApiRoutes.GetSuggestionsAsyncRoute}?page={request.Page}&pageSize={request.PageSize}";
             return await _httpClient.GetFromJsonAsync<GeneralResponse>(url) ?? GeneralResponse.BadRequest("فشل استرجاع البيانات.");
         }
+
+        public async Task<GeneralResponse> DeleteFeedbackAsync(Guid complaintId)
+        {
+            var response = await _httpClient.DeleteAsync(ApiRoutes.DeleteFeedbackAsyncRoute(complaintId));
+            return await response.Content.ReadFromJsonAsync<GeneralResponse>() ?? GeneralResponse.BadRequest("فشل الاتصال بالسيرفر.");
+        }
     }
 }

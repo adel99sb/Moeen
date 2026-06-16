@@ -17,6 +17,38 @@ namespace Moeen.Api.Application.Services
             _context = context;
         }
 
+        public async Task<List<HalqaDto>> GetAllHalqasAsync(Guid? mosqueId = null)
+        {
+            var query = _context.Halqas
+                .AsNoTracking()
+                .Include(h => h.Fouj)
+                .Include(h => h.Teacher)
+                .AsQueryable();
+
+            if (mosqueId.HasValue)
+                query = query.Where(h => h.Fouj.MosqueId == mosqueId.Value);
+
+            return await query
+                .OrderBy(h => h.Fouj.name)
+                .ThenBy(h => h.Name)
+                .Select(h => new HalqaDto
+                {
+                    Id = h.Id,
+                    Name = h.Name,
+                    FoujId = h.FoujId,
+                    FoujName = h.Fouj != null ? h.Fouj.name : string.Empty,
+                    TeacherId = h.TeacherId ?? Guid.Empty,
+                    TeacherName = h.Teacher != null ? h.Teacher.name : string.Empty,
+                    Type = h.Type,
+                    StudentsCount = h.ProgressEntries
+                        .Where(pe => !pe.IsDeleted)
+                        .Select(pe => pe.StudentId)
+                        .Distinct()
+                        .Count()
+                })
+                .ToListAsync();
+        }
+
         public async Task<HalqaDto> GetHalqaByIdAsync(GetHalqaByIdRequest request)
         {
             var halqa = await _context.Halqas

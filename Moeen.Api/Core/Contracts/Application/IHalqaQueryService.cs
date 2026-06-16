@@ -13,6 +13,11 @@ namespace Moeen.Api.Core.Contracts.Application
         Task<HalqaDto> GetHalqaByIdAsync(GetHalqaByIdRequest request);
 
         /// <summary>
+        /// جلب كل الحلقات مع إمكانية التصفية حسب المسجد.
+        /// </summary>
+        Task<List<HalqaDto>> GetAllHalqasAsync(Guid? mosqueId = null);
+
+        /// <summary>
         /// الحصول على قائمة الطلاب المسجلين في الحلقة مع إمكانية التصفية والتصفح
         /// </summary>
         Task<HalqaStudentsResponse> GetHalqaStudentsAsync(GetHalqaStudentsRequest request);

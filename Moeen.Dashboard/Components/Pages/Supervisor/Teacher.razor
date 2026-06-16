@@ -1,655 +1,503 @@
-﻿@page "/supervisor/teacher"
-@rendermode InteractiveServer
-@inject NavigationManager NavManager
+@page "/supervisor/teacher"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Text.Json
+@using Moeen.Dashboard.Application.Services.Abstractions
+@using Moeen.Dashboard.Components.Shared
+@using Moeen.Dashboard.Services.Abstractions
+@using Moeen.Shared.Requests.Enrollment
+@using Moeen.Shared.Requests.Mosuq
+@using Moeen.Shared.Responses.Enrollment
+@using Moeen.Shared.Responses.Mosuq
+@inject IEnrollmentService EnrollmentService
+@inject IMosquService MosquService
+@inject IJSRuntime JS
 
-<h3>Teacher</h3>
 <style>
-  :root {
-    --primary-green: #195042;
-    --accent-beige: #d6cabc;
-    --light-beige: #f4f1ee;
-    --white: #ffffff;
-    --text-dark: #2d3436;
-    --status-green: #2ecc71;
-    --danger-red: #e74c3c;
-  }
-
-  body {
-    font-family: 'Tajawal', sans-serif;
-    background-color: #f9f9f9;
-    direction: rtl;
-  }
-
-  .management-container {
-    background: var(--white);
-    margin: 20px;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-  }
-
-  /* العنوان */
-  .page-title {
-    color: var(--primary-green);
-    position: relative;
-    padding-bottom: 10px; /* مسافة بين النص والخط */
-    border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
-    display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
-  }
-
-  .search-wrapper {
-    position: relative;
-    flex: 1;
-    max-width: 400px;
-  }
-
-  .search-input {
-    width: 100%;
-    padding: 12px 45px 12px 15px;
-    border: 1.5px solid var(--accent-beige);
-    border-radius: 12px;
-    outline: none;
-    transition: 0.3s;
-  }
-
-  .search-input:focus {
-    border-color: var(--primary-green);
-    box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
-  }
-
-  .search-wrapper i {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--primary-green);
-  }
-
-  .table {
-    width: 100%;
-    table-layout: fixed;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    font-family: 'Tajawal', sans-serif;
-    font-size: clamp(0.5rem,1.5vw,1rem);
-    text-align: center;
-  }
-
-  .table th {
-    background-color: var(--light-beige);
-    color: var(--primary-green);
-    padding: 12px;
-  }
-
-  .table td {
-    background-color: var(--white);
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-  }
-
-  .table tbody tr:hover {
-    background-color: #fafafa;
-    transform: scale(1.01);
-  }
-
-  .btn-pprimary {
-    background-color: var(--primary-green);
-    font-size: 15px;
-    padding: 10px 20px;
-    color: var(--white);
-    border-radius: 12px;
-    display: inline-block;
-    transition: 0.3s;
-    cursor: pointer;
-    border: none;
-  }
-
-  .btn-pprimary:hover {
-    background-color: #123d32;
-    transform: translateY(-2px);
-  }
-   
-  .form-container, .form-container * {
-    box-sizing: border-box;
-  }
-
-  .form-container {
-    max-width: 850px;
-    margin: 2rem auto;
-    background: var(--white);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    direction: rtl; 
-    overflow: hidden;
-  }
-
-  .form-header {
-    background: var(--accent-beige);
-    color: var(--white);
-    padding: 1.2rem;
-    text-align: center;
-  }
-
-  form {
-    padding: 2rem;
-  }
-
-  .grid-row {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 1.5rem;
-    margin-bottom: 1.2rem;
-  }
-
-  .grid-row:nth-of-type(4) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .input-group label {
-    color: var(--text-dark);
-    font-weight: 600;
-    font-size: 0.85rem;
-    text-align: right;
-  }
-
-  /* حل مشكلة الأيقونات والمحاذاة */
-  .input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-  }
-
-  .input-wrapper i {
-    position: absolute;
-    right: 12px; /* تثبيت الأيقونة جهة اليمين */
-    color: var(--primary-green);
-    z-index: 2;
-    pointer-events: none;
-  }
-
-  .input-wrapper input,
-  .input-wrapper select {
-    width: 100%;
-    padding: 10px 35px 10px 10px;
-    border: 1px solid var(--accent-beige);
-    border-radius: 8px;
-    background: var(--light-beige);
-    font-size: 0.9rem;
-    height: 45px; 
-    outline: none;
-    transition: var(--transition);
-  }
-
-  .input-wrapper input:focus,
-  .input-wrapper select:focus {
-    border-color: var(--primary-green);
-    background: #fff;
-  }
-
-  .actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #eee;
-  }
- .actions button, .actions a {
-    flex: 1;
-    height: 48px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    border: none;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-
-  .actions .save {
-    background: var(--primary-green);
-    color: white;
-  }
-        
-  .actions .cancel {
-    background: #f8f9fa;
-    color: #dc3545;
-  }
-
-  .btn-icon {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2rem;
-    transition: var(--transition);
-  }
-  .btn-icon.edit { color: #3498db; }
-  .btn-icon.delete { color: var(--danger-red); }
-  .btn-icon:hover { transform: scale(1.1); }
-    
-  @@media (max-width: 768px) {
-    .grid-row, .grid-row:nth-of-type(4) {
-      grid-template-columns: 1fr !important;
-    }
-  }
-    
-  .attendance-options label {
-    margin: 0 10px;
-    cursor: pointer;
-    font-family: 'Tajawal', sans-serif;
-    font-size: clamp(1rem,2.5vw,1.5rem);
-    padding: 4px 8px;
-    border-radius: 6px;
-    transition: background 0.2s;
-  }
-
-  /* تغيير لون الخلفية عند اختيار الحالة */
-  .attendance-options input[type="radio"]:checked + span {
-    color: var(--primary-green);
-    font-weight: bold;
-    padding: 4px 8px;
-    border-radius: 6px;
-  }
-  
-  .attendance-options input[type="radio"] {
-    width: 20px; /* تكبير الدائرة */
-    height: 20px; /* تكبير الدائرة */
-    margin-right: 5px;
-    cursor: pointer;
-  }
+    .teachers-page { direction: rtl; color: #163f35; }
+    .teachers-card { background: #fff; border: 1px solid rgba(25, 80, 66, 0.10); border-radius: 24px; padding: 28px; box-shadow: 0 22px 60px rgba(25, 80, 66, 0.08); }
+    .teachers-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 26px; }
+    .teachers-title { margin: 0; color: #195042; font-size: 1.65rem; font-weight: 900; letter-spacing: -0.04em; }
+    .teachers-subtitle { margin: 7px 0 0; color: #7b7067; font-size: 0.95rem; }
+    .teachers-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 22px; flex-wrap: wrap; }
+    .search-wrapper { position: relative; width: min(100%, 430px); }
+    .search-wrapper .bi { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #195042; }
+    .search-input { width: 100%; height: 48px; padding: 0 44px 0 16px; border: 1px solid #ddd5cc; border-radius: 15px; outline: none; background: #fbfaf8; color: #163f35; transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease; }
+    .search-input:focus { border-color: #195042; background: #fff; box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.10); }
+    .btn-moeen-primary, .btn-moeen-light { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 17px; border-radius: 14px; border: 0; font-weight: 800; transition: transform 0.18s ease, background 0.18s ease; }
+    .btn-moeen-primary { background: #195042; color: #fff; box-shadow: 0 14px 28px rgba(25, 80, 66, 0.18); }
+    .btn-moeen-primary:hover:not(:disabled) { background: #123d32; transform: translateY(-1px); }
+    .btn-moeen-light { background: #f4f1e8; color: #195042; border: 1px solid #e2dbd2; }
+    .teachers-table-wrap { overflow-x: auto; border: 1px solid #eee8e0; border-radius: 18px; }
+    .teachers-table { width: 100%; margin: 0; border-collapse: collapse; min-width: 900px; }
+    .teachers-table th { background: #f4f1e8; color: #195042; font-weight: 900; padding: 15px 18px; border-bottom: 1px solid rgba(25, 80, 66, 0.18); white-space: nowrap; text-align: center; }
+    .teachers-table td { padding: 15px 18px; border-bottom: 1px solid #f1ece6; vertical-align: middle; color: #263f37; text-align: center; }
+    .teachers-table tr:last-child td { border-bottom: 0; }
+    .teachers-table tbody tr:hover td { background: #fbfaf8; }
+    .teacher-name-cell { display: flex; align-items: center; gap: 12px; font-weight: 900; color: #163f35; text-align: right; }
+    .teacher-avatar { width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 14px; background: #195042; color: #fff; font-size: 1rem; }
+    .teacher-bio { max-width: 260px; margin: 0 auto; color: #655d56; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .row-actions { display: flex; justify-content: center; gap: 8px; }
+    .icon-btn { width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #e2dbd2; border-radius: 12px; background: #fff; color: #195042; transition: transform 0.18s ease, background 0.18s ease; }
+    .icon-btn:hover { background: #f4f1e8; transform: translateY(-1px); }
+    .icon-btn.info { color: #039855; }
+    .icon-btn.edit { color: #2563eb; }
+    .icon-btn.danger { color: #b42318; }
+    .state-card { padding: 22px; border: 1px solid #eee8e0; border-radius: 18px; background: #fff; color: #195042; }
+    @@media (max-width: 760px) { .teachers-card { padding: 20px; } .teachers-header { flex-direction: column; } }
 </style>
 
-<section class="management-container">
-  <header class="page-header">
-    <h2 class="page-title">إدارة المعلمين</h2>
-  </header>
-  <br />
+<section class="teachers-page">
+    <div class="teachers-card">
+        <header class="teachers-header">
+            <div>
+                <h2 class="teachers-title">إدارة المعلمين</h2>
+                <p class="teachers-subtitle">عرض المعلمين، إضافة معلم جديد، وتعديل بيانات المعلم من نفس الديالوج المشترك.</p>
+            </div>
+            <button class="btn-moeen-primary" type="button" @onclick="OpenCreateDialog" disabled="@_isLoading">
+                <i class="bi bi-person-plus"></i>
+                <span>إضافة معلم جديد</span>
+            </button>
+        </header>
 
-  <!-- ربط حقل البحث تفاعلياً -->
-  <div class="search-wrapper">
-    <i class="bi bi-search"></i>
-    <input type="text" class="search-input" placeholder="ابحث عن معلم..." @oninput="HandleSearch">
-  </div>
-  <br />
+        <div class="teachers-toolbar">
+            <div class="search-wrapper">
+                <i class="bi bi-search"></i>
+                <input class="search-input" value="@_searchText" placeholder="ابحث باسم المعلم..." @oninput="HandleSearch" />
+            </div>
+            <button class="btn-moeen-light" type="button" @onclick="LoadTeachersAsync" disabled="@_isLoading">
+                <i class="bi bi-arrow-clockwise"></i>
+                <span>تحديث</span>
+            </button>
+        </div>
 
-  @if (ShowMessage)
-  {
-    <div class="alert alert-success mb-3">@Message</div>
-  }
-
-  <table class="table">
-    <thead>
-      <tr>
-        <th class="table th">اسم المعلم</th>
-        <th class="table th">حضور</th>
-        <th class="table th">معلومات المعلم</th>
-        <th class="table th">حذف المعلم</th>
-      </tr>
-    </thead>
-    <tbody>
-      @if (filteredTeacherList == null || filteredTeacherList.Count == 0)
-      {
-        <tr>
-          <td colspan="4" class="text-center p-3" style="color: gray;">
-            لا يوجد معلمين يطابقون هذا البحث
-          </td>
-        </tr>
-      }
-      else
-      {
-        @foreach (var teacher in filteredTeacherList)
+        @if (!string.IsNullOrWhiteSpace(_successMessage))
         {
-          <tr>
-            <td class="table td fw-bold">@teacher.FullName</td>
-            <td class="table td">
-              <div class="attendance-options">
-                <!-- حل مشكلة اسم الراديو ليكون فريد لكل معلم باستخدام الـ Id -->
-                <label>
-                  <input type="radio" name="attend_@teacher.Id" value="حاضر" 
-                         checked="@(teacher.AttendanceStatus == "حاضر")" 
-                         @onchange="@(() => MarkAttendance(teacher, "حاضر"))"> 
-                  <span>حاضر</span>
-                </label>
-                <label>
-                  <input type="radio" name="attend_@teacher.Id" value="غائب" 
-                         checked="@(teacher.AttendanceStatus == "غائب")" 
-                         @onchange="@(() => MarkAttendance(teacher, "غائب"))"> 
-                  <span>غائب</span>
-                </label>
-                <label>
-                  <input type="radio" name="attend_@teacher.Id" value="غياب مبرر" 
-                         checked="@(teacher.AttendanceStatus == "غياب مبرر")" 
-                         @onchange="@(() => MarkAttendance(teacher, "غياب مبرر"))"> 
-                  <span>مبرر</span>
-                </label>
-              </div>
-            </td>
-            <td>
-              <button class="btn-icon" title="عرض" @onclick="viewTeacher1"><i class="bi bi-info-circle" style="color: #2ecc71;"></i></button>
-       <button class="btn-icon edit" title="تعديل" @onclick="() => EnableEditMode(teacher)"><i class="bi bi-pencil-square"></i></button>
-            </td>
-            <td>
-              <button class="btn-icon delete" title="حذف" @onclick="() => DeleteTeacher(teacher.Id)"><i class="bi bi-trash"></i></button>
-            </td>
-          </tr>
+            <div class="alert alert-success">@_successMessage</div>
         }
-      }
-    </tbody>
-  </table>
 
-  <!-- ربط الـ Details والـ Form تفاعلياً للحفظ والتعديل -->
-  <details open="@_isDetailsOpen">
-    <summary class="btn-pprimary" @onclick="ToggleDetails">
-      @(isEditMode ? "تعديل بيانات المعلم الحالي" : "إضافة معلم جديد")
-    </summary>
-    <div class="form-container">
-      <div class="form-header">
-        <h2>
-          <i class="@(isEditMode ? "bi bi-pencil-square" : "bi bi-person-plus-fill")"></i> 
-          @(isEditMode ? "تعديل بيانات المعلم" : "إضافة معلم")
-        </h2>
-      </div>
-      <EditForm Model="_model" OnValidSubmit="HandleSubmit">
-        <div class="grid-row">
-          <div class="input-group">
-            <label>الاسم الكامل</label>
-            <div class="input-wrapper">
-              <i class="bi bi-person"></i>
-              <InputText @bind-Value="_model.FullName" placeholder="أدخل الاسم" />
-            </div>
-          </div>
-          <div class="input-group">
-            <label>رقم الهاتف</label>
-            <div class="input-wrapper">
-              <i class="bi bi-telephone"></i>
-              <InputText @bind-Value="_model.Phone" placeholder="أدخل الرقم" />
-            </div>
-          </div>
-        </div>
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <div class="alert alert-danger">@_errorMessage</div>
+        }
 
-        <div class="grid-row">
-          <div class="input-group">
-            <label>تاريخ التسجيل</label>
-            <div class="input-wrapper">
-              <i class="bi bi-calendar-event"></i>
-              <input type="date" @bind="_model.RegisterDate" />
+        @if (_isLoading)
+        {
+            <div class="state-card d-flex align-items-center gap-3">
+                <span class="spinner-border text-success" role="status"></span>
+                <span>جاري تحميل بيانات المعلمين...</span>
             </div>
-          </div>
-          <div class="input-group">
-            <label>تاريخ الميلاد</label>
-            <div class="input-wrapper">
-              <i class="bi bi-calendar-event"></i>
-              <input type="date" @bind="_model.BirthDate" />
+        }
+        else
+        {
+            <div class="teachers-table-wrap">
+                <table class="teachers-table">
+                    <thead>
+                        <tr>
+                            <th>اسم المعلم</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>رقم الهاتف</th>
+                            <th>المسجد</th>
+                            <th>الخبرة</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (_teachers.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">لا يوجد معلمين حالياً.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var teacher in _teachers)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="teacher-name-cell">
+                                            <span class="teacher-avatar"><i class="bi bi-person-workspace"></i></span>
+                                            <span>@teacher.Name</span>
+                                        </div>
+                                    </td>
+                                    <td>@teacher.Email</td>
+                                    <td>@(string.IsNullOrWhiteSpace(teacher.Phone) ? "—" : teacher.Phone)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(teacher.MosqueName) ? "—" : teacher.MosqueName)</td>
+                                    <td><div class="teacher-bio" title="@teacher.Bio">@(string.IsNullOrWhiteSpace(teacher.Bio) ? "—" : teacher.Bio)</div></td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="icon-btn info" type="button" title="عرض" @onclick="() => OpenDetailsDialog(teacher)">
+                                                <i class="bi bi-info-circle"></i>
+                                            </button>
+                                            <button class="icon-btn edit" type="button" title="تعديل" @onclick="() => OpenEditDialog(teacher)">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                            <button class="icon-btn danger" type="button" title="حذف" @onclick="() => DeleteTeacherAsync(teacher)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
             </div>
-          </div> 
-        </div>
-
-        <div class="grid-row">
-          <div class="input-group">
-            <label>البريد الإلكتروني</label>
-            <div class="input-wrapper">
-              <i class="bi bi-envelope"></i>
-              <InputText @bind-Value="_model.Email" type="email" placeholder="أدخل البريد الالكتروني" />
-            </div>
-          </div>
-          <div class="input-group">
-            <label>كلمة المرور</label>
-            <div class="input-wrapper">
-              <i class="bi bi-lock"></i>
-              <input type="password" @bind="_model.Password" placeholder="أدخل كلمة المرور" class="form-control" />
-            </div>
-          </div>
-        </div>
-
-        <div class="grid-row">
-          <div class="input-group">
-            <label>الفوج</label>
-            <div class="input-wrapper">
-              <i class="bi bi-layers"></i>
-              <InputSelect @bind-Value="_model.Group">
-                <option value="" disabled selected>اختر الفوج</option>
-                <option value="الفوج الأول">الفوج الأول</option>
-                <option value="الفوج الثاني">الفوج الثاني</option>
-              </InputSelect>
-            </div>
-          </div>
-          <div class="input-group">
-            <label>الحلقة</label>
-            <div class="input-wrapper">
-              <i class="bi bi-layers"></i>
-              <InputSelect @bind-Value="_model.ClassLevel">
-                <option value="" disabled selected>اختر الحلقة</option>
-                <option value="الحلقة الأولى">الحلقة الأولى</option>
-                <option value="الحلقة الثانية">الحلقة الثانية</option>
-              </InputSelect>
-            </div>
-          </div>
-        </div>
-            <div class="grid-row">
-          <div class="input-group">
-            <label>الجنس</label>
-            <div class="input-wrapper">
-              <i class="bi bi-gender-ambiguous"></i>
-              <InputSelect @bind-Value="_model.Gender">
-                <option value="" disabled selected>اختر الجنس</option>
-                <option value="male">ذكر</option>
-                <option value="female">أنثى</option>
-              </InputSelect>
-            </div>
-          </div>
-          <div class="input-group">
-            <label>حالة الحساب</label>
-            <div class="input-wrapper">
-              <i class="bi bi-check-circle"></i>
-              <InputSelect @bind-Value="_model.Status">
-                <option value="active">نشط</option>
-                <option value="inactive">متوقف</option>
-              </InputSelect>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid-row">
-          <div class="input-group">
-            <label>لمحة عن الخبرات</label>
-            <div class="input-wrapper">
-              <i class="bi bi-person-workspace"></i>
-              <InputText @bind-Value="_model.Experience" placeholder="اكتب هنا..." />
-            </div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button type="submit" class="save">
-            <i class="bi bi-check2-all"></i> 
-            @(isEditMode ? "حفظ التعديلات" : "حفظ المعلم")
-          </button>
-          <button type="button" class="cancel" @onclick="ResetForm"><i class="bi bi-x-lg"></i> إلغاء</button>
-        </div>
-      </EditForm>
+        }
     </div>
-  </details>
+
+    <MemberManagementDialog IsOpen="@_isDialogOpen"
+                            IsEditMode="@_isEditMode"
+                            IsSaving="@_isSaving"
+                            EntityName="معلم"
+                            ErrorMessage="@_dialogError"
+                            Model="@_form"
+                            Mosques="@_mosques"
+                            ShowMosque="true"
+                            DisableMosque="@_isEditMode"
+                            ShowPassword="@(!_isEditMode)"
+                            ShowJoinedAt="true"
+                            ShowStatus="false"
+                            ShowScore="false"
+                            ShowBio="true"
+                            ShowAssignedAt="true"
+                            OnApply="ApplyDialogAsync"
+                            OnCancel="CloseDialog" />
+
+    <MemberDetailsDialog IsOpen="@_isDetailsOpen"
+                         Model="@_detailsModel"
+                         OnClose="CloseDetailsDialog" />
 </section>
 
 @code {
-    // كلاس داخلي ذكي لحفظ حقول المعلم محلياً دون أي تعديل بالديزاين
-    public class LocalTeacher
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private readonly List<TeacherRow> _teachers = new();
+    private List<MosquDto> _mosques = new();
+    private MemberManagementDialogModel _form = new();
+    private MemberDetailsDialogModel _detailsModel = new();
+
+    private bool _isLoading = true;
+    private bool _isSaving;
+    private bool _isDialogOpen;
+    private bool _isDetailsOpen;
+    private bool _isEditMode;
+    private string _searchText = string.Empty;
+    private string? _errorMessage;
+    private string? _successMessage;
+    private string? _dialogError;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public string FullName { get; set; } = "";
-        public string Phone { get; set; } = "";
-        public DateTime RegisterDate { get; set; } = DateTime.Now;
-        public DateTime BirthDate { get; set; } = DateTime.Now.AddYears(-25);
-        public string Email { get; set; } = "";
-        public string Password { get; set; } = "";
-        public string Group { get; set; } = "";
-        public string ClassLevel { get; set; } = "";
-        public string Gender { get; set; } = "";
-        public string Status { get; set; } = "active";
-        public string Experience { get; set; } = "";
-        public string AttendanceStatus { get; set; } = ""; // لتخزين حالة الحضور (حاضر/غائب/مبرر) لكل معلم
+        if (!firstRender)
+            return;
+
+        await LoadInitialDataAsync();
+        StateHasChanged();
     }
 
-    private List<LocalTeacher> masterTeacherList = new();
-    private List<LocalTeacher> filteredTeacherList = new();
-    
-    private LocalTeacher _model = new();
-    private string searchQuery = "";
-    private bool isEditMode = false;
-    private bool _isDetailsOpen = false;
-    private bool ShowMessage = false;
-    private string Message = "";
-
-    protected override void OnInitialized()
+    private async Task LoadInitialDataAsync()
     {
-        // تثبيت الثلاث معلمات الأصليات اللي بملفكِ عشان يظهروا بالجدول فوراً بنفس أسمائهم
-        masterTeacherList = new List<LocalTeacher>
-        {
-            new LocalTeacher { FullName = "آلاء قاسم" },
-            new LocalTeacher { FullName = "ماريا العبدالسلام" },
-            new LocalTeacher { FullName = "آية دعبول" }
-        };
-        
-        filteredTeacherList = new List<LocalTeacher>(masterTeacherList);
-    }
+        _isLoading = true;
+        _errorMessage = null;
 
-    private void HandleSubmit()
-    {
-        if (isEditMode)
+        try
         {
-            var target = masterTeacherList.FirstOrDefault(t => t.Id == _model.Id);
-            if (target != null)
-            {
-                target.FullName = _model.FullName;
-                target.Phone = _model.Phone;
-                target.RegisterDate = _model.RegisterDate;
-                target.BirthDate = _model.BirthDate;
-                target.Email = _model.Email;
-                target.Password = _model.Password;
-                target.Group = _model.Group;
-                target.ClassLevel = _model.ClassLevel;
-                target.Gender = _model.Gender;
-                target.Status = _model.Status;
-                target.Experience = _model.Experience;
-                Message = "تم تعديل بيانات المعلم بنجاح!";
-                ShowMessage = true;
-            }
+            await LoadMosquesAsync();
+            await LoadTeachersAsync();
         }
-        else
+        catch (Exception ex)
         {
-            masterTeacherList.Insert(0, new LocalTeacher
+            _errorMessage = $"تعذر تحميل بيانات المعلمين: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadMosquesAsync()
+    {
+        try
+        {
+            _mosques = await MosquService.GetAllMosqus(new GetAllMosqusRequest { Page = 1, PageSize = 200 }) ?? new();
+        }
+        catch
+        {
+            _mosques = new();
+        }
+    }
+
+    private async Task LoadTeachersAsync()
+    {
+        _errorMessage = null;
+
+        try
+        {
+            var response = await EnrollmentService.GetAllTeachersAsync(new GetAllTeachersRequest
             {
-                FullName = _model.FullName,
-                Phone = _model.Phone,
-                RegisterDate = _model.RegisterDate,
-                BirthDate = _model.BirthDate,
-                Email = _model.Email,
-                Password = _model.Password,
-                Group = _model.Group,
-                ClassLevel = _model.ClassLevel,
-                Gender = _model.Gender,
-                Status = _model.Status,
-                Experience = _model.Experience
+                Name = string.IsNullOrWhiteSpace(_searchText) ? null : _searchText,
+                PageNumber = 1,
+                PageSize = 200
             });
-            Message = "تم إضافة المعلم بنجاح!";
-            ShowMessage = true;
-        }
 
-        ResetForm();
-        ApplyFilter();
+            if (response == null || !response.Success)
+            {
+                _errorMessage = response?.Message ?? "فشل تحميل المعلمين.";
+                _teachers.Clear();
+                return;
+            }
+
+            var json = JsonSerializer.Serialize(response.Data);
+            var teachers = JsonSerializer.Deserialize<List<TeacherDto>>(json, JsonOptions) ?? new();
+
+            _teachers.Clear();
+            _teachers.AddRange(teachers.Select(TeacherRow.FromDto));
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"تعذر تحميل المعلمين: {ex.Message}";
+            _teachers.Clear();
+        }
     }
 
-    private void EnableEditMode(LocalTeacher teacher)
+    private async Task HandleSearch(ChangeEventArgs args)
     {
-        isEditMode = true;
-        _model = new LocalTeacher
+        _searchText = args.Value?.ToString() ?? string.Empty;
+        await LoadTeachersAsync();
+    }
+
+    private void OpenCreateDialog()
+    {
+        _successMessage = null;
+        _dialogError = null;
+        _isEditMode = false;
+        _form = new MemberManagementDialogModel
+        {
+            Gender = "Male",
+            JoinedAt = DateTime.Today,
+            MosqueId = _mosques.FirstOrDefault()?.Id ?? Guid.Empty
+        };
+        _isDialogOpen = true;
+    }
+
+    private void OpenEditDialog(TeacherRow teacher)
+    {
+        _successMessage = null;
+        _dialogError = null;
+        _isEditMode = true;
+        _form = new MemberManagementDialogModel
         {
             Id = teacher.Id,
-            FullName = teacher.FullName,
-            Phone = teacher.Phone,
-            RegisterDate = teacher.RegisterDate,
-            BirthDate = teacher.BirthDate,
+            Name = teacher.Name,
             Email = teacher.Email,
-            Password = teacher.Password,
-            Group = teacher.Group,
-            ClassLevel = teacher.ClassLevel,
-            Gender = teacher.Gender,
-            Status = teacher.Status,
-            Experience = teacher.Experience
+            Phone = teacher.Phone,
+            Gender = string.Equals(teacher.Gender, "Female", StringComparison.OrdinalIgnoreCase) ? "Female" : "Male",
+            JoinedAt = teacher.JoinedAt == default ? DateTime.Today : teacher.JoinedAt,
+            MosqueId = teacher.MosqueId,
+            Bio = teacher.Bio,
+            AssignedAt = teacher.AssignedAt
         };
+        _isDialogOpen = true;
+    }
+
+    private void CloseDialog()
+    {
+        if (_isSaving)
+            return;
+
+        _isDialogOpen = false;
+        _dialogError = null;
+    }
+
+    private void OpenDetailsDialog(TeacherRow teacher)
+    {
+        _detailsModel = new MemberDetailsDialogModel
+        {
+            Title = teacher.Name,
+            Subtitle = "معلومات المعلم الكاملة",
+            Sections = new List<MemberDetailsSectionModel>
+            {
+                new()
+                {
+                    Title = "البيانات الأساسية",
+                    Items = new List<MemberDetailsItemModel>
+                    {
+                        Item("الاسم الكامل", teacher.Name),
+                        Item("البريد الإلكتروني", teacher.Email),
+                        Item("رقم الهاتف", teacher.Phone),
+                        Item("الجنس", GetGenderLabel(teacher.Gender)),
+                        Item("تاريخ الانضمام", FormatDate(teacher.JoinedAt)),
+                        Item("المسجد", teacher.MosqueName)
+                    }
+                },
+                new()
+                {
+                    Title = "الخبرة والتعيين",
+                    Items = new List<MemberDetailsItemModel>
+                    {
+                        Item("مكان/تاريخ التعيين", teacher.AssignedAt),
+                        Item("لمحة عن الخبرات", teacher.Bio, wide: true)
+                    }
+                }
+            }
+        };
+
         _isDetailsOpen = true;
-        ShowMessage = false;
     }
 
-    private void DeleteTeacher(Guid id)
+    private void CloseDetailsDialog()
     {
-        var target = masterTeacherList.FirstOrDefault(t => t.Id == id);
-        if (target != null)
-        {
-            masterTeacherList.Remove(target);
-            Message = "تم حذف المعلم محلياً!";
-            ShowMessage = true;
-        }
-        ApplyFilter();
-    }
-
-    private void MarkAttendance(LocalTeacher teacher, string status)
-    {
-        teacher.AttendanceStatus = status;
-        Message = $"تم تسجيل ({teacher.FullName}) بـ {status}";
-        ShowMessage = true;
-    }
-
-    private void HandleSearch(ChangeEventArgs e)
-    {
-        searchQuery = e.Value?.ToString() ?? "";
-        ApplyFilter();
-    }
-
-    private void ApplyFilter()
-    {
-        if (string.IsNullOrWhiteSpace(searchQuery))
-        {
-            filteredTeacherList = new List<LocalTeacher>(masterTeacherList);
-        }
-        else
-        {
-            filteredTeacherList = masterTeacherList
-                .Where(t => t.FullName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-        }
-    }
-
-    private void ToggleDetails()
-    {
-        _isDetailsOpen = !_isDetailsOpen;
-        if (!_isDetailsOpen) isEditMode = false;
-    }
-
-    private void ResetForm()
-    {
-        _model = new LocalTeacher();
-        isEditMode = false;
         _isDetailsOpen = false;
     }
 
-    private void viewTeacher1()
+    private async Task ApplyDialogAsync()
     {
-        NavManager.NavigateTo("/supervisor/teacher1");
+        _isSaving = true;
+        _dialogError = null;
+        _successMessage = null;
+
+        try
+        {
+            if (_isEditMode)
+            {
+                var response = await EnrollmentService.UpdateMemberInfoAsync(new UpdateMemberInfoRequest
+                {
+                    MemberId = _form.Id.ToString(),
+                    Name = _form.Name,
+                    Email = _form.Email,
+                    Phone = _form.Phone,
+                    Gender = _form.Gender,
+                    Bio = _form.Bio,
+                    AssignedAt = _form.AssignedAt
+                });
+
+                if (response == null || !response.Success)
+                {
+                    _dialogError = response?.Message ?? "فشل تعديل بيانات المعلم.";
+                    return;
+                }
+
+                _successMessage = "تم تعديل بيانات المعلم بنجاح.";
+            }
+            else
+            {
+                if (_form.MosqueId == Guid.Empty)
+                {
+                    _dialogError = "يرجى اختيار المسجد قبل إضافة المعلم.";
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(_form.Password))
+                {
+                    _dialogError = "يرجى إدخال كلمة مرور للمعلم الجديد.";
+                    return;
+                }
+
+                var response = await EnrollmentService.AddTeacherAsync(new AddTeacherRequest
+                {
+                    Name = _form.Name,
+                    Email = _form.Email,
+                    Password = _form.Password!,
+                    ConfirmPassword = _form.Password!,
+                    Phone = _form.Phone ?? string.Empty,
+                    PhoneNumber = _form.Phone ?? string.Empty,
+                    Gender = _form.Gender,
+                    MosqueId = _form.MosqueId,
+                    Bio = _form.Bio ?? string.Empty,
+                    AssignedAt = _form.AssignedAt ?? string.Empty,
+                    Experiences = string.IsNullOrWhiteSpace(_form.Bio) ? null : new List<string> { _form.Bio },
+                    TeachingPlaces = string.IsNullOrWhiteSpace(_form.AssignedAt) ? null : new List<string> { _form.AssignedAt }
+                });
+
+                if (response == null || !response.Success)
+                {
+                    _dialogError = response?.Message ?? "فشل إضافة المعلم.";
+                    return;
+                }
+
+                _successMessage = "تم إضافة المعلم بنجاح.";
+            }
+
+            _isDialogOpen = false;
+            await LoadTeachersAsync();
+        }
+        catch (Exception ex)
+        {
+            _dialogError = ex.Message;
+        }
+        finally
+        {
+            _isSaving = false;
+        }
     }
 
-    private void editTeacher()
+    private async Task DeleteTeacherAsync(TeacherRow teacher)
     {
-        NavManager.NavigateTo("/supervisor/editinfo_teacher");
+        _successMessage = null;
+        _errorMessage = null;
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"هل تريد حذف المعلم {teacher.Name}؟");
+        if (!confirmed)
+            return;
+
+        try
+        {
+            var response = await EnrollmentService.DeleteTeacherAsync(teacher.Id);
+            if (response == null || !response.Success)
+            {
+                _errorMessage = response?.Message ?? "فشل حذف المعلم.";
+                return;
+            }
+
+            _successMessage = "تم حذف المعلم بنجاح.";
+            await LoadTeachersAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private static MemberDetailsItemModel Item(string label, string? value, bool wide = false)
+        => new()
+        {
+            Label = label,
+            Value = string.IsNullOrWhiteSpace(value) ? "—" : value,
+            Wide = wide
+        };
+
+    private static string GetGenderLabel(string? gender)
+        => string.Equals(gender, "Female", StringComparison.OrdinalIgnoreCase) ? "أنثى" : "ذكر";
+
+    private static string FormatDate(DateTime date)
+        => date == default ? "—" : date.ToString("yyyy/MM/dd");
+
+    private sealed class TeacherRow
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string? Phone { get; set; }
+        public string? Gender { get; set; }
+        public DateTime JoinedAt { get; set; }
+        public Guid MosqueId { get; set; }
+        public string MosqueName { get; set; } = string.Empty;
+        public string? Bio { get; set; }
+        public string? AssignedAt { get; set; }
+
+        public static TeacherRow FromDto(TeacherDto dto)
+            => new()
+            {
+                Id = dto.Id,
+                Name = dto.Name ?? string.Empty,
+                Email = dto.Email ?? string.Empty,
+                Phone = dto.Phone,
+                Gender = dto.Gender,
+                JoinedAt = dto.JoinedAt,
+                MosqueId = dto.MosqueId,
+                MosqueName = dto.MosqueName ?? string.Empty,
+                Bio = dto.Bio,
+                AssignedAt = dto.AssignedAt
+            };
     }
 }

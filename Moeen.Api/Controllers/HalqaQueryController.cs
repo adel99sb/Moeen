@@ -19,6 +19,20 @@ namespace Moeen.Api.Controllers
         /// <summary>
         /// POST (قديم/متوافق): جلب تفاصيل حلقة عبر Body.
         /// </summary>
+        [HttpGet("all")]
+        public async Task<ActionResult<GeneralResponse>> GetAllHalqas([FromQuery] Guid? mosqueId)
+        {
+            try
+            {
+                var result = await _HalqaQueryService.GetAllHalqasAsync(mosqueId);
+                return Ok(GeneralResponse.Ok("تم جلب الحلقات بنجاح.", result));
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, GeneralResponse.InternalError("حدث خطأ داخلي أثناء جلب الحلقات"));
+            }
+        }
+
         [HttpPost("get-by-id")]
         public async Task<ActionResult<GeneralResponse>> GetHalqaById([FromBody] GetHalqaByIdRequest request)
         {

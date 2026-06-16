@@ -1,3 +1,4 @@
+﻿
 using System;
 using System.Collections.Generic;
 
@@ -38,6 +39,7 @@ namespace Moeen.Shared.Responses.LessonManagement
         public int StudentsCount { get; set; }
     }
 
+
     public class LessonHistoryItemDto
     {
         public Guid LessonId { get; set; }
@@ -61,6 +63,32 @@ namespace Moeen.Shared.Responses.LessonManagement
         public string LessonTitle { get; set; } = string.Empty;
         public string CircleName { get; set; } = string.Empty;
         public string TeacherName { get; set; } = string.Empty;
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
+    }
+
+
+    public class WeeklyLessonManagementDto
+    {
+        public Guid Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public int AssignmentsCount { get; set; }
+        public List<WeeklyLessonAssignmentDto> Assignments { get; set; } = new();
+    }
+
+    public class WeeklyLessonAssignmentDto
+    {
+        public Guid Id { get; set; }
+        public Guid WeeklyLessonId { get; set; }
+        public Guid TeacherId { get; set; }
+        public string TeacherName { get; set; } = string.Empty;
+        public Guid HalqaId { get; set; }
+        public string HalqaName { get; set; } = string.Empty;
+        public string FoujName { get; set; } = string.Empty;
+        public int StudentsCount { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
     }

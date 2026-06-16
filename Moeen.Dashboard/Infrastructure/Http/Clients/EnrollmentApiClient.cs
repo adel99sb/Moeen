@@ -192,11 +192,27 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             var body = await response.Content.ReadAsStringAsync();
             var contentType = response.Content.Headers.ContentType?.MediaType;
 
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = TryReadApiErrorMessage(body);
+                var bodyStart = string.IsNullOrWhiteSpace(body) ? string.Empty : body.Length > 300 ? body[..300] : body;
+
+                _logger.LogWarning(
+                    "Enrollment API request failed. Operation={Operation}, StatusCode={StatusCode}, ContentType={ContentType}, BodyStart={BodyStart}",
+                    operation,
+                    (int)response.StatusCode,
+                    contentType,
+                    bodyStart);
+
+                return new GeneralResponse(
+                    string.IsNullOrWhiteSpace(errorMessage) ? $"فشل تنفيذ العملية. StatusCode={(int)response.StatusCode}" : errorMessage,
+                    success: false,
+                    statusCode: (int)response.StatusCode);
+            }
+
             if (string.IsNullOrWhiteSpace(body))
             {
-                return response.IsSuccessStatusCode
-                    ? GeneralResponse.Ok("تمت العملية بنجاح.")
-                    : GeneralResponse.BadRequest($"فشل تنفيذ العملية. StatusCode={(int)response.StatusCode}");
+                return GeneralResponse.Ok("تمت العملية بنجاح.");
             }
 
             try
@@ -225,6 +241,40 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
                 string.IsNullOrWhiteSpace(message) ? "فشل تنفيذ العملية." : message,
                 success: false,
                 statusCode: (int)response.StatusCode);
+        }
+
+        private static string? TryReadApiErrorMessage(string body)
+        {
+            if (string.IsNullOrWhiteSpace(body))
+                return null;
+
+            try
+            {
+                using var document = JsonDocument.Parse(body);
+                var root = document.RootElement;
+
+                if (root.TryGetProperty("message", out var messageElement) &&
+                    messageElement.ValueKind == JsonValueKind.String)
+                {
+                    var message = messageElement.GetString();
+                    if (!string.IsNullOrWhiteSpace(message))
+                        return message;
+                }
+
+                if (root.TryGetProperty("title", out var titleElement) &&
+                    titleElement.ValueKind == JsonValueKind.String)
+                {
+                    var title = titleElement.GetString();
+                    if (!string.IsNullOrWhiteSpace(title))
+                        return title;
+                }
+            }
+            catch (JsonException)
+            {
+                return body.Length > 700 ? body[..700] : body;
+            }
+
+            return body.Length > 700 ? body[..700] : body;
         }
     }
 }

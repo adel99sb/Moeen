@@ -98,7 +98,8 @@
         public static string UpdateComplaintStatusAsyncRoute { get; } = "api/Feedback/complaint/status";
         public static string UpdateSuggestionStatusAsyncRoute { get; } = "api/Feedback/suggestion/status";
         public static string GetComplaintsAsyncRoute { get; } = "api/Feedback/complaints";
-        public static string GetSuggestionsAsyncRoute { get; } = "api/Feedback/complaints";
+        public static string GetSuggestionsAsyncRoute { get; } = "api/Feedback/suggestions";
+        public static string DeleteFeedbackAsyncRoute(Guid complaintId) => $"api/Feedback/{complaintId}";
         //goal
 
         public static string RecordDailyEntryAsyncRoute { get; } = "api/goal-tracking/daily-entry";
@@ -126,6 +127,16 @@
         public static string EvaluateAutomaticPointsAsyncRoute { get; } = "api/Points/automatic-award";
         // supervisor dashboard
         public static string SupervisorDashboardOverviewRoute { get; } = "api/supervisor-dashboard/overview";
+        // fouj / halqa management
+        public static string FoujRoute { get; } = "api/Fouj";
+        public static string FoujByIdRoute(Guid foujId) => $"api/Fouj/{foujId}";
+        public static string GetAllHalqasAsyncRoute { get; } = "api/HalqaQuery/all";
+        public static string CreateHalqaAsyncRoute { get; } = "api/HalqaCommand/create";
+        public static string UpdateHalqaAsyncRoute { get; } = "api/HalqaCommand/update";
+        public static string DeleteHalqaAsyncRoute { get; } = "api/HalqaCommand/delete";
+        // library management
+        public static string LibraryBooksRoute { get; } = "api/library-management/books";
+        public static string LibraryBookByIdRoute(Guid bookId) => $"api/library-management/books/{bookId}";
         public static string MosquAssignAdmin { get; } = "api/Mosqu/assign-admin";
     }
 }

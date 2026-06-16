@@ -89,6 +89,32 @@ builder.Services.AddHttpClient<PointsApiClient>(client =>
 }).AddHttpMessageHandler<AuthHandler>();
 builder.Services.AddScoped<IPointsService, PointsService>();
 
+// fouj / halqa management
+builder.Services.AddHttpClient<FoujApiClient>(client =>
+{
+    client.BaseAddress = new Uri(ApiRoutes.BaseUrl);
+}).AddHttpMessageHandler<AuthHandler>();
+builder.Services.AddScoped<IFoujManagementService, FoujManagementService>();
+
+builder.Services.AddHttpClient<HalqaApiClient>(client =>
+{
+    client.BaseAddress = new Uri(ApiRoutes.BaseUrl);
+}).AddHttpMessageHandler<AuthHandler>();
+builder.Services.AddScoped<IHalqaManagementService, HalqaManagementService>();
+
+builder.Services.AddHttpClient<LibraryManagementApiClient>(client =>
+{
+    client.BaseAddress = new Uri(ApiRoutes.BaseUrl);
+}).AddHttpMessageHandler<AuthHandler>();
+builder.Services.AddScoped<ILibraryManagementService, LibraryManagementService>();
+
+// weekly lessons management
+builder.Services.AddHttpClient<WeeklyLessonApiClient>(client =>
+{
+    client.BaseAddress = new Uri(ApiRoutes.BaseUrl);
+}).AddHttpMessageHandler<AuthHandler>();
+builder.Services.AddScoped<IWeeklyLessonService, WeeklyLessonService>();
+
 // supervisor dashboard overview
 builder.Services.AddHttpClient<SupervisorDashboardApiClient>(client =>
 {
