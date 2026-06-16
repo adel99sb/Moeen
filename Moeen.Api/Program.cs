@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -14,6 +15,7 @@ using Moeen.Api.infrastructure.Providers;
 using Moeen.Api.infrastructure.Repositories;
 using Moeen.Api.Infrastructure.Data;
 using Moeen.Api.infrastructure.Middleware;
+using Moeen.Shared.Responses;
 using System.Security.Claims;
 using System.Text;
 
@@ -157,7 +159,25 @@ builder.Services.AddScoped<IBackupService, BackupService>();
 builder.Services.AddScoped<IFoujService, FoujService>();
 builder.Services.AddScoped<IStudentNotesService, StudentNotesService>();
 builder.Services.AddScoped<IDailyAssignmentService, DailyAssignmentService>();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Where(item => item.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    item => item.Key,
+                    item => item.Value!.Errors
+                        .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage) ? "Invalid value." : error.ErrorMessage)
+                        .ToArray());
+
+            return new ObjectResult(GeneralResponse.BadRequest("Invalid request data.", errors))
+            {
+                StatusCode = StatusCodes.Status400BadRequest
+            };
+        };
+    });
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>

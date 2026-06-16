@@ -14,6 +14,17 @@ namespace Moeen.Api.Controllers
     {   
         private readonly IUserService _userService;
 
+        private Dictionary<string, string[]> GetModelStateErrors()
+        {
+            return ModelState
+                .Where(item => item.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    item => item.Key,
+                    item => item.Value!.Errors
+                        .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage) ? "Invalid value." : error.ErrorMessage)
+                        .ToArray());
+        }
+
         public UserController(IUserService userService)
         {
             _userService = userService;
@@ -27,7 +38,7 @@ namespace Moeen.Api.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return Moeen.Shared.Responses.GeneralResponse.BadRequest("Invalid request data.", GetModelStateErrors()).ToActionResult();
 
             try
             {
@@ -36,7 +47,7 @@ namespace Moeen.Api.Controllers
             }
             catch (Exception)
             {
-                return BadRequest("An error occurred while registering.");
+                return Moeen.Shared.Responses.GeneralResponse.InternalError("An error occurred while registering.").ToActionResult();
             }
         }
 
@@ -48,7 +59,7 @@ namespace Moeen.Api.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return Moeen.Shared.Responses.GeneralResponse.BadRequest("Invalid request data.", GetModelStateErrors()).ToActionResult();
 
             try
             {
@@ -57,7 +68,7 @@ namespace Moeen.Api.Controllers
             }
             catch (Exception)
             {
-                return BadRequest("An error occurred while logging in.");
+                return Moeen.Shared.Responses.GeneralResponse.InternalError("An error occurred while logging in.").ToActionResult();
             }
         }
 
@@ -68,7 +79,7 @@ namespace Moeen.Api.Controllers
         public async Task<IActionResult> GetAllUsers([FromBody] PaginationRequest paginationRequest, [FromQuery] string? keyword = null)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return Moeen.Shared.Responses.GeneralResponse.BadRequest("Invalid request data.", GetModelStateErrors()).ToActionResult();
 
             var result = await _userService.GetAllUsersAsync(paginationRequest, keyword);
             return result.ToActionResult();
@@ -116,7 +127,7 @@ namespace Moeen.Api.Controllers
         public async Task<IActionResult> ResetPassword([FromBody] ChangePasswordRequest request)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return Moeen.Shared.Responses.GeneralResponse.BadRequest("Invalid request data.", GetModelStateErrors()).ToActionResult();
 
             var result = await _userService.ResetPasswordAsync(request);
             return result.ToActionResult();
@@ -144,3 +155,4 @@ namespace Moeen.Api.Controllers
         }
     }
 }
+
