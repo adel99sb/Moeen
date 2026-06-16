@@ -1,9 +1,11 @@
+using Microsoft.Extensions.Http;
 using Moeen.Dashboard.Application.Services.Abstractions;
 using Moeen.Dashboard.Application.Services.Implementations;
 using Moeen.Dashboard.Components;
 using Moeen.Dashboard.Infrastructure.Http;
 using Moeen.Dashboard.Infrastructure.Http.Clients;
 using Moeen.Dashboard.Infrastructure.Http.Handlers;
+using Moeen.Dashboard.Infrastructure.Middleware;
 using Moeen.Dashboard.Services.Abstractions;
 using Moeen.Dashboard.Services.Implementation;
 using Moeen.Dashboard.Services.Implementations;
@@ -12,11 +14,19 @@ using Moeen.Frontend.Services.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddTransient<ApiHttpDiagnosticsHandler>();
+builder.Services.AddSingleton<IHttpMessageHandlerBuilderFilter, ApiHttpDiagnosticsFilter>();
+builder.Services.AddScoped<IDashboardErrorFormatter, DashboardErrorFormatter>();
 
 builder.Services.AddTransient<AuthHandler>();
 
@@ -140,6 +150,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<DashboardRequestLoggingMiddleware>();
 
 app.UseStaticFiles();
 app.UseAntiforgery();

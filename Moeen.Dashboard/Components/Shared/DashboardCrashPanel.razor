@@ -1,0 +1,32 @@
+@if (Problem != null)
+{
+    <div class="dashboard-crash-panel" dir="rtl">
+        <div class="dashboard-crash-title">
+            <i class="bi bi-bug-fill"></i>
+            <div>
+                <h2>صار خطأ غير متوقع بالواجهة</h2>
+                <p>الخطأ انحفظ بالـ logs. التفاصيل ظاهرة هون حتى نعرف نصلحه بسرعة.</p>
+            </div>
+        </div>
+        <DashboardAlert Severity="danger" Title="رسالة الخطأ" Message="@Problem.Message" Details="@Problem.ToString()" Dismissible="false" />
+        <button class="dashboard-crash-reload" type="button" @onclick="Reload">
+            <i class="bi bi-arrow-clockwise"></i>
+            <span>إعادة تحميل الصفحة</span>
+        </button>
+    </div>
+}
+
+<style>
+    .dashboard-crash-panel { padding: 24px; border-radius: 24px; border: 1px solid #fecdca; background: #fffafa; color: #163f35; }
+    .dashboard-crash-title { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .dashboard-crash-title > .bi { width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border-radius: 16px; background: #fff3f1; color: #b42318; font-size: 1.4rem; }
+    .dashboard-crash-title h2 { margin: 0; color: #b42318; font-size: 1.25rem; font-weight: 900; }
+    .dashboard-crash-title p { margin: 4px 0 0; color: #7b7067; font-weight: 700; }
+    .dashboard-crash-reload { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; border: 0; border-radius: 14px; background: #195042; color: #fff; font-weight: 900; }
+</style>
+
+@code {
+    [Parameter] public Exception? Problem { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+    private void Reload() => NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+}

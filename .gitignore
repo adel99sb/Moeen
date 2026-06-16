@@ -364,6 +364,11 @@ FodyWeavers.xsd
 /Moeen.Api/appsettings.Development.json
 /Moeen.Api/appsettings.Development.json
 /Moeen.Api/appsettings.json
+
+# Local MCP / Forge runtime state
+.forge/
+.mcp-state/
+**/.mcp-state/
 /Moeen.Dashboard/appsettings.json
 /Moeen.Dashboard/appsettings.json
 /Moeen.Dashboard/appsettings.json

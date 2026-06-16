@@ -1,0 +1,14 @@
+<DashboardAlert Severity="success" Title="تمت العملية" Message="@SuccessMessage" Dismissible="@Dismissible" OnDismiss="@OnSuccessDismiss" />
+<DashboardAlert Severity="danger" Title="حدث خطأ" Message="@ErrorMessage" Details="@ErrorDetails" Dismissible="@Dismissible" OnDismiss="@OnErrorDismiss" />
+<DashboardAlert Severity="warning" Title="تنبيه" Message="@WarningMessage" Dismissible="@Dismissible" OnDismiss="@OnWarningDismiss" />
+
+@code {
+    [Parameter] public string? SuccessMessage { get; set; }
+    [Parameter] public string? ErrorMessage { get; set; }
+    [Parameter] public string? ErrorDetails { get; set; }
+    [Parameter] public string? WarningMessage { get; set; }
+    [Parameter] public bool Dismissible { get; set; } = true;
+    [Parameter] public EventCallback OnSuccessDismiss { get; set; }
+    [Parameter] public EventCallback OnErrorDismiss { get; set; }
+    [Parameter] public EventCallback OnWarningDismiss { get; set; }
+}

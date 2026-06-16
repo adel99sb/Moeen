@@ -17,7 +17,14 @@
         </header>
 
         <article class="content dashboard-content">
-            @Body
+            <DashboardCrashBoundary>
+                <ChildContent>
+                    @Body
+                </ChildContent>
+                <ErrorContent Context="problem">
+                    <DashboardCrashPanel Problem="problem" />
+                </ErrorContent>
+            </DashboardCrashBoundary>
         </article>
     </main>
 </div>
@@ -35,3 +42,4 @@
         Nav.NavigateTo("/", replace: true);
     }
 }
+

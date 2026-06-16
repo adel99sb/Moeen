@@ -13,11 +13,18 @@ using Moeen.Api.infrastructure.Data;
 using Moeen.Api.infrastructure.Providers;
 using Moeen.Api.infrastructure.Repositories;
 using Moeen.Api.Infrastructure.Data;
+using Moeen.Api.infrastructure.Middleware;
 using System.Security.Claims;
 using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
 
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -206,7 +213,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
+app.UseMiddleware<ApiRequestLoggingMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
-app.Run();
 app.Run();

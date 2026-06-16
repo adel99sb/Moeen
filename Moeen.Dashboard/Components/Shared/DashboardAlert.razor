@@ -1,0 +1,75 @@
+@if (!string.IsNullOrWhiteSpace(Message))
+{
+    <div class="@AlertCss" dir="rtl" role="alert">
+        <div class="dashboard-alert-icon"><i class="@IconCss"></i></div>
+        <div class="dashboard-alert-body">
+            @if (!string.IsNullOrWhiteSpace(Title))
+            {
+                <div class="dashboard-alert-title">@Title</div>
+            }
+            <div class="dashboard-alert-message">@Message</div>
+            @if (!string.IsNullOrWhiteSpace(Details))
+            {
+                <details class="dashboard-alert-details">
+                    <summary>تفاصيل تقنية</summary>
+                    <pre>@Details</pre>
+                </details>
+            }
+        </div>
+        @if (Dismissible)
+        {
+            <button type="button" class="dashboard-alert-close" title="إغلاق" @onclick="DismissAsync">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        }
+    </div>
+}
+
+<style>
+    .dashboard-alert { display: flex; align-items: flex-start; gap: 12px; margin: 14px 0; padding: 14px 16px; border-radius: 16px; border: 1px solid transparent; line-height: 1.7; }
+    .dashboard-alert-success { background: #ecfdf3; border-color: #abefc6; color: #027a48; }
+    .dashboard-alert-danger { background: #fff3f1; border-color: #fecdca; color: #b42318; }
+    .dashboard-alert-warning { background: #fffaeb; border-color: #fedf89; color: #b54708; }
+    .dashboard-alert-info { background: #eef4ff; border-color: #c7d7fe; color: #1849a9; }
+    .dashboard-alert-icon { width: 28px; min-width: 28px; display: inline-flex; align-items: center; justify-content: center; padding-top: 2px; font-size: 1.1rem; }
+    .dashboard-alert-body { flex: 1; min-width: 0; }
+    .dashboard-alert-title { font-weight: 900; margin-bottom: 2px; }
+    .dashboard-alert-message { font-weight: 700; overflow-wrap: anywhere; }
+    .dashboard-alert-close { border: 0; background: transparent; color: inherit; opacity: .75; width: 28px; height: 28px; border-radius: 10px; }
+    .dashboard-alert-close:hover { background: rgba(0,0,0,.06); opacity: 1; }
+    .dashboard-alert-details { margin-top: 10px; font-size: .86rem; }
+    .dashboard-alert-details pre { margin: 8px 0 0; white-space: pre-wrap; direction: ltr; text-align: left; background: rgba(255,255,255,.55); padding: 10px; border-radius: 12px; max-height: 260px; overflow: auto; }
+</style>
+
+@code {
+    [Parameter] public string? Message { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Details { get; set; }
+    [Parameter] public string Severity { get; set; } = "danger";
+    [Parameter] public bool Dismissible { get; set; }
+    [Parameter] public EventCallback OnDismiss { get; set; }
+
+    private string NormalizedSeverity => Severity?.ToLowerInvariant() switch
+    {
+        "success" => "success",
+        "warning" => "warning",
+        "info" => "info",
+        _ => "danger"
+    };
+
+    private string AlertCss => $"dashboard-alert dashboard-alert-{NormalizedSeverity}";
+
+    private string IconCss => NormalizedSeverity switch
+    {
+        "success" => "bi bi-check-circle-fill",
+        "warning" => "bi bi-exclamation-triangle-fill",
+        "info" => "bi bi-info-circle-fill",
+        _ => "bi bi-x-circle-fill"
+    };
+
+    private async Task DismissAsync()
+    {
+        if (OnDismiss.HasDelegate)
+            await OnDismiss.InvokeAsync();
+    }
+}
