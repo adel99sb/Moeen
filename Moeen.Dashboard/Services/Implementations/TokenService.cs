@@ -165,7 +165,7 @@ namespace Moeen.Dashboard.Services.Implementations
         private static string GetHomeRoute(string? primaryRole)
             => primaryRole switch
             {
-                "owner" => "/owner/AccountManagement",
+                "owner" => "/owner/dashboard",
                 "supervisor" => "/Supervisor/SupervisorDashboard",
                 "teacher" => "/Teacher/TeacherDashboard",
                 "examer" => "/Examer/Dashboard",

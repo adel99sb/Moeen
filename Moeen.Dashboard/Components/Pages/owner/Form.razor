@@ -1,235 +1,1014 @@
 ﻿@page "/owner/Form"
-<style> 
-    .form-container, .form-container * {
-        box-sizing: border-box;
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Text.Json
+@using Microsoft.AspNetCore.Components
+@using Moeen.Dashboard.Application.Services.Abstractions
+@using Moeen.Dashboard.Services.Abstractions
+@using Moeen.Shared.Requests.Enrollment
+@using Moeen.Shared.Requests.Mosuq
+@using Moeen.Shared.Responses
+@using Moeen.Shared.Responses.Enrollment
+@using Moeen.Shared.Responses.Mosuq
+@inject IEnrollmentService EnrollmentService
+@inject IMosquService MosquService
+@inject IDashboardErrorFormatter ErrorFormatter
+@inject NavigationManager Navigation
+
+<PageTitle>@FormTitle</PageTitle>
+
+<style>
+    .account-form-page {
+        min-height: calc(100vh - 80px);
+        direction: rtl;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 48px 18px;
+        background: #faf7f0;
+        color: #163f35;
     }
 
-    :root {
-        --primary-green: #195042;
-        --accent-beige: #d6cabc;
-        --light-beige: #f4f1ee;
-        --white: #ffffff;
-        --text-dark: #2d3436;
-        --transition: all 0.3s ease;
+    .account-form-shell {
+        width: min(860px, 100%);
     }
 
-    .form-container {
-        max-width: 850px;
-        margin: 2rem auto;
-        background: var(--white);
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        direction: rtl; 
+    .account-form-card {
+        background: #fff;
+        border: 1px solid #e7ded2;
+        border-radius: 18px;
+        box-shadow: 0 26px 70px rgba(25, 80, 66, .16);
         overflow: hidden;
     }
 
-    .form-header {
-        background: var(--primary-green);
-        color: var(--white);
-        padding: 1.2rem;
-        text-align: center;
+    .account-form-header {
+        min-height: 78px;
+        background: #195042;
+        color: #fff;
+        padding: 22px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
     }
 
-    form {
-        padding: 2rem;
+    .account-form-title h1 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 800;
     }
 
-    .grid-row {
+    .account-form-title p {
+        margin: 6px 0 0;
+        color: rgba(255, 255, 255, .82);
+        font-size: .86rem;
+    }
+
+    .close-form-btn {
+        border: 0;
+        background: rgba(255, 255, 255, .12);
+        color: #fff;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .account-form-body {
+        padding: 26px 28px;
+    }
+
+    .type-tabs {
         display: grid;
-        grid-template-columns: repeat(2, 1fr); 
-        gap: 1.5rem;
-        margin-bottom: 1.2rem;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 22px;
     }
-        .grid-row:nth-of-type(4) {
-            grid-template-columns: repeat(3, 1fr);
-        }
 
-    .input-group {
+    .type-tab {
+        border: 1px solid #dfd3c4;
+        color: #195042;
+        background: #fff;
+        border-radius: 13px;
+        padding: 10px 12px;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: .2s ease;
+    }
+
+    .type-tab.active,
+    .type-tab:hover {
+        background: #195042;
+        color: #fff;
+        border-color: #195042;
+    }
+
+    .type-tab:disabled {
+        cursor: not-allowed;
+        opacity: .78;
+        transform: none;
+    }
+
+    .profile-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        background: #f9fbfa;
+        border: 1px solid #e4eee9;
+        border-radius: 16px;
+        padding: 14px;
+        margin-bottom: 22px;
+    }
+
+    .profile-summary-item {
+        background: #fff;
+        border: 1px solid #eef3f0;
+        border-radius: 12px;
+        padding: 12px;
+    }
+
+    .profile-summary-item small {
+        color: #6b7280;
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 800;
+    }
+
+    .profile-summary-item strong {
+        color: #195042;
+        overflow-wrap: anywhere;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px 20px;
+    }
+
+    .form-field {
         display: flex;
         flex-direction: column;
         gap: 8px;
     }
 
-        .input-group label {
-            color: var(--text-dark);
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-align: right;
-        }
+    .form-field label {
+        font-size: .86rem;
+        font-weight: 800;
+        color: #263c36;
+    }
 
-    /* حل مشكلة الأيقونات والمحاذاة */
-    .input-wrapper {
+    .field-box {
         position: relative;
-        display: flex;
-        align-items: center;
+    }
+
+    .field-box i {
+        position: absolute;
+        right: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #195042;
+        opacity: .78;
+        pointer-events: none;
+    }
+
+    .field-box input,
+    .field-box select,
+    .field-box textarea {
         width: 100%;
+        border: 1.5px solid #d6cabc;
+        border-radius: 12px;
+        background: #fbfaf8;
+        color: #1c332d;
+        min-height: 44px;
+        padding: 10px 42px 10px 12px;
+        outline: none;
+        transition: .2s ease;
     }
 
-        .input-wrapper i {
-            position: absolute;
-            right: 12px; /* تثبيت الأيقونة جهة اليمين */
-            color: var(--primary-green);
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        .input-wrapper input,
-        .input-wrapper select {
-            width: 100%;
-            padding: 10px 35px 10px 10px;
-            border: 1px solid var(--accent-beige);
-            border-radius: 8px;
-            background: var(--light-beige);
-            font-size: 0.9rem;
-            height: 45px; 
-            outline: none;
-            transition: var(--transition);
-        }
-
-            .input-wrapper input:focus,
-            .input-wrapper select:focus {
-                border-color: var(--primary-green);
-                background: #fff;
-            }
-    .actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #eee;
+    .field-box textarea {
+        min-height: 92px;
+        resize: vertical;
     }
 
-        .actions button, .actions a {
-            flex: 1;
-            height: 48px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-        }
+    .field-box input:focus,
+    .field-box select:focus,
+    .field-box textarea:focus {
+        border-color: #195042;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(25, 80, 66, .08);
+    }
 
-        .actions .save {
-            background: var(--primary-green);
-            color: white;
-        }
+    .field-box input:disabled,
+    .field-box select:disabled,
+    .field-box textarea:disabled {
+        background: #f3f4f6;
+        color: #6b7280;
+        cursor: not-allowed;
+    }
 
-        .actions .cancel {
-            background: #f8f9fa;
-            color: #dc3545;
-        }
+    .full-span { grid-column: 1 / -1; }
 
-    /* حل مشكلة الميديا كويري في Razor */
-    @@media (max-width: 768px) {
-        .grid-row, .grid-row:nth-of-type(4) {
-            grid-template-columns: 1fr !important;
-        }
+    .form-actions {
+        border-top: 1px solid #eee5da;
+        margin-top: 26px;
+        padding-top: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .btn-form-save,
+    .btn-form-cancel {
+        min-height: 48px;
+        border: 0;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-weight: 900;
+        text-decoration: none;
+    }
+
+    .btn-form-save {
+        background: #195042;
+        color: #fff;
+    }
+
+    .btn-form-save:disabled {
+        opacity: .65;
+        cursor: not-allowed;
+    }
+
+    .btn-form-cancel {
+        background: #f8f9fa;
+        color: #c61f32;
+    }
+
+    .hint-text {
+        color: #7b6f62;
+        font-size: .8rem;
+        line-height: 1.7;
+    }
+
+    .loading-box {
+        border: 1px dashed #d6cabc;
+        border-radius: 16px;
+        padding: 24px;
+        text-align: center;
+        color: #667085;
+    }
+
+    @@media (max-width: 760px) {
+        .account-form-page { padding: 24px 10px; }
+        .account-form-header,
+        .account-form-body { padding: 20px; }
+        .type-tabs,
+        .profile-summary,
+        .form-grid,
+        .form-actions { grid-template-columns: 1fr; }
     }
 </style>
-<h3>Form</h3>
-<div class="form-container">
-    <div class="form-header">
-        <h2><i class="bi bi-person-plus-fill"></i> إضافة / تعديل بيانات</h2>
+
+<div class="account-form-page">
+    <div class="account-form-shell">
+        <DashboardStatusMessages
+            SuccessMessage="@_successMessage"
+            ErrorMessage="@_errorMessage"
+            OnSuccessDismiss="EventCallback.Factory.Create(this, () => _successMessage = null)"
+            OnErrorDismiss="EventCallback.Factory.Create(this, () => _errorMessage = null)" />
+
+        <section class="account-form-card">
+            <header class="account-form-header">
+                <button type="button" class="close-form-btn" title="إغلاق" @onclick="Cancel">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <div class="account-form-title text-end">
+                    <h1><i class="@HeaderIcon"></i> @FormTitle</h1>
+                    <p>@HeaderDescription</p>
+                </div>
+            </header>
+
+            <div class="account-form-body">
+                @if (_isLoading)
+                {
+                    <div class="loading-box">
+                        <span class="spinner-border text-success" role="status"></span>
+                        <div class="mt-3">جاري تجهيز بيانات النموذج...</div>
+                    </div>
+                }
+                else
+                {
+                    <div class="type-tabs">
+                        @foreach (var type in _types)
+                        {
+                            <button type="button" class="@GetTypeTabClass(type.Value)" disabled="@(!CanChangeAccountType)" @onclick="() => ChangeTypeAsync(type.Value)">
+                                <i class="@type.Icon"></i>
+                                @type.Label
+                            </button>
+                        }
+                    </div>
+
+                    @if (_loadedProfile != null)
+                    {
+                        <div class="profile-summary">
+                            <div class="profile-summary-item">
+                                <small>نوع الحساب</small>
+                                <strong>@CurrentTypeLabel</strong>
+                            </div>
+                            <div class="profile-summary-item">
+                                <small>المسجد</small>
+                                <strong>@Display(_loadedProfile.MosqueName)</strong>
+                            </div>
+                            <div class="profile-summary-item">
+                                <small>تاريخ الانضمام</small>
+                                <strong>@FormatDate(_loadedProfile.JoinedAt)</strong>
+                            </div>
+
+                            @if (_loadedProfile.StudentDetails != null)
+                            {
+                                <div class="profile-summary-item">
+                                    <small>عدد سجلات التقدم</small>
+                                    <strong>@_loadedProfile.StudentDetails.ProgressCount</strong>
+                                </div>
+                                <div class="profile-summary-item">
+                                    <small>عدد الاختبارات</small>
+                                    <strong>@_loadedProfile.StudentDetails.ExamCount</strong>
+                                </div>
+                            }
+
+                            @if (_loadedProfile.TeacherDetails != null)
+                            {
+                                <div class="profile-summary-item">
+                                    <small>عدد الحلقات</small>
+                                    <strong>@_loadedProfile.TeacherDetails.HalaqasCount</strong>
+                                </div>
+                            }
+
+                            @if (_loadedProfile.ParentDetails != null)
+                            {
+                                <div class="profile-summary-item">
+                                    <small>الطالب المرتبط</small>
+                                    <strong>@Display(_loadedProfile.ParentDetails.StudentName)</strong>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <form @onsubmit="SaveAsync" @onsubmit:preventDefault="true">
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label>الاسم الكامل</label>
+                                <div class="field-box">
+                                    <i class="bi bi-person"></i>
+                                    <input type="text" @bind="_model.Name" disabled="@IsViewMode" placeholder="أدخل الاسم" autocomplete="off" />
+                                </div>
+                            </div>
+
+                            <div class="form-field">
+                                <label>رقم الهاتف</label>
+                                <div class="field-box">
+                                    <i class="bi bi-telephone"></i>
+                                    <input type="tel" @bind="_model.Phone" disabled="@IsViewMode" placeholder="مثال: 09xxxxxxxx" autocomplete="off" />
+                                </div>
+                            </div>
+
+                            <div class="form-field">
+                                <label>البريد الإلكتروني</label>
+                                <div class="field-box">
+                                    <i class="bi bi-envelope"></i>
+                                    <input type="email" @bind="_model.Email" disabled="@IsViewMode" placeholder="name@example.com" autocomplete="off" />
+                                </div>
+                            </div>
+
+                            @if (!IsExistingMember)
+                            {
+                                <div class="form-field">
+                                    <label>كلمة المرور</label>
+                                    <div class="field-box">
+                                        <i class="bi bi-lock"></i>
+                                        <input type="password" @bind="_model.Password" placeholder="6 أحرف على الأقل" autocomplete="new-password" />
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="form-field">
+                                <label>الجنس</label>
+                                <div class="field-box">
+                                    <i class="bi bi-gender-ambiguous"></i>
+                                    <select @bind="_model.Gender" disabled="@IsViewMode">
+                                        <option value="Male">ذكر</option>
+                                        <option value="Female">أنثى</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            @if (_model.Type != "Parent")
+                            {
+                                <div class="form-field">
+                                    <label>المسجد</label>
+                                    <div class="field-box">
+                                        <i class="bi bi-building"></i>
+                                        <select @bind="_selectedMosqueId" disabled="@(IsExistingMember || IsViewMode)">
+                                            <option value="">اختر المسجد</option>
+                                            @foreach (var mosque in _mosques)
+                                            {
+                                                <option value="@mosque.Id">@Display(mosque.name)</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    @if (IsEditMode)
+                                    {
+                                        <span class="hint-text">تعديل المسجد غير مفعّل من هذه الشاشة حالياً.</span>
+                                    }
+                                </div>
+                            }
+
+                            @if (_model.Type == "Supervisor")
+                            {
+                                @if (!IsExistingMember)
+                                {
+                                    <div class="form-field">
+                                        <label>تاريخ التعيين</label>
+                                        <div class="field-box">
+                                            <i class="bi bi-calendar-event"></i>
+                                            <input type="date" @bind="_model.AssignedAt" />
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else if (_model.Type == "Teacher")
+                            {
+                                <div class="form-field">
+                                    <label>تاريخ التعيين</label>
+                                    <div class="field-box">
+                                        <i class="bi bi-calendar-event"></i>
+                                        <input type="date" @bind="_model.AssignedAt" disabled="@IsViewMode" />
+                                    </div>
+                                </div>
+                                <div class="form-field full-span">
+                                    <label>نبذة عن المعلم</label>
+                                    <div class="field-box">
+                                        <textarea @bind="_model.Bio" disabled="@IsViewMode" placeholder="اختياري"></textarea>
+                                    </div>
+                                </div>
+                            }
+                            else if (_model.Type == "Student")
+                            {
+                                <div class="form-field">
+                                    <label>العمر</label>
+                                    <div class="field-box">
+                                        <i class="bi bi-123"></i>
+                                        <input type="number" min="1" max="100" @bind="_model.Age" disabled="@IsViewMode" />
+                                    </div>
+                                </div>
+                                <div class="form-field">
+                                    <label>تاريخ التسجيل</label>
+                                    <div class="field-box">
+                                        <i class="bi bi-calendar-event"></i>
+                                        <input type="date" @bind="_model.EnrollmentDate" disabled="@(IsExistingMember || IsViewMode)" />
+                                    </div>
+                                </div>
+                                <div class="form-field">
+                                    <label>حالة الحساب</label>
+                                    <div class="field-box">
+                                        <i class="bi bi-check-circle"></i>
+                                        <select @bind="_model.Status" disabled="@IsViewMode">
+                                            <option value="0">نشط</option>
+                                            <option value="1">متوقف</option>
+                                            <option value="2">متخرج/معلّق</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-field">
+                                    <label>النقاط</label>
+                                    <div class="field-box">
+                                        <i class="bi bi-award"></i>
+                                        <input type="number" min="0" max="100" @bind="_model.Score" disabled="@IsViewMode" />
+                                    </div>
+                                </div>
+                            }
+                            else if (_model.Type == "Parent")
+                            {
+                                <div class="form-field">
+                                    <label>الطالب المرتبط</label>
+                                    <div class="field-box">
+                                        <i class="bi bi-mortarboard"></i>
+                                        <select @bind="_selectedStudentId" disabled="@(IsExistingMember || IsViewMode)">
+                                            <option value="">اختر الطالب</option>
+                                            @foreach (var student in _students)
+                                            {
+                                                <option value="@student.Id">@Display(student.Name) - @Display(student.MosqueName)</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    @if (!IsExistingMember)
+                                    {
+                                        <span class="hint-text">ولي الأمر يحتاج طالب موجود مسبقاً حتى يتم ربطه به.</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="hint-text">تعديل الطالب المرتبط غير مفعّل من هذه الشاشة حالياً.</span>
+                                    }
+                                </div>
+                                <div class="form-field">
+                                    <label>صلة القرابة</label>
+                                    <div class="field-box">
+                                        <i class="bi bi-people"></i>
+                                        <input type="text" @bind="_model.Relationship" disabled="@IsViewMode" placeholder="أب / أم / ولي أمر" />
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="form-actions">
+                            @if (!IsViewMode)
+                            {
+                                <button type="submit" class="btn-form-save" disabled="@_isSaving">
+                                    @if (_isSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                                        <span>جاري الحفظ...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-check2-all"></i>
+                                        <span>@SaveButtonText</span>
+                                    }
+                                </button>
+                            }
+                            <button type="button" class="btn-form-cancel" @onclick="Cancel">
+                                <i class="bi bi-x-lg"></i> @(IsViewMode ? "رجوع" : "إلغاء")
+                            </button>
+                        </div>
+                    </form>
+                }
+            </div>
+        </section>
     </div>
-
-    <form>
-        <div class="grid-row">
-            <div class="input-group">
-                <label>الاسم الكامل</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-person"></i>
-                    <input type="text" placeholder="أدخل الاسم">
-                </div>
-            </div>
-            <div class="input-group">
-                <label>رقم الهاتف</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-telephone"></i>
-                    <input type="tel">
-                </div>
-            </div>
-        </div>
-
-        <div class="grid-row">
-            <div class="input-group">
-                <label>تاريخ التعيين</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-calendar-event"></i>
-                    <input type="date">
-                </div>
-            </div>
-            <div class="input-group">
-                <label>البريد الإلكتروني</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-envelope"></i>
-                    <input type="email">
-                </div>
-            </div>
-        </div>
-
-        <div class="grid-row">
-            <div class="input-group">
-                <label>الجنس</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-gender-ambiguous"></i>
-                    <select>
-                        <option value="" disabled selected>اختر الجنس</option>
-                        <option value="male">ذكر</option>
-                        <option value="female">أنثى</option>
-                    </select>
-                </div>
-            </div>
-            <div class="input-group">
-                <label>كلمة المرور</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-lock"></i>
-                    <input type="password">
-                </div>
-            </div>
-        </div>
-
-        <div class="grid-row">
-            <div class="input-group">
-                <label>الفوج</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-layers"></i>
-                    <select>
-                        <option>الفوج الأول</option>
-                        <option>الفوج الثاني</option>
-                    </select>
-                </div>
-            </div>
-            <div class="input-group">
-                <label>الجامع التابع له</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-mosque"></i>
-                    <input type="text">
-                </div>
-            </div>
-            <div class="input-group">
-                <label>حالة الحساب</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-check-circle"></i>
-                    <select>
-                        <option value="active">نشط</option>
-                        <option value="inactive">متوقف</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="actions">
-            <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ البيانات</button>
-            <a href="/owner/AccountManagement" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
-        </div>
-    </form>
 </div>
 
 @code {
+    [SupplyParameterFromQuery(Name = "type")]
+    public string? Type { get; set; }
 
+    [SupplyParameterFromQuery(Name = "memberId")]
+    public string? MemberId { get; set; }
+
+    [SupplyParameterFromQuery(Name = "mode")]
+    public string? Mode { get; set; }
+
+    private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private readonly List<AccountTypeOption> _types = new()
+    {
+        new("Supervisor", "مشرف", "bi bi-person-badge"),
+        new("Teacher", "معلم", "bi bi-person-video3"),
+        new("Student", "طالب", "bi bi-mortarboard"),
+        new("Parent", "ولي أمر", "bi bi-people")
+    };
+
+    private AccountFormModel _model = new();
+    private List<MosquDto> _mosques = new();
+    private List<MemberProfileDto> _students = new();
+    private MemberProfileDto? _loadedProfile;
+    private Guid? _memberId;
+    private string _selectedMosqueId = string.Empty;
+    private string _selectedStudentId = string.Empty;
+    private bool _isLoading = true;
+    private bool _isSaving;
+    private bool _isEditMode;
+    private bool _isViewMode;
+    private string? _errorMessage;
+    private string? _successMessage;
+
+    private bool IsExistingMember => _memberId.HasValue;
+    private bool IsEditMode => _isEditMode;
+    private bool IsViewMode => _isViewMode;
+    private bool CanChangeAccountType => !IsExistingMember && !IsViewMode;
+    private string FormTitle => IsViewMode ? $"تفاصيل حساب {CurrentTypeLabel}" : IsEditMode ? $"تعديل حساب {CurrentTypeLabel}" : $"إضافة حساب {CurrentTypeLabel}";
+    private string CurrentTypeLabel => _types.FirstOrDefault(t => t.Value == _model.Type)?.Label ?? "مستخدم";
+    private string HeaderIcon => IsViewMode ? "bi bi-eye" : IsEditMode ? "bi bi-pencil-square" : "bi bi-person-plus";
+    private string HeaderDescription => IsViewMode
+        ? "عرض بيانات الحساب والتفاصيل المرتبطة به بدون تعديل."
+        : IsEditMode
+            ? "عدّل البيانات المتاحة ثم اضغط حفظ التعديل."
+            : "أدخل البيانات المطلوبة ثم اضغط حفظ. الحقول تتغير حسب نوع الحساب.";
+    private string SaveButtonText => IsEditMode ? "حفظ التعديل" : "حفظ البيانات";
+
+    protected override async Task OnInitializedAsync()
+    {
+        InitializeDefaults();
+        await LoadLookupsAsync();
+
+        if (_memberId.HasValue)
+            await LoadMemberProfileAsync(_memberId.Value);
+    }
+
+    private void InitializeDefaults()
+    {
+        _memberId = TryParseGuid(MemberId);
+        _isViewMode = _memberId.HasValue && string.Equals(Mode, "view", StringComparison.OrdinalIgnoreCase);
+        _isEditMode = _memberId.HasValue && !_isViewMode;
+
+        var requestedType = NormalizeType(Type);
+        if (!_memberId.HasValue && requestedType != "Supervisor")
+        {
+            requestedType = "Supervisor";
+            _errorMessage = "Owner can add supervisors only.";
+        }
+
+        _model = new AccountFormModel
+        {
+            Type = requestedType,
+            EnrollmentDate = DateTime.Today,
+            AssignedAt = DateTime.Today,
+            Age = 12,
+            Status = 0,
+            Score = 0
+        };
+    }
+
+    private async Task LoadLookupsAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            _mosques = await MosquService.GetAllMosqus(new GetAllMosqusRequest { Page = 1, PageSize = 200 }) ?? new();
+            if (_mosques.Count > 0 && string.IsNullOrWhiteSpace(_selectedMosqueId))
+                _selectedMosqueId = _mosques[0].Id.ToString();
+
+            await LoadStudentsAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ErrorFormatter.FromException(ex, "تجهيز نموذج الحساب");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadStudentsAsync()
+    {
+        var response = await EnrollmentService.SearchMembersAsync(new SearchMembersRequest
+        {
+            MemberType = "Student",
+            Name = string.Empty,
+            Email = string.Empty,
+            Phone = string.Empty,
+            PageNumber = 1,
+            PageSize = 200,
+            SortBy = "Name",
+            SortDescending = false
+        });
+
+        _students = response.Success ? DeserializeMembers(response.Data) : new();
+        if (_students.Count > 0 && string.IsNullOrWhiteSpace(_selectedStudentId))
+            _selectedStudentId = _students[0].Id.ToString();
+    }
+
+    private async Task LoadMemberProfileAsync(Guid memberId)
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            var response = await EnrollmentService.GetMemberProfileAsync(new GetMemberProfileRequest
+            {
+                MemberId = memberId.ToString()
+            });
+
+            if (!response.Success)
+            {
+                _loadedProfile = null;
+                _errorMessage = ErrorFormatter.FromResponse(response, "فشل تحميل بيانات الحساب.");
+                return;
+            }
+
+            var profile = DeserializeMember(response.Data);
+            if (profile == null)
+            {
+                _loadedProfile = null;
+                _errorMessage = "تعذر قراءة بيانات الحساب القادمة من الخادم.";
+                return;
+            }
+
+            if (!string.Equals(profile.MemberType, "Supervisor", StringComparison.OrdinalIgnoreCase))
+            {
+                _loadedProfile = null;
+                _errorMessage = "Owner cannot manage this account type.";
+                return;
+            }
+
+            _loadedProfile = profile;
+            ApplyProfileToModel(profile);
+        }
+        catch (Exception ex)
+        {
+            _loadedProfile = null;
+            _errorMessage = ErrorFormatter.FromException(ex, "تحميل بيانات الحساب");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void ApplyProfileToModel(MemberProfileDto profile)
+    {
+        _model.Type = NormalizeType(profile.MemberType);
+        _model.Name = profile.Name ?? string.Empty;
+        _model.Email = profile.Email ?? string.Empty;
+        _model.Phone = profile.Phone ?? string.Empty;
+        _model.Password = string.Empty;
+        _model.Gender = string.IsNullOrWhiteSpace(profile.Gender) ? "Male" : profile.Gender;
+        _model.Status = profile.Status;
+        _selectedMosqueId = profile.MosqueId?.ToString() ?? string.Empty;
+
+        if (profile.StudentDetails != null)
+        {
+            _model.Age = profile.StudentDetails.Age <= 0 ? 12 : profile.StudentDetails.Age;
+            _model.EnrollmentDate = profile.StudentDetails.EnrollmentDate == default ? DateTime.Today : profile.StudentDetails.EnrollmentDate;
+            _model.Score = profile.StudentDetails.Score;
+        }
+
+        if (profile.TeacherDetails != null)
+        {
+            _model.Bio = profile.TeacherDetails.Bio;
+            _model.AssignedAt = TryParseDate(profile.TeacherDetails.AssignedAt) ?? DateTime.Today;
+        }
+
+        if (profile.ParentDetails != null)
+        {
+            _selectedStudentId = profile.ParentDetails.StudentId == Guid.Empty ? string.Empty : profile.ParentDetails.StudentId.ToString();
+            _model.Relationship = profile.ParentDetails.Relationship;
+        }
+    }
+
+    private async Task ChangeTypeAsync(string type)
+    {
+        if (!CanChangeAccountType)
+            return;
+
+        _model.Type = NormalizeType(type);
+        _errorMessage = null;
+        _successMessage = null;
+
+        if (_model.Type == "Parent" && _students.Count == 0)
+            await LoadStudentsAsync();
+    }
+
+    private async Task SaveAsync()
+    {
+        if (IsViewMode)
+            return;
+
+        _isSaving = true;
+        _errorMessage = null;
+        _successMessage = null;
+
+        try
+        {
+            var validationError = ValidateForm();
+            if (!string.IsNullOrWhiteSpace(validationError))
+            {
+                _errorMessage = validationError;
+                return;
+            }
+
+            var response = IsEditMode
+                ? await UpdateExistingMemberAsync()
+                : _model.Type switch
+                {
+                    "Supervisor" => await SaveSupervisorAsync(),
+                    "Teacher" => await SaveTeacherAsync(),
+                    "Student" => await SaveStudentAsync(),
+                    "Parent" => await SaveParentAsync(),
+                    _ => GeneralResponse.BadRequest("نوع الحساب غير مدعوم.")
+                };
+
+            if (!response.Success)
+            {
+                _errorMessage = ErrorFormatter.FromResponse(response, "فشل حفظ الحساب.");
+                return;
+            }
+
+            _successMessage = response.Message;
+            Navigation.NavigateTo("/owner/AccountManagement", replace: true);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ErrorFormatter.FromException(ex, "حفظ الحساب");
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private Task<GeneralResponse> UpdateExistingMemberAsync()
+    {
+        if (!_memberId.HasValue)
+            return Task.FromResult(GeneralResponse.BadRequest("معرّف الحساب مطلوب للتعديل."));
+
+        var request = new UpdateMemberInfoRequest
+        {
+            MemberId = _memberId.Value.ToString(),
+            Name = _model.Name.Trim(),
+            Email = _model.Email.Trim(),
+            Phone = _model.Phone?.Trim(),
+            Gender = _model.Gender
+        };
+
+        if (_model.Type == "Student")
+        {
+            request.Age = Math.Clamp(_model.Age, 1, 100);
+            request.Status = _model.Status;
+            request.Score = Math.Clamp(_model.Score, 0, 100);
+        }
+        else if (_model.Type == "Teacher")
+        {
+            request.Bio = _model.Bio?.Trim();
+            request.AssignedAt = (_model.AssignedAt ?? DateTime.Today).ToString("yyyy-MM-dd");
+        }
+        else if (_model.Type == "Parent")
+        {
+            request.Relationship = string.IsNullOrWhiteSpace(_model.Relationship) ? "ولي أمر" : _model.Relationship.Trim();
+        }
+
+        return EnrollmentService.UpdateMemberInfoAsync(request);
+    }
+
+    private Task<GeneralResponse> SaveSupervisorAsync()
+    {
+        var mosqueId = Guid.Parse(_selectedMosqueId);
+        return EnrollmentService.AddSupervisorAsync(new AddSupervisorRequest
+        {
+            Name = _model.Name.Trim(),
+            Email = _model.Email.Trim(),
+            Phone = _model.Phone.Trim(),
+            Password = _model.Password,
+            ConfirmPassword = _model.Password,
+            Gender = _model.Gender,
+            MosqueId = mosqueId,
+            AssignedAt = _model.AssignedAt ?? DateTime.Today
+        });
+    }
+
+    private Task<GeneralResponse> SaveTeacherAsync()
+    {
+        var mosqueId = Guid.Parse(_selectedMosqueId);
+        return EnrollmentService.AddTeacherAsync(new AddTeacherRequest
+        {
+            Name = _model.Name.Trim(),
+            Email = _model.Email.Trim(),
+            Phone = _model.Phone.Trim(),
+            PhoneNumber = _model.Phone.Trim(),
+            Password = _model.Password,
+            ConfirmPassword = _model.Password,
+            Gender = _model.Gender,
+            MosqueId = mosqueId,
+            Bio = _model.Bio?.Trim() ?? string.Empty,
+            AssignedAt = (_model.AssignedAt ?? DateTime.Today).ToString("yyyy-MM-dd")
+        });
+    }
+
+    private Task<GeneralResponse> SaveStudentAsync()
+    {
+        var mosqueId = Guid.Parse(_selectedMosqueId);
+        return EnrollmentService.RegisterStudentAsync(new RegisterStudentRequest
+        {
+            Name = _model.Name.Trim(),
+            Email = _model.Email.Trim(),
+            Phone = _model.Phone.Trim(),
+            Password = _model.Password,
+            ConfirmPassword = _model.Password,
+            Gender = _model.Gender,
+            Age = Math.Clamp(_model.Age, 1, 100),
+            EnrollmentDate = _model.EnrollmentDate ?? DateTime.Today,
+            Status = _model.Status,
+            Score = Math.Clamp(_model.Score, 0, 100),
+            MosqueId = mosqueId
+        });
+    }
+
+    private Task<GeneralResponse> SaveParentAsync()
+    {
+        var studentId = Guid.Parse(_selectedStudentId);
+        return EnrollmentService.RegisterParentAsync(new RegisterParentRequest
+        {
+            Name = _model.Name.Trim(),
+            Email = _model.Email.Trim(),
+            Phone = _model.Phone.Trim(),
+            Password = _model.Password,
+            ConfirmPassword = _model.Password,
+            Gender = _model.Gender,
+            StudentId = studentId,
+            Relationship = string.IsNullOrWhiteSpace(_model.Relationship) ? "ولي أمر" : _model.Relationship.Trim()
+        });
+    }
+
+    private string? ValidateForm()
+    {
+        if (string.IsNullOrWhiteSpace(_model.Name))
+            return "الاسم الكامل مطلوب.";
+
+        if (string.IsNullOrWhiteSpace(_model.Email))
+            return "البريد الإلكتروني مطلوب.";
+
+        if (!_model.Email.Contains('@'))
+            return "صيغة البريد الإلكتروني غير صحيحة.";
+
+        if (!IsExistingMember && (string.IsNullOrWhiteSpace(_model.Password) || _model.Password.Length < 6))
+            return "كلمة المرور مطلوبة ويجب أن تكون 6 أحرف على الأقل.";
+
+        if (!IsExistingMember && _model.Type != "Parent" && !Guid.TryParse(_selectedMosqueId, out _))
+            return "يجب اختيار المسجد.";
+
+        if (!IsExistingMember && _model.Type == "Parent" && !Guid.TryParse(_selectedStudentId, out _))
+            return "يجب اختيار الطالب المرتبط بولي الأمر.";
+
+        return null;
+    }
+
+    private MemberProfileDto? DeserializeMember(object? data)
+    {
+        if (data is null)
+            return null;
+
+        if (data is MemberProfileDto dto)
+            return dto;
+
+        if (data is JsonElement element)
+            return element.Deserialize<MemberProfileDto>(_jsonOptions);
+
+        var json = JsonSerializer.Serialize(data, _jsonOptions);
+        return JsonSerializer.Deserialize<MemberProfileDto>(json, _jsonOptions);
+    }
+
+    private List<MemberProfileDto> DeserializeMembers(object? data)
+    {
+        if (data is null)
+            return new();
+
+        if (data is JsonElement element)
+            return element.Deserialize<List<MemberProfileDto>>(_jsonOptions) ?? new();
+
+        var json = JsonSerializer.Serialize(data, _jsonOptions);
+        return JsonSerializer.Deserialize<List<MemberProfileDto>>(json, _jsonOptions) ?? new();
+    }
+
+    private void Cancel()
+        => Navigation.NavigateTo("/owner/AccountManagement");
+
+    private string GetTypeTabClass(string type)
+        => _model.Type == type ? "type-tab active" : "type-tab";
+
+    private static string NormalizeType(string? type)
+        => type?.Trim().ToLowerInvariant() switch
+        {
+            "teacher" => "Teacher",
+            "student" => "Student",
+            "parent" => "Parent",
+            _ => "Supervisor"
+        };
+
+    private static Guid? TryParseGuid(string? value)
+        => Guid.TryParse(value, out var id) && id != Guid.Empty ? id : null;
+
+    private static DateTime? TryParseDate(string? value)
+        => DateTime.TryParse(value, out var date) ? date : null;
+
+    private static string Display(string? value)
+        => string.IsNullOrWhiteSpace(value) ? "غير محدد" : value;
+
+    private static string FormatDate(DateTime value)
+        => value == default ? "-" : value.ToLocalTime().ToString("yyyy/MM/dd");
+
+    private sealed record AccountTypeOption(string Value, string Label, string Icon);
+
+    private sealed class AccountFormModel
+    {
+        public string Type { get; set; } = "Supervisor";
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string Gender { get; set; } = "Male";
+        public DateTime? AssignedAt { get; set; }
+        public DateTime? EnrollmentDate { get; set; }
+        public int Age { get; set; } = 12;
+        public int Status { get; set; }
+        public int Score { get; set; }
+        public string? Bio { get; set; }
+        public string? Relationship { get; set; }
+    }
 }

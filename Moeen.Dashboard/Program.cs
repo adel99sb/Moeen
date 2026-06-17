@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Http;
+﻿using Microsoft.Extensions.Http;
 using Moeen.Dashboard.Application.Services.Abstractions;
 using Moeen.Dashboard.Application.Services.Implementations;
 using Moeen.Dashboard.Components;
@@ -131,6 +131,18 @@ builder.Services.AddHttpClient<SupervisorDashboardApiClient>(client =>
     client.BaseAddress = new Uri(ApiRoutes.BaseUrl);
 });
 
+// owner dashboard overview
+builder.Services.AddHttpClient<OwnerDashboardApiClient>(client =>
+{
+    client.BaseAddress = new Uri(ApiRoutes.BaseUrl);
+});
+
+// teacher data client
+builder.Services.AddHttpClient<InstructorHomeApiClient>(client =>
+{
+    client.BaseAddress = new Uri(ApiRoutes.BaseUrl);
+});
+
 // 1. تسجيل الـ HttpClient الخاص بالـ User وتحديد الرابط الأساسي من الـ ApiRoutes عندكِ
 builder.Services.AddHttpClient<UserApiClient>(client =>
 {
@@ -139,6 +151,12 @@ builder.Services.AddHttpClient<UserApiClient>(client =>
 
 // 2. ربط الواجهة بالتنفيذ الفعلي ليتم حقنها في صفحات الـ Razor
 builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddHttpClient<BackupApiClient>(client =>
+{
+    client.BaseAddress = new Uri(ApiRoutes.BaseUrl);
+}).AddHttpMessageHandler<AuthHandler>();
+builder.Services.AddScoped<IBackupService, BackupService>();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.

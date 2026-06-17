@@ -26,6 +26,14 @@ namespace Moeen.Api.Controllers
         public async Task<ActionResult<GeneralResponse>> AddTeacher([FromBody] AddTeacherRequest request)
             => Ok(await _enrollmentService.AddTeacherAsync(request));
 
+        [HttpPost("add-supervisor")]
+        public async Task<ActionResult<GeneralResponse>> AddSupervisor([FromBody] AddSupervisorRequest request)
+            => Ok(await _enrollmentService.AddSupervisorAsync(request));
+
+        [HttpPost("teachers/{teacherId:guid}/promote-to-supervisor")]
+        public async Task<ActionResult<GeneralResponse>> PromoteTeacherToSupervisor([FromRoute] Guid teacherId)
+            => Ok(await _enrollmentService.PromoteTeacherToSupervisorAsync(new PromoteTeacherToSupervisorRequest { TeacherId = teacherId }));
+
         [HttpPost("register-parent")]
         public async Task<ActionResult<GeneralResponse>> RegisterParent([FromBody] RegisterParentRequest request)
             => Ok(await _enrollmentService.RegisterParentAsync(request));
@@ -119,6 +127,10 @@ namespace Moeen.Api.Controllers
         [HttpDelete("parents/{parentId:guid}")]
         public async Task<ActionResult<GeneralResponse>> DeleteParent([FromRoute] Guid parentId)
             => Ok(await _enrollmentService.DeleteParentAsync(new DeleteParentRequest { ParentId = parentId }));
+
+        [HttpDelete("supervisors/{supervisorId:guid}")]
+        public async Task<ActionResult<GeneralResponse>> DeleteSupervisor([FromRoute] Guid supervisorId)
+            => Ok(await _enrollmentService.DeleteSupervisorAsync(new DeleteSupervisorRequest { SupervisorId = supervisorId }));
 
         [HttpPost("export-members")]
         public async Task<ActionResult<GeneralResponse>> ExportMembersList([FromBody] ExportMembersRequest request)

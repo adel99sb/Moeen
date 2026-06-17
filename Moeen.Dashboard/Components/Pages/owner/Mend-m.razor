@@ -1,302 +1,403 @@
-﻿@page "/Mend-m"
-@page "/Mend-m/{Id:guid?}"
+@page "/Mend-m"
+@page "/Mend-m/{Id:guid}"
+@page "/management/mosques-management/new"
+@page "/management/mosques-management/edit/{Id:guid}"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using Moeen.Dashboard.Services.Abstractions
 @using Moeen.Shared.Requests.Mosuq
-
 @inject IMosquService MosquService
-@rendermode InteractiveServer
-@inject NavigationManager mgr
+@inject IDashboardErrorFormatter ErrorFormatter
+@inject NavigationManager Navigation
 
-
+<PageTitle>@(IsEditMode ? "تعديل مسجد" : "إضافة مسجد")</PageTitle>
 
 <style>
-    :root {
-        --primary-green: #1a4d3e;
-        --bg-light: #f8f5f0;
-        --border-color: #e0ddd7;
-        --text-color: #333;
-        --icon-color: #8a9a95;
+    .mosque-form-page {
+        min-height: calc(100vh - 80px);
+        direction: rtl;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 48px 18px;
+        color: #163f35;
     }
 
-    /* أضفنا هذا الجزء لضمان عدم تداخل ستايل Blazor الافتراضي */
-    .form-container {
-        width: 100% !important;
-        max-width: 850px;
-        background: white;
-        border-radius: 20px;
+    .mosque-form-shell {
+        width: min(860px, 100%);
+    }
+
+    .mosque-form-card {
+        background: #fff;
+        border: 1px solid #e7ded2;
+        border-radius: 18px;
+        box-shadow: 0 26px 70px rgba(25, 80, 66, .16);
         overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        margin: 20px auto;
-        direction: rtl !important; /* لضمان الاتجاه من اليمين لليسار */
-        text-align: right !important; /* لضمان محاذاة النصوص */
     }
 
-    .form-header {
-        background-color: var(--primary-green);
-        height: 100px;
-        width: 100%;
+    .mosque-form-header {
+        min-height: 82px;
+        background: #195042;
+        color: #fff;
+        padding: 22px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
     }
 
-    .form-body {
-        padding: 40px;
+    .mosque-form-title h1 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 900;
     }
 
-    .input-grid {
+    .mosque-form-title p {
+        margin: 6px 0 0;
+        color: rgba(255, 255, 255, .82);
+        font-size: .86rem;
+    }
+
+    .close-form-btn {
+        border: 0;
+        background: rgba(255, 255, 255, .12);
+        color: #fff;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mosque-form-body {
+        padding: 26px 28px;
+    }
+
+    .form-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 25px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px 20px;
     }
 
-    .full-width {
-        grid-column: span 2;
-    }
-
-    .input-group {
+    .form-field {
         display: flex;
         flex-direction: column;
-        align-items: flex-start; /* محاذاة الليبل لليمين */
-    }
-
-        .input-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: var(--text-color);
-            font-size: 0.95rem;
-            width: 100%;
-            text-align: right;
-        }
-
-    .input-wrapper {
-        position: relative;
-        display: flex;
-        width: 100%;
-    }
-
-        .input-wrapper input,
-        .input-wrapper textarea {
-            width: 100%;
-            padding: 15px 45px 15px 15px;
-            background-color: var(--bg-light);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            outline: none;
-            font-size: 14px;
-            font-family: inherit;
-            text-align: right;
-        }
-
-        .input-wrapper i {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--icon-color);
-        }
-
-    /* تعديل مكان أيقونة الوصف */
-    .input-group.full-width i {
-        top: 20px;
-        transform: none;
-    }
-
-    .form-footer {
-        margin-top: 40px;
-        padding-top: 25px;
-        border-top: 1px solid #f0f0f0;
-        display: flex;
-        justify-content: flex-start; /* لترتيب الأزرار من اليمين */
-        gap: 15px;
-    }
-
-    .btn-save {
-        background-color: var(--primary-green);
-        color: white;
-        border: none;
-        padding: 12px 30px;
-        border-radius: 10px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: bold;
-    }
-
-    .btn-cancel {
-        background-color: transparent;
-        color: #cc4b4b;
-        border: none;
-        padding: 12px 20px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
         gap: 8px;
     }
 
-    @@media (max-width: 768px) {
-        .input-grid {
-            grid-template-columns: 1fr;
-        }
+    .form-field label {
+        font-size: .86rem;
+        font-weight: 900;
+        color: #263c36;
+    }
 
-        .full-width {
-            grid-column: span 1;
-        }
+    .field-box {
+        position: relative;
+    }
+
+    .field-box i {
+        position: absolute;
+        right: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #195042;
+        opacity: .78;
+        pointer-events: none;
+    }
+
+    .field-box input,
+    .field-box textarea {
+        width: 100%;
+        border: 1.5px solid #d6cabc;
+        border-radius: 12px;
+        background: #fbfaf8;
+        color: #1c332d;
+        min-height: 44px;
+        padding: 10px 42px 10px 12px;
+        outline: none;
+        transition: .2s ease;
+    }
+
+    .field-box textarea {
+        min-height: 92px;
+        resize: vertical;
+        padding-top: 12px;
+    }
+
+    .field-box.textarea i {
+        top: 18px;
+        transform: none;
+    }
+
+    .field-box input:focus,
+    .field-box textarea:focus {
+        border-color: #195042;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(25, 80, 66, .08);
+    }
+
+    .full-span { grid-column: 1 / -1; }
+
+    .validation-message {
+        color: #b42318;
+        font-size: .78rem;
+    }
+
+    .form-actions {
+        border-top: 1px solid #eee5da;
+        margin-top: 26px;
+        padding-top: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .btn-form-save,
+    .btn-form-cancel {
+        min-height: 48px;
+        border: 0;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-weight: 900;
+        text-decoration: none;
+    }
+
+    .btn-form-save {
+        background: #195042;
+        color: #fff;
+    }
+
+    .btn-form-save:disabled {
+        opacity: .65;
+        cursor: not-allowed;
+    }
+
+    .btn-form-cancel {
+        background: #f8f9fa;
+        color: #c61f32;
+    }
+
+    .loading-box {
+        border: 1px dashed #d6cabc;
+        border-radius: 16px;
+        padding: 24px;
+        text-align: center;
+        color: #667085;
+    }
+
+    @@media (max-width: 760px) {
+        .mosque-form-page { padding: 24px 10px; }
+        .mosque-form-header,
+        .mosque-form-body { padding: 20px; }
+        .form-grid,
+        .form-actions { grid-template-columns: 1fr; }
     }
 </style>
 
-<EditForm Model="Model" FormName="f1">
-    <DataAnnotationsValidator />
-    <div class="form-container">
-        <div class="form-header"></div>
-        <div class="form-body">
-            <div class="input-grid">
-                <div class="input-group">
-                    <label>اسم الجامع</label>
-                    <div class="input-wrapper">
-                        <InputText @bind-Value="Model.name" placeholder="أدخل الاسم" />
-                        <ValidationMessage For="@(() => Model.name)" />
-                        <i class="fas fa-user"></i>
-                    </div>
-                </div>
+<div class="mosque-form-page">
+    <div class="mosque-form-shell">
+        <DashboardStatusMessages
+            SuccessMessage="@_successMessage"
+            ErrorMessage="@_errorMessage"
+            OnSuccessDismiss="EventCallback.Factory.Create(this, () => _successMessage = null)"
+            OnErrorDismiss="EventCallback.Factory.Create(this, () => _errorMessage = null)" />
 
-                <div class="input-group">
-                    <label>رقم الهاتف</label>
-                    <div class="input-wrapper">
-                        <InputText @bind-Value="Model.contact_phone" type="tel" placeholder="09xxxxxxxx" />
-                        <ValidationMessage For="@(() => Model.contact_phone)" />
-                        <i class="fas fa-phone"></i>
-                    </div>
+        <section class="mosque-form-card">
+            <header class="mosque-form-header">
+                <button type="button" class="close-form-btn" title="إغلاق" @onclick="Cancel">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <div class="mosque-form-title text-end">
+                    <h1><i class="bi bi-building-add"></i> @(IsEditMode ? "تعديل بيانات المسجد" : "إضافة مسجد جديد")</h1>
+                    <p>أدخل بيانات المسجد ثم اضغط حفظ. بعد الحفظ ستعود إلى جدول المساجد.</p>
                 </div>
+            </header>
 
-                <div class="input-group full-width">
-                    <label>العنوان</label>
-                    <div class="input-wrapper">
-                        <InputText @bind-Value="Model.address" placeholder="أدخل العنوان بالتفصيل" />
-                        <ValidationMessage For="@(() => Model.address)" />
-                        <i class="fas fa-map-marker-alt"></i>
-                    </div>
-                </div>
-
-                <div class="input-group full-width">
-                    <label>الوصف</label>
-                    <div class="input-wrapper">
-                        <InputText @bind-Value="Model.Description" placeholder="اكتب وصفاً تفصيلياً هنا..." />
-                        <ValidationMessage For="@(() => Model.Description)" />
-                        <i class="fas fa-align-right"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-footer">
-                @if (!IsEditMode)
+            <div class="mosque-form-body">
+                @if (_isLoading)
                 {
-                <button class="btn-save" @onclick="moveTopage">
-                    <span>إضافة مشرف</span>
-                </button>
-                    
+                    <div class="loading-box">
+                        <span class="spinner-border text-success" role="status"></span>
+                        <div class="mt-3">جاري تحميل بيانات المسجد...</div>
+                    </div>
                 }
-                <button class="btn-save" @onclick="HandleSaveMosqe">
-                    <span>@(IsEditMode ? "تحديث البيانات" : "حفظ البيانات")</span>
-                    <i class="fas fa-check-double"></i>
-                </button>
-                <button class="btn-cancel" @onclick="Cancel">
-                    <span>إلغاء</span>
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-</EditForm>
-<!-- Error Message -->
-@if (ShowMessage)
-{
-    if (Succees)
-    {
-        <div class="alert alert-success">
-            @Message
-        </div>
-    }
-    else
-    {
-        <div class="alert alert-danger">
-            @Message
-        </div>
-    }
-}
+                else
+                {
+                    <EditForm Model="Model" OnValidSubmit="HandleSaveMosqueAsync">
+                        <DataAnnotationsValidator />
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label>اسم المسجد</label>
+                                <div class="field-box">
+                                    <i class="bi bi-building"></i>
+                                    <InputText @bind-Value="Model.name" placeholder="أدخل اسم المسجد" />
+                                </div>
+                                <ValidationMessage For="@(() => Model.name)" />
+                            </div>
+
+                            <div class="form-field">
+                                <label>رقم الهاتف</label>
+                                <div class="field-box">
+                                    <i class="bi bi-telephone"></i>
+                                    <InputText @bind-Value="Model.contact_phone" type="tel" placeholder="مثال: 09xxxxxxxx" />
+                                </div>
+                                <ValidationMessage For="@(() => Model.contact_phone)" />
+                            </div>
+
+                            <div class="form-field full-span">
+                                <label>العنوان</label>
+                                <div class="field-box">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <InputText @bind-Value="Model.address" placeholder="أدخل العنوان بالتفصيل" />
+                                </div>
+                                <ValidationMessage For="@(() => Model.address)" />
+                            </div>
+
+                            <div class="form-field">
+                                <label>خط العرض Latitude</label>
+                                <div class="field-box">
+                                    <i class="bi bi-geo"></i>
+                                    <InputNumber @bind-Value="Model.Latitude" />
+                                </div>
+                                <ValidationMessage For="@(() => Model.Latitude)" />
+                            </div>
+
+                            <div class="form-field">
+                                <label>خط الطول Longitude</label>
+                                <div class="field-box">
+                                    <i class="bi bi-geo"></i>
+                                    <InputNumber @bind-Value="Model.Longitude" />
+                                </div>
+                                <ValidationMessage For="@(() => Model.Longitude)" />
+                            </div>
+
+                            <div class="form-field full-span">
+                                <label>الوصف</label>
+                                <div class="field-box textarea">
+                                    <i class="bi bi-card-text"></i>
+                                    <InputTextArea @bind-Value="Model.Description" placeholder="اكتب وصفاً مختصراً عن المسجد..." />
+                                </div>
+                                <ValidationMessage For="@(() => Model.Description)" />
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-form-save" disabled="@_isSaving">
+                                @if (_isSaving)
+                                {
+                                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                                    <span>جاري الحفظ...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-check2-all"></i>
+                                    <span>@(IsEditMode ? "تحديث البيانات" : "حفظ البيانات")</span>
+                                }
+                            </button>
+                            <button type="button" class="btn-form-cancel" @onclick="Cancel">
+                                <i class="bi bi-x-lg"></i> إلغاء
+                            </button>
+                        </div>
+                    </EditForm>
+                }
+            </div>
+        </section>
+    </div>
+</div>
 
 @code {
-
-    protected override async Task OnInitializedAsync()
-    {
-        if (IsEditMode && Id.HasValue)
-        {
-            var res = await MosquService.GetMosqueByIdAsync(Id.Value);
-
-            Model = new AddMosquReq
-            {
-                name = res.name,
-                address = res.address,
-                contact_phone = res.contactPhone,
-                Description = res.Description
-            };
-        }
-    }
     [Parameter]
     public Guid? Id { get; set; }
 
     private bool IsEditMode => Id.HasValue;
-
-    private AddMosquReq Model = new();
-
-    private bool ShowMessage;
-    private bool Succees = false;
-    private string Message;
-
-    private void moveTopage()
+    private AddMosquReq Model = new()
     {
-        mgr.NavigateTo("/owner/Form");
-    }
-    private async Task HandleSaveMosqe()
+        name = string.Empty,
+        address = string.Empty,
+        contact_phone = string.Empty,
+        Description = string.Empty
+    };
+
+    private bool _isLoading;
+    private bool _isSaving;
+    private string? _errorMessage;
+    private string? _successMessage;
+
+    protected override async Task OnInitializedAsync()
     {
-        ShowMessage = true;
+        if (!IsEditMode || !Id.HasValue)
+            return;
+
+        _isLoading = true;
+        _errorMessage = null;
 
         try
         {
-            if (IsEditMode)
+            var mosque = await MosquService.GetMosqueByIdAsync(Id.Value);
+            Model = new AddMosquReq
             {
-                var req = new UpdateMosqueInfoRequest
+                name = mosque.name ?? string.Empty,
+                address = mosque.address ?? string.Empty,
+                contact_phone = mosque.contactPhone ?? string.Empty,
+                Description = mosque.Description ?? string.Empty,
+                Latitude = mosque.Latitude,
+                Longitude = mosque.Longitude
+            };
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ErrorFormatter.FromException(ex, "تحميل بيانات المسجد");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task HandleSaveMosqueAsync()
+    {
+        _isSaving = true;
+        _errorMessage = null;
+        _successMessage = null;
+
+        try
+        {
+            var response = IsEditMode && Id.HasValue
+                ? await MosquService.UpdateMosqueInfoAsync(new UpdateMosqueInfoRequest
                 {
                     MosqueId = Id.Value,
                     Name = Model.name,
                     Address = Model.address,
                     ContactPhone = Model.contact_phone,
-                    Description = Model.Description
-                };
+                    Description = Model.Description,
+                    Latitude = Model.Latitude,
+                    Longitude = Model.Longitude
+                })
+                : await MosquService.AddMosqu(Model);
 
-                var res = await MosquService.UpdateMosqueInfoAsync(req);
-
-                Message = res.Message;
-                Succees = res.Success;
-            }
-            else
+            if (!response.Success)
             {
-                var res = await MosquService.AddMosqu(Model);
-
-                Message = res.Message;
-                Succees = res.Success;
+                _errorMessage = ErrorFormatter.FromResponse(response, IsEditMode ? "فشل تحديث المسجد." : "فشل إضافة المسجد.");
+                return;
             }
+
+            _successMessage = response.Message;
+            Navigation.NavigateTo("/management/mosques-management", replace: true);
         }
         catch (Exception ex)
         {
-            Succees = false;
-            Message = ex.Message;
+            _errorMessage = ErrorFormatter.FromException(ex, IsEditMode ? "تحديث المسجد" : "إضافة المسجد");
         }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
 
-    }
     private void Cancel()
-    {
-        mgr.NavigateTo("/management/mosques-management");
-    }
+        => Navigation.NavigateTo("/management/mosques-management");
 }

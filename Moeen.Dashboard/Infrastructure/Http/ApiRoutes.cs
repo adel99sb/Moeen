@@ -53,6 +53,8 @@
         //enrollment
         public static string RegisterStudentAsyncRoute { get; } = "api/Enrollment/register-student";
         public static string AddTeacherAsyncRoute { get; } = "api/Enrollment/add-teacher";
+        public static string AddSupervisorAsyncRoute { get; } = "api/Enrollment/add-supervisor";
+        public static string PromoteTeacherToSupervisorAsyncRoute { get; } = "api/Enrollment/teachers/{teacherId}/promote-to-supervisor";
         public static string RegisterParentAsyncRoute { get; } = "api/Enrollment/register-parent";
         public static string UpdateMemberInfoAsyncRoute { get; } = "api/Enrollment/update-member";
         public static string UpdateStudentInfoAsyncRoute { get; } = "api/Enrollment/students/update-info";
@@ -71,6 +73,7 @@
         public static string DeleteStudentAsyncRoute { get; } = "api/Enrollment/students/{studentId}";
         public static string DeleteTeacherAsyncRoute { get; } = "api/Enrollment/teachers/{teacherId}";
         public static string DeleteParentAsyncRoute { get; } = "api/Enrollment/parents/{parentId}";
+        public static string DeleteSupervisorAsyncRoute { get; } = "api/Enrollment/supervisors/{supervisorId}";
         public static string ExportMembersListAsyncRoute { get; } = "api/Enrollment/export-members";
         //exam phase
         public static string DefineExamPhaseAsyncRoute { get; } = "api/ExamPhase/define";
@@ -127,6 +130,13 @@
         public static string EvaluateAutomaticPointsAsyncRoute { get; } = "api/Points/automatic-award";
         // supervisor dashboard
         public static string SupervisorDashboardOverviewRoute { get; } = "api/supervisor-dashboard/overview";
+        // owner dashboard
+        public static string OwnerDashboardOverviewRoute { get; } = "api/owner-dashboard/overview";
+        // teacher dashboard
+        public static string TeacherDashboardOverviewRoute { get; } = "api/teacher-dashboard/overview";
+        public static string TeacherHalaqasProgressRoute { get; } = "api/teacher-dashboard/my-halaqas-progress";
+        public static string CreateBackupRoute { get; } = "api/Backup/create";
+        public static string LastBackupInfoRoute { get; } = "api/Backup/last-info";
         // fouj / halqa management
         public static string FoujRoute { get; } = "api/Fouj";
         public static string FoujByIdRoute(Guid foujId) => $"api/Fouj/{foujId}";

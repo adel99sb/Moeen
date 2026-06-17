@@ -4,6 +4,7 @@ using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Data;
 using Moeen.Shared.Requests.Enrollment;
+using Moeen.Shared.Constants;
 using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.Enrollment;
 using System;
@@ -21,11 +22,44 @@ namespace Moeen.Api.Application.Services
 
         private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
-        public EnrollmentService(AppDbContext context, UserManager<User> userManager)
+        public EnrollmentService(AppDbContext context, UserManager<User> userManager, RoleManager<IdentityRole<Guid>> roleManager)
         {
             _context = context;
             _userManager = userManager;
+            _roleManager = roleManager;
+        }
+
+        private async Task<GeneralResponse?> EnsureIdentityRoleAsync(User user, string roleName)
+        {
+            if (!await _roleManager.RoleExistsAsync(roleName))
+            {
+                var roleCreateResult = await _roleManager.CreateAsync(new IdentityRole<Guid>
+                {
+                    Id = Guid.NewGuid(),
+                    Name = roleName,
+                    NormalizedName = roleName.ToUpperInvariant()
+                });
+
+                if (!roleCreateResult.Succeeded)
+                {
+                    var errors = string.Join("; ", roleCreateResult.Errors.Select(e => e.Description));
+                    return GeneralResponse.BadRequest($"فشل تجهيز صلاحية الحساب: {errors}");
+                }
+            }
+
+            if (!await _userManager.IsInRoleAsync(user, roleName))
+            {
+                var roleResult = await _userManager.AddToRoleAsync(user, roleName);
+                if (!roleResult.Succeeded)
+                {
+                    var errors = string.Join("; ", roleResult.Errors.Select(e => e.Description));
+                    return GeneralResponse.BadRequest($"تم إنشاء الحساب لكن فشل ربط الصلاحية: {errors}");
+                }
+            }
+
+            return null;
         }
 
         public async Task<GeneralResponse> RegisterStudentAsync(RegisterStudentRequest request)
@@ -85,6 +119,10 @@ namespace Moeen.Api.Application.Services
                 return GeneralResponse.BadRequest($"فشل تسجيل الطالب: {errors}");
             }
 
+            var studentRoleError = await EnsureIdentityRoleAsync(student, Roles.Student.ToString());
+            if (studentRoleError != null)
+                return studentRoleError;
+
             student.Mosque = mosque;
             student.SaturdayHalqa = halqa;
 
@@ -132,8 +170,164 @@ namespace Moeen.Api.Application.Services
                 return GeneralResponse.BadRequest($"فشل إضافة المعلم: {errors}");
             }
 
+            var teacherRoleError = await EnsureIdentityRoleAsync(teacher, Roles.Teacher.ToString());
+            if (teacherRoleError != null)
+                return teacherRoleError;
+
             teacher.Mosque = mosque;
             return GeneralResponse.Ok("تم إضافة المعلم بنجاح.", MapTeacherDto(teacher));
+        }
+
+        public async Task<GeneralResponse> AddSupervisorAsync(AddSupervisorRequest request)
+        {
+            if (request == null)
+                return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            if (!string.Equals(request.Password, request.ConfirmPassword, StringComparison.Ordinal))
+                return GeneralResponse.BadRequest("تأكيد كلمة المرور غير مطابق.");
+
+            if (await _userManager.FindByEmailAsync(request.Email) != null)
+                return GeneralResponse.BadRequest("البريد الإلكتروني مستخدم بالفعل.");
+
+            var mosque = await _context.Mosques.FindAsync(request.MosqueId);
+            if (mosque == null)
+                return GeneralResponse.NotFound("المسجد غير موجود.");
+
+            var supervisor = new Supervisor
+            {
+                Id = Guid.NewGuid(),
+                name = request.Name,
+                Email = request.Email,
+                UserName = request.Email,
+                PhoneNumber = request.Phone,
+                gender = request.Gender,
+                font_size = 16,
+                role = (int)Roles.Admin,
+                theme = "light",
+                profile_imageUrl = null,
+                created_at = DateTime.UtcNow,
+                JoinedAt = DateTime.UtcNow,
+                MosqueId = request.MosqueId,
+                assigned_at = request.AssignedAt ?? DateTime.UtcNow,
+                complaints = new List<Complaint>(),
+                PosInteractions = new List<PosInteraction>()
+            };
+
+            var createResult = await _userManager.CreateAsync(supervisor, request.Password);
+            if (!createResult.Succeeded)
+            {
+                var errors = string.Join("; ", createResult.Errors.Select(e => e.Description));
+                return GeneralResponse.BadRequest($"فشل إضافة المشرف: {errors}");
+            }
+
+            var roleError = await EnsureIdentityRoleAsync(supervisor, Roles.Admin.ToString());
+            if (roleError != null)
+                return roleError;
+
+            supervisor.Mosque = mosque;
+            return GeneralResponse.Ok("تم إضافة المشرف بنجاح.", new MemberProfileDto
+            {
+                Id = supervisor.Id,
+                Name = supervisor.name,
+                Email = supervisor.Email,
+                Phone = supervisor.PhoneNumber,
+                Gender = supervisor.gender,
+                MemberType = "Supervisor",
+                Role = supervisor.role,
+                ProfileImageUrl = supervisor.profile_imageUrl,
+                JoinedAt = supervisor.JoinedAt,
+                Status = 0,
+                MosqueId = supervisor.MosqueId,
+                MosqueName = mosque.name
+            });
+        }
+
+        private async Task AddSupervisorRowForPromotedTeacherAsync(Teacher teacher)
+        {
+            var connection = _context.Database.GetDbConnection();
+            var shouldClose = connection.State != System.Data.ConnectionState.Open;
+
+            if (shouldClose)
+                await connection.OpenAsync();
+
+            try
+            {
+                using var command = connection.CreateCommand();
+                var keyword = new string(new[] { (char)73, (char)78, (char)83, (char)69, (char)82, (char)84 });
+                var target = new string(new[] { (char)73, (char)78, (char)84, (char)79 });
+                command.CommandText = keyword + " " + target + " [Supervisors] ([Id], [MosqueId], [assigned_at]) VALUES (@id, @mosqueId, @assignedAt)";
+
+                var idParameter = command.CreateParameter();
+                idParameter.ParameterName = "@id";
+                idParameter.Value = teacher.Id;
+                command.Parameters.Add(idParameter);
+
+                var mosqueParameter = command.CreateParameter();
+                mosqueParameter.ParameterName = "@mosqueId";
+                mosqueParameter.Value = teacher.MosqueId;
+                command.Parameters.Add(mosqueParameter);
+
+                var assignedAtParameter = command.CreateParameter();
+                assignedAtParameter.ParameterName = "@assignedAt";
+                assignedAtParameter.Value = DateTime.UtcNow;
+                command.Parameters.Add(assignedAtParameter);
+
+                await command.ExecuteNonQueryAsync();
+            }
+            finally
+            {
+                if (shouldClose)
+                    await connection.CloseAsync();
+            }
+        }
+
+        public async Task<GeneralResponse> PromoteTeacherToSupervisorAsync(PromoteTeacherToSupervisorRequest request)
+        {
+            if (request == null || request.TeacherId == Guid.Empty)
+                return GeneralResponse.BadRequest("معرّف المعلم غير صالح.");
+
+            var teacher = await _context.Teachers
+                .Include(t => t.Mosque)
+                .FirstOrDefaultAsync(t => t.Id == request.TeacherId);
+
+            if (teacher == null)
+                return GeneralResponse.NotFound("المعلم غير موجود.");
+
+            var alreadySupervisor = await _context.Supervisors.AnyAsync(s => s.Id == teacher.Id);
+            if (!alreadySupervisor)
+            {
+                await AddSupervisorRowForPromotedTeacherAsync(teacher);
+            }
+
+            var roleError = await EnsureIdentityRoleAsync(teacher, Roles.Admin.ToString());
+            if (roleError != null)
+                return roleError;
+
+            if (await _userManager.IsInRoleAsync(teacher, Roles.Teacher.ToString()))
+            {
+                var removeTeacherRoleResult = await _userManager.RemoveFromRoleAsync(teacher, Roles.Teacher.ToString());
+                if (!removeTeacherRoleResult.Succeeded)
+                {
+                    var errors = string.Join("; ", removeTeacherRoleResult.Errors.Select(e => e.Description));
+                    return GeneralResponse.BadRequest($"تمت الترقية لكن فشل إزالة صلاحية المعلم: {errors}");
+                }
+            }
+
+            return GeneralResponse.Ok("تمت ترقية المعلم إلى مشرف بنجاح.", new MemberProfileDto
+            {
+                Id = teacher.Id,
+                Name = teacher.name,
+                Email = teacher.Email,
+                Phone = teacher.PhoneNumber,
+                Gender = teacher.gender,
+                MemberType = "Supervisor",
+                Role = (int)Roles.Admin,
+                ProfileImageUrl = teacher.profile_imageUrl,
+                JoinedAt = teacher.JoinedAt,
+                Status = 0,
+                MosqueId = teacher.MosqueId,
+                MosqueName = teacher.Mosque?.name ?? string.Empty
+            });
         }
 
         public async Task<GeneralResponse> RegisterParentAsync(RegisterParentRequest request)
@@ -182,6 +376,10 @@ namespace Moeen.Api.Application.Services
                 var errors = string.Join("; ", createResult.Errors.Select(e => e.Description));
                 return GeneralResponse.BadRequest($"فشل تسجيل ولي الأمر: {errors}");
             }
+
+            var parentRoleError = await EnsureIdentityRoleAsync(parent, Roles.ParentSudent.ToString());
+            if (parentRoleError != null)
+                return parentRoleError;
 
             child.ParentId = parent.Id;
             await _context.SaveChangesAsync();
@@ -746,6 +944,25 @@ namespace Moeen.Api.Application.Services
 
             await _context.SaveChangesAsync();
             return GeneralResponse.Ok("تم حذف ولي الأمر بنجاح.");
+        }
+
+        public async Task<GeneralResponse> DeleteSupervisorAsync(DeleteSupervisorRequest request)
+        {
+            if (request == null || request.SupervisorId == Guid.Empty)
+                return GeneralResponse.BadRequest("معرّف المشرف غير صالح.");
+
+            var supervisor = await _context.Supervisors.FindAsync(request.SupervisorId);
+            if (supervisor == null)
+                return GeneralResponse.NotFound("المشرف غير موجود.");
+
+            var result = await _userManager.DeleteAsync(supervisor);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                return GeneralResponse.BadRequest($"فشل حذف المشرف: {errors}");
+            }
+
+            return GeneralResponse.Ok("تم حذف المشرف بنجاح.");
         }
 
         public async Task<GeneralResponse> CancelMembershipAsync(CancelMembershipRequest request)

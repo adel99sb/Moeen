@@ -1,461 +1,429 @@
-﻿@page "/owner/AccountManagement"
+@page "/owner/AccountManagement"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Text.Json
+@using Microsoft.AspNetCore.Components.Web
+@using Moeen.Dashboard.Application.Services.Abstractions
+@using Moeen.Dashboard.Services.Abstractions
+@using Moeen.Shared.Requests.Enrollment
+@using Moeen.Shared.Responses
+@using Moeen.Shared.Responses.Enrollment
+@inject IEnrollmentService EnrollmentService
+@inject IDashboardErrorFormatter ErrorFormatter
+@inject NavigationManager Navigation
+
+<PageTitle>إدارة المشرفين</PageTitle>
+
 <style>
-    /*AccountManagement style*/
-    :root {
-        /* الألوان الأساسية والثانوية */
-        --primary-green: #195042;
-        --primary-green-dark: #123d32;
-        --accent-beige: #d6cabc;
-        --light-beige: #f4f1ee;
-        --white: #ffffff;
-        --text-dark: #2d3436;
-        --text-gray: #636e72;
-        --status-green: #2ecc71;
-        --danger-red: #e74c3c;
-        --bg-gray: #f9f9f9;
-        --border-gray: #f1f1f1;
-        --bg-row-hover: #fafafa;
-        --bg-status-inactive: #fdeaea;
-        /* الخطوط */
-        --font-main: 'Tajawal', sans-serif;
-        /* الظلال */
-        --shadow-card: 0 10px 30px rgba(0,0,0,0.05);
-        --shadow-focus: 0 0 0 4px rgba(25, 80, 66, 0.1);
-        /* خلفيات الحالات */
-        --bg-status-active: rgba(46, 204, 113, 0.1);
-        --bg-status-inactive-badge: rgba(231, 76, 60, 0.15);
-        /* الحدود */
-        --border-status-inactive: 1px solid rgba(231, 76, 60, 0.2);
-        /* القياسات والمسافات */
-        --margin-container: 20px;
-        --padding-container: 30px;
-        --radius-container: 20px;
-        --radius-md: 12px;
-        --radius-sm: 10px;
-        --radius-badge: 20px;
-        --radius-icon: 6px;
-        --radius-tab: 12px 12px 0 0;
-        --gap-tabs: 10px;
-        --gap-btn: 8px;
-        --padding-tab: 12px 25px;
-        --padding-search: 12px 45px 12px 15px;
-        --padding-btn-lg: 12px 25px;
-        --padding-btn-md: 10px 20px;
-        --padding-btn-sm: 6px 14px;
-        --padding-table: 15px;
-        --padding-badge: 5px 12px;
-        --padding-icon: 8px;
-        --margin-icon: 0 2px;
-        --pos-icon-search: 15px;
-        --spacing-table-rows: 0 10px;
-        --table-min-width: 600px;
-        --min-width-actions: 100px;
-        --min-width-search: 250px;
-        --max-width-search: 400px;
-        --font-size-btn: 15px;
-        --font-size-badge: 0.85rem;
-        --font-size-sm: 12px;
-        --border-width-thin: 1.5px;
-        --border-width-base: 1px;
-        --border-width-thick: 3px;
-        --border-width-medium: 2px;
-        /* التأثيرات الحركية */
-        --scale-hover: scale(1.01);
-        --scale-icon-hover: scale(1.2);
-        --translate-hover: translateY(-2px);
-    }
-
-    body {
-        font-family: var(--font-main);
-        background-color: var(--bg-gray);
-        direction: rtl;
-        text-align: right;
-    }
-
-    .management-container {
-        background: var(--white);
-        margin: var(--margin-container);
-        padding: var(--padding-container);
-        border-radius: var(--radius-container);
-        box-shadow: var(--shadow-card);
-        max-width: 100%;
-        overflow-x: hidden;
-    }
-
-    /* العنوان */
-    .page-title {
-        color: var(--primary-green);
-        position: relative;
-        padding-bottom: 10px;
-        border-bottom: var(--border-width-thick) solid var(--accent-beige);
-        display: inline-block;
-        margin-bottom: 25px;
-    }
-
-    .tabs-navigation {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--gap-tabs);
-        margin-bottom: 30px;
-        border-bottom: var(--border-width-medium) solid var(--light-beige);
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .tab-item {
-        padding: var(--padding-tab);
-        border: none;
-        background: none;
-        cursor: pointer;
-        font-weight: 500;
-        color: var(--text-gray);
-        transition: 0.3s;
-        border-radius: var(--radius-tab);
-        white-space: nowrap;
-        flex: 0 0 auto;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-        .tab-item.active {
-            background-color: var(--primary-green);
-            color: var(--white);
-        }
-
-        .tab-item:hover:not(.active) {
-            background-color: var(--accent-beige);
-            color: var(--primary-green);
-        }
-
-    /* شريط البحث والأزرار */
-    .action-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 25px;
-        flex-wrap: wrap;
-        gap: 15px;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .search-wrapper {
-        position: relative;
-        flex: 1;
-        min-width: var(--min-width-search);
-        max-width: var(--max-width-search);
-    }
-
-    .search-input {
-        width: 100%;
-        padding: var(--padding-search);
-        border: var(--border-width-thin) solid var(--accent-beige);
-        border-radius: var(--radius-md);
-        outline: none;
-        transition: 0.3s;
-        box-sizing: border-box;
-    }
-
-        .search-input:focus {
-            border-color: var(--primary-green);
-            box-shadow: var(--shadow-focus);
-        }
-
-    .search-wrapper i {
-        position: absolute;
-        right: var(--pos-icon-search);
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--primary-green);
-    }
-
-    .btn-pary {
-        background-color: var(--accent-beige);
-        color: white;
-        padding: var(--padding-btn-sm);
-        border-radius: var(--radius-sm);
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: var(--gap-btn);
-        transition: 0.3s;
-    }
-
-        .btn-pary:hover {
-            background-color: var(--primary-green);
-            transform: var(--translate-hover);
-        }
-
-    .btn-primary {
-        background-color: var(--primary-green);
-        color: var(--white);
-        padding: var(--padding-btn-lg);
-        border-radius: var(--radius-md);
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: var(--gap-btn);
-        transition: 0.3s;
-        white-space: nowrap;
-    }
-
-        .btn-primary:hover {
-            background-color: var(--primary-green-dark);
-            transform: var(--translate-hover);
-        }
-    
-    .btn-pprimary {
-        background-color: var(--primary-green);
-        font-size: var(--font-size-btn);
-        padding: var(--padding-btn-md);
-        color: var(--white);
-        border-radius: var(--radius-md);
-        display: inline;
-        transition: 0.3s;
-    }
-
-        .btn-pprimary:hover {
-            background-color: var(--primary-green-dark);
-            transform: var(--translate-hover);
-        }
-
-    /* الجدول */
-    .table-responsive {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .data-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: var(--spacing-table-rows);
-        margin: 0 auto;
-        min-width: var(--table-min-width);
-    }
-
-        .data-table th {
-            background-color: var(--light-beige);
-            color: var(--primary-green);
-            padding: var(--padding-table);
-            text-align: right;
-            white-space: nowrap;
-        }
-
-        .data-table tbody tr {
-            background-color: var(--white);
-            transition: 0.3s;
-        }
-
-            .data-table tbody tr td {
-                padding: var(--padding-table);
-                border-top: var(--border-width-base) solid var(--border-gray);
-                border-bottom: var(--border-width-base) solid var(--border-gray);
-            }
-
-            .data-table tbody tr:hover {
-                background-color: var(--bg-row-hover);
-                transform: var(--scale-hover);
-            }
-    
-    /* حالة النشط */
-    .status-badge {
-        padding: var(--padding-badge);
-        border-radius: var(--radius-badge);
-        font-size: var(--font-size-badge);
-        display: inline-block;
-    }
-
-        .status-badge.active {
-            background-color: var(--bg-status-active);
-            color: var(--status-green);
-        }
-    
-    /* الأزرار داخل الجدول */
-    .actions-cell {
-        text-align: center;
-        min-width: var(--min-width-actions);
-        white-space: nowrap;
-    }
-
-    .btn-icon {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: var(--padding-icon);
-        margin: var(--margin-icon);
-        border-radius: var(--radius-icon);
-        transition: 0.3s;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-        .btn-icon.edit {
-            color: var(--primary-green);
-        }
-
-        .btn-icon.delete {
-            color: var(--danger-red);
-        }
-
-        .btn-icon:hover {
-            transform: var(--scale-icon-hover);
-            background-color: var(--light-beige);
-        }
-
-    .inactive {
-        padding: 2px 10px;
-        border-radius: var(--radius-badge);
-        font-size: var(--font-size-sm);
-        background: var(--bg-status-inactive);
-        color: var(--danger-red);
-        display: inline-block;
-    }
-
-    .status-badge.inactive {
-        background-color: var(--bg-status-inactive-badge);
-        color: var(--danger-red);
-        border: var(--border-status-inactive);
-    }
-
-    /* تحسينات للشاشات المتوسطة والكبيرة */
-    @@media (min-width: 769px) {
-        .tabs-navigation {
-            flex-wrap: nowrap;
-        }
-        
-        .tab-item {
-            flex: 1;
-            text-align: center;
-        }
-    }
-
-    @@media (max-width: 768px) {
-        .management-container {
-            margin: 10px;
-            padding: 15px;
-        }
-
-        .tabs-navigation {
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-
-        .tab-item {
-            padding: 10px 15px;
-            font-size: 0.9rem;
-            flex: 1 1 calc(50% - 10px);
-            text-align: center;
-        }
-
-        .action-bar {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .search-wrapper {
-            max-width: 100%;
-            min-width: 100%;
-        }
-
-        .btn-primary {
-            justify-content: center;
-        }
-
-        .data-table th {
-            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
-            padding: 10px;
-        }
-
-        .data-table td {
-            padding: 10px;
-            font-size: 0.9rem;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .tab-item {
-            flex: 1 1 100%;
-            padding: 8px 12px;
-            font-size: 0.85rem;
-        }
-
-        .page-title {
-            font-size: 1.3rem;
-        }
-    }
+    .accounts-page { direction: rtl; padding: 12px; color: #24342f; }
+    .accounts-hero { background: linear-gradient(135deg, #195042, #28715f); color: #fff; border-radius: 24px; padding: 26px; margin-bottom: 22px; box-shadow: 0 18px 45px rgba(25, 80, 66, .16); }
+    .accounts-hero h1 { margin: 0 0 8px; font-weight: 800; }
+    .accounts-hero p { margin: 0; opacity: .92; }
+    .accounts-panel { background: #fff; border: 1px solid #e4eee9; border-radius: 22px; padding: 20px; box-shadow: 0 10px 30px rgba(25, 80, 66, .06); }
+    .accounts-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid #edf3f0; padding-bottom: 14px; }
+    .account-tab { border: 1px solid #dfece7; background: #fff; color: #195042; border-radius: 14px; padding: 10px 16px; display: inline-flex; align-items: center; gap: 8px; font-weight: 800; transition: .2s ease; }
+    .account-tab:hover, .account-tab.active { background: #195042; color: #fff; border-color: #195042; transform: translateY(-2px); }
+    .account-tab .count { background: rgba(255, 255, 255, .18); border-radius: 999px; padding: 2px 8px; font-size: .8rem; }
+    .accounts-toolbar { display: grid; grid-template-columns: minmax(220px, 1fr) auto auto; gap: 12px; margin-bottom: 18px; align-items: center; }
+    .accounts-search { position: relative; }
+    .accounts-search i { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #195042; }
+    .accounts-search input, .accounts-toolbar select { width: 100%; border: 1.5px solid #d6cabc; border-radius: 14px; padding: 11px 42px 11px 14px; outline: none; background: #fff; transition: .2s ease; }
+    .accounts-toolbar select { padding: 11px 14px; min-width: 140px; }
+    .accounts-search input:focus, .accounts-toolbar select:focus { border-color: #195042; box-shadow: 0 0 0 4px rgba(25, 80, 66, .08); }
+    .btn-owner-primary, .btn-owner-light, .btn-owner-success { border: none; border-radius: 14px; padding: 11px 18px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; white-space: nowrap; }
+    .btn-owner-primary { background: #195042; color: #fff; }
+    .btn-owner-success { background: #14723a; color: #fff; }
+    .btn-owner-light { background: #f4f1ee; color: #195042; }
+    .btn-owner-primary:disabled, .btn-owner-light:disabled, .btn-owner-success:disabled { opacity: .65; cursor: not-allowed; }
+    .accounts-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .summary-card { background: #f9fbfa; border: 1px solid #e4eee9; border-radius: 16px; padding: 14px; }
+    .summary-card small { color: #6b7280; }
+    .summary-card strong { display: block; color: #195042; font-size: 1.35rem; margin-top: 4px; }
+    .permission-note { background: #fff8e7; border: 1px solid #f1d69a; color: #775900; border-radius: 16px; padding: 14px 16px; margin-bottom: 16px; line-height: 1.8; }
+    .accounts-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; min-width: 920px; }
+    .accounts-table th { background: #f4f1ee; color: #195042; padding: 13px; white-space: nowrap; }
+    .accounts-table td { background: #fff; border-top: 1px solid #eef3f0; border-bottom: 1px solid #eef3f0; padding: 13px; vertical-align: middle; }
+    .accounts-table tr td:first-child { border-radius: 0 14px 14px 0; }
+    .accounts-table tr td:last-child { border-radius: 14px 0 0 14px; }
+    .account-avatar { width: 42px; height: 42px; border-radius: 50%; background: #e7f0ec; color: #195042; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; margin-left: 10px; }
+    .status-pill, .role-pill { border-radius: 999px; padding: 5px 11px; font-size: .85rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; }
+    .status-active { background: #eaf8f0; color: #14723a; }
+    .status-other { background: #eef7ff; color: #145c9e; }
+    .role-pill { background: #f4f1ee; color: #195042; }
+    .icon-action { border: none; border-radius: 10px; width: 36px; height: 36px; margin: 0 2px; display: inline-flex; align-items: center; justify-content: center; transition: .2s ease; }
+    .icon-action.view { background: #eef7ff; color: #145c9e; }
+    .icon-action.edit { background: #f4f1ee; color: #195042; }
+    .icon-action.delete { background: #fff1f1; color: #b42318; }
+    .icon-action:hover { transform: translateY(-2px); }
+    .accounts-pagination { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; color: #6b7280; }
+    .empty-state, .loading-state { border: 1px dashed #d6cabc; border-radius: 18px; padding: 28px; text-align: center; color: #667085; background: #fffdfb; }
+    @@media (max-width: 900px) { .accounts-toolbar { grid-template-columns: 1fr; } .accounts-summary { grid-template-columns: 1fr; } }
 </style>
 
-<h3>AccountManagement</h3>
-   
-<section class="management-container">
-    <header class="page-header">
-        <h2 class="page-title">إدارة حسابات المستخدمين</h2>
-    </header>
-    <nav class="tabs-navigation">
-        <NavLink class="tab-item" href="owner/AccountManagement" Match="NavLinkMatch.All">
-            المشرفون
-        </NavLink>
-        <NavLink class="tab-item" href="owner/Teachers">
-            المعلمون
-        </NavLink>
-        <NavLink class="tab-item" href="owner/Students">
-            الطلاب
-        </NavLink>
-        <NavLink class="tab-item" href="owner/Parents">
-            الأهالي
-        </NavLink>
-    </nav>
+<div class="accounts-page">
+    <section class="accounts-hero">
+        <h1>إدارة المشرفين</h1>
+        <p>صلاحيات المالك هنا محصورة بإدارة المشرفين فقط، مع إمكانية ترقية معلم موجود ليصبح مشرفاً.</p>
+    </section>
 
-    <div class="action-bar">
-        <div class="search-wrapper">
-            <i class="bi bi-search"></i>
-            <input type="text" class="search-input" placeholder="ابحث عن مشرف...">
+    <section class="accounts-panel">
+        <DashboardStatusMessages
+            SuccessMessage="@_successMessage"
+            ErrorMessage="@_errorMessage"
+            OnSuccessDismiss="EventCallback.Factory.Create(this, () => _successMessage = null)"
+            OnErrorDismiss="EventCallback.Factory.Create(this, () => _errorMessage = null)" />
+
+        <div class="accounts-tabs">
+            <button type="button" class="@GetTabClass(OwnerAccountView.Supervisors)" disabled="@_isBusy" @onclick="() => SelectViewAsync(OwnerAccountView.Supervisors)">
+                <i class="bi bi-person-badge"></i>
+                <span>المشرفون</span>
+                @if (_view == OwnerAccountView.Supervisors && _totalCount > 0)
+                {
+                    <span class="count">@_totalCount</span>
+                }
+            </button>
+            <button type="button" class="@GetTabClass(OwnerAccountView.PromoteTeacher)" disabled="@_isBusy" @onclick="() => SelectViewAsync(OwnerAccountView.PromoteTeacher)">
+                <i class="bi bi-arrow-up-circle"></i>
+                <span>ترقية معلم إلى مشرف</span>
+                @if (_view == OwnerAccountView.PromoteTeacher && _totalCount > 0)
+                {
+                    <span class="count">@_totalCount</span>
+                }
+            </button>
         </div>
-        <a href="owner/Form" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> إضافة مشرف
-        </a>
-    </div>
 
-    <div class="table-responsive">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>الاسم</th>
-                    <th>الجامع</th>
-                    <th>الفوج</th>
-                    <th>الحالة</th>
-                    <th class="text-center">الإجراءات</th>
-                </tr>
-            </thead>
-            <tbody>
-                
-                <tr>
-                    <td>أحمد العلي</td>
-                    <td>جامع التوبة</td>
-                    <td>الفوج الأول</td>
-                    <td><span class="status-badge active">نشط</span></td>
-                    <td class="actions-cell">
-                        <a href="/owner/Form"> <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button></a>
+        <div class="permission-note">
+            <i class="bi bi-shield-check"></i>
+            المالك لا يدير الطلاب أو الأهالي أو المعلمين من هذه الشاشة. إدارة المشرفين متاحة بالكامل، والمعلم يمكن ترقيته إلى مشرف فقط.
+        </div>
 
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>محمد العلي</td>
-                    <td>جامع ابي حنيفة</td>
-                    <td> الفوج الأول</td>
-                    <td><span class="status-badge active">نشط</span></td>
-                    <td class="actions-cell">
-                        <button class="btn-icon edit" title="تعديل"><i class="bi bi-pencil-square"></i></button>
-                        <button class="btn-icon delete" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</section>
+        <div class="accounts-toolbar">
+            <div class="accounts-search">
+                <i class="bi bi-search"></i>
+                <input value="@_searchText" @oninput="HandleSearchInput" @onkeydown="HandleSearchKey" placeholder="@SearchPlaceholder" />
+            </div>
+
+            <select value="@_pageSize" @onchange="ChangePageSizeAsync" disabled="@_isBusy">
+                <option value="10">10 بالسطر</option>
+                <option value="20">20 بالسطر</option>
+                <option value="50">50 بالسطر</option>
+            </select>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="btn-owner-light" disabled="@_isBusy" @onclick="ReloadAsync">
+                    <i class="bi bi-arrow-clockwise"></i> تحديث
+                </button>
+                @if (_view == OwnerAccountView.Supervisors)
+                {
+                    <button type="button" class="btn-owner-primary" @onclick="GoToCreateSupervisorForm">
+                        <i class="bi bi-plus-lg"></i> إضافة مشرف
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="accounts-summary">
+            <div class="summary-card">
+                <small>القسم الحالي</small>
+                <strong>@SelectedViewLabel</strong>
+            </div>
+            <div class="summary-card">
+                <small>عدد النتائج</small>
+                <strong>@_totalCount</strong>
+            </div>
+            <div class="summary-card">
+                <small>الصفحة</small>
+                <strong>@_page / @TotalPages</strong>
+            </div>
+        </div>
+
+        @if (_isLoading)
+        {
+            <div class="loading-state">
+                <span class="spinner-border text-success" role="status"></span>
+                <div class="mt-3">جاري تحميل البيانات...</div>
+            </div>
+        }
+        else if (_members.Count == 0)
+        {
+            <div class="empty-state">
+                <i class="bi bi-people fs-1 d-block mb-2"></i>
+                لا توجد نتائج مطابقة ضمن قسم @SelectedViewLabel.
+            </div>
+        }
+        else if (_view == OwnerAccountView.Supervisors)
+        {
+            <div class="table-responsive">
+                <table class="accounts-table">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>النوع</th>
+                            <th>المسجد</th>
+                            <th>البريد</th>
+                            <th>الهاتف</th>
+                            <th>الحالة</th>
+                            <th>تاريخ الانضمام</th>
+                            <th class="text-center">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var member in _members)
+                        {
+                            <tr>
+                                <td><span class="account-avatar">@GetInitial(member.Name)</span><span class="fw-bold">@Display(member.Name)</span></td>
+                                <td><span class="role-pill"><i class="bi bi-person-badge"></i>مشرف</span></td>
+                                <td>@Display(member.MosqueName)</td>
+                                <td>@Display(member.Email)</td>
+                                <td>@Display(member.Phone)</td>
+                                <td><span class="status-pill status-active">نشط</span></td>
+                                <td>@FormatDate(member.JoinedAt)</td>
+                                <td class="text-center">
+                                    <button type="button" class="icon-action view" title="عرض" @onclick="() => GoToSupervisorDetails(member)"><i class="bi bi-eye"></i></button>
+                                    <button type="button" class="icon-action edit" title="تعديل" @onclick="() => GoToSupervisorEdit(member)"><i class="bi bi-pencil-square"></i></button>
+                                    <button type="button" class="icon-action delete" title="حذف" disabled="@_isBusy" @onclick="() => DeleteSupervisorAsync(member)"><i class="bi bi-trash"></i></button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="accounts-table">
+                    <thead>
+                        <tr>
+                            <th>المعلم</th>
+                            <th>المسجد</th>
+                            <th>البريد</th>
+                            <th>الهاتف</th>
+                            <th>تاريخ الانضمام</th>
+                            <th class="text-center">الإجراء المتاح</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var teacher in _members)
+                        {
+                            <tr>
+                                <td><span class="account-avatar">@GetInitial(teacher.Name)</span><span class="fw-bold">@Display(teacher.Name)</span></td>
+                                <td>@Display(teacher.MosqueName)</td>
+                                <td>@Display(teacher.Email)</td>
+                                <td>@Display(teacher.Phone)</td>
+                                <td>@FormatDate(teacher.JoinedAt)</td>
+                                <td class="text-center">
+                                    <button type="button" class="btn-owner-success" disabled="@_isBusy" @onclick="() => PromoteTeacherAsync(teacher)">
+                                        <i class="bi bi-arrow-up-circle"></i> ترقية إلى مشرف
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        @if (!_isLoading && _members.Count > 0)
+        {
+            <div class="accounts-pagination">
+                <span>يعرض @_members.Count من أصل @_totalCount نتيجة</span>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn-owner-light" disabled="@(_page <= 1 || _isBusy)" @onclick="PreviousPageAsync">السابق</button>
+                    <button type="button" class="btn-owner-light" disabled="@(_page >= TotalPages || _isBusy)" @onclick="NextPageAsync">التالي</button>
+                </div>
+            </div>
+        }
+    </section>
+</div>
+
 @code {
+    private enum OwnerAccountView { Supervisors, PromoteTeacher }
 
+    private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private List<MemberProfileDto> _members = new();
+    private OwnerAccountView _view = OwnerAccountView.Supervisors;
+    private string _searchText = string.Empty;
+    private bool _isLoading = true;
+    private bool _isBusy;
+    private int _page = 1;
+    private int _pageSize = 10;
+    private int _totalCount;
+    private string? _errorMessage;
+    private string? _successMessage;
+
+    private string SelectedViewLabel => _view == OwnerAccountView.Supervisors ? "المشرفون" : "ترقية معلم إلى مشرف";
+    private string CurrentMemberType => _view == OwnerAccountView.Supervisors ? "Supervisor" : "Teacher";
+    private string SearchPlaceholder => _view == OwnerAccountView.Supervisors ? "ابحث باسم المشرف..." : "ابحث باسم المعلم المراد ترقيته...";
+    private int TotalPages => Math.Max(1, (int)Math.Ceiling(_totalCount / (double)_pageSize));
+
+    protected override async Task OnInitializedAsync() => await LoadMembersAsync();
+
+    private async Task SelectViewAsync(OwnerAccountView view)
+    {
+        if (_view == view) return;
+        _view = view;
+        _page = 1;
+        _successMessage = null;
+        _errorMessage = null;
+        await LoadMembersAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        _successMessage = null;
+        await LoadMembersAsync();
+    }
+
+    private async Task SearchAsync()
+    {
+        _page = 1;
+        await LoadMembersAsync();
+    }
+
+    private void HandleSearchInput(ChangeEventArgs args) => _searchText = args.Value?.ToString() ?? string.Empty;
+
+    private async Task HandleSearchKey(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter") await SearchAsync();
+    }
+
+    private async Task ChangePageSizeAsync(ChangeEventArgs args)
+    {
+        if (int.TryParse(args.Value?.ToString(), out var value))
+        {
+            _pageSize = Math.Clamp(value, 5, 100);
+            _page = 1;
+            await LoadMembersAsync();
+        }
+    }
+
+    private async Task PreviousPageAsync()
+    {
+        if (_page <= 1) return;
+        _page--;
+        await LoadMembersAsync();
+    }
+
+    private async Task NextPageAsync()
+    {
+        if (_page >= TotalPages) return;
+        _page++;
+        await LoadMembersAsync();
+    }
+
+    private async Task LoadMembersAsync()
+    {
+        _isLoading = true;
+        _isBusy = true;
+        _errorMessage = null;
+
+        try
+        {
+            var response = await EnrollmentService.SearchMembersAsync(new SearchMembersRequest
+            {
+                MemberType = CurrentMemberType,
+                Name = string.IsNullOrWhiteSpace(_searchText) ? string.Empty : _searchText.Trim(),
+                Email = string.Empty,
+                Phone = string.Empty,
+                PageNumber = _page,
+                PageSize = _pageSize,
+                SortBy = "Name",
+                SortDescending = false
+            });
+
+            if (!response.Success)
+            {
+                _members = new();
+                _totalCount = 0;
+                _errorMessage = ErrorFormatter.FromResponse(response, "فشل تحميل البيانات.");
+                return;
+            }
+
+            _members = DeserializeMembers(response.Data);
+            _totalCount = response.TotalCount ?? _members.Count;
+        }
+        catch (Exception ex)
+        {
+            _members = new();
+            _totalCount = 0;
+            _errorMessage = ErrorFormatter.FromException(ex, "تحميل البيانات");
+        }
+        finally
+        {
+            _isLoading = false;
+            _isBusy = false;
+        }
+    }
+
+    private async Task DeleteSupervisorAsync(MemberProfileDto member)
+    {
+        _isBusy = true;
+        _errorMessage = null;
+        _successMessage = null;
+
+        try
+        {
+            var response = await EnrollmentService.DeleteSupervisorAsync(member.Id);
+            if (!response.Success)
+            {
+                _errorMessage = ErrorFormatter.FromResponse(response, "فشل حذف المشرف.");
+                return;
+            }
+
+            _successMessage = response.Message;
+            await LoadMembersAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ErrorFormatter.FromException(ex, "حذف المشرف");
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task PromoteTeacherAsync(MemberProfileDto teacher)
+    {
+        _isBusy = true;
+        _errorMessage = null;
+        _successMessage = null;
+
+        try
+        {
+            var response = await EnrollmentService.PromoteTeacherToSupervisorAsync(teacher.Id);
+            if (!response.Success)
+            {
+                _errorMessage = ErrorFormatter.FromResponse(response, "فشل ترقية المعلم إلى مشرف.");
+                return;
+            }
+
+            _successMessage = response.Message;
+            await LoadMembersAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ErrorFormatter.FromException(ex, "ترقية المعلم إلى مشرف");
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private List<MemberProfileDto> DeserializeMembers(object? data)
+    {
+        if (data is null) return new();
+        if (data is JsonElement element) return element.Deserialize<List<MemberProfileDto>>(_jsonOptions) ?? new();
+        var json = JsonSerializer.Serialize(data, _jsonOptions);
+        return JsonSerializer.Deserialize<List<MemberProfileDto>>(json, _jsonOptions) ?? new();
+    }
+
+    private void GoToCreateSupervisorForm() => Navigation.NavigateTo("/owner/Form?type=Supervisor");
+    private void GoToSupervisorEdit(MemberProfileDto member) => Navigation.NavigateTo($"/owner/Form?memberId={member.Id}&type=Supervisor&mode=edit");
+    private void GoToSupervisorDetails(MemberProfileDto member) => Navigation.NavigateTo($"/owner/Form?memberId={member.Id}&type=Supervisor&mode=view");
+    private string GetTabClass(OwnerAccountView view) => _view == view ? "account-tab active" : "account-tab";
+    private static string Display(string? value) => string.IsNullOrWhiteSpace(value) ? "غير محدد" : value;
+    private static string GetInitial(string? value) => string.IsNullOrWhiteSpace(value) ? "؟" : value.Trim()[0].ToString();
+    private static string FormatDate(DateTime value) => value == default ? "-" : value.ToLocalTime().ToString("yyyy/MM/dd");
 }

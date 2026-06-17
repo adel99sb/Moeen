@@ -5,10 +5,6 @@ using Moeen.Api.infrastructure.Configurations;
 using Moeen.Shared.Requests.Backup;
 using Moeen.Shared.Responses;
 using Moeen.Shared.Responses.Backup;
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Moeen.Api.Application.Services
 {
@@ -27,7 +23,7 @@ namespace Moeen.Api.Application.Services
         {
             var databaseName = GetDatabaseName();
             if (string.IsNullOrWhiteSpace(databaseName))
-                return GeneralResponse.InternalError("ÇÓã ŞÇÚÏÉ ÇáÈíÇäÇÊ ÛíÑ ãÚÑİ.");
+                return GeneralResponse.InternalError("ØªØ¹Ø°Ø± ØªØ­Ø¯ÙŠØ¯ Ø§Ø³Ù… Ù‚Ø§Ø¹Ø¯Ø© Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ù…Ù† Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ø§Ù„Ø§ØªØµØ§Ù„.");
 
             Directory.CreateDirectory(_backupDirectory);
 
@@ -36,32 +32,36 @@ namespace Moeen.Api.Application.Services
 
             try
             {
-                await using var connection = new SqlConnection(_connectionString);
+                await using var connection = new SqlConnection(BuildMasterConnectionString());
                 await connection.OpenAsync();
 
-                var commandText = $"BACKUP DATABASE [{databaseName}] TO DISK = @path WITH INIT, COMPRESSION;";
-                await using var command = new SqlCommand(commandText, connection);
-                command.Parameters.AddWithValue("@path", backupPath);
+                try
+                {
+                    await ExecuteBackupAsync(connection, databaseName, backupPath, useCompression: true);
+                }
+                catch (SqlException)
+                {
+                    await ExecuteBackupAsync(connection, databaseName, backupPath, useCompression: false);
+                }
 
-                await command.ExecuteNonQueryAsync();
-
-                return GeneralResponse.Ok("Êã ÅäÔÇÁ ÇáäÓÎÉ ÇáÇÍÊíÇØíÉ ÈäÌÇÍ.", new BackupInfoDto
+                var fileInfo = new FileInfo(backupPath);
+                return GeneralResponse.Ok("ØªÙ… Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ù†Ø³Ø®Ø© Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠØ© Ø¨Ù†Ø¬Ø§Ø­.", new BackupInfoDto
                 {
                     FileName = fileName,
-                    SizeBytes = new FileInfo(backupPath).Length,
-                    CreatedAtUtc = DateTime.UtcNow
+                    SizeBytes = fileInfo.Exists ? fileInfo.Length : 0,
+                    CreatedAtUtc = fileInfo.Exists ? fileInfo.LastWriteTimeUtc : DateTime.UtcNow
                 });
             }
-            catch
+            catch (Exception ex)
             {
-                return GeneralResponse.InternalError("İÔá ÅäÔÇÁ ÇáäÓÎÉ ÇáÇÍÊíÇØíÉ.");
+                return GeneralResponse.InternalError($"ÙØ´Ù„ Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ù†Ø³Ø®Ø© Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠØ©: {ex.Message}");
             }
         }
 
         public Task<GeneralResponse> GetLastBackupInfoAsync()
         {
             if (!Directory.Exists(_backupDirectory))
-                return Task.FromResult(GeneralResponse.NotFound("áÇ ÊæÌÏ äÓÎ ÇÍÊíÇØíÉ ÈÚÏ."));
+                return Task.FromResult(GeneralResponse.NotFound("Ù„Ø§ ØªÙˆØ¬Ø¯ Ù†Ø³Ø®Ø© Ø§Ø­ØªÙŠØ§Ø·ÙŠØ© Ø¨Ø¹Ø¯."));
 
             var lastFile = new DirectoryInfo(_backupDirectory)
                 .GetFiles("*.bak")
@@ -69,9 +69,9 @@ namespace Moeen.Api.Application.Services
                 .FirstOrDefault();
 
             if (lastFile == null)
-                return Task.FromResult(GeneralResponse.NotFound("áÇ ÊæÌÏ äÓÎ ÇÍÊíÇØíÉ ÈÚÏ."));
+                return Task.FromResult(GeneralResponse.NotFound("Ù„Ø§ ØªÙˆØ¬Ø¯ Ù†Ø³Ø®Ø© Ø§Ø­ØªÙŠØ§Ø·ÙŠØ© Ø¨Ø¹Ø¯."));
 
-            return Task.FromResult(GeneralResponse.Ok("Êã ÌáÈ ãÚáæãÇÊ ÂÎÑ äÓÎÉ ÇÍÊíÇØíÉ.", new BackupInfoDto
+            return Task.FromResult(GeneralResponse.Ok("ØªÙ… Ø¬Ù„Ø¨ Ø¢Ø®Ø± Ù†Ø³Ø®Ø© Ø§Ø­ØªÙŠØ§Ø·ÙŠØ© Ø¨Ù†Ø¬Ø§Ø­.", new BackupInfoDto
             {
                 FileName = lastFile.Name,
                 SizeBytes = lastFile.Length,
@@ -82,11 +82,11 @@ namespace Moeen.Api.Application.Services
         public async Task<GeneralResponse> RestoreBackupAsync(RestoreBackupRequest request)
         {
             if (request?.Content == null || request.Content.Length == 0)
-                return GeneralResponse.BadRequest("ãáİ ÇáäÓÎÉ ÇáÇÍÊíÇØíÉ ãØáæÈ.");
+                return GeneralResponse.BadRequest("Ù…Ù„Ù Ø§Ù„Ù†Ø³Ø®Ø© Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠØ© Ù…Ø·Ù„ÙˆØ¨.");
 
             var databaseName = GetDatabaseName();
             if (string.IsNullOrWhiteSpace(databaseName))
-                return GeneralResponse.InternalError("ÇÓã ŞÇÚÏÉ ÇáÈíÇäÇÊ ÛíÑ ãÚÑİ.");
+                return GeneralResponse.InternalError("ØªØ¹Ø°Ø± ØªØ­Ø¯ÙŠØ¯ Ø§Ø³Ù… Ù‚Ø§Ø¹Ø¯Ø© Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ù…Ù† Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ø§Ù„Ø§ØªØµØ§Ù„.");
 
             Directory.CreateDirectory(_backupDirectory);
 
@@ -97,26 +97,25 @@ namespace Moeen.Api.Application.Services
             var backupPath = Path.Combine(_backupDirectory, safeFileName);
             await File.WriteAllBytesAsync(backupPath, request.Content);
 
-            var builder = new SqlConnectionStringBuilder(_connectionString)
-            {
-                InitialCatalog = "master"
-            };
-
-            await using var connection = new SqlConnection(builder.ConnectionString);
+            await using var connection = new SqlConnection(BuildMasterConnectionString());
             await connection.OpenAsync();
 
             try
             {
                 await ExecuteNonQueryAsync(connection, $"ALTER DATABASE [{databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;");
-                await using var restore = new SqlCommand($"RESTORE DATABASE [{databaseName}] FROM DISK = @path WITH REPLACE;", connection);
+
+                await using var restore = new SqlCommand($"RESTORE DATABASE [{databaseName}] FROM DISK = @path WITH REPLACE;", connection)
+                {
+                    CommandTimeout = 300
+                };
                 restore.Parameters.AddWithValue("@path", backupPath);
                 await restore.ExecuteNonQueryAsync();
 
-                return GeneralResponse.Ok("ÊãÊ ÇÓÊÚÇÏÉ ÇáäÓÎÉ ÇáÇÍÊíÇØíÉ ÈäÌÇÍ.");
+                return GeneralResponse.Ok("ØªÙ…Øª Ø§Ø³ØªØ¹Ø§Ø¯Ø© Ø§Ù„Ù†Ø³Ø®Ø© Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠØ© Ø¨Ù†Ø¬Ø§Ø­.");
             }
-            catch
+            catch (Exception ex)
             {
-                return GeneralResponse.InternalError("İÔáÊ ÚãáíÉ ÇáÇÓÊÚÇÏÉ.");
+                return GeneralResponse.InternalError($"ÙØ´Ù„ Ø§Ø³ØªØ¹Ø§Ø¯Ø© Ø§Ù„Ù†Ø³Ø®Ø© Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠØ©: {ex.Message}");
             }
             finally
             {
@@ -126,7 +125,7 @@ namespace Moeen.Api.Application.Services
                 }
                 catch
                 {
-                    // ÊÌÇåá Ãí ÃÎØÇÁ ÃËäÇÁ ÅÚÇÏÉ MULTI_USER
+                    // Best effort: do not hide the original restore result.
                 }
             }
         }
@@ -137,10 +136,37 @@ namespace Moeen.Api.Application.Services
             return builder.InitialCatalog;
         }
 
-        private static Task ExecuteNonQueryAsync(SqlConnection connection, string commandText)
+        private string BuildMasterConnectionString()
         {
-            var command = new SqlCommand(commandText, connection);
-            return command.ExecuteNonQueryAsync();
+            var builder = new SqlConnectionStringBuilder(_connectionString)
+            {
+                InitialCatalog = "master"
+            };
+
+            return builder.ConnectionString;
+        }
+
+        private static async Task ExecuteBackupAsync(SqlConnection connection, string databaseName, string backupPath, bool useCompression)
+        {
+            var compressionClause = useCompression ? ", COMPRESSION" : string.Empty;
+            var commandText = $"BACKUP DATABASE [{databaseName}] TO DISK = @path WITH INIT{compressionClause};";
+
+            await using var command = new SqlCommand(commandText, connection)
+            {
+                CommandTimeout = 300
+            };
+            command.Parameters.AddWithValue("@path", backupPath);
+            await command.ExecuteNonQueryAsync();
+        }
+
+        private static async Task ExecuteNonQueryAsync(SqlConnection connection, string commandText)
+        {
+            await using var command = new SqlCommand(commandText, connection)
+            {
+                CommandTimeout = 300
+            };
+
+            await command.ExecuteNonQueryAsync();
         }
     }
 }

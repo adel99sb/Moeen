@@ -7,6 +7,8 @@ namespace Moeen.Dashboard.Application.Services.Abstractions
     {
         Task<GeneralResponse> RegisterStudentAsync(RegisterStudentRequest request);
         Task<GeneralResponse> AddTeacherAsync(AddTeacherRequest request);
+        Task<GeneralResponse> AddSupervisorAsync(AddSupervisorRequest request);
+        Task<GeneralResponse> PromoteTeacherToSupervisorAsync(Guid teacherId);
         Task<GeneralResponse> RegisterParentAsync(RegisterParentRequest request);
         Task<GeneralResponse> UpdateMemberInfoAsync(UpdateMemberInfoRequest request);
         Task<GeneralResponse> UpdateStudentInfoAsync(UpdateStudentInfoRequest request);
@@ -25,6 +27,7 @@ namespace Moeen.Dashboard.Application.Services.Abstractions
         Task<GeneralResponse> DeleteStudentAsync(Guid studentId);
         Task<GeneralResponse> DeleteTeacherAsync(Guid teacherId);
         Task<GeneralResponse> DeleteParentAsync(Guid parentId);
+        Task<GeneralResponse> DeleteSupervisorAsync(Guid supervisorId);
         Task<GeneralResponse> ExportMembersListAsync(ExportMembersRequest request);
     }
 }

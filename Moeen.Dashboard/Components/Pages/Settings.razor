@@ -1,244 +1,518 @@
-@page "/settings"
+﻿@page "/settings"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Text.Json
 @using Moeen.Frontend.Services.Abstractions
-@using Moeen.Shared.Requests.Feedback
 @using Moeen.Shared.Requests
+@using Moeen.Shared.Requests.Feedback
+@using Moeen.Shared.Responses
+@using Moeen.Shared.Responses.Backup
 @inject IFeedbackService FeedbackService
-@rendermode InteractiveServer
-    <style>
-         :root {
---primary-green: #195042;
---accent-beige: #d6cabc;
---light-beige: #f4f1ee;
---white: #ffffff;
---text-dark: #2d3436;
---status-green: #2ecc71;
---danger-red: #e74c3c;
-        --transition: all 0.3s ease;
-    --shadow-md: 0 6px 15px rgba(0,0,0,0.12);
+@inject Moeen.Dashboard.Services.Abstractions.IBackupService BackupService
 
+<PageTitle>الإعدادات</PageTitle>
 
-}
-body {
-font-family: 'Tajawal', sans-serif;
-background-color: #f9f9f9;
-direction: rtl;
-}
-.management-container {
-background: var(--white);
-margin: 20px;
-padding: 30px;
-border-radius: 20px;
-box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-/* العنوان */
-.page-title {
-color: var(--primary-green);
-position: relative;
-padding-bottom: 10px; /* مسافة بين النص والخط */
-border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
-display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
-}
-     /* الكاردات */
-             .card-container{
-                display:flex;
-                gap:20px;
-                flex-wrap:wrap;
-             }
-           .card {
-               flex:1 1 calc(50%-20px);
-    grid-template-columns: repeat(2,1fr);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-    padding: 20px;
-    background-color: #efebe9;
-    transition: var(--transition);
-    align-content:center;
-}
-
-    .card:hover {
-        transform: translateY(-5px);
-            border-color: #195042;
-    }
-                /* اسم الفوج */
-                .card h3 {
-                    margin-bottom: 10px;
-                    padding-right:10px;
-                }
-
-            /* الحلقات */
-            .sessions {
-                width:auto;
-                margin-right:20px;
-                padding-right:30px;
-                background: #d6cabc;
-                padding: 8px;
-                font-size:20px;
-                border-radius: 10px;
-        border-color: #195042;
-                margin-bottom: 3px;
-            }
-              .btn-pprimary {
-    background-color: var(--primary-green);
-    font-size: 15px;
-    padding: 10px 20px;
-    color: var(--white);
-    border-radius: 12px;
-    display: inline;
-    transition: 0.3s;
-}
-
-    .btn-pprimary:hover {
-        background-color: #123d32;
-        transform: translateY(-2px);
-    }
-     .table th {
-        background-color: var(--light-beige);
-        color: var(--primary-green);
+<style>
+    .settings-page {
+        direction: rtl;
         padding: 12px;
-    }
-    .table td {
-        background-color: var(--white);
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-
-    }
-    .table tbody tr:hover {
-        background-color: #fafafa;
-        transform: scale(1.01);
-    }
-    .table-wrapper{
-		overflow-x: auto;
-		width: 100%;
-		border-radius: var(--radius-md);
-	}
-    .actions-cell {
-        text-align: center; /* توسيط المحتوى داخل الخلية */
-        min-width: 100px; /* نضمن مساحة كافية للأيقونات */
+        color: #24342f;
     }
 
-    .btn-icon.edit {
-        color: var(--primary-green);
+    .settings-hero {
+        background: linear-gradient(135deg, #195042, #28715f);
+        color: #fff;
+        border-radius: 24px;
+        padding: 26px;
+        margin-bottom: 22px;
+        box-shadow: 0 18px 45px rgba(25, 80, 66, .16);
     }
 
-    .btn-icon.delete {
-        color: var(--danger-red);
+    .settings-hero h1 {
+        margin: 0 0 8px;
+        font-weight: 900;
     }
 
-    .btn-icon:hover {
-        transform: scale(1.2);
+    .settings-hero p {
+        margin: 0;
+        opacity: .92;
     }
 
-    </style>
-    <div class="management-container">
-         <header class="page-header">
-        <h2 class="page-title">الإعدادات</h2>
-    </header>
- <!-- كارد النسخ الاحتياطي -->
-    <div class="card-container">
-    <div class="card">
-        <h3>لنسخ الاحتياطي </h3>
-        <br />
-        <p>آخر نسخ احتياطي :أبدا</p>
-        <br />
-        <p>قم بعمل نسخة احتياطية لبياناتك هنا.</p>
-        <br />
-        
-        <button class="btn-pprimary">نسخ احتياطي</button>
-    </div>
-<hr>
-    <!-- كارد المظهر -->
-    <div class="card">
-        <h3>المظهر</h3>
-        <br />
-        <!-- تغيير السمة -->
-         <div class="card">
-        <label class="label">تغيير السمة:</label>
-         <select class="select">
-            <option value="light">فاتح</option>
-            <option value="dark">داكن</option>
-        </select>
+    .settings-panel {
+        background: #fff;
+        border: 1px solid #e4eee9;
+        border-radius: 22px;
+        padding: 22px;
+        box-shadow: 0 10px 30px rgba(25, 80, 66, .06);
+        margin-bottom: 18px;
+    }
+
+    .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .settings-card {
+        background: #f9fbfa;
+        border: 1px solid #e4eee9;
+        border-radius: 18px;
+        padding: 18px;
+    }
+
+    .settings-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .settings-card-title {
+        color: #195042;
+        font-weight: 900;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .settings-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: #e7f0ec;
+        color: #195042;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 42px;
+    }
+
+    .settings-card p {
+        color: #667085;
+        margin: 0 0 14px;
+        line-height: 1.8;
+    }
+
+    .backup-info {
+        display: grid;
+        gap: 10px;
+        margin: 14px 0 16px;
+    }
+
+    .backup-info-row {
+        background: #fff;
+        border: 1px solid #eee5da;
+        border-radius: 13px;
+        padding: 11px 13px;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .backup-info-row span:first-child {
+        color: #667085;
+        font-weight: 800;
+    }
+
+    .backup-info-row span:last-child {
+        color: #195042;
+        font-weight: 900;
+        overflow-wrap: anywhere;
+    }
+
+    .btn-settings-primary,
+    .btn-settings-light {
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 16px;
+        font-weight: 900;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-settings-primary {
+        background: #195042;
+        color: #fff;
+    }
+
+    .btn-settings-primary:disabled,
+    .btn-settings-light:disabled {
+        opacity: .68;
+        cursor: not-allowed;
+    }
+
+    .btn-settings-light {
+        background: #f4f1ee;
+        color: #195042;
+    }
+
+    .settings-section-title {
+        color: #195042;
+        font-weight: 900;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .settings-table-scroll {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .settings-table {
+        width: 100%;
+        min-width: 760px;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+    .settings-table th {
+        background: #f4f1ee;
+        color: #195042;
+        padding: 13px;
+        white-space: nowrap;
+        font-weight: 900;
+    }
+
+    .settings-table th:first-child { border-radius: 0 14px 14px 0; }
+    .settings-table th:last-child { border-radius: 14px 0 0 14px; }
+
+    .settings-table td {
+        background: #fff;
+        border-top: 1px solid #eef3f0;
+        border-bottom: 1px solid #eef3f0;
+        padding: 13px;
+        vertical-align: middle;
+    }
+
+    .settings-table tr td:first-child {
+        border-right: 1px solid #eef3f0;
+        border-radius: 0 14px 14px 0;
+    }
+
+    .settings-table tr td:last-child {
+        border-left: 1px solid #eef3f0;
+        border-radius: 14px 0 0 14px;
+    }
+
+    .status-pill {
+        border-radius: 999px;
+        padding: 5px 11px;
+        font-size: .85rem;
+        font-weight: 800;
+        background: #eef7ff;
+        color: #145c9e;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .empty-state,
+    .loading-state {
+        border: 1px dashed #d6cabc;
+        border-radius: 18px;
+        padding: 28px;
+        color: #667085;
+        text-align: center;
+    }
+
+    .settings-alert {
+        border-radius: 14px;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+        background: #fff1f1;
+        color: #b42318;
+        border: 1px solid #ffd7d7;
+    }
+
+    @@media (max-width: 900px) {
+        .settings-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="settings-page">
+    <section class="settings-hero">
+        <h1>الإعدادات</h1>
+        <p>إدارة النسخ الاحتياطي والاطلاع على الشكاوى من واجهة واحدة واضحة.</p>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(_successMessage))
+    {
+        <div class="alert alert-success rounded-4">@_successMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <div class="settings-alert">@_errorMessage</div>
+    }
+
+    <section class="settings-panel">
+        <div class="settings-grid">
+            <article class="settings-card">
+                <div class="settings-card-header">
+                    <h3 class="settings-card-title"><i class="bi bi-cloud-arrow-down"></i> النسخ الاحتياطي</h3>
+                    <span class="settings-icon"><i class="bi bi-database-check"></i></span>
+                </div>
+                <p>أنشئ نسخة احتياطية من قاعدة البيانات. سيتم حفظ ملف النسخة داخل مجلد <strong>Backups</strong> في مشروع الـ API.</p>
+
+                <div class="backup-info">
+                    <div class="backup-info-row">
+                        <span>آخر نسخة</span>
+                        <span>@LastBackupDateText</span>
+                    </div>
+                    <div class="backup-info-row">
+                        <span>اسم الملف</span>
+                        <span>@Display(_lastBackup?.FileName)</span>
+                    </div>
+                    <div class="backup-info-row">
+                        <span>الحجم</span>
+                        <span>@FormatBytes(_lastBackup?.SizeBytes)</span>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-settings-primary" disabled="@_isCreatingBackup" @onclick="CreateBackupAsync">
+                    @if (_isCreatingBackup)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                        <span>جاري إنشاء النسخة...</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-cloud-arrow-down"></i>
+                        <span>إنشاء نسخة احتياطية</span>
+                    }
+                </button>
+            </article>
+
+            <article class="settings-card">
+                <div class="settings-card-header">
+                    <h3 class="settings-card-title"><i class="bi bi-info-circle"></i> ملاحظات مهمة</h3>
+                    <span class="settings-icon"><i class="bi bi-shield-check"></i></span>
+                </div>
+                <p>زر النسخ الاحتياطي يحتاج أن يكون الـ API شغال وأن يكون المستخدم الحالي Owner.</p>
+                <p>إذا فشل النسخ بسبب صلاحيات قاعدة البيانات، ستظهر رسالة الخطأ القادمة من الـ API مباشرة في هذه الصفحة.</p>
+                <button type="button" class="btn-settings-light" disabled="@_isLoadingBackupInfo" @onclick="() => LoadLastBackupInfoAsync()">
+                    @if (_isLoadingBackupInfo)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                        <span>جاري التحديث...</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-arrow-clockwise"></i>
+                        <span>تحديث معلومات النسخة</span>
+                    }
+                </button>
+            </article>
         </div>
-        <br />
-        <!-- حجم الخط -->
-        <div class="card">
-        <label class="label">حجم الخط:</label>
-        <select class="select">
-            <option value="large">كبير</option>
-            <option value="medium">وسط</option>
-            <option value="small">صغير</option>
-        </select>
-         </div>
-    </div>
-    </div>
+    </section>
 
-
-
-<hr>
-
-<div >
-    <!-- كارد الشكاوي -->
-    <div>
-        <h3>الشكاوي </h3>
-        <button class="btn-pprimary" @onclick="LoadComplaintsAsync">عرض الشكاوي</button>
-           <table class="table">
-            <thead>
-                <tr>
-                    <th>الشكوى</th>
-                    <th>حالة الشكوى</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (complaints.Count == 0)
+    <section class="settings-panel">
+        <div class="settings-section-title">
+            <span><i class="bi bi-chat-dots"></i> الشكاوى</span>
+            <button type="button" class="btn-settings-light" disabled="@_isLoadingComplaints" @onclick="() => LoadComplaintsAsync()">
+                @if (_isLoadingComplaints)
                 {
-                    <tr>
-                        <td colspan="2">لا توجد شكاوى</td>
-                    </tr>
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                    <span>جاري التحميل...</span>
                 }
                 else
                 {
-                    @foreach (var complaint in complaints)
-                    {
-                        <tr>
-                            <td>@complaint.Content</td>
-                            <td class="actions-cell">غير متاح</td>
-                        </tr>
-                    }
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>تحديث الشكاوى</span>
                 }
-			</tbody>
-            </table>
-            @if (!string.IsNullOrWhiteSpace(errorMessage))
-            {
-                <p>@errorMessage</p>
-            }
-    </div>
+            </button>
+        </div>
+
+        @if (_isLoadingComplaints)
+        {
+            <div class="loading-state">
+                <span class="spinner-border text-success" role="status"></span>
+                <div class="mt-3">جاري تحميل الشكاوى...</div>
+            </div>
+        }
+        else if (_complaints.Count == 0)
+        {
+            <div class="empty-state">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                لا توجد شكاوى حالياً.
+            </div>
+        }
+        else
+        {
+            <div class="settings-table-scroll">
+                <table class="settings-table">
+                    <thead>
+                        <tr>
+                            <th>الشكوى</th>
+                            <th>معرّف المستخدم</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var complaint in _complaints)
+                        {
+                            <tr>
+                                <td>@Display(complaint.Content)</td>
+                                <td>@complaint.UserId</td>
+                                <td><span class="status-pill"><i class="bi bi-info-circle"></i> غير متاح</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
 </div>
-    </div>
 
 @code {
-    private List<ComplaintDto> complaints = new();
-    private string? errorMessage;
+    private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private List<ComplaintDto> _complaints = new();
+    private BackupInfoDto? _lastBackup;
+    private bool _isLoadingComplaints;
+    private bool _isLoadingBackupInfo;
+    private bool _isCreatingBackup;
+    private string? _errorMessage;
+    private string? _successMessage;
+
+    private string LastBackupDateText => _lastBackup == null
+        ? "لا توجد نسخة بعد"
+        : _lastBackup.CreatedAtUtc.ToLocalTime().ToString("yyyy/MM/dd HH:mm");
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadComplaintsAsync();
+        await Task.WhenAll(LoadComplaintsAsync(), LoadLastBackupInfoAsync(showNotFoundAsError: false));
+    }
+
+    private async Task CreateBackupAsync()
+    {
+        _isCreatingBackup = true;
+        _successMessage = null;
+        _errorMessage = null;
+
+        try
+        {
+            var response = await BackupService.CreateBackupAsync();
+            if (!response.Success)
+            {
+                _errorMessage = response.Message;
+                return;
+            }
+
+            _lastBackup = ParseBackupInfo(response.Data);
+            _successMessage = response.Message;
+
+            if (_lastBackup == null)
+                await LoadLastBackupInfoAsync(showNotFoundAsError: false);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isCreatingBackup = false;
+        }
+    }
+
+    private async Task LoadLastBackupInfoAsync(bool showNotFoundAsError = true)
+    {
+        _isLoadingBackupInfo = true;
+        _errorMessage = null;
+
+        try
+        {
+            var response = await BackupService.GetLastBackupInfoAsync();
+            if (!response.Success)
+            {
+                _lastBackup = null;
+                if (showNotFoundAsError && response.StatusCode != 404)
+                    _errorMessage = response.Message;
+                return;
+            }
+
+            _lastBackup = ParseBackupInfo(response.Data);
+        }
+        catch (Exception ex)
+        {
+            _lastBackup = null;
+            if (showNotFoundAsError)
+                _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isLoadingBackupInfo = false;
+        }
     }
 
     private async Task LoadComplaintsAsync()
     {
+        _isLoadingComplaints = true;
+        _errorMessage = null;
+
         try
         {
-            errorMessage = null;
-            complaints = await FeedbackService.GetComplaintsAsync(new PaginationRequest
+            _complaints = await FeedbackService.GetComplaintsAsync(new PaginationRequest
             {
                 Page = 1,
-                PageSize = 10
-            });
+                PageSize = 50
+            }) ?? new();
         }
         catch (Exception ex)
         {
-            complaints = new();
-            errorMessage = ex.Message;
+            _complaints = new();
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isLoadingComplaints = false;
         }
     }
 
+    private BackupInfoDto? ParseBackupInfo(object? data)
+    {
+        if (data == null)
+            return null;
+
+        if (data is BackupInfoDto dto)
+            return dto;
+
+        if (data is JsonElement element)
+            return element.Deserialize<BackupInfoDto>(_jsonOptions);
+
+        var json = JsonSerializer.Serialize(data, _jsonOptions);
+        return JsonSerializer.Deserialize<BackupInfoDto>(json, _jsonOptions);
+    }
+
+    private static string FormatBytes(long? bytes)
+    {
+        if (!bytes.HasValue || bytes.Value <= 0)
+            return "غير محدد";
+
+        var value = bytes.Value;
+        if (value < 1024)
+            return $"{value} B";
+
+        var kb = value / 1024d;
+        if (kb < 1024)
+            return $"{kb:0.##} KB";
+
+        var mb = kb / 1024d;
+        if (mb < 1024)
+            return $"{mb:0.##} MB";
+
+        return $"{mb / 1024d:0.##} GB";
+    }
+
+    private static string Display(string? value)
+        => string.IsNullOrWhiteSpace(value) ? "غير محدد" : value;
 }

@@ -16,6 +16,8 @@ using Moeen.Api.infrastructure.Repositories;
 using Moeen.Api.Infrastructure.Data;
 using Moeen.Api.infrastructure.Middleware;
 using Moeen.Shared.Responses;
+using Moeen.Shared.Constants;
+using Moeen.Shared.Responses.TeacherDashboard;
 using System.Security.Claims;
 using System.Text;
 
@@ -226,6 +228,7 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     await AppSeeder.SeedDevelopmentDataAsync(app.Services, app.Configuration);
+    await LocalDevData.ApplyAsync(app.Services);
 
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -236,4 +239,286 @@ app.UseAuthentication();
 app.UseMiddleware<ApiRequestLoggingMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
+app.MapGet("/api/teacher-dashboard/overview", GetCurrentTeacherOverviewAsync).RequireAuthorization();
+app.MapGet("/api/teacher-dashboard/my-halaqas-progress", GetCurrentTeacherHalaqasProgressAsync).RequireAuthorization();
+
 app.Run();
+static async Task<IResult> GetCurrentTeacherOverviewAsync(ClaimsPrincipal user, AppDbContext context)
+{
+    if (!user.IsInRole("Teacher"))
+        return Results.Forbid();
+
+    var teacherId = GetCurrentTeacherId(user);
+    if (teacherId is null)
+        return Results.Unauthorized();
+
+    var teacher = await context.Teachers.AsNoTracking()
+        .Where(t => t.Id == teacherId.Value)
+        .Select(t => new { t.Id, Name = t.name ?? string.Empty, MosqueName = t.Mosque != null ? t.Mosque.name : string.Empty })
+        .FirstOrDefaultAsync();
+
+    if (teacher is null)
+        return Results.NotFound();
+
+    var halaqas = await context.Halqas.AsNoTracking()
+        .Where(h => h.TeacherId == teacherId.Value)
+        .OrderBy(h => h.Name)
+        .Select(h => new { h.Id, Name = h.Name ?? string.Empty, Type = h.Type ?? string.Empty })
+        .ToListAsync();
+
+    var halaqaIds = halaqas.Select(h => h.Id).ToList();
+    var students = halaqaIds.Count == 0
+        ? new List<TeacherDashboardStudentRow>()
+        : await context.Students.AsNoTracking()
+            .Where(s => s.HalqaId.HasValue && halaqaIds.Contains(s.HalqaId.Value))
+            .Select(s => new TeacherDashboardStudentRow(s.Id, s.name ?? string.Empty, s.HalqaId, s.score))
+            .ToListAsync();
+
+    var progress = await LoadTeacherProgressRowsAsync(context, teacherId.Value, halaqaIds);
+    var attendance = await LoadTeacherAttendanceRowsAsync(context, teacherId.Value, students.Select(s => s.Id).ToList());
+    var latest = GetLatestTeacherProgressByStudent(progress);
+    var today = DateTime.UtcNow.Date;
+    var monthStart = new DateTime(today.Year, today.Month, 1);
+
+    string HalaqaName(Guid? halaqaId) => halaqas.FirstOrDefault(h => h.Id == halaqaId)?.Name ?? string.Empty;
+
+    var response = new TeacherDashboardOverviewResponse
+    {
+        TeacherId = teacher.Id,
+        TeacherName = teacher.Name,
+        MosqueName = teacher.MosqueName,
+        TotalHalaqas = halaqas.Count,
+        TotalStudents = students.Count,
+        AttendanceTodayPercent = TeacherAttendanceRate(attendance.Where(a => a.Date.Date == today).Select(a => a.Status)),
+        TotalMemorizedPages = latest.Values.Sum(p => Math.Max(0, p.MemorizedUntil)),
+        ExcellencePoints = students.Sum(s => Math.Max(0, s.Score)),
+        Halaqas = halaqas.Select(h =>
+        {
+            var halaqaStudents = students.Where(s => s.HalqaId == h.Id).ToList();
+            var latestScores = halaqaStudents
+                .Select(s => latest.TryGetValue(s.Id, out var row) ? row.LevelScore : 0)
+                .Where(score => score > 0)
+                .ToList();
+
+            return new TeacherDashboardHalaqaMetricDto
+            {
+                HalqaId = h.Id,
+                HalqaName = h.Name,
+                HalqaType = h.Type,
+                StudentsCount = halaqaStudents.Count,
+                ProgressEntriesThisMonth = progress.Count(p => p.HalqaId == h.Id && p.Date >= monthStart),
+                AttendanceRatePercent = TeacherAttendanceRate(attendance.Where(a => a.HalqaId == h.Id && a.Date >= monthStart).Select(a => a.Status)),
+                AverageLevelScore = latestScores.Count == 0 ? 0 : (int)Math.Round(latestScores.Average())
+            };
+        }).ToList()
+    };
+
+    response.TopStudents = latest.Values
+        .Join(students, p => p.StudentId, s => s.Id, (p, s) => new { Progress = p, Student = s })
+        .OrderByDescending(x => x.Progress.LevelScore)
+        .ThenByDescending(x => x.Progress.MemorizedUntil)
+        .Take(5)
+        .Select(x => new TeacherDashboardStudentProgressDto
+        {
+            StudentId = x.Student.Id,
+            StudentName = x.Student.Name,
+            HalqaName = HalaqaName(x.Student.HalqaId),
+            MemorizedUntil = x.Progress.MemorizedUntil,
+            LatestPageNumber = x.Progress.PageNumber,
+            LevelScore = x.Progress.LevelScore,
+            Points = x.Student.Score,
+            LastProgressDate = x.Progress.Date
+        })
+        .ToList();
+
+    response.FollowUpStudents = BuildTeacherFollowUpStudents(students, HalaqaName, progress, attendance);
+    response.FollowUpAlerts = response.FollowUpStudents.Count;
+
+    return Results.Ok(response);
+}
+
+static async Task<IResult> GetCurrentTeacherHalaqasProgressAsync(ClaimsPrincipal user, AppDbContext context)
+{
+    if (!user.IsInRole("Teacher"))
+        return Results.Forbid();
+
+    var teacherId = GetCurrentTeacherId(user);
+    if (teacherId is null)
+        return Results.Unauthorized();
+
+    var teacher = await context.Teachers.AsNoTracking()
+        .Where(t => t.Id == teacherId.Value)
+        .Select(t => new { t.Id, Name = t.name ?? string.Empty })
+        .FirstOrDefaultAsync();
+
+    if (teacher is null)
+        return Results.NotFound();
+
+    var halaqas = await context.Halqas.AsNoTracking()
+        .Where(h => h.TeacherId == teacherId.Value)
+        .OrderBy(h => h.Name)
+        .Select(h => new { h.Id, Name = h.Name ?? string.Empty, Type = h.Type ?? string.Empty })
+        .ToListAsync();
+
+    var halaqaIds = halaqas.Select(h => h.Id).ToList();
+    var students = halaqaIds.Count == 0
+        ? new List<TeacherDashboardStudentRow>()
+        : await context.Students.AsNoTracking()
+            .Where(s => s.HalqaId.HasValue && halaqaIds.Contains(s.HalqaId.Value))
+            .Select(s => new TeacherDashboardStudentRow(s.Id, s.name ?? string.Empty, s.HalqaId, s.score))
+            .ToListAsync();
+
+    var progress = await LoadTeacherProgressRowsAsync(context, teacherId.Value, halaqaIds);
+    var attendance = await LoadTeacherAttendanceRowsAsync(context, teacherId.Value, students.Select(s => s.Id).ToList());
+    var latest = GetLatestTeacherProgressByStudent(progress);
+
+    var response = new TeacherHalaqaProgressResponse
+    {
+        TeacherId = teacher.Id,
+        TeacherName = teacher.Name,
+        TotalHalaqas = halaqas.Count,
+        TotalStudents = students.Count,
+        TotalProgressEntries = progress.Count,
+        AverageAttendanceRatePercent = TeacherAttendanceRate(attendance.Select(a => a.Status))
+    };
+
+    response.Halaqas = halaqas.Select(h =>
+    {
+        var halaqaStudents = students.Where(s => s.HalqaId == h.Id).ToList();
+        var halaqaProgress = progress.Where(p => p.HalqaId == h.Id).ToList();
+        var halaqaAttendance = attendance.Where(a => a.HalqaId == h.Id).ToList();
+        var studentRows = halaqaStudents.Select(s =>
+        {
+            latest.TryGetValue(s.Id, out var last);
+            var memorizedUntil = last?.MemorizedUntil ?? 0;
+
+            return new TeacherStudentProgressDto
+            {
+                StudentId = s.Id,
+                StudentName = s.Name,
+                Points = s.Score,
+                TotalEntries = halaqaProgress.Count(p => p.StudentId == s.Id),
+                LatestJuzNumber = last?.JuzNumber ?? 0,
+                LatestPageNumber = last?.PageNumber ?? 0,
+                MemorizedUntil = memorizedUntil,
+                NextTarget = last?.NextTarget ?? 0,
+                LevelScore = last?.LevelScore ?? 0,
+                AttendanceRatePercent = TeacherAttendanceRate(halaqaAttendance.Where(a => a.StudentId == s.Id).Select(a => a.Status)),
+                MemorizationPercent = TeacherMemorizationPercent(memorizedUntil),
+                LastProgressDate = last?.Date
+            };
+        }).OrderByDescending(s => s.LastProgressDate ?? DateTime.MinValue).ToList();
+
+        return new TeacherHalaqaProgressDto
+        {
+            HalqaId = h.Id,
+            HalqaName = h.Name,
+            HalqaType = h.Type,
+            StudentsCount = halaqaStudents.Count,
+            ProgressEntriesCount = halaqaProgress.Count,
+            AttendanceRatePercent = TeacherAttendanceRate(halaqaAttendance.Select(a => a.Status)),
+            AverageLevelScore = studentRows.Count == 0 ? 0 : (int)Math.Round(studentRows.Average(s => s.LevelScore)),
+            AverageMemorizationPercent = studentRows.Count == 0 ? 0 : (int)Math.Round(studentRows.Average(s => s.MemorizationPercent)),
+            LastProgressDate = halaqaProgress.OrderByDescending(p => p.Date).Select(p => (DateTime?)p.Date).FirstOrDefault(),
+            Students = studentRows
+        };
+    }).ToList();
+
+    return Results.Ok(response);
+}
+
+static Guid? GetCurrentTeacherId(ClaimsPrincipal user)
+{
+    var value = user.FindFirstValue("UserIdentifier") ?? user.FindFirstValue(ClaimTypes.NameIdentifier);
+    return Guid.TryParse(value, out var id) ? id : null;
+}
+
+static async Task<List<TeacherDashboardProgressRow>> LoadTeacherProgressRowsAsync(AppDbContext context, Guid teacherId, List<Guid> halaqaIds)
+{
+    return halaqaIds.Count == 0
+        ? new List<TeacherDashboardProgressRow>()
+        : await context.ProgressEntries.AsNoTracking()
+            .Where(p => p.TeacherId == teacherId && !p.IsDeleted && halaqaIds.Contains(p.HalqaId))
+            .Select(p => new TeacherDashboardProgressRow(p.Id, p.StudentId, p.HalqaId, p.JuzNumber, p.PageNumber, p.MemorizedUntil, p.NextTarget, p.LevelScore, p.Date))
+            .ToListAsync();
+}
+
+static async Task<List<TeacherDashboardAttendanceRow>> LoadTeacherAttendanceRowsAsync(AppDbContext context, Guid teacherId, List<Guid> studentIds)
+{
+    return studentIds.Count == 0
+        ? new List<TeacherDashboardAttendanceRow>()
+        : await context.Attendances.AsNoTracking()
+            .Where(a => a.TeacherId == teacherId && studentIds.Contains(a.StudentId))
+            .Select(a => new TeacherDashboardAttendanceRow(a.StudentId, a.HalqeSession.HalqaId, a.Status, a.HalqeSession.date))
+            .ToListAsync();
+}
+
+static Dictionary<Guid, TeacherDashboardProgressRow> GetLatestTeacherProgressByStudent(IEnumerable<TeacherDashboardProgressRow> rows)
+{
+    return rows.GroupBy(p => p.StudentId).ToDictionary(g => g.Key, g => g.OrderByDescending(p => p.Date).First());
+}
+
+static int TeacherAttendanceRate(IEnumerable<AttendanceStatus> statuses)
+{
+    var list = statuses.ToList();
+    if (list.Count == 0)
+        return 0;
+
+    var attended = list.Count(status => status == AttendanceStatus.Present || status == AttendanceStatus.Late);
+    return (int)Math.Round(attended * 100.0 / list.Count);
+}
+
+static int TeacherMemorizationPercent(int value)
+{
+    return value <= 0 ? 0 : Math.Clamp((int)Math.Round(value * 100.0 / 604), 0, 100);
+}
+
+static List<TeacherDashboardStudentAlertDto> BuildTeacherFollowUpStudents(
+    List<TeacherDashboardStudentRow> students,
+    Func<Guid?, string> halaqaName,
+    List<TeacherDashboardProgressRow> progress,
+    List<TeacherDashboardAttendanceRow> attendance)
+{
+    var recentStart = DateTime.UtcNow.Date.AddDays(-30);
+    var followUpStart = DateTime.UtcNow.Date.AddDays(-14);
+    var result = attendance
+        .Where(a => a.Date >= recentStart && a.Status == AttendanceStatus.Absent)
+        .GroupBy(a => a.StudentId)
+        .OrderByDescending(g => g.Count())
+        .Take(5)
+        .Select(g =>
+        {
+            var student = students.FirstOrDefault(s => s.Id == g.Key);
+            return new TeacherDashboardStudentAlertDto
+            {
+                StudentId = g.Key,
+                StudentName = student?.Name ?? string.Empty,
+                HalqaName = halaqaName(student?.HalqaId),
+                Reason = "غياب متكرر خلال آخر 30 يوم",
+                Count = g.Count()
+            };
+        })
+        .ToList();
+
+    if (result.Count < 5)
+    {
+        result.AddRange(students
+            .Where(s => !progress.Any(p => p.StudentId == s.Id && p.Date >= followUpStart) && result.All(r => r.StudentId != s.Id))
+            .Take(5 - result.Count)
+            .Select(s => new TeacherDashboardStudentAlertDto
+            {
+                StudentId = s.Id,
+                StudentName = s.Name,
+                HalqaName = halaqaName(s.HalqaId),
+                Reason = "لا يوجد تقدم مسجل خلال آخر 14 يوم",
+                Count = 0
+            }));
+    }
+
+    return result;
+}
+
+internal sealed record TeacherDashboardStudentRow(Guid Id, string Name, Guid? HalqaId, int Score);
+internal sealed record TeacherDashboardProgressRow(Guid Id, Guid StudentId, Guid HalqaId, int JuzNumber, int PageNumber, int MemorizedUntil, int NextTarget, int LevelScore, DateTime Date);
+internal sealed record TeacherDashboardAttendanceRow(Guid StudentId, Guid HalqaId, AttendanceStatus Status, DateTime Date);
+

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Data;
@@ -10,7 +10,9 @@ namespace Moeen.Api.Infrastructure.Data
     {
         private static readonly Guid DevelopmentMosqueId = Guid.Parse("11111111-1111-1111-1111-111111111111");
         private static readonly Guid DevelopmentSupervisorId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        private static readonly Guid DevelopmentTeacherId = Guid.Parse("33333333-3333-3333-3333-333333333333");
         public const string DevelopmentSupervisorEmail = "supervisor@moeen.local";
+        public const string DevelopmentTeacherEmail = "teacher@moeen.local";
         private const string DevelopmentSupervisorPasswordConfigurationKey = "SeedUsers:DevelopmentSupervisorPassword";
 
         public static async Task SeedRolesAsync(RoleManager<IdentityRole<Guid>> roleManager)
@@ -45,6 +47,7 @@ namespace Moeen.Api.Infrastructure.Data
             await SeedRolesAsync(roleManager);
             await SeedDevelopmentMosqueAsync(context);
             await SeedDevelopmentSupervisorAsync(context, userManager, developmentSupervisorPassword);
+            await SeedDevelopmentTeacherAsync(context, userManager, developmentSupervisorPassword);
         }
 
         private static async Task SeedDevelopmentMosqueAsync(AppDbContext context)
@@ -82,6 +85,83 @@ namespace Moeen.Api.Infrastructure.Data
             }
 
             await context.SaveChangesAsync();
+        }
+
+        private static async Task SeedDevelopmentTeacherAsync(AppDbContext context, UserManager<User> userManager, string developmentPassword)
+        {
+            var teacher = await context.Teachers.FirstOrDefaultAsync(x => x.Id == DevelopmentTeacherId);
+            var existingTeacherUser = await userManager.FindByIdAsync(DevelopmentTeacherId.ToString())
+                                      ?? await userManager.FindByEmailAsync(DevelopmentTeacherEmail);
+
+            if (teacher == null && existingTeacherUser == null)
+            {
+                teacher = new Teacher
+                {
+                    Id = DevelopmentTeacherId,
+                    UserName = DevelopmentTeacherEmail,
+                    Email = DevelopmentTeacherEmail,
+                    EmailConfirmed = true,
+                    name = "معلم معين التجريبي",
+                    gender = "Male",
+                    font_size = 16,
+                    role = (int)Roles.Teacher,
+                    theme = "light",
+                    profile_imageUrl = null,
+                    created_at = DateTime.UtcNow,
+                    JoinedAt = DateTime.UtcNow,
+                    MosqueId = DevelopmentMosqueId,
+                    Bio = "معلم seed محلي لاختبار لوحة المعلم والترقية.",
+                    assigned_at = DateTime.UtcNow.ToString("yyyy-MM-dd"),
+                    complaints = new List<Complaint>(),
+                    PosInteractions = new List<PosInteraction>(),
+                    halaqas = new List<Halqa>(),
+                    ProgressEntrys = new List<ProgressEntry>(),
+                    Attendances = new List<Attendance>()
+                };
+
+                var result = await userManager.CreateAsync(teacher, developmentPassword);
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    throw new InvalidOperationException($"Failed to seed development teacher: {errors}");
+                }
+            }
+            else
+            {
+                var userToUpdate = (User?)teacher ?? existingTeacherUser;
+                if (userToUpdate == null)
+                    throw new InvalidOperationException("Development teacher seed is in an invalid state.");
+
+                userToUpdate.UserName = DevelopmentTeacherEmail;
+                userToUpdate.Email = DevelopmentTeacherEmail;
+                userToUpdate.EmailConfirmed = true;
+                userToUpdate.role = (int)Roles.Teacher;
+
+                if (teacher != null)
+                {
+                    teacher.name = "معلم معين التجريبي";
+                    teacher.MosqueId = DevelopmentMosqueId;
+                    teacher.Bio = string.IsNullOrWhiteSpace(teacher.Bio) ? "معلم seed محلي لاختبار لوحة المعلم والترقية." : teacher.Bio;
+                    teacher.assigned_at = string.IsNullOrWhiteSpace(teacher.assigned_at) ? DateTime.UtcNow.ToString("yyyy-MM-dd") : teacher.assigned_at;
+                    await context.SaveChangesAsync();
+                }
+                else
+                {
+                    userToUpdate.name = "معلم معين التجريبي";
+                    var updateResult = await userManager.UpdateAsync(userToUpdate);
+                    if (!updateResult.Succeeded)
+                    {
+                        var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+                        throw new InvalidOperationException($"Failed to update development teacher user: {errors}");
+                    }
+                }
+            }
+
+            var teacherIdentityUser = (User?)teacher ?? existingTeacherUser;
+            if (teacherIdentityUser == null)
+                throw new InvalidOperationException("Development teacher user was not created.");
+
+            await EnsureDevelopmentUserHasOnlyRoleAsync(userManager, teacherIdentityUser, Roles.Teacher, "development teacher");
         }
 
         private static async Task SeedDevelopmentSupervisorAsync(AppDbContext context, UserManager<User> userManager, string developmentSupervisorPassword)
@@ -149,15 +229,40 @@ namespace Moeen.Api.Infrastructure.Data
                 }
             }
 
-            if (!await userManager.IsInRoleAsync(supervisor, Roles.Admin.ToString()))
+            await EnsureDevelopmentUserHasOnlyRoleAsync(userManager, supervisor, Roles.Admin, "development supervisor");
+        }
+        private static async Task EnsureDevelopmentUserHasOnlyRoleAsync(
+            UserManager<User> userManager,
+            User user,
+            Roles desiredRole,
+            string seedName)
+        {
+            var desiredRoleName = desiredRole.ToString();
+            var currentRoles = await userManager.GetRolesAsync(user);
+            var rolesToRemove = currentRoles
+                .Where(role => !string.Equals(role, desiredRoleName, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            if (rolesToRemove.Length > 0)
             {
-                var roleResult = await userManager.AddToRoleAsync(supervisor, Roles.Admin.ToString());
+                var removeResult = await userManager.RemoveFromRolesAsync(user, rolesToRemove);
+                if (!removeResult.Succeeded)
+                {
+                    var errors = string.Join(", ", removeResult.Errors.Select(e => e.Description));
+                    throw new InvalidOperationException($"Failed to remove stale roles from {seedName}: {errors}");
+                }
+            }
+
+            if (!currentRoles.Any(role => string.Equals(role, desiredRoleName, StringComparison.OrdinalIgnoreCase)))
+            {
+                var roleResult = await userManager.AddToRoleAsync(user, desiredRoleName);
                 if (!roleResult.Succeeded)
                 {
                     var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
-                    throw new InvalidOperationException($"Failed to assign development supervisor role: {errors}");
+                    throw new InvalidOperationException($"Failed to assign {seedName} role: {errors}");
                 }
             }
         }
+
     }
 }

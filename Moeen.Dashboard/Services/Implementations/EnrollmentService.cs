@@ -22,6 +22,12 @@ namespace Moeen.Dashboard.Application.Services.Implementations
         public async Task<GeneralResponse> AddTeacherAsync(AddTeacherRequest request)
             => await _client.AddTeacherAsync(request);
 
+        public async Task<GeneralResponse> AddSupervisorAsync(AddSupervisorRequest request)
+            => await _client.AddSupervisorAsync(request);
+
+        public async Task<GeneralResponse> PromoteTeacherToSupervisorAsync(Guid teacherId)
+            => await _client.PromoteTeacherToSupervisorAsync(teacherId);
+
         public async Task<GeneralResponse> RegisterParentAsync(RegisterParentRequest request)
             => await _client.RegisterParentAsync(request);
 
@@ -75,6 +81,9 @@ namespace Moeen.Dashboard.Application.Services.Implementations
 
         public async Task<GeneralResponse> DeleteParentAsync(Guid parentId)
             => await _client.DeleteParentAsync(parentId);
+
+        public async Task<GeneralResponse> DeleteSupervisorAsync(Guid supervisorId)
+            => await _client.DeleteSupervisorAsync(supervisorId);
 
         public async Task<GeneralResponse> ExportMembersListAsync(ExportMembersRequest request)
             => await _client.ExportMembersListAsync(request);

@@ -29,6 +29,19 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             return await ReadGeneralResponseAsync(response, "AddTeacher");
         }
 
+        public async Task<GeneralResponse> AddSupervisorAsync(AddSupervisorRequest request)
+        {
+            var response = await _http.PostAsJsonAsync(ApiRoutes.AddSupervisorAsyncRoute, request);
+            return await ReadGeneralResponseAsync(response, "AddSupervisor");
+        }
+
+        public async Task<GeneralResponse> PromoteTeacherToSupervisorAsync(Guid teacherId)
+        {
+            var url = ApiRoutes.PromoteTeacherToSupervisorAsyncRoute.Replace("{teacherId}", teacherId.ToString());
+            var response = await _http.PostAsync(url, content: null);
+            return await ReadGeneralResponseAsync(response, "PromoteTeacherToSupervisor");
+        }
+
         public async Task<GeneralResponse> RegisterParentAsync(RegisterParentRequest request)
         {
             var response = await _http.PostAsJsonAsync(ApiRoutes.RegisterParentAsyncRoute, request);
@@ -179,6 +192,13 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             var url = ApiRoutes.DeleteParentAsyncRoute.Replace("{parentId}", parentId.ToString());
             var response = await _http.DeleteAsync(url);
             return await ReadGeneralResponseAsync(response, "DeleteParent");
+        }
+
+        public async Task<GeneralResponse> DeleteSupervisorAsync(Guid supervisorId)
+        {
+            var url = ApiRoutes.DeleteSupervisorAsyncRoute.Replace("{supervisorId}", supervisorId.ToString());
+            var response = await _http.DeleteAsync(url);
+            return await ReadGeneralResponseAsync(response, "DeleteSupervisor");
         }
 
         public async Task<GeneralResponse> ExportMembersListAsync(ExportMembersRequest request)

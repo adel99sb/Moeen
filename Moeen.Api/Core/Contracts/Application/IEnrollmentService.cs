@@ -17,6 +17,16 @@ namespace Moeen.Api.Core.Contracts.Application
         Task<GeneralResponse> AddTeacherAsync(AddTeacherRequest request);
 
         /// <summary>
+        /// [POST] إضافة مشرف جديد بواسطة المالك
+        /// </summary>
+        Task<GeneralResponse> AddSupervisorAsync(AddSupervisorRequest request);
+
+        /// <summary>
+        /// [POST] ترقية معلم ليصبح مشرفاً
+        /// </summary>
+        Task<GeneralResponse> PromoteTeacherToSupervisorAsync(PromoteTeacherToSupervisorRequest request);
+
+        /// <summary>
         /// تسجيل ولي أمر جديد
         /// </summary>
         Task<GeneralResponse> RegisterParentAsync(RegisterParentRequest request);
@@ -103,6 +113,11 @@ namespace Moeen.Api.Core.Contracts.Application
         /// [DELETE] حذف سجل ولي أمر نهائيًا
         /// </summary>
         Task<GeneralResponse> DeleteParentAsync(DeleteParentRequest request);
+
+        /// <summary>
+        /// [DELETE] حذف سجل مشرف نهائيًا
+        /// </summary>
+        Task<GeneralResponse> DeleteSupervisorAsync(DeleteSupervisorRequest request);
 
         /// <summary>
         /// تصدير قائمة الأعضاء

@@ -4,10 +4,10 @@ namespace Moeen.Shared.Requests.Enrollment
 {
     public class SearchMembersRequest
     {
-        public string Name { get; set; }
-        public string Email { get; set; }
-        public string Phone { get; set; }
-        public string MemberType { get; set; } // Student, Teacher, Parent, Supervisor
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public string MemberType { get; set; } = string.Empty; // Student, Teacher, Parent, Supervisor
         public Guid? MosqueId { get; set; }
         public int? Status { get; set; }
         public DateTime? JoinedFrom { get; set; }
