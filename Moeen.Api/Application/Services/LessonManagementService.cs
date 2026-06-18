@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.Core.Entities;
@@ -119,51 +120,107 @@ namespace Moeen.Api.Application.Services
         public async Task<GeneralResponse> GetWeeklyLessonDashboardAsync(GetWeeklyLessonDashboardRequest request)
         {
             var teacherId = _currentUserService.CurrentUserId;
-            if (!teacherId.HasValue)
+            if (!teacherId.HasValue || !IsCurrentUserTeacher())
                 return GeneralResponse.Unauthorized("غير مصرح.");
 
             var date = (request?.Date ?? DateTime.UtcNow).Date;
 
-            var circles = await _context.Set<SaturdayHalqa>()
-                .Include(c => c.Students)
-                .Include(c => c.SaturdayLessons)
-                .Where(c => c.TeacherId == teacherId.Value)
+            var regularCircles = await _context.Halqas
+                .AsNoTracking()
+                .Where(h => h.TeacherId == teacherId.Value)
+                .Select(h => new CircleLookup(h.Id, h.Name ?? string.Empty))
                 .ToListAsync();
 
-            var attendances = await _context.Attendances
-                .Include(a => a.HalqeSession)
-                .Where(a => a.HalqeSession.date == date)
+            var regularCircleIds = regularCircles
+                .Select(circle => circle.Id)
+                .ToHashSet();
+
+            var fallbackCircles = await _context.Set<SaturdayHalqa>()
+                .AsNoTracking()
+                .Where(h =>
+                    h.TeacherId == teacherId.Value &&
+                    !regularCircleIds.Contains(h.Id) &&
+                    _context.Set<SaturdayLesson>().Any(l => l.TeacherId == teacherId.Value && l.SaturdayHalqeId == h.Id && !l.HalqaId.HasValue))
+                .Select(h => new CircleLookup(h.Id, h.name ?? string.Empty))
                 .ToListAsync();
+
+            var circles = regularCircles
+                .Concat(fallbackCircles)
+                .OrderBy(c => c.Name)
+                .ToList();
+
+            var circleIds = circles.Select(c => c.Id).ToList();
+
+            var lessons = await _context.Set<SaturdayLesson>().AsNoTracking()
+                .Include(l => l.WeeklyLesson)
+                .Where(l =>
+                    l.TeacherId == teacherId.Value ||
+                    (l.HalqaId.HasValue && circleIds.Contains(l.HalqaId.Value)) ||
+                    (l.SaturdayHalqeId != Guid.Empty && circleIds.Contains(l.SaturdayHalqeId)))
+                .ToListAsync();
+
+            var lessonIds = lessons.Select(l => l.Id).ToList();
+            var attendances = lessonIds.Count == 0
+                ? new List<Attendance>()
+                : await _context.Attendances.AsNoTracking()
+                    .Include(a => a.HalqeSession)
+                    .Where(a => lessonIds.Contains(a.SaturdayLessonId) && a.HalqeSession.date == date)
+                    .ToListAsync();
+
+            var studentRows = regularCircleIds.Count == 0
+                ? new List<LessonStudentLookup>()
+                : (await _context.Students.AsNoTracking()
+                    .Where(s => s.HalqaId.HasValue && regularCircleIds.Contains(s.HalqaId.Value))
+                    .Select(s => new
+                    {
+                        s.Id,
+                        Name = s.name ?? string.Empty,
+                        s.HalqaId
+                    })
+                    .ToListAsync())
+                    .Select(s => new LessonStudentLookup(s.Id, s.Name, s.HalqaId!.Value))
+                    .ToList();
+
+            string ResolveLessonTitle(SaturdayLesson lesson)
+                => !string.IsNullOrWhiteSpace(lesson.WeeklyLesson?.Title)
+                    ? lesson.WeeklyLesson.Title
+                    : $"الدرس {lesson.lesson_number}";
 
             var dashboard = new WeeklyLessonDashboardDto
             {
                 Date = date,
                 Circles = circles.Select(circle =>
                 {
-                    var currentLesson = circle.SaturdayLessons
-                        .OrderByDescending(l => l.lesson_number)
+                    var currentLesson = lessons
+                        .Where(l => ResolveLessonCircleId(l) == circle.Id)
+                        .OrderBy(l => l.start_time)
+                        .ThenBy(l => l.lesson_number)
                         .FirstOrDefault();
 
-                    var students = circle.Students.Select(student =>
-                    {
-                        var status = attendances.FirstOrDefault(a =>
-                            a.StudentId == student.Id && a.SaturdayLessonId == currentLesson?.Id);
-
-                        return new LessonStudentStatusDto
+                    var students = studentRows
+                        .Where(student => student.HalqaId == circle.Id)
+                        .OrderBy(student => student.Name)
+                        .Select(student =>
                         {
-                            StudentId = student.Id,
-                            StudentName = student.name,
-                            Status = status?.Status.ToString() ?? "غير مسجل",
-                            Points = student.score
-                        };
-                    }).ToList();
+                            var status = attendances.FirstOrDefault(a =>
+                                a.StudentId == student.Id && a.SaturdayLessonId == currentLesson?.Id);
+
+                            return new LessonStudentStatusDto
+                            {
+                                StudentId = student.Id,
+                                StudentName = student.Name,
+                                Status = status?.Status.ToString() ?? "غير مسجل",
+                                Points = 0
+                            };
+                        })
+                        .ToList();
 
                     return new CircleLessonCardDto
                     {
                         CircleId = circle.Id,
-                        CircleName = circle.name,
+                        CircleName = circle.Name,
                         CurrentLessonId = currentLesson?.Id,
-                        CurrentLessonTitle = currentLesson == null ? "لا يوجد" : $"الدرس {currentLesson.lesson_number}",
+                        CurrentLessonTitle = currentLesson == null ? "لا يوجد" : ResolveLessonTitle(currentLesson),
                         Students = students
                     };
                 }).ToList()
@@ -174,20 +231,37 @@ namespace Moeen.Api.Application.Services
 
         public async Task<GeneralResponse> RecordLessonAttendanceAsync(RecordAttendanceRequest request)
         {
-            if (request == null || request.LessonId == Guid.Empty || request.Entries.Count == 0)
+            if (request == null || request.LessonId == Guid.Empty || request.Entries == null || request.Entries.Count == 0)
                 return GeneralResponse.BadRequest("بيانات الحضور غير مكتملة.");
 
             var teacherId = _currentUserService.CurrentUserId;
-            if (!teacherId.HasValue)
+            if (!teacherId.HasValue || !IsCurrentUserTeacher())
                 return GeneralResponse.Unauthorized("غير مصرح.");
 
-            var lesson = await _context.Set<SaturdayLesson>().FindAsync(request.LessonId);
+            var lesson = await _context.Set<SaturdayLesson>().FirstOrDefaultAsync(l => l.Id == request.LessonId);
             if (lesson == null)
                 return GeneralResponse.NotFound("الدرس غير موجود.");
 
-            var halqaId = ResolveHalqaId(lesson.SaturdayHalqeId);
+            var halqaId = await ResolveCanonicalHalqaIdAsync(lesson);
+
             if (halqaId == Guid.Empty)
                 return GeneralResponse.BadRequest("لا توجد حلقة مرتبطة بالدرس.");
+
+            var ownsLesson = lesson.TeacherId == teacherId.Value
+                || await _context.Halqas.AnyAsync(h => h.Id == halqaId && h.TeacherId == teacherId.Value)
+                || await _context.Set<SaturdayHalqa>().AnyAsync(h => h.Id == halqaId && h.TeacherId == teacherId.Value);
+
+            if (!ownsLesson)
+                return GeneralResponse.BadRequest("هذا الدرس غير تابع لحلقات المعلم الحالي.");
+
+            var requestedStudentIds = request.Entries.Select(e => e.StudentId).Distinct().ToList();
+            var validStudentIds = await _context.Students.AsNoTracking()
+                .Where(s => requestedStudentIds.Contains(s.Id) && s.HalqaId == halqaId)
+                .Select(s => s.Id)
+                .ToListAsync();
+
+            if (validStudentIds.Count != requestedStudentIds.Count)
+                return GeneralResponse.BadRequest("يوجد طلاب غير تابعين لهذه الحلقة.");
 
             await using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -259,6 +333,14 @@ namespace Moeen.Api.Application.Services
             if (request == null || request.CircleId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرف الحلقة مطلوب.");
 
+            var teacherId = _currentUserService.CurrentUserId;
+            if (!teacherId.HasValue || !IsCurrentUserTeacher())
+                return GeneralResponse.Unauthorized("غير مصرح.");
+
+            var teacherCircleIds = await GetTeacherCircleIdsAsync(teacherId.Value);
+            if (!teacherCircleIds.Contains(request.CircleId))
+                return GeneralResponse.BadRequest("هذه الحلقة غير تابعة للمعلم الحالي.");
+
             var fromDate = (request.FromDate ?? DateTime.UtcNow.AddDays(-30)).Date;
             var toDate = (request.ToDate ?? DateTime.UtcNow).Date;
 
@@ -266,12 +348,14 @@ namespace Moeen.Api.Application.Services
                 from a in _context.Attendances.AsNoTracking()
                 join l in _context.Set<SaturdayLesson>().AsNoTracking() on a.SaturdayLessonId equals l.Id
                 join s in _context.HalqaSessions.AsNoTracking() on a.HalqeSessionId equals s.Id
-                where l.SaturdayHalqeId == request.CircleId && s.date >= fromDate && s.date <= toDate
-                group new { a, l, s } by new { a.SaturdayLessonId, s.date, l.lesson_number } into g
+                where ((l.HalqaId.HasValue && l.HalqaId.Value == request.CircleId) || (!l.HalqaId.HasValue && l.SaturdayHalqeId == request.CircleId))
+                    && s.date >= fromDate
+                    && s.date <= toDate
+                group new { a, l, s } by new { a.SaturdayLessonId, s.date, l.lesson_number, WeeklyTitle = l.WeeklyLesson != null ? l.WeeklyLesson.Title : string.Empty } into g
                 select new LessonHistoryItemDto
                 {
                     LessonId = g.Key.SaturdayLessonId,
-                    LessonTitle = $"الدرس {g.Key.lesson_number}",
+                    LessonTitle = string.IsNullOrWhiteSpace(g.Key.WeeklyTitle) ? $"الدرس {g.Key.lesson_number}" : g.Key.WeeklyTitle,
                     Date = g.Key.date,
                     TotalStudents = g.Count(),
                     PresentCount = g.Count(x => x.a.Status == AttendanceStatus.Present),
@@ -294,6 +378,9 @@ namespace Moeen.Api.Application.Services
 
         public async Task<GeneralResponse> GetCirclesOverviewAsync(GetCirclesOverviewRequest request)
         {
+            if (!CanManageWeeklyLessons())
+                return GeneralResponse.Unauthorized("غير مصرح.");
+
             var circles = await _context.Set<SaturdayHalqa>()
                 .Include(c => c.Teacher)
                 .Include(c => c.Students)
@@ -323,6 +410,9 @@ namespace Moeen.Api.Application.Services
 
         public async Task<GeneralResponse> GetManagedWeeklyLessonsAsync()
         {
+            if (!CanManageWeeklyLessons())
+                return GeneralResponse.Unauthorized("غير مصرح.");
+
             var lessons = await _context.WeeklyLessons
                 .AsNoTracking()
                 .Include(l => l.Schedules)
@@ -341,6 +431,9 @@ namespace Moeen.Api.Application.Services
 
         public async Task<GeneralResponse> CreateWeeklyLessonAsync(CreateWeeklyLessonRequest request)
         {
+            if (!CanManageWeeklyLessons())
+                return GeneralResponse.Unauthorized("غير مصرح.");
+
             if (request == null || string.IsNullOrWhiteSpace(request.Title))
                 return GeneralResponse.BadRequest("عنوان الدرس الأسبوعي مطلوب.");
 
@@ -365,6 +458,9 @@ namespace Moeen.Api.Application.Services
 
         public async Task<GeneralResponse> UpdateWeeklyLessonAsync(UpdateWeeklyLessonRequest request)
         {
+            if (!CanManageWeeklyLessons())
+                return GeneralResponse.Unauthorized("غير مصرح.");
+
             if (request == null || request.Id == Guid.Empty || string.IsNullOrWhiteSpace(request.Title))
                 return GeneralResponse.BadRequest("بيانات الدرس الأسبوعي غير مكتملة.");
 
@@ -387,6 +483,9 @@ namespace Moeen.Api.Application.Services
 
         public async Task<GeneralResponse> DeleteWeeklyLessonAsync(Guid weeklyLessonId)
         {
+            if (!CanManageWeeklyLessons())
+                return GeneralResponse.Unauthorized("غير مصرح.");
+
             if (weeklyLessonId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرف الدرس الأسبوعي مطلوب.");
 
@@ -408,30 +507,45 @@ namespace Moeen.Api.Application.Services
 
         public async Task<GeneralResponse> CreateWeeklyLessonAssignmentAsync(CreateWeeklyLessonAssignmentRequest request)
         {
+            if (!CanManageWeeklyLessons())
+                return GeneralResponse.Unauthorized("غير مصرح.");
+
             var validation = await ValidateWeeklyLessonAssignmentAsync(request.WeeklyLessonId, request.TeacherId, request.HalqaId, request.StartTime, request.EndTime);
             if (!validation.Success)
                 return validation;
 
-            var assignment = new SaturdayLesson
+            try
             {
-                Id = Guid.NewGuid(),
-                WeeklyLessonId = request.WeeklyLessonId,
-                SaturdayHalqeId = request.HalqaId,
-                HalqaId = request.HalqaId,
-                TeacherId = request.TeacherId,
-                lesson_number = 1,
-                start_time = request.StartTime,
-                end_time = request.EndTime
-            };
+                var legacySaturdayHalqa = await EnsureLegacySaturdayHalqaAsync(request.HalqaId, request.TeacherId);
 
-            await _context.Set<SaturdayLesson>().AddAsync(assignment);
-            await _context.SaveChangesAsync();
+                var assignment = new SaturdayLesson
+                {
+                    Id = Guid.NewGuid(),
+                    WeeklyLessonId = request.WeeklyLessonId,
+                    SaturdayHalqeId = legacySaturdayHalqa.Id,
+                    HalqaId = request.HalqaId,
+                    TeacherId = request.TeacherId,
+                    lesson_number = 1,
+                    start_time = request.StartTime,
+                    end_time = request.EndTime
+                };
 
-            return GeneralResponse.Ok("تم إضافة موعد الحلقة للدرس الأسبوعي.");
+                await _context.Set<SaturdayLesson>().AddAsync(assignment);
+                await _context.SaveChangesAsync();
+
+                return GeneralResponse.Ok("تم إضافة موعد الحلقة للدرس الأسبوعي.");
+            }
+            catch (DbUpdateException ex) when (TryMapWeeklyLessonAssignmentDbError(ex) is GeneralResponse error)
+            {
+                return error;
+            }
         }
 
         public async Task<GeneralResponse> UpdateWeeklyLessonAssignmentAsync(UpdateWeeklyLessonAssignmentRequest request)
         {
+            if (!CanManageWeeklyLessons())
+                return GeneralResponse.Unauthorized("غير مصرح.");
+
             if (request == null || request.Id == Guid.Empty)
                 return GeneralResponse.BadRequest("معرف الموعد مطلوب.");
 
@@ -439,23 +553,35 @@ namespace Moeen.Api.Application.Services
             if (assignment == null)
                 return GeneralResponse.NotFound("موعد الحلقة غير موجود.");
 
-            var validation = await ValidateWeeklyLessonAssignmentAsync(request.WeeklyLessonId, request.TeacherId, request.HalqaId, request.StartTime, request.EndTime);
+            var validation = await ValidateWeeklyLessonAssignmentAsync(request.WeeklyLessonId, request.TeacherId, request.HalqaId, request.StartTime, request.EndTime, request.Id);
             if (!validation.Success)
                 return validation;
 
-            assignment.WeeklyLessonId = request.WeeklyLessonId;
-            assignment.SaturdayHalqeId = request.HalqaId;
-            assignment.HalqaId = request.HalqaId;
-            assignment.TeacherId = request.TeacherId;
-            assignment.start_time = request.StartTime;
-            assignment.end_time = request.EndTime;
+            try
+            {
+                var legacySaturdayHalqa = await EnsureLegacySaturdayHalqaAsync(request.HalqaId, request.TeacherId);
 
-            await _context.SaveChangesAsync();
-            return GeneralResponse.Ok("تم تعديل موعد الحلقة.");
+                assignment.WeeklyLessonId = request.WeeklyLessonId;
+                assignment.SaturdayHalqeId = legacySaturdayHalqa.Id;
+                assignment.HalqaId = request.HalqaId;
+                assignment.TeacherId = request.TeacherId;
+                assignment.start_time = request.StartTime;
+                assignment.end_time = request.EndTime;
+
+                await _context.SaveChangesAsync();
+                return GeneralResponse.Ok("تم تعديل موعد الحلقة.");
+            }
+            catch (DbUpdateException ex) when (TryMapWeeklyLessonAssignmentDbError(ex) is GeneralResponse error)
+            {
+                return error;
+            }
         }
 
         public async Task<GeneralResponse> DeleteWeeklyLessonAssignmentAsync(Guid assignmentId)
         {
+            if (!CanManageWeeklyLessons())
+                return GeneralResponse.Unauthorized("غير مصرح.");
+
             if (assignmentId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرف الموعد مطلوب.");
 
@@ -512,7 +638,7 @@ namespace Moeen.Api.Application.Services
             return GeneralResponse.Ok("تم جلب دروس الطالب لليوم.", dto);
         }
 
-        private async Task<GeneralResponse> ValidateWeeklyLessonAssignmentAsync(Guid weeklyLessonId, Guid teacherId, Guid halqaId, TimeSpan startTime, TimeSpan endTime)
+        private async Task<GeneralResponse> ValidateWeeklyLessonAssignmentAsync(Guid weeklyLessonId, Guid teacherId, Guid halqaId, TimeSpan startTime, TimeSpan endTime, Guid? assignmentIdToIgnore = null)
         {
             if (weeklyLessonId == Guid.Empty)
                 return GeneralResponse.BadRequest("يرجى اختيار الدرس الأسبوعي.");
@@ -530,12 +656,42 @@ namespace Moeen.Api.Application.Services
             if (!lessonExists)
                 return GeneralResponse.NotFound("الدرس الأسبوعي غير موجود.");
 
-            var halqa = await _context.Halqas.AsNoTracking().FirstOrDefaultAsync(h => h.Id == halqaId);
+            var teacher = await _context.Teachers.AsNoTracking().FirstOrDefaultAsync(t => t.Id == teacherId);
+            if (teacher == null)
+                return GeneralResponse.NotFound("المعلم غير موجود.");
+
+            var halqa = await _context.Halqas
+                .AsNoTracking()
+                .Include(h => h.Fouj)
+                .FirstOrDefaultAsync(h => h.Id == halqaId);
             if (halqa == null)
                 return GeneralResponse.NotFound("الحلقة غير موجودة.");
 
             if (halqa.TeacherId != teacherId)
                 return GeneralResponse.BadRequest("الحلقة المختارة غير تابعة للمعلم المحدد.");
+
+            if (halqa.Fouj == null)
+                return GeneralResponse.BadRequest("الحلقة المختارة غير مرتبطة بفوج صالح.");
+
+            if (teacher.MosqueId != Guid.Empty && teacher.MosqueId != halqa.Fouj.MosqueId)
+                return GeneralResponse.BadRequest("المعلم المختار لا يتبع مسجد الحلقة المحددة.");
+
+            var managedMosqueId = await ResolveManagedMosqueIdAsync();
+            if (managedMosqueId.HasValue && halqa.Fouj.MosqueId != managedMosqueId.Value)
+                return GeneralResponse.BadRequest("الحلقة المختارة خارج نطاق المسجد الذي يديره المشرف الحالي.");
+
+            var duplicateExists = await _context.Set<SaturdayLesson>()
+                .AsNoTracking()
+                .AnyAsync(l =>
+                    l.WeeklyLessonId == weeklyLessonId &&
+                    l.HalqaId == halqaId &&
+                    l.TeacherId == teacherId &&
+                    l.start_time == startTime &&
+                    l.end_time == endTime &&
+                    (!assignmentIdToIgnore.HasValue || l.Id != assignmentIdToIgnore.Value));
+
+            if (duplicateExists)
+                return GeneralResponse.BadRequest("يوجد موعد مطابق لهذه الحلقة ضمن الدرس الأسبوعي.");
 
             return GeneralResponse.Ok("Valid");
         }
@@ -572,8 +728,126 @@ namespace Moeen.Api.Application.Services
             };
         }
 
-        private static Guid ResolveHalqaId(Guid? fallbackHalqaId)
-            => fallbackHalqaId ?? Guid.Empty;
+        private sealed record CircleLookup(Guid Id, string Name);
+        private sealed record LessonStudentLookup(Guid Id, string Name, Guid HalqaId);
+
+        private bool IsCurrentUserTeacher()
+            => _currentUserService.IsInRole(nameof(Roles.Teacher));
+
+        private bool CanManageWeeklyLessons()
+            => _currentUserService.IsAdmin == true || _currentUserService.IsInRole("Supervisor");
+
+        private async Task<Guid?> ResolveManagedMosqueIdAsync()
+        {
+            if (_currentUserService.IsAdmin == true)
+                return null;
+
+            var currentUserId = _currentUserService.CurrentUserId;
+            if (!currentUserId.HasValue || !_currentUserService.IsInRole("Supervisor"))
+                return null;
+
+            return await _context.Supervisors
+                .AsNoTracking()
+                .Where(s => s.Id == currentUserId.Value)
+                .Select(s => (Guid?)s.MosqueId)
+                .FirstOrDefaultAsync();
+        }
+
+        private async Task<SaturdayHalqa> EnsureLegacySaturdayHalqaAsync(Guid halqaId, Guid teacherId)
+        {
+            var legacySaturdayHalqa = await _context.Set<SaturdayHalqa>()
+                .FirstOrDefaultAsync(h => h.Id == halqaId);
+
+            var halqa = await _context.Halqas
+                .Include(h => h.Fouj)
+                .FirstOrDefaultAsync(h => h.Id == halqaId);
+
+            if (halqa == null || halqa.Fouj == null)
+                throw new InvalidOperationException("Halqa must exist before creating a weekly lesson assignment.");
+
+            if (legacySaturdayHalqa == null)
+            {
+                legacySaturdayHalqa = new SaturdayHalqa
+                {
+                    Id = halqa.Id,
+                    TeacherId = teacherId,
+                    name = halqa.Name ?? string.Empty,
+                    age_min = 0,
+                    age_max = 0,
+                    MosqueId = halqa.Fouj.MosqueId,
+                    SaturdayLessons = new List<SaturdayLesson>(),
+                    Students = new List<Student>()
+                };
+
+                await _context.Set<SaturdayHalqa>().AddAsync(legacySaturdayHalqa);
+                return legacySaturdayHalqa;
+            }
+
+            legacySaturdayHalqa.TeacherId = teacherId;
+            legacySaturdayHalqa.name = string.IsNullOrWhiteSpace(halqa.Name) ? legacySaturdayHalqa.name : halqa.Name;
+            legacySaturdayHalqa.MosqueId = halqa.Fouj.MosqueId;
+            return legacySaturdayHalqa;
+        }
+
+        private static GeneralResponse? TryMapWeeklyLessonAssignmentDbError(DbUpdateException ex)
+        {
+            if (ex.InnerException is not SqlException sqlException)
+                return null;
+
+            return sqlException.Number switch
+            {
+                547 => GeneralResponse.BadRequest("تعذر حفظ موعد الحلقة لأن بعض البيانات المرتبطة غير صالحة أو غير مكتملة."),
+                2601 or 2627 => GeneralResponse.BadRequest("يوجد موعد مطابق مسبقاً لهذه الحلقة."),
+                _ => null
+            };
+        }
+
+        private Guid ResolveLessonCircleId(SaturdayLesson lesson)
+        {
+            if (lesson.HalqaId.HasValue && lesson.HalqaId.Value != Guid.Empty)
+                return lesson.HalqaId.Value;
+
+            return lesson.SaturdayHalqeId;
+        }
+
+        private async Task<Guid> ResolveCanonicalHalqaIdAsync(SaturdayLesson lesson)
+        {
+            if (lesson.HalqaId.HasValue && lesson.HalqaId.Value != Guid.Empty)
+                return lesson.HalqaId.Value;
+
+            if (lesson.SaturdayHalqeId == Guid.Empty)
+                return Guid.Empty;
+
+            var halqaId = await _context.Halqas
+                .AsNoTracking()
+                .Where(h => h.Id == lesson.SaturdayHalqeId)
+                .Select(h => h.Id)
+                .FirstOrDefaultAsync();
+
+            return halqaId;
+        }
+
+        private async Task<HashSet<Guid>> GetTeacherCircleIdsAsync(Guid teacherId)
+        {
+            var halqaIds = await _context.Halqas
+                .AsNoTracking()
+                .Where(h => h.TeacherId == teacherId)
+                .Select(h => h.Id)
+                .ToListAsync();
+
+            var fallbackSaturdayIds = await _context.Set<SaturdayHalqa>()
+                .AsNoTracking()
+                .Where(h =>
+                    h.TeacherId == teacherId &&
+                    !halqaIds.Contains(h.Id) &&
+                    _context.Set<SaturdayLesson>().Any(l => l.TeacherId == teacherId && l.SaturdayHalqeId == h.Id && !l.HalqaId.HasValue))
+                .Select(h => h.Id)
+                .ToListAsync();
+
+            return halqaIds
+                .Concat(fallbackSaturdayIds)
+                .ToHashSet();
+        }
 
         private async Task<HalqaSession> EnsureHalqaSessionAsync(Guid halqaId, DateTime date)
         {

@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.Halqa
@@ -17,5 +18,7 @@ namespace Moeen.Shared.Requests.Halqa
 
         [StringLength(50, ErrorMessage = "Halqa type cannot exceed 50 characters")]
         public string Type { get; set; }
+
+        public List<Guid>? StudentIds { get; set; }
     }
 }

@@ -1,5 +1,7 @@
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
+using Moeen.Shared.Constants;
 using Moeen.Shared.Requests.LessonManagement;
 using Moeen.Shared.Responses;
 using System;
@@ -37,14 +39,17 @@ namespace Moeen.Api.Controllers
         public async Task<ActionResult<GeneralResponse>> GetLessonsByCircle([FromRoute] Guid circleId)
             => Ok(await _lessonService.GetLessonsByCircleAsync(new GetLessonsByCircleRequest { CircleId = circleId }));
 
+        [Authorize]
         [HttpGet("dashboard/weekly")]
         public async Task<ActionResult<GeneralResponse>> GetWeeklyDashboard([FromQuery] DateTime? date)
             => Ok(await _lessonService.GetWeeklyLessonDashboardAsync(new GetWeeklyLessonDashboardRequest { Date = date }));
 
+        [Authorize]
         [HttpPost("attendance")]
         public async Task<ActionResult<GeneralResponse>> RecordLessonAttendance([FromBody] RecordAttendanceRequest request)
             => Ok(await _lessonService.RecordLessonAttendanceAsync(request));
 
+        [Authorize]
         [HttpGet("circles/{circleId:guid}/history")]
         public async Task<ActionResult<GeneralResponse>> GetLessonHistory(
             [FromRoute] Guid circleId,
@@ -61,18 +66,22 @@ namespace Moeen.Api.Controllers
                 PageSize = pageSize
             }));
 
+        [Authorize(Roles = "Admin,Owner,Supervisor")]
         [HttpGet("circles/overview")]
         public async Task<ActionResult<GeneralResponse>> GetCirclesOverview([FromQuery] Guid? mosqueId)
             => Ok(await _lessonService.GetCirclesOverviewAsync(new GetCirclesOverviewRequest { MosqueId = mosqueId }));
 
+        [Authorize(Roles = "Admin,Owner,Supervisor")]
         [HttpGet("weekly-lessons")]
         public async Task<ActionResult<GeneralResponse>> GetManagedWeeklyLessons()
             => Ok(await _lessonService.GetManagedWeeklyLessonsAsync());
 
+        [Authorize(Roles = "Admin,Owner,Supervisor")]
         [HttpPost("weekly-lessons")]
         public async Task<ActionResult<GeneralResponse>> CreateWeeklyLesson([FromBody] CreateWeeklyLessonRequest request)
             => Ok(await _lessonService.CreateWeeklyLessonAsync(request));
 
+        [Authorize(Roles = "Admin,Owner,Supervisor")]
         [HttpPut("weekly-lessons/{weeklyLessonId:guid}")]
         public async Task<ActionResult<GeneralResponse>> UpdateWeeklyLesson([FromRoute] Guid weeklyLessonId, [FromBody] UpdateWeeklyLessonRequest request)
         {
@@ -80,27 +89,31 @@ namespace Moeen.Api.Controllers
             return Ok(await _lessonService.UpdateWeeklyLessonAsync(request));
         }
 
+        [Authorize(Roles = "Admin,Owner,Supervisor")]
         [HttpDelete("weekly-lessons/{weeklyLessonId:guid}")]
         public async Task<ActionResult<GeneralResponse>> DeleteWeeklyLesson([FromRoute] Guid weeklyLessonId)
             => Ok(await _lessonService.DeleteWeeklyLessonAsync(weeklyLessonId));
 
+        [Authorize(Roles = "Admin,Owner,Supervisor")]
         [HttpPost("weekly-lessons/{weeklyLessonId:guid}/rows")]
         public async Task<ActionResult<GeneralResponse>> CreateWeeklyLessonRow([FromRoute] Guid weeklyLessonId, [FromBody] CreateWeeklyLessonAssignmentRequest request)
         {
             request.WeeklyLessonId = weeklyLessonId;
-            return Ok(await _lessonService.CreateWeeklyLessonAssignmentAsync(request));
+            return ToGeneralResponseResult(await _lessonService.CreateWeeklyLessonAssignmentAsync(request));
         }
 
+        [Authorize(Roles = "Admin,Owner,Supervisor")]
         [HttpPut("weekly-lesson-rows/{rowId:guid}")]
         public async Task<ActionResult<GeneralResponse>> UpdateWeeklyLessonRow([FromRoute] Guid rowId, [FromBody] UpdateWeeklyLessonAssignmentRequest request)
         {
             request.Id = rowId;
-            return Ok(await _lessonService.UpdateWeeklyLessonAssignmentAsync(request));
+            return ToGeneralResponseResult(await _lessonService.UpdateWeeklyLessonAssignmentAsync(request));
         }
 
+        [Authorize(Roles = "Admin,Owner,Supervisor")]
         [HttpDelete("weekly-lesson-rows/{rowId:guid}")]
         public async Task<ActionResult<GeneralResponse>> DeleteWeeklyLessonRow([FromRoute] Guid rowId)
-            => Ok(await _lessonService.DeleteWeeklyLessonAssignmentAsync(rowId));
+            => ToGeneralResponseResult(await _lessonService.DeleteWeeklyLessonAssignmentAsync(rowId));
 
         [HttpGet("students/{studentId:guid}/daily-lessons")]
         public async Task<ActionResult<GeneralResponse>> GetStudentDailyLessons(
@@ -111,5 +124,8 @@ namespace Moeen.Api.Controllers
                 StudentId = studentId,
                 Date = date
             }));
+
+        private ActionResult<GeneralResponse> ToGeneralResponseResult(GeneralResponse response)
+            => StatusCode(response?.StatusCode > 0 ? response.StatusCode : StatusCodes.Status200OK, response);
     }
 }

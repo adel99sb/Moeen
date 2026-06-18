@@ -1,20 +1,29 @@
-﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
+using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.infrastructure.Data;
 using Moeen.Shared.Requests.HalqaQuery;
+using Moeen.Shared.Responses.Enrollment;
 using Moeen.Shared.Responses.Halqa;
 using Moeen.Shared.Responses.HalqaQuery;
-using Moeen.Shared.Responses.Enrollment;
 
 namespace Moeen.Api.Application.Services
 {
     public class HalqaQueryService : IHalqaQueryService
     {
-        private readonly AppDbContext _context;
+        private const int StudentRole = 2;
 
-        public HalqaQueryService(AppDbContext context)
+        private readonly AppDbContext _context;
+        private readonly ICurrentUserService _currentUserService;
+
+        public HalqaQueryService(AppDbContext context, ICurrentUserService currentUserService)
         {
             _context = context;
+            _currentUserService = currentUserService;
         }
 
         public async Task<List<HalqaDto>> GetAllHalqasAsync(Guid? mosqueId = null)
@@ -40,11 +49,55 @@ namespace Moeen.Api.Application.Services
                     TeacherId = h.TeacherId ?? Guid.Empty,
                     TeacherName = h.Teacher != null ? h.Teacher.name : string.Empty,
                     Type = h.Type,
-                    StudentsCount = h.ProgressEntries
-                        .Where(pe => !pe.IsDeleted)
-                        .Select(pe => pe.StudentId)
-                        .Distinct()
-                        .Count()
+                    StudentsCount = h.Students.Count(s => s.role == StudentRole)
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<HalqaAssignmentStudentOptionDto>> GetAssignmentStudentsAsync(Guid? halqaId = null)
+        {
+            var managedMosqueId = await ResolveManagedMosqueIdAsync();
+
+            if (halqaId.HasValue && halqaId.Value != Guid.Empty)
+            {
+                var halqaExists = await _context.Halqas
+                    .Include(h => h.Fouj)
+                    .AnyAsync(h => h.Id == halqaId.Value && (!managedMosqueId.HasValue || h.Fouj.MosqueId == managedMosqueId.Value));
+
+                if (!halqaExists)
+                    throw new ArgumentException("الحلقة غير موجودة أو لا يمكنك إدارتها.");
+            }
+
+            var query = _context.Students
+                .AsNoTracking()
+                .Include(s => s.Halqa)
+                .Where(s => s.role == StudentRole);
+
+            if (managedMosqueId.HasValue)
+                query = query.Where(s => s.MosqueId == managedMosqueId.Value);
+
+            if (halqaId.HasValue && halqaId.Value != Guid.Empty)
+            {
+                query = query.Where(s =>
+                    !s.HalqaId.HasValue ||
+                    s.HalqaId == Guid.Empty ||
+                    s.HalqaId == halqaId.Value);
+            }
+            else
+            {
+                query = query.Where(s => !s.HalqaId.HasValue || s.HalqaId == Guid.Empty);
+            }
+
+            return await query
+                .OrderBy(s => s.name)
+                .Select(s => new HalqaAssignmentStudentOptionDto
+                {
+                    Id = s.Id,
+                    Name = s.name ?? string.Empty,
+                    Email = s.Email ?? string.Empty,
+                    IsSelected = halqaId.HasValue && s.HalqaId == halqaId.Value,
+                    HalqaId = s.HalqaId,
+                    HalqaName = s.Halqa != null ? s.Halqa.Name : string.Empty
                 })
                 .ToListAsync();
         }
@@ -59,11 +112,8 @@ namespace Moeen.Api.Application.Services
             if (halqa == null)
                 throw new ArgumentException("Circle not found.", nameof(request.HalqaId));
 
-            // Students count computed in DB (using ProgressEntry relation)
-            var studentsCount = await _context.ProgressEntries
-                .Where(pe => pe.HalqaId == request.HalqaId)
-                .Select(pe => pe.StudentId)
-                .Distinct()
+            var studentsCount = await _context.Students
+                .Where(s => s.role == StudentRole && s.HalqaId == request.HalqaId)
                 .CountAsync();
 
             return new HalqaDto
@@ -72,7 +122,7 @@ namespace Moeen.Api.Application.Services
                 Name = halqa.Name,
                 FoujId = halqa.FoujId,
                 FoujName = halqa.Fouj?.name,
-                TeacherId = (Guid)halqa.TeacherId,
+                TeacherId = halqa.TeacherId ?? Guid.Empty,
                 TeacherName = halqa.Teacher?.name,
                 Type = halqa.Type,
                 StudentsCount = studentsCount
@@ -83,11 +133,9 @@ namespace Moeen.Api.Application.Services
         {
             var filter = request.Filter ?? new StudentFilterDto();
 
-            // Build base query: students that have progress entries for this halqa
             var baseQuery = _context.Students
-                .Where(s => s.progressEntrys.Any(pe => pe.HalqaId == request.HalqaId));
+                .Where(s => s.role == StudentRole && s.HalqaId == request.HalqaId);
 
-            // Apply filters (will be translated to SQL)
             if (!string.IsNullOrWhiteSpace(filter.Name))
                 baseQuery = baseQuery.Where(s => EF.Functions.Like(s.name, $"%{filter.Name}%"));
 
@@ -152,11 +200,8 @@ namespace Moeen.Api.Application.Services
 
         public async Task<HalqaStudentsCountResponse> GetHalqaStudentsCountAsync(GetHalqaStudentsCountRequest request)
         {
-            // Count distinct students who have progress entries for the halqa
-            var count = await _context.ProgressEntries
-                .Where(pe => pe.HalqaId == request.HalqaId)
-                .Select(pe => pe.StudentId)
-                .Distinct()
+            var count = await _context.Students
+                .Where(s => s.role == StudentRole && s.HalqaId == request.HalqaId)
                 .CountAsync();
 
             return new HalqaStudentsCountResponse { Count = count };
@@ -166,29 +211,24 @@ namespace Moeen.Api.Application.Services
         {
             var circleId = request.HalqaId;
 
-            // 1) students count and active students count (two counts, executed in DB)
-            var studentsCountTask = _context.ProgressEntries
-                .Where(pe => pe.HalqaId == circleId)
-                .Select(pe => pe.StudentId)
-                .Distinct()
+            var studentsCountTask = _context.Students
+                .Where(s => s.role == StudentRole && s.HalqaId == circleId)
                 .CountAsync();
 
             var activeCountTask = _context.Students
-                .Where(s => s.progressEntrys.Any(pe => pe.HalqaId == circleId) && s.status != 0)
-                .Select(s => s.Id)
-                .Distinct()
+                .Where(s => s.role == StudentRole && s.HalqaId == circleId && s.status != 0)
                 .CountAsync();
 
-            // 2) average memorization progress (single query)
             var avgMemTask = _context.ProgressEntries
                 .Where(pe => pe.HalqaId == circleId)
                 .Select(pe => (double?)pe.MemorizedUntil)
                 .AverageAsync();
 
-            // 3) sessions in optional range and attendance counts (fetch sessions ids then count attendances)
             var sessionsQuery = _context.HalqaSessions.Where(hs => hs.HalqaId == circleId);
-            if (request.FromDate.HasValue) sessionsQuery = sessionsQuery.Where(hs => hs.date >= request.FromDate.Value);
-            if (request.ToDate.HasValue) sessionsQuery = sessionsQuery.Where(hs => hs.date <= request.ToDate.Value);
+            if (request.FromDate.HasValue)
+                sessionsQuery = sessionsQuery.Where(hs => hs.date >= request.FromDate.Value);
+            if (request.ToDate.HasValue)
+                sessionsQuery = sessionsQuery.Where(hs => hs.date <= request.ToDate.Value);
 
             var sessionsListTask = sessionsQuery
                 .OrderBy(hs => hs.date)
@@ -223,13 +263,12 @@ namespace Moeen.Api.Application.Services
                 ActiveStudentsCount = activeCount,
                 AverageMemorizationProgress = Math.Round(avgMem, 2),
                 AttendanceRate = Math.Round(attendanceRate, 2),
-                AverageEvaluationScore = 0.0 // يحتاج مصدر تقييم خارجي، نترك 0 الآن
+                AverageEvaluationScore = 0.0
             };
         }
 
         public async Task<HalqaAttendanceReportResponse> GetHalqaAttendanceReportAsync(GetHalqaAttendanceReportRequest request)
         {
-            // 1) جلب الجلسات ضمن الفترة
             var sessions = await _context.HalqaSessions
                 .Where(hs => hs.HalqaId == request.HalqaId && hs.date >= request.FromDate && hs.date <= request.ToDate)
                 .OrderBy(hs => hs.date)
@@ -238,7 +277,6 @@ namespace Moeen.Api.Application.Services
 
             var sessionIds = sessions.Select(s => s.Id).ToList();
 
-            // 2) جلب الحضور مرة واحدة، مجمّع حسب HalqeSessionId
             var attendanceGroups = new Dictionary<Guid, int>();
             if (sessionIds.Any())
             {
@@ -262,13 +300,13 @@ namespace Moeen.Api.Application.Services
                 DailyRecords = new List<HalqaAttendanceDailyRecordDto>()
             };
 
-            foreach (var s in sessions)
+            foreach (var session in sessions)
             {
-                attendanceGroups.TryGetValue(s.Id, out int presentCount);
+                attendanceGroups.TryGetValue(session.Id, out int presentCount);
 
                 result.DailyRecords.Add(new HalqaAttendanceDailyRecordDto
                 {
-                    Date = s.date.Date,
+                    Date = session.date.Date,
                     PresentCount = presentCount,
                     AbsentCount = 0,
                     LateCount = 0,
@@ -277,6 +315,18 @@ namespace Moeen.Api.Application.Services
             }
 
             return result;
+        }
+
+        private async Task<Guid?> ResolveManagedMosqueIdAsync()
+        {
+            var currentUserId = _currentUserService.CurrentUserId;
+            if (!currentUserId.HasValue)
+                return null;
+
+            return await _context.Supervisors
+                .Where(s => s.Id == currentUserId.Value)
+                .Select(s => (Guid?)s.MosqueId)
+                .FirstOrDefaultAsync();
         }
     }
 }

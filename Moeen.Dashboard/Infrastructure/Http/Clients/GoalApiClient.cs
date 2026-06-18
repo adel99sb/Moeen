@@ -1,11 +1,8 @@
-﻿using System.Net.Http;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
 using Moeen.Shared.Requests.Goal;
 using Moeen.Shared.Responses;
 
 namespace Moeen.Dashboard.Infrastructure.Http.Clients
-
 {
     public class GoalApiClient
     {
@@ -25,22 +22,19 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
 
         public async Task<GeneralResponse> UpdateProgressRecordAsync(UpdateProgressRecordRequest request)
         {
-            // بناءً على الـ Route في الباك إند: records/{recordId:guid}
-            var response = await _httpClient.PutAsJsonAsync(ApiRoutes.UpdateProgressRecordAsyncRoute, request);
+            var url = ApiRoutes.UpdateProgressRecordAsyncRoute.Replace("{recordId}", request.RecordId.ToString());
+            var response = await _httpClient.PutAsJsonAsync(url, request);
             return await response.Content.ReadFromJsonAsync<GeneralResponse>()
                    ?? GeneralResponse.BadRequest("فشل الاتصال بالسيرفر أثناء تحديث السجل.");
         }
 
         public async Task<GeneralResponse> GetStudentProgressSummaryAsync(GetStudentProgressSummaryRequest request)
         {
-            // تحويل الـ FromQuery إلى Query Strings وتمرير الـ StudentId في الـ Route
             var url = ApiRoutes.GetStudentProgressSummaryAsyncRoute.Replace("{studentId}", request.StudentId.ToString());
-
-            var query = "";
-            if (request.FromDate.HasValue) query += $"fromDate={request.FromDate.Value:yyyy-MM-dd}&";
-            if (request.ToDate.HasValue) query += $"toDate={request.ToDate.Value:yyyy-MM-dd}&";
-
-            if (!string.IsNullOrEmpty(query)) url += "?" + query.TrimEnd('&');
+            var query = new List<string>();
+            if (request.FromDate.HasValue) query.Add($"fromDate={request.FromDate.Value:yyyy-MM-dd}");
+            if (request.ToDate.HasValue) query.Add($"toDate={request.ToDate.Value:yyyy-MM-dd}");
+            if (query.Count > 0) url += "?" + string.Join("&", query);
 
             return await _httpClient.GetFromJsonAsync<GeneralResponse>(url)
                    ?? GeneralResponse.BadRequest("فشل استرجاع ملخص تقدم الطالب.");
@@ -48,15 +42,18 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
 
         public async Task<GeneralResponse> GetStudentProgressHistoryAsync(GetStudentProgressHistoryRequest request)
         {
-            // تركيب الرابط للتاريخ، الترقيم ونوع السجل المطلوب
-            var url = ApiRoutes.GetStudentProgressHistoryAsyncRoute.Replace("{studentId}", request.StudentId.ToString())
-                                                                    .Replace("{pageNumber}", request.PageNumber.ToString())
-                                                                    .Replace("{pageSize}", request.PageSize.ToString());    
+            var url = ApiRoutes.GetStudentProgressHistoryAsyncRoute.Replace("{studentId}", request.StudentId.ToString());
+            var query = new List<string>
+            {
+                $"pageNumber={Math.Max(1, request.PageNumber)}",
+                $"pageSize={Math.Max(1, request.PageSize)}"
+            };
 
-            if (request.FromDate.HasValue) url += $"&fromDate={request.FromDate.Value:yyyy-MM-dd}";
-            if (request.ToDate.HasValue) url += $"&toDate={request.ToDate.Value:yyyy-MM-dd}";
-            if (request.RecordType.HasValue) url += $"&recordType={(int)request.RecordType.Value}";
+            if (request.FromDate.HasValue) query.Add($"fromDate={request.FromDate.Value:yyyy-MM-dd}");
+            if (request.ToDate.HasValue) query.Add($"toDate={request.ToDate.Value:yyyy-MM-dd}");
+            if (request.RecordType.HasValue) query.Add($"recordType={(int)request.RecordType.Value}");
 
+            url += "?" + string.Join("&", query);
             return await _httpClient.GetFromJsonAsync<GeneralResponse>(url)
                    ?? GeneralResponse.BadRequest("فشل استرجاع السجل التفصيلي للطالب.");
         }
@@ -64,13 +61,11 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
         public async Task<GeneralResponse> GetCirclePerformanceOverviewAsync(GetHalqaPerformanceOverviewRequest request)
         {
             var url = ApiRoutes.GetCirclePerformanceOverviewAsyncRoute;
-
-            var query = "";
-            if (request.HalqaId.HasValue) query += $"circleId={request.HalqaId.Value}&";
-            if (request.FromDate.HasValue) query += $"fromDate={request.FromDate.Value:yyyy-MM-dd}&";
-            if (request.ToDate.HasValue) query += $"toDate={request.ToDate.Value:yyyy-MM-dd}&";
-
-            if (!string.IsNullOrEmpty(query)) url += "?" + query.TrimEnd('&');
+            var query = new List<string>();
+            if (request.HalqaId.HasValue) query.Add($"halqaId={request.HalqaId.Value}");
+            if (request.FromDate.HasValue) query.Add($"fromDate={request.FromDate.Value:yyyy-MM-dd}");
+            if (request.ToDate.HasValue) query.Add($"toDate={request.ToDate.Value:yyyy-MM-dd}");
+            if (query.Count > 0) url += "?" + string.Join("&", query);
 
             return await _httpClient.GetFromJsonAsync<GeneralResponse>(url)
                    ?? GeneralResponse.BadRequest("فشل استرجاع لوحة أداء الحلقة.");

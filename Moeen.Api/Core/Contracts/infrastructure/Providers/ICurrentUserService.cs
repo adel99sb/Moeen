@@ -6,6 +6,7 @@
         string CurrentUserName { get; }
         bool? IsActived { get; }
         bool? IsAdmin { get; }
+        bool IsInRole(string roleName);
         string GetBaseUrl(string relativePath);
     }
 }

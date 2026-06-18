@@ -1,446 +1,335 @@
-﻿@page "/Teacher/WeekSessions"
+@page "/Teacher/WeekSessions"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using Moeen.Dashboard.Services.Abstractions
+@using Moeen.Shared.Constants
+@using Moeen.Shared.Requests.LessonManagement
+@using Moeen.Shared.Responses.LessonManagement
+@inject IWeeklyLessonService WeeklyLessonService
+
+<PageTitle>الدروس الأسبوعية</PageTitle>
 
 <style>
-    /* 1. عزل التنسيقات وضبط الاتجاه */
-    .week-sessions-container {
-        direction: rtl;
-        text-align: right;
-        font-family: var(--font-family-main);
-        background-color: var(--color-bg-page);
-        padding-bottom: var(--spacing-pb-container);
-    }
-
-    /* 2. المتغيرات اللونية والخطوط والأبعاد */
-    :root {
-        /* الألوان الأساسية */
-        --color-primary-green: #195042;
-        --color-luxury-beige: #d6cabc;
-        --color-text-dark: #2c3e50;
-        --color-border-light: #e9ecef;
-        --color-bg-page: #f8f9fa;
-        --color-white: #ffffff;
-        --color-border-input: #ced4da;
-        --color-success: #28a745;
-        --color-danger: #dc3545;
-        --color-border-history: #eeeeee;
-        
-        /* ظلال وألوان شبه شفافة */
-        --shadow-card: 0 4px 15px rgba(0,0,0,0.05);
-        --bg-header-overlay: rgba(0,0,0,0.1);
-        --shadow-focus: rgba(25, 80, 66, 0.15);
-        --bg-success-soft: rgba(40, 167, 69, 0.1);
-        
-        /* الخطوط */
-        --font-family-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        
-        /* الأحجام والابعاد */
-        --radius-card: 16px;
-        --radius-badge: 20px;
-        --radius-input: 10px;
-        --radius-btn: 8px;
-        --radius-icon: 50%;
-        
-        --width-points-input: 60px;
-        --height-history-icon: 40px;
-        --width-history-icon: 40px;
-        
-        --spacing-header-py: 2rem;
-        --spacing-card-px: 1.5rem;
-        --spacing-card-py: 1rem;
-        --spacing-body: 1.5rem;
-        --spacing-table-cell-py: 12px;
-        --spacing-table-cell-px: 10px;
-        --spacing-label-py: 6px;
-        --spacing-label-px: 12px;
-        --spacing-select-py: 10px;
-        --spacing-input-py: 5px;
-        --spacing-icon-py: 1rem;
-        --spacing-icon-px: 1.5rem;
-        --spacing-history-item-py: 1rem;
-        --spacing-history-item-px: 1.5rem;
-        
-        --mb-header: 2rem;
-        --mb-card: 1.5rem;
-        --mb-select: 1.5rem;
-        --ml-icon: 15px;
-        --pr-table-first: 15px;
-        
-        --gap-header-actions: 10px;
-        --gap-history: 10px;
-        --gap-labels: 2px;
-        
-        --font-size-title: 1.1rem;
-        --font-size-badge: 0.8rem;
-        --font-size-icon: 1.2rem;
-        --font-size-label: 0.85rem;
-        --font-size-history-badge: 0.7rem;
-        
-        --font-weight-title: 800;
-        --font-weight-th: 700;
-        --font-weight-td: 600;
-        --font-weight-badge: bold;
-        
-        --border-width-header: 4px;
-        --border-width-th: 2px;
-        --border-width-td: 1px;
-        --border-width-label: 1px;
-        --border-width-input: 1px;
-        --border-width-select: 1px;
-        
-        --transition-icon: transform 0.3s ease;
-        --transition-label: all 0.2s;
-    }
-
-    /* 3. رأسية الصفحة */
-    .page-header {
-        background-color: var(--color-primary-green);
-        color: var(--color-luxury-beige);
-        padding: var(--spacing-header-py) 0;
-        margin-bottom: var(--mb-header);
-        border-bottom: var(--border-width-header) solid var(--color-luxury-beige);
-    }
-
-    /* 4. تصميم البطاقة (Card) */
-    .session-card {
-        background: var(--color-white);
-        border-radius: var(--radius-card);
-        box-shadow: var(--shadow-card);
-        overflow: hidden;
-        margin-bottom: var(--mb-card);
-        border: none;
-    }
-
-    /* رأس البطاقة (الجزء البيج) */
-    .card-header-custom {
-        background-color: var(--color-luxury-beige);
-        padding: var(--spacing-card-py) var(--spacing-card-px);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        user-select: none;
-    }
-
-    .card-title {
-        font-weight: var(--font-weight-title);
-        color: var(--color-primary-green);
-        font-size: var(--font-size-title);
-        margin: 0;
-    }
-
-    .card-header-actions {
-        display: flex;
-        align-items: center;
-        gap: var(--gap-header-actions);
-    }
-
-    .count-badge {
-        background-color: var(--color-primary-green);
-        color: var(--color-white);
-        padding: 4px 10px;
-        border-radius: var(--radius-badge);
-        font-size: var(--font-size-badge);
-        font-weight: var(--font-weight-badge);
-    }
-
-    /* أيقونة التدوير */
-    .toggle-icon {
-        transition: var(--transition-icon);
-        color: var(--color-primary-green);
-        font-size: var(--font-size-icon);
-    }
-    
-    /* تدوير الأيقونة عند الفتح */
-    details[open] .toggle-icon {
-        transform: rotate(180deg);
-    }
-
-    /* إخفاء مثلث الديفتلز الافتراضي */
-    summary::-webkit-details-marker { display: none; }
-    summary { list-style: none; }
-
-    /* محتوى البطاقة */
-    .card-body-custom {
-        padding: var(--spacing-body);
-    }
-
-    /* 5. الجدول والتنسيقات الداخلية */
-    .custom-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-    }
-
-    .custom-table th {
-        background-color: var(--color-bg-page);
-        color: var(--color-primary-green);
-        font-weight: var(--font-weight-th);
-        padding: 10px;
-        border-bottom: var(--border-width-th) solid var(--color-luxury-beige);
-        text-align: center;
-    }
-    
-    .custom-table th:first-child { 
-        text-align: right; 
-        padding-right: var(--pr-table-first); 
-    }
-
-    .custom-table td {
-        padding: var(--spacing-table-cell-py) var(--spacing-table-cell-px);
-        border-bottom: var(--border-width-td) solid var(--color-border-light);
-        text-align: center;
-        vertical-align: middle;
-    }
-    
-    .custom-table td:first-child { 
-        text-align: right; 
-        padding-right: var(--pr-table-first); 
-        font-weight: var(--font-weight-td);
-        color: var(--color-text-dark);
-    }
-
-    /* أزرار الحالة */
-    .status-radio { display: none; }
-    
-    .status-label {
-        display: inline-block;
-        padding: var(--spacing-label-py) var(--spacing-label-px);
-        margin: 0 var(--gap-labels);
-        border-radius: var(--radius-btn);
-        border: var(--border-width-label) solid var(--color-border-input);
-        cursor: pointer;
-        font-size: var(--font-size-label);
-        transition: var(--transition-label);
-        background: var(--color-white);
-    }
-
-    /* تنسيق عند اختيار حاضر */
-    .status-radio:checked + .status-label.present {
-        background-color: var(--color-success);
-        color: var(--color-white);
-        border-color: var(--color-success);
-    }
-
-    /* تنسيق عند اختيار غائب */
-    .status-radio:checked + .status-label.absent {
-        background-color: var(--color-danger);
-        color: var(--color-white);
-        border-color: var(--color-danger);
-    }
-
-    /* حقل النقاط */
-    .points-input {
-        width: var(--width-points-input);
-        text-align: center;
-        border: var(--border-width-input) solid var(--color-luxury-beige);
-        border-radius: var(--radius-btn);
-        padding: var(--spacing-input-py);
-        font-weight: var(--font-weight-td);
-        color: var(--color-primary-green);
-    }
-    .points-input:focus {
-        outline: none;
-        border-color: var(--color-primary-green);
-        box-shadow: 0 0 0 0.2rem var(--shadow-focus);
-    }
-
-    /* القائمة المنسدلة للدرس */
-    .lesson-select {
-        width: 100%;
-        padding: var(--spacing-select-py);
-        border: var(--border-width-select) solid var(--color-luxury-beige);
-        border-radius: var(--radius-input);
-        background-color: var(--color-white);
-        color: var(--color-text-dark);
-        margin-bottom: var(--mb-select);
-    }
-
-    /* سجل الدروس السابقة */
-    .history-section {
-        background-color: var(--color-primary-green);
-        border-radius: var(--radius-card);
-        color: var(--color-white);
-        overflow: hidden;
-    }
-    .history-header {
-        padding: var(--spacing-icon-py) var(--spacing-icon-px);
-        background-color: var(--bg-header-overlay);
-        font-weight: var(--font-weight-badge);
-        display: flex;
-        align-items: center;
-        gap: var(--gap-history);
-    }
-    .history-item {
-        background: var(--color-white);
-        color: var(--color-text-dark);
-        padding: var(--spacing-history-item-py) var(--spacing-history-item-px);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: var(--border-width-td) solid var(--color-border-history);
-    }
-    .history-icon {
-        width: var(--width-history-icon); 
-        height: var(--height-history-icon);
-        background: var(--color-luxury-beige);
-        color: var(--color-primary-green);
-        border-radius: var(--radius-icon);
-        display: flex; 
-        align-items: center; 
-        justify-content: center;
-        margin-left: var(--ml-icon);
-    }
+    .week-sessions-container { direction: rtl; text-align: right; background-color: #f8f9fa; min-height: calc(100vh - 70px); padding-bottom: 42px; color: #163f35; }
+    .page-header { background-color: #195042; color: #d6cabc; padding: 42px 0; margin-bottom: 32px; border-bottom: 4px solid #d6cabc; }
+    .summary-strip { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: #fff; border: 1px solid rgba(25, 80, 66, .1); border-radius: 20px; padding: 16px 18px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(25, 80, 66, .06); }
+    .date-input { border: 1.5px solid #d6cabc; border-radius: 12px; padding: 10px 12px; color: #195042; background: #fff; }
+    .session-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 24px; border: 1px solid rgba(25, 80, 66, .08); }
+    .card-header-custom { background-color: #d6cabc; padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+    .card-title { font-weight: 900; color: #195042; font-size: 1.08rem; margin: 0; }
+    .card-header-actions { display: flex; align-items: center; gap: 10px; }
+    .count-badge { background-color: #195042; color: #fff; padding: 4px 10px; border-radius: 20px; font-size: .8rem; font-weight: 800; }
+    .card-body-custom { padding: 22px; }
+    .lesson-label { color: #5a6c7d; font-weight: 800; font-size: .88rem; }
+    .lesson-title-box { margin: 8px 0 18px; border: 1.5px solid #d6cabc; border-radius: 12px; padding: 12px 14px; background: #fbfaf8; color: #195042; font-weight: 900; }
+    .custom-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .custom-table th { background-color: #f8f9fa; color: #195042; font-weight: 800; padding: 12px 10px; border-bottom: 2px solid #d6cabc; text-align: center; }
+    .custom-table th:first-child, .custom-table td:first-child { text-align: right; padding-right: 15px; }
+    .custom-table td { padding: 12px 10px; border-bottom: 1px solid #e9ecef; text-align: center; vertical-align: middle; }
+    .student-name { font-weight: 800; color: #2c3e50; }
+    .status-buttons { display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+    .status-label { display: inline-block; padding: 7px 13px; border-radius: 9px; border: 1px solid #ced4da; cursor: pointer; font-size: .85rem; transition: all .2s; background: #fff; color: #195042; font-weight: 800; }
+    .status-label.present.active { background-color: #28a745; color: #fff; border-color: #28a745; }
+    .status-label.absent.active { background-color: #dc3545; color: #fff; border-color: #dc3545; }
+    .points-input { width: 72px; text-align: center; border: 1px solid #d6cabc; border-radius: 9px; padding: 6px; font-weight: 800; color: #195042; }
+    .save-btn { background: #195042; color: #fff; border: 0; border-radius: 12px; padding: 10px 18px; font-weight: 900; display: inline-flex; align-items: center; gap: 8px; }
+    .save-btn:disabled { opacity: .6; cursor: not-allowed; }
+    .history-section { background-color: #195042; border-radius: 16px; color: #fff; overflow: hidden; margin-top: 12px; }
+    .history-header { padding: 16px 24px; background-color: rgba(0,0,0,0.1); font-weight: 900; display: flex; align-items: center; gap: 10px; }
+    .history-item { background: #fff; color: #2c3e50; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; gap: 12px; }
+    .history-icon { width: 40px; height: 40px; background: #d6cabc; color: #195042; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 15px; flex: 0 0 auto; }
+    .state-box { background: #fff; border: 1px dashed #d6cabc; border-radius: 16px; padding: 28px; text-align: center; color: #667085; }
+    .alert-clean { border-radius: 14px; padding: 12px 14px; margin-bottom: 16px; }
+    .alert-ok { background: #eaf8f0; color: #14723a; border: 1px solid #bde6cc; }
+    .alert-bad { background: #fff1f1; color: #b42318; border: 1px solid #f3c4c4; }
 </style>
 
 <div class="week-sessions-container container-fluid">
-    
-    <!-- رأسية الصفحة -->
     <header class="page-header text-center">
         <div class="container">
-            <h2 class="fw-bold mb-1">دروس الاسبوع</h2>
-            <p class="mb-0 opacity-75">متابعة كل مايخص الدروس</p>
+            <h2 class="fw-bold mb-1">الدروس الأسبوعية</h2>
+            <p class="mb-0 opacity-75">متابعة الدرس الحالي لكل حلقة وحفظ حضور الطلاب ونقاطهم</p>
         </div>
     </header>
 
     <div class="container">
-        <div class="row g-4">
-            
-            <!-- كارد 1: حلقة اليافعين -->
-            <div class="col-lg-6">
-                <details class="session-card" open>
-                    <summary class="card-header-custom">
-                        <h3 class="card-title">حلقة اليافعين</h3>
-                        <div class="card-header-actions">
-                            <span class="count-badge">العدد: 12</span>
-                            <i class="bi bi-chevron-down toggle-icon"></i>
-                        </div>
-                    </summary>
-                    <div class="card-body-custom">
-                        <label class="fw-bold small text-muted">الدرس الحالي من كتاب:</label>
-                        <select class="lesson-select">
-                            <option>رياض الصالحين</option>
-                            <option>منهاج المسلم</option>
-                        </select>
-
-                        <table class="custom-table">
-                            <thead>
-                                <tr>
-                                    <th>اسم الطالب</th>
-                                    <th>الحالة</th>
-                                    <th>النقاط</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>زينب سباعي</td>
-                                    <td>
-                                        <input type="radio" name="status-y1" id="p-y1" class="status-radio" >
-                                        <label for="p-y1" class="status-label present">حاضر</label>
-                                        <input type="radio" name="status-y1" id="a-y1" class="status-radio">
-                                        <label for="a-y1" class="status-label absent">غائب</label>
-                                    </td>
-                                    <td><input type="number" class="points-input" value="0" min="0"></td>
-                                </tr>
-                                <tr>
-                                    <td>الاء قاسم</td>
-                                    <td>
-                                        <input type="radio" name="status-y2" id="p-y2" class="status-radio" >
-                                        <label for="p-y2" class="status-label present">حاضر</label>
-                                        <input type="radio" name="status-y2" id="a-y2" class="status-radio">
-                                        <label for="a-y2" class="status-label absent">غائب</label>
-                                    </td>
-                                    <td><input type="number" class="points-input" value="0" min="0" ></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </details>
+        <div class="summary-strip">
+            <div>
+                <strong>تاريخ المتابعة</strong>
+                <div class="text-muted small">البيانات المعروضة مرتبطة بحساب المعلم الحالي فقط.</div>
             </div>
-
-            <!-- كارد 2: حلقة الأطفال -->
-            <div class="col-lg-6">
-                <details class="session-card" open>
-                    <summary class="card-header-custom">
-                        <h3 class="card-title">حلقة الأطفال</h3>
-                        <div class="card-header-actions">
-                            <span class="count-badge">العدد: 15</span>
-                            <i class="bi bi-chevron-down toggle-icon"></i>
-                        </div>
-                    </summary>
-                    <div class="card-body-custom">
-                        <label class="fw-bold small text-muted">الدرس الحالي من كتاب:</label>
-                        <select class="lesson-select">
-                            <option>قصص الأنبياء</option>
-                            <option>العقيدة الإسلامية</option>
-                        </select>
-
-                        <table class="custom-table">
-                            <thead>
-                                <tr>
-                                    <th>اسم الطالب</th>
-                                    <th>الحالة</th>
-                                    <th>النقاط</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>هبة عجم</td>
-                                    <td>
-                                        <input type="radio" name="status-c1" id="p-c1" class="status-radio" >
-                                        <label for="p-c1" class="status-label present">حاضر</label>
-                                        <input type="radio" name="status-c1" id="a-c1" class="status-radio">
-                                        <label for="a-c1" class="status-label absent">غائب</label>
-                                    </td>
-                                    <td><input type="number" class="points-input" value="0" min="0"></td>
-                                </tr>
-                                <tr>
-                                    <td>آية دعبول</td>
-                                    <td>
-                                        <input type="radio" name="status-c2" id="a3" class="status-radio" >
-                                        <label for="a3" class="status-label present">حاضر</label>
-                                        <input type="radio" name="status-c2" id="a4" class="status-radio">
-                                        <label for="a4" class="status-label absent">غائب</label>
-                                    </td>
-                                    <td><input type="number" class="points-input" value="0" min="0"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </details>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <input type="date" class="date-input" @bind="_selectedDate" />
+                <button type="button" class="save-btn" @onclick="LoadAsync" disabled="@_isLoading"><i class="bi bi-arrow-clockwise"></i> تحديث</button>
             </div>
+        </div>
 
-            <!-- سجل الدروس السابقة -->
-            <div class="col-12">
-                <div class="history-section">
-                    <div class="history-header">
-                        <i class="bi bi-clock-history"></i>
-                        <span>سجل الدروس السابقة</span>
-                    </div>
-                    <div class="history-item">
-                        <div class="d-flex align-items-center">
-                            <div class="history-icon"><i class="bi bi-book"></i></div>
-                            <div>
-                                <span class="badge bg-light text-dark mb-1">حلقة اليافعين</span>
-                                <h6 class="mb-0 fw-bold">  تفسير سورة البقرة: الآيات 1-20</h6>
-                                <small class="text-muted">السبت 7 ذو القعدة | حضر: 10 طلاب</small>
+        @if (!string.IsNullOrWhiteSpace(_successMessage))
+        {
+            <div class="alert-clean alert-ok"><i class="bi bi-check-circle ms-1"></i>@_successMessage</div>
+        }
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <div class="alert-clean alert-bad"><i class="bi bi-exclamation-triangle ms-1"></i>@_errorMessage</div>
+        }
+
+        @if (_isLoading)
+        {
+            <div class="state-box"><span class="spinner-border text-success"></span><div class="mt-3">جاري تحميل دروس المعلم...</div></div>
+        }
+        else if (_dashboard.Circles.Count == 0)
+        {
+            <div class="state-box">لا توجد دروس أسبوعية مرتبطة بحلقاتك حالياً.</div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var circle in _dashboard.Circles)
+                {
+                    <div class="col-lg-6">
+                        <details class="session-card" open>
+                            <summary class="card-header-custom">
+                                <h3 class="card-title">@Display(circle.CircleName)</h3>
+                                <div class="card-header-actions">
+                                    <span class="count-badge">العدد: @circle.Students.Count</span>
+                                    <i class="bi bi-chevron-down toggle-icon"></i>
+                                </div>
+                            </summary>
+                            <div class="card-body-custom">
+                                <label class="lesson-label">الدرس الحالي من كتاب:</label>
+                                <div class="lesson-title-box">@Display(circle.CurrentLessonTitle)</div>
+
+                                @if (circle.CurrentLessonId is null || circle.CurrentLessonId == Guid.Empty)
+                                {
+                                    <div class="state-box">لا يوجد درس حالي محدد لهذه الحلقة.</div>
+                                }
+                                else if (circle.Students.Count == 0)
+                                {
+                                    <div class="state-box">لا يوجد طلاب مرتبطون بهذه الحلقة.</div>
+                                }
+                                else
+                                {
+                                    <div class="table-responsive">
+                                        <table class="custom-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>اسم الطالب</th>
+                                                    <th>الحالة</th>
+                                                    <th>النقاط</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var student in circle.Students)
+                                                {
+                                                    <tr>
+                                                        <td class="student-name">@Display(student.StudentName)</td>
+                                                        <td>
+                                                            <div class="status-buttons">
+                                                                <button type="button" class="@GetPresentStatusClass(circle.CurrentLessonId, student.StudentId)" @onclick="() => SetStatus(circle.CurrentLessonId, student.StudentId, AttendanceStatus.Present)">حاضر</button>
+                                                                <button type="button" class="@GetAbsentStatusClass(circle.CurrentLessonId, student.StudentId)" @onclick="() => SetStatus(circle.CurrentLessonId, student.StudentId, AttendanceStatus.Absent)">غائب</button>
+                                                            </div>
+                                                        </td>
+                                                        <td><input type="number" min="0" class="points-input" value="@GetPoints(circle.CurrentLessonId, student.StudentId)" @onchange="e => SetPoints(circle.CurrentLessonId, student.StudentId, e.Value?.ToString())" /></td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="text-start mt-3">
+                                        <button type="button" class="save-btn" disabled="@_isSaving" @onclick="() => SaveCircleAsync(circle)">
+                                            @if (_isSaving)
+                                            {
+                                                <span class="spinner-border spinner-border-sm"></span><span>جاري الحفظ...</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-cloud-arrow-up"></i><span>حفظ حضور الحلقة</span>
+                                            }
+                                        </button>
+                                    </div>
+                                }
                             </div>
-                        </div>
-                        <span class="badge bg-success bg-opacity-10 text-success">مكتمل</span>
+                        </details>
                     </div>
-                    <div class="history-item">
-                        <div class="d-flex align-items-center">
-                            <div class="history-icon"><i class="bi bi-journal-text"></i></div>
-                            <div>
-                                <span class="badge bg-light text-dark mb-1">حلقة الأطفال</span>
-                                <h6 class="mb-0 fw-bold">قصص الأنبياء: النبي يوسف</h6>
-                                <small class="text-muted">السبت 30 شوال | حضر: 14 طالب</small>
-                            </div>
-                        </div>
-                        <span class="badge bg-success bg-opacity-10 text-success">مكتمل</span>
+                }
+
+                <div class="col-12">
+                    <div class="history-section">
+                        <div class="history-header"><i class="bi bi-clock-history"></i><span>سجل الدروس السابقة</span></div>
+                        @if (_history.Count == 0)
+                        {
+                            <div class="history-item"><span>لا يوجد سجل سابق بعد.</span></div>
+                        }
+                        else
+                        {
+                            @foreach (var item in _history)
+                            {
+                                <div class="history-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="history-icon"><i class="bi bi-book"></i></div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold">@Display(item.LessonTitle)</h6>
+                                            <small class="text-muted">@item.Date.ToLocalTime().ToString("yyyy/MM/dd") | حاضر: @item.PresentCount | غائب: @item.AbsentCount</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-success bg-opacity-10 text-success">مكتمل</span>
+                                </div>
+                            }
+                        }
                     </div>
                 </div>
             </div>
-
-        </div>
+        }
     </div>
 </div>
+
+@code {
+    private WeeklyLessonDashboardDto _dashboard = new() { Date = DateTime.Today };
+    private readonly Dictionary<string, AttendanceStatus> _statuses = new();
+    private readonly Dictionary<string, int> _points = new();
+    private readonly List<LessonHistoryItemDto> _history = new();
+    private DateTime _selectedDate = DateTime.Today;
+    private bool _isLoading = true;
+    private bool _isSaving;
+    private string? _errorMessage;
+    private string? _successMessage;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        await LoadAsync();
+        StateHasChanged();
+    }
+
+    private async Task LoadAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+        _successMessage = null;
+        try
+        {
+            _dashboard = await WeeklyLessonService.GetTeacherWeeklyDashboardAsync(_selectedDate);
+            _selectedDate = _dashboard.Date == default ? _selectedDate : _dashboard.Date.Date;
+            SeedCurrentState();
+            await LoadHistoryAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"تعذر تحميل الدروس الأسبوعية: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void SeedCurrentState()
+    {
+        _statuses.Clear();
+        _points.Clear();
+
+        foreach (var circle in _dashboard.Circles)
+        {
+            foreach (var student in circle.Students)
+            {
+                var key = Key(circle.CurrentLessonId, student.StudentId);
+                _statuses[key] = ParseStatus(student.Status);
+                _points[key] = Math.Max(0, student.Points);
+            }
+        }
+    }
+
+    private async Task LoadHistoryAsync()
+    {
+        _history.Clear();
+        foreach (var circle in _dashboard.Circles.Take(5))
+        {
+            var items = await WeeklyLessonService.GetLessonHistoryAsync(circle.CircleId, 1, 5);
+            _history.AddRange(items);
+        }
+
+        _history.Sort((a, b) => b.Date.CompareTo(a.Date));
+    }
+
+    private async Task SaveCircleAsync(CircleLessonCardDto circle)
+    {
+        if (circle.CurrentLessonId is null || circle.CurrentLessonId == Guid.Empty)
+        {
+            _errorMessage = "لا يوجد درس حالي لحفظ الحضور عليه.";
+            return;
+        }
+
+        _isSaving = true;
+        _errorMessage = null;
+        _successMessage = null;
+        try
+        {
+            var request = new RecordAttendanceRequest
+            {
+                LessonId = circle.CurrentLessonId.Value,
+                Date = _selectedDate.Date,
+                Entries = circle.Students.Select(student => new LessonAttendanceEntryDto
+                {
+                    StudentId = student.StudentId,
+                    Status = GetStatus(circle.CurrentLessonId, student.StudentId),
+                    Points = GetPoints(circle.CurrentLessonId, student.StudentId)
+                }).ToList()
+            };
+
+            var response = await WeeklyLessonService.RecordLessonAttendanceAsync(request);
+            if (!response.Success)
+            {
+                _errorMessage = string.IsNullOrWhiteSpace(response.Message) ? "فشل حفظ حضور الحلقة." : response.Message;
+                return;
+            }
+
+            _successMessage = string.IsNullOrWhiteSpace(response.Message) ? "تم حفظ حضور الحلقة." : response.Message;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"حدث خطأ أثناء حفظ الحضور: {ex.Message}";
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private void SetStatus(Guid? lessonId, Guid studentId, AttendanceStatus status) => _statuses[Key(lessonId, studentId)] = status;
+
+    private AttendanceStatus GetStatus(Guid? lessonId, Guid studentId)
+        => _statuses.TryGetValue(Key(lessonId, studentId), out var status) ? status : AttendanceStatus.Present;
+
+    private void SetPoints(Guid? lessonId, Guid studentId, string? value)
+    {
+        _points[Key(lessonId, studentId)] = int.TryParse(value, out var points) ? Math.Max(0, points) : 0;
+    }
+
+    private int GetPoints(Guid? lessonId, Guid studentId)
+        => _points.TryGetValue(Key(lessonId, studentId), out var points) ? points : 0;
+
+    private string GetPresentStatusClass(Guid? lessonId, Guid studentId)
+        => GetStatus(lessonId, studentId) == AttendanceStatus.Present ? "status-label present active" : "status-label present";
+
+    private string GetAbsentStatusClass(Guid? lessonId, Guid studentId)
+        => GetStatus(lessonId, studentId) == AttendanceStatus.Absent ? "status-label absent active" : "status-label absent";
+
+    private static AttendanceStatus ParseStatus(string? status)
+    {
+        if (Enum.TryParse<AttendanceStatus>(status, ignoreCase: true, out var parsed))
+            return parsed;
+
+        return status switch
+        {
+            "حاضر" => AttendanceStatus.Present,
+            "غائب" => AttendanceStatus.Absent,
+            "متأخر" => AttendanceStatus.Late,
+            "معذور" => AttendanceStatus.Excused,
+            _ => AttendanceStatus.Present
+        };
+    }
+
+    private static string Key(Guid? lessonId, Guid studentId) => $"{lessonId ?? Guid.Empty:N}:{studentId:N}";
+    private static string Display(string? value) => string.IsNullOrWhiteSpace(value) ? "غير محدد" : value;
+}

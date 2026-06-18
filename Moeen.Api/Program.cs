@@ -258,21 +258,73 @@ static async Task<IResult> GetCurrentTeacherOverviewAsync(ClaimsPrincipal user, 
         .FirstOrDefaultAsync();
 
     if (teacher is null)
-        return Results.NotFound();
+    {
+        teacher = await context.Users.AsNoTracking()
+            .Where(u => u.Id == teacherId.Value)
+            .Select(u => new { u.Id, Name = u.name ?? string.Empty, MosqueName = string.Empty })
+            .FirstOrDefaultAsync();
 
-    var halaqas = await context.Halqas.AsNoTracking()
+        if (teacher is null)
+            return Results.NotFound();
+    }
+
+    var regularHalaqas = await context.Halqas.AsNoTracking()
         .Where(h => h.TeacherId == teacherId.Value)
         .OrderBy(h => h.Name)
         .Select(h => new { h.Id, Name = h.Name ?? string.Empty, Type = h.Type ?? string.Empty })
         .ToListAsync();
 
+    var saturdayHalaqas = await context.SaturdayHalqes.AsNoTracking()
+        .Where(h => h.TeacherId == teacherId.Value)
+        .OrderBy(h => h.name)
+        .Select(h => new { h.Id, Name = h.name ?? string.Empty, Type = "حلقة أسبوعية" })
+        .ToListAsync();
+
+    var halaqas = regularHalaqas
+        .Concat(saturdayHalaqas)
+        .GroupBy(h => h.Id)
+        .Select(g => g.First())
+        .OrderBy(h => h.Name)
+        .ToList();
+
     var halaqaIds = halaqas.Select(h => h.Id).ToList();
-    var students = halaqaIds.Count == 0
-        ? new List<TeacherDashboardStudentRow>()
-        : await context.Students.AsNoTracking()
-            .Where(s => s.HalqaId.HasValue && halaqaIds.Contains(s.HalqaId.Value))
-            .Select(s => new TeacherDashboardStudentRow(s.Id, s.name ?? string.Empty, s.HalqaId, s.score))
-            .ToListAsync();
+    var studentRows = halaqaIds.Count == 0
+        ? new List<TeacherDashboardStudentLookup>()
+        : (await context.Students.AsNoTracking()
+            .Where(s =>
+                (s.HalqaId.HasValue && halaqaIds.Contains(s.HalqaId.Value)) ||
+                (s.SaturdayHalqaId.HasValue && halaqaIds.Contains(s.SaturdayHalqaId.Value)) ||
+                (s.SaturdayHalqeId != Guid.Empty && halaqaIds.Contains(s.SaturdayHalqeId)))
+            .Select(s => new
+            {
+                s.Id,
+                Name = s.name ?? string.Empty,
+                s.HalqaId,
+                s.SaturdayHalqaId,
+                s.SaturdayHalqeId,
+                Score = s.score
+            })
+            .ToListAsync())
+            .Select(s => new TeacherDashboardStudentLookup(s.Id, s.Name, s.HalqaId, s.SaturdayHalqaId, s.SaturdayHalqeId, s.Score))
+            .ToList();
+
+    var students = studentRows
+        .Select(s =>
+        {
+            Guid? circleId = s.HalqaId.HasValue && halaqaIds.Contains(s.HalqaId.Value)
+                ? s.HalqaId
+                : s.SaturdayHalqaId.HasValue && halaqaIds.Contains(s.SaturdayHalqaId.Value)
+                    ? s.SaturdayHalqaId
+                    : s.SaturdayHalqeId != Guid.Empty && halaqaIds.Contains(s.SaturdayHalqeId)
+                        ? s.SaturdayHalqeId
+                        : null;
+
+            return new TeacherDashboardStudentRow(s.Id, s.Name, circleId, s.Score);
+        })
+        .Where(s => s.HalqaId.HasValue)
+        .GroupBy(s => s.Id)
+        .Select(g => g.First())
+        .ToList();
 
     var progress = await LoadTeacherProgressRowsAsync(context, teacherId.Value, halaqaIds);
     var attendance = await LoadTeacherAttendanceRowsAsync(context, teacherId.Value, students.Select(s => s.Id).ToList());
@@ -352,21 +404,73 @@ static async Task<IResult> GetCurrentTeacherHalaqasProgressAsync(ClaimsPrincipal
         .FirstOrDefaultAsync();
 
     if (teacher is null)
-        return Results.NotFound();
+    {
+        teacher = await context.Users.AsNoTracking()
+            .Where(u => u.Id == teacherId.Value)
+            .Select(u => new { u.Id, Name = u.name ?? string.Empty })
+            .FirstOrDefaultAsync();
 
-    var halaqas = await context.Halqas.AsNoTracking()
+        if (teacher is null)
+            return Results.NotFound();
+    }
+
+    var regularHalaqas = await context.Halqas.AsNoTracking()
         .Where(h => h.TeacherId == teacherId.Value)
         .OrderBy(h => h.Name)
         .Select(h => new { h.Id, Name = h.Name ?? string.Empty, Type = h.Type ?? string.Empty })
         .ToListAsync();
 
+    var saturdayHalaqas = await context.SaturdayHalqes.AsNoTracking()
+        .Where(h => h.TeacherId == teacherId.Value)
+        .OrderBy(h => h.name)
+        .Select(h => new { h.Id, Name = h.name ?? string.Empty, Type = "حلقة أسبوعية" })
+        .ToListAsync();
+
+    var halaqas = regularHalaqas
+        .Concat(saturdayHalaqas)
+        .GroupBy(h => h.Id)
+        .Select(g => g.First())
+        .OrderBy(h => h.Name)
+        .ToList();
+
     var halaqaIds = halaqas.Select(h => h.Id).ToList();
-    var students = halaqaIds.Count == 0
-        ? new List<TeacherDashboardStudentRow>()
-        : await context.Students.AsNoTracking()
-            .Where(s => s.HalqaId.HasValue && halaqaIds.Contains(s.HalqaId.Value))
-            .Select(s => new TeacherDashboardStudentRow(s.Id, s.name ?? string.Empty, s.HalqaId, s.score))
-            .ToListAsync();
+    var studentRows = halaqaIds.Count == 0
+        ? new List<TeacherDashboardStudentLookup>()
+        : (await context.Students.AsNoTracking()
+            .Where(s =>
+                (s.HalqaId.HasValue && halaqaIds.Contains(s.HalqaId.Value)) ||
+                (s.SaturdayHalqaId.HasValue && halaqaIds.Contains(s.SaturdayHalqaId.Value)) ||
+                (s.SaturdayHalqeId != Guid.Empty && halaqaIds.Contains(s.SaturdayHalqeId)))
+            .Select(s => new
+            {
+                s.Id,
+                Name = s.name ?? string.Empty,
+                s.HalqaId,
+                s.SaturdayHalqaId,
+                s.SaturdayHalqeId,
+                Score = s.score
+            })
+            .ToListAsync())
+            .Select(s => new TeacherDashboardStudentLookup(s.Id, s.Name, s.HalqaId, s.SaturdayHalqaId, s.SaturdayHalqeId, s.Score))
+            .ToList();
+
+    var students = studentRows
+        .Select(s =>
+        {
+            Guid? circleId = s.HalqaId.HasValue && halaqaIds.Contains(s.HalqaId.Value)
+                ? s.HalqaId
+                : s.SaturdayHalqaId.HasValue && halaqaIds.Contains(s.SaturdayHalqaId.Value)
+                    ? s.SaturdayHalqaId
+                    : s.SaturdayHalqeId != Guid.Empty && halaqaIds.Contains(s.SaturdayHalqeId)
+                        ? s.SaturdayHalqeId
+                        : null;
+
+            return new TeacherDashboardStudentRow(s.Id, s.Name, circleId, s.Score);
+        })
+        .Where(s => s.HalqaId.HasValue)
+        .GroupBy(s => s.Id)
+        .Select(g => g.First())
+        .ToList();
 
     var progress = await LoadTeacherProgressRowsAsync(context, teacherId.Value, halaqaIds);
     var attendance = await LoadTeacherAttendanceRowsAsync(context, teacherId.Value, students.Select(s => s.Id).ToList());
@@ -519,6 +623,7 @@ static List<TeacherDashboardStudentAlertDto> BuildTeacherFollowUpStudents(
 }
 
 internal sealed record TeacherDashboardStudentRow(Guid Id, string Name, Guid? HalqaId, int Score);
+internal sealed record TeacherDashboardStudentLookup(Guid Id, string Name, Guid? HalqaId, Guid? SaturdayHalqaId, Guid SaturdayHalqeId, int Score);
 internal sealed record TeacherDashboardProgressRow(Guid Id, Guid StudentId, Guid HalqaId, int JuzNumber, int PageNumber, int MemorizedUntil, int NextTarget, int LevelScore, DateTime Date);
 internal sealed record TeacherDashboardAttendanceRow(Guid StudentId, Guid HalqaId, AttendanceStatus Status, DateTime Date);
 

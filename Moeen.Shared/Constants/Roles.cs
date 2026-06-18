@@ -6,6 +6,7 @@
         Admin = 1,
         Teacher= 2,
         ParentSudent = 3,
-        Owner = 4
+        Owner = 4,
+        Examer = 5
     }
 }

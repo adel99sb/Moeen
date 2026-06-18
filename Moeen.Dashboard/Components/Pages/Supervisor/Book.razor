@@ -398,6 +398,15 @@
                 publicationYear = parsedYear;
             }
 
+            var normalizedLink = NormalizeBookLink(_form.Link);
+            if (normalizedLink == null)
+            {
+                _dialogError = "يرجى إدخال رابط صالح للكتاب يبدأ بـ http:// أو https://.";
+                return;
+            }
+
+            _form.Link = normalizedLink;
+
             var bookData = new BookDto
             {
                 Title = _form.Title.Trim(),
@@ -406,8 +415,8 @@
                 Publisher = _form.Publisher?.Trim() ?? string.Empty,
                 PublicationYear = publicationYear,
                 Description = _form.Description.Trim(),
-                CoverImageUrl = _form.Link.Trim(),
-                DownloadUrl = _form.Link.Trim()
+                CoverImageUrl = normalizedLink,
+                DownloadUrl = normalizedLink
             };
 
             var response = _isEditMode
@@ -507,6 +516,24 @@
 
     private void CloseDetailsDialog()
         => _isDetailsOpen = false;
+
+    private static string? NormalizeBookLink(string? rawLink)
+    {
+        if (string.IsNullOrWhiteSpace(rawLink))
+            return null;
+
+        var candidate = rawLink.Trim();
+        if (!candidate.Contains("://", StringComparison.Ordinal))
+            candidate = $"https://{candidate}";
+
+        if (!Uri.TryCreate(candidate, UriKind.Absolute, out var uri))
+            return null;
+
+        if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+            return null;
+
+        return uri.ToString();
+    }
 
     private static string Display(string? value)
         => string.IsNullOrWhiteSpace(value) ? "—" : value;

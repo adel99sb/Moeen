@@ -1,5 +1,6 @@
 ﻿using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Shared.Constants;
+using System.Security.Claims;
 
 namespace Moeen.Api.infrastructure.Providers
 {
@@ -16,8 +17,10 @@ namespace Moeen.Api.infrastructure.Providers
         {
             get
             {
-                var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst("UserIdentifier")?.Value;
-                return userIdClaim != null ? Guid.Parse(userIdClaim) : (Guid?)null;
+                var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst("UserIdentifier")?.Value
+                    ?? _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                return Guid.TryParse(userIdClaim, out var parsedUserId) ? parsedUserId : null;
             }
         }
         public bool? IsActived
@@ -25,8 +28,7 @@ namespace Moeen.Api.infrastructure.Providers
             get
             {
                 var userActiveClaim = _httpContextAccessor.HttpContext?.User?.FindFirst("IsActive")?.Value;
-                bool state = bool.Parse(userActiveClaim);
-                return userActiveClaim != null ? state : null;
+                return bool.TryParse(userActiveClaim, out var state) ? state : null;
             }
         }
         public bool? IsAdmin
@@ -38,15 +40,28 @@ namespace Moeen.Api.infrastructure.Providers
                 if (user == null)
                     return null;
 
-                return user.IsInRole(Roles.Owner.ToString());
+                return user.IsInRole(Roles.Owner.ToString())
+                    || user.IsInRole(Roles.Admin.ToString());
             }
+        }
+
+        public bool IsInRole(string roleName)
+        {
+            if (string.IsNullOrWhiteSpace(roleName))
+                return false;
+
+            return _httpContextAccessor.HttpContext?.User?.IsInRole(roleName) == true;
         }
 
         public string CurrentUserName
         {
             get
             {
-                return _httpContextAccessor.HttpContext?.User?.Identity?.Name;
+                var user = _httpContextAccessor.HttpContext?.User;
+                return user?.FindFirst("FullName")?.Value
+                    ?? user?.FindFirst(ClaimTypes.Name)?.Value
+                    ?? user?.Identity?.Name
+                    ?? string.Empty;
             }
         }
         public string GetBaseUrl(string relativePath)

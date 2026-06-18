@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Shared.Requests.Halqa;
 using Moeen.Shared.Responses;
@@ -9,23 +11,23 @@ namespace Moeen.Api.Controllers
     [ApiController]
     public class HalqaCommandController : ControllerBase
     {
-        private readonly IHalqaCommandService _HalqaCommandService;
+        private readonly IHalqaCommandService _halqaCommandService;
 
-        public HalqaCommandController(IHalqaCommandService HalqaCommandService)
+        public HalqaCommandController(IHalqaCommandService halqaCommandService)
         {
-            _HalqaCommandService = HalqaCommandService;
+            _halqaCommandService = halqaCommandService;
         }
 
-        /// <summary>
-        /// أمر: إنشاء حلقة جديدة.
-        /// </summary>
         [HttpPost("create")]
         public async Task<ActionResult<GeneralResponse>> CreateHalqa([FromBody] CreateHalqaRequest request)
         {
             try
             {
-                var result = await _HalqaCommandService.CreateHalqaAsync(request);
-                return Ok(GeneralResponse.Ok("تم إنشاء الحلقة بنجاح.", result));
+                var result = await _halqaCommandService.CreateHalqaAsync(request);
+                if (!result.Success)
+                    return StatusCode(result.StatusCode, result);
+
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {
@@ -37,16 +39,16 @@ namespace Moeen.Api.Controllers
             }
         }
 
-        /// <summary>
-        /// أمر: تحديث بيانات حلقة.
-        /// </summary>
         [HttpPut("update")]
         public async Task<ActionResult<GeneralResponse>> UpdateHalqa([FromBody] UpdateHalqaRequest request)
         {
             try
             {
-                var result = await _HalqaCommandService.UpdateHalqaAsync(request);
-                return Ok(GeneralResponse.Ok("تم تحديث الحلقة بنجاح.", result));
+                var result = await _halqaCommandService.UpdateHalqaAsync(request);
+                if (!result.Success)
+                    return StatusCode(result.StatusCode, result);
+
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {
@@ -58,31 +60,27 @@ namespace Moeen.Api.Controllers
             }
         }
 
-        /// <summary>
-        /// أمر: حذف حلقة.
-        /// </summary>
         [HttpDelete("delete")]
         public async Task<ActionResult<GeneralResponse>> DeleteHalqa([FromBody] DeleteHalqaRequest request)
         {
-            var deleted = await _HalqaCommandService.DeleteHalqaAsync(request);
+            var deleted = await _halqaCommandService.DeleteHalqaAsync(request);
 
-            // ✅ Optional: تفحص على الـ Success
             if (!deleted.Success)
                 return StatusCode(deleted.StatusCode, deleted);
 
             return Ok(deleted);
         }
 
-        /// <summary>
-        /// أمر: إعادة تعيين معلم للحلقة.
-        /// </summary>
         [HttpPut("reassign-teacher")]
         public async Task<ActionResult<GeneralResponse>> ReassignTeacher([FromBody] ReassignHalqaTeacherRequest request)
         {
             try
             {
-                var result = await _HalqaCommandService.ReassignTeacherAsync(request);
-                return Ok(GeneralResponse.Ok("تمت إعادة تعيين المعلم بنجاح.", result));
+                var result = await _halqaCommandService.ReassignTeacherAsync(request);
+                if (!result.Success)
+                    return StatusCode(result.StatusCode, result);
+
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {
@@ -94,16 +92,16 @@ namespace Moeen.Api.Controllers
             }
         }
 
-        /// <summary>
-        /// أمر: نقل الحلقة إلى فوج آخر.
-        /// </summary>
         [HttpPut("move-to-fouj")]
         public async Task<ActionResult<GeneralResponse>> MoveToFouj([FromBody] MoveHalqaToFoujRequest request)
         {
             try
             {
-                var result = await _HalqaCommandService.MoveToFoujAsync(request);
-                return Ok(GeneralResponse.Ok("تم نقل الحلقة بنجاح.", result));
+                var result = await _halqaCommandService.MoveToFoujAsync(request);
+                if (!result.Success)
+                    return StatusCode(result.StatusCode, result);
+
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {

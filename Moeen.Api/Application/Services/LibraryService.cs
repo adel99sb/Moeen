@@ -61,6 +61,8 @@ namespace Moeen.Api.Application.Services
             if (string.IsNullOrWhiteSpace(fileUrl))
                 return GeneralResponse.BadRequest("ملف الكتاب أو رابط التحميل مطلوب.");
 
+            var uploaderName = await ResolveCurrentUserDisplayNameAsync();
+
             var book = new PdfFile
             {
                 Id = Guid.NewGuid(),
@@ -69,16 +71,14 @@ namespace Moeen.Api.Application.Services
                 FileUrl = fileUrl,
                 title = request.BookData.Title.Trim(),
                 description = request.BookData.Description.Trim(),
-                uploaded_by = string.IsNullOrWhiteSpace(_currentUserService.CurrentUserName)
-                    ? "System"
-                    : _currentUserService.CurrentUserName.Trim(),
+                uploaded_by = uploaderName,
                 created_at = DateTime.UtcNow
             };
 
             await _unitOfWork.Repository<PdfFile>().AddAsync(book);
             await _unitOfWork.CompleteAsync();
 
-            return GeneralResponse.Ok("تمت إضافة الكتاب بنجاح.", MapBook(book));
+            return GeneralResponse.Ok("تمت إضافة الكتاب بنجاح.", await MapBookAsync(book));
         }
 
         public async Task<GeneralResponse> UpdateBookInfoAsync(UpdateBookRequest request)
@@ -105,7 +105,7 @@ namespace Moeen.Api.Application.Services
             await _unitOfWork.Repository<PdfFile>().UpdateAsync(book);
             await _unitOfWork.CompleteAsync();
 
-            return GeneralResponse.Ok("تم تحديث بيانات الكتاب بنجاح.", MapBook(book));
+            return GeneralResponse.Ok("تم تحديث بيانات الكتاب بنجاح.", await MapBookAsync(book));
         }
 
         public async Task<GeneralResponse> SearchLibraryAsync(SearchLibraryRequest request)
@@ -114,13 +114,12 @@ namespace Moeen.Api.Application.Services
                 return GeneralResponse.BadRequest("نص البحث مطلوب.");
 
             var books = (await _unitOfWork.Repository<PdfFile>().GetAllAsync()).ToList();
-            var results = books
-                .Where(b => Matches(b.title, request.Query)
-                         || Matches(b.description, request.Query)
-                         || Matches(b.FileUrl, request.Query)
-                         || Matches(b.uploaded_by, request.Query))
-                .OrderByDescending(b => b.created_at)
-                .Select(MapBook)
+            var results = (await MapBooksAsync(books))
+                .Where(b => Matches(b.Title, request.Query)
+                         || Matches(b.Description, request.Query)
+                         || Matches(b.CoverImageUrl, request.Query)
+                         || Matches(b.Author, request.Query))
+                .OrderByDescending(b => b.CreatedAt)
                 .ToList();
 
             return GeneralResponse.Ok("تم إرجاع نتائج البحث بنجاح.", results, totalCount: results.Count);
@@ -143,11 +142,10 @@ namespace Moeen.Api.Application.Services
                 books = books.Where(b => Matches(b.description, request.Language) || Matches(b.FileUrl, request.Language)).ToList();
 
             var totalCount = books.Count;
-            var items = books
-                .OrderByDescending(b => b.created_at)
+            var items = (await MapBooksAsync(books))
+                .OrderByDescending(b => b.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(MapBook)
                 .ToList();
 
             return GeneralResponse.Ok("تم جلب الكتب بنجاح.", items, pageNumber, pageSize, totalCount);
@@ -162,7 +160,7 @@ namespace Moeen.Api.Application.Services
             if (book == null)
                 return GeneralResponse.NotFound("الكتاب غير موجود.");
 
-            return GeneralResponse.Ok("تم جلب بيانات الكتاب بنجاح.", MapBook(book));
+            return GeneralResponse.Ok("تم جلب بيانات الكتاب بنجاح.", await MapBookAsync(book));
         }
 
         public async Task<GeneralResponse> GetBooksByCategoryAsync(GetBooksByCategoryRequest request)
@@ -171,10 +169,9 @@ namespace Moeen.Api.Application.Services
                 return GeneralResponse.BadRequest("التصنيف مطلوب.");
 
             var books = (await _unitOfWork.Repository<PdfFile>().GetAllAsync()).ToList();
-            var results = books
-                .Where(b => Matches(b.title, request.Category) || Matches(b.description, request.Category))
-                .OrderByDescending(b => b.created_at)
-                .Select(MapBook)
+            var results = (await MapBooksAsync(books))
+                .Where(b => Matches(b.Title, request.Category) || Matches(b.Description, request.Category))
+                .OrderByDescending(b => b.CreatedAt)
                 .ToList();
 
             return GeneralResponse.Ok("تم جلب الكتب حسب التصنيف بنجاح.", results, totalCount: results.Count);
@@ -257,13 +254,70 @@ namespace Moeen.Api.Application.Services
             return source.Contains(query, StringComparison.OrdinalIgnoreCase);
         }
 
-        private static BookResponseDto MapBook(PdfFile book)
+        private async Task<List<BookResponseDto>> MapBooksAsync(IEnumerable<PdfFile> books)
+        {
+            var items = books.ToList();
+            var uploaderNames = await ResolveUploaderNamesAsync(items);
+
+            return items.Select(book => MapBook(book, ResolveUploaderDisplayName(book.uploaded_by, uploaderNames))).ToList();
+        }
+
+        private async Task<BookResponseDto> MapBookAsync(PdfFile book)
+        {
+            var uploaderNames = await ResolveUploaderNamesAsync(new[] { book });
+            return MapBook(book, ResolveUploaderDisplayName(book.uploaded_by, uploaderNames));
+        }
+
+        private async Task<Dictionary<Guid, string>> ResolveUploaderNamesAsync(IEnumerable<PdfFile> books)
+        {
+            var userIds = books
+                .Select(book => Guid.TryParse(book.uploaded_by, out var userId) ? userId : Guid.Empty)
+                .Where(id => id != Guid.Empty)
+                .Distinct()
+                .ToList();
+
+            if (userIds.Count == 0)
+                return new Dictionary<Guid, string>();
+
+            var users = (await _unitOfWork.Repository<User>().GetAllAsync())
+                .Where(user => userIds.Contains(user.Id))
+                .ToDictionary(user => user.Id, user => string.IsNullOrWhiteSpace(user.name) ? user.Id.ToString() : user.name.Trim());
+
+            return users;
+        }
+
+        private async Task<string> ResolveCurrentUserDisplayNameAsync()
+        {
+            var claimedName = _currentUserService.CurrentUserName?.Trim();
+            if (!string.IsNullOrWhiteSpace(claimedName))
+                return claimedName;
+
+            var currentUserId = _currentUserService.CurrentUserId;
+            if (!currentUserId.HasValue)
+                return "System";
+
+            var user = await _unitOfWork.Repository<User>().GetByIdAsync(currentUserId.Value);
+            return string.IsNullOrWhiteSpace(user?.name) ? "System" : user.name.Trim();
+        }
+
+        private static string ResolveUploaderDisplayName(string? storedUploader, IReadOnlyDictionary<Guid, string> uploaderNames)
+        {
+            if (string.IsNullOrWhiteSpace(storedUploader))
+                return "غير محدد";
+
+            if (Guid.TryParse(storedUploader, out var uploaderId) && uploaderNames.TryGetValue(uploaderId, out var uploaderName))
+                return uploaderName;
+
+            return storedUploader.Trim();
+        }
+
+        private static BookResponseDto MapBook(PdfFile book, string uploaderDisplayName)
         {
             return new BookResponseDto
             {
                 Id = book.Id,
                 Title = book.title,
-                Author = book.uploaded_by,
+                Author = uploaderDisplayName,
                 ISBN = string.Empty,
                 Publisher = string.Empty,
                 PublicationYear = book.created_at.Year,

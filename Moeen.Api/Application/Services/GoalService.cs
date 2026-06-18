@@ -38,9 +38,13 @@ namespace Moeen.Api.Application.Services
             if (student == null)
                 return GeneralResponse.NotFound("الطالب غير موجود.");
 
-            var halqaId = await ResolveHalqaIdAsync(teacherId.Value, student.SaturdayHalqeId);
+            var studentHalqaId = student.HalqaId
+                ?? student.SaturdayHalqaId
+                ?? (student.SaturdayHalqeId == Guid.Empty ? (Guid?)null : student.SaturdayHalqeId);
+
+            var halqaId = await ResolveHalqaIdAsync(teacherId.Value, studentHalqaId);
             if (halqaId == Guid.Empty)
-                return GeneralResponse.NotFound("لا توجد حلقة مرتبطة.");
+                return GeneralResponse.NotFound("لا توجد حلقة مرتبطة بهذا الطالب ضمن حلقات المعلم الحالي.");
 
             var date = request.Date.Date;
 
@@ -347,14 +351,35 @@ namespace Moeen.Api.Application.Services
             return GeneralResponse.Ok("تم جلب لوحة الأداء.", overview);
         }
 
-        private async Task<Guid> ResolveHalqaIdAsync(Guid teacherId, Guid? fallbackHalqaId)
+        private async Task<Guid> ResolveHalqaIdAsync(Guid teacherId, Guid? studentHalqaId)
         {
-            var halqaId = await _context.Halqas
+            if (studentHalqaId.HasValue && studentHalqaId.Value != Guid.Empty)
+            {
+                var belongsToRegularHalqa = await _context.Halqas
+                    .AnyAsync(h => h.Id == studentHalqaId.Value && h.TeacherId == teacherId);
+
+                if (belongsToRegularHalqa)
+                    return studentHalqaId.Value;
+
+                var belongsToSaturdayHalqa = await _context.SaturdayHalqes
+                    .AnyAsync(h => h.Id == studentHalqaId.Value && h.TeacherId == teacherId);
+
+                if (belongsToSaturdayHalqa)
+                    return studentHalqaId.Value;
+            }
+
+            var regularHalqaId = await _context.Halqas
                 .Where(h => h.TeacherId == teacherId)
                 .Select(h => h.Id)
                 .FirstOrDefaultAsync();
 
-            return halqaId != Guid.Empty ? halqaId : (fallbackHalqaId ?? Guid.Empty);
+            if (regularHalqaId != Guid.Empty)
+                return regularHalqaId;
+
+            return await _context.SaturdayHalqes
+                .Where(h => h.TeacherId == teacherId)
+                .Select(h => h.Id)
+                .FirstOrDefaultAsync();
         }
 
         private async Task<HalqaSession> EnsureHalqaSessionAsync(Guid halqaId, DateTime date)

@@ -1,84 +1,297 @@
 @page "/Teacher/Progress"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Text.Json
+@using Microsoft.AspNetCore.Components
 @using Moeen.Dashboard.Infrastructure.Http.Clients
+@using Moeen.Dashboard.Services.Abstractions
+@using Moeen.Shared.Constants
+@using Moeen.Shared.Requests.Goal
+@using Moeen.Shared.Responses.Goal
 @using Moeen.Shared.Responses.TeacherDashboard
 @inject InstructorHomeApiClient TeacherApiClient
+@inject IGoalService GoalService
+@inject NavigationManager Navigation
 
-<h1>تقدم حلقاتي</h1>
+<PageTitle>السجل السابق</PageTitle>
 
-@if (_isLoading)
-{
-    <p>جاري تحميل البيانات...</p>
-}
-else if (!string.IsNullOrWhiteSpace(_errorMessage))
-{
-    <p>@_errorMessage</p>
-}
-else if (_progress is not null)
-{
-    <div>
-        <p>الأستاذ: @_progress.TeacherName</p>
-        <p>الحلقات: @_progress.TotalHalaqas</p>
-        <p>الطلاب: @_progress.TotalStudents</p>
-        <p>Progress entries: @_progress.TotalProgressEntries</p>
-        <p>Average attendance: @_progress.AverageAttendanceRatePercent%</p>
+<style>
+    .progress-history-page { direction: rtl; min-height: calc(100vh - 70px); background: #faf7f0; color: #163f35; padding: 20px; }
+    .history-hero { background: linear-gradient(135deg, #195042, #246a58); color: #fff; border-radius: 24px; padding: 24px; margin-bottom: 18px; box-shadow: 0 18px 45px rgba(25, 80, 66, .16); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .history-hero h1 { margin: 0 0 8px; font-weight: 900; }
+    .history-hero p { margin: 0; opacity: .88; }
+    .btn-clean { border: 0; border-radius: 14px; padding: 11px 16px; font-weight: 900; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+    .btn-primary-clean { background: #195042; color: #fff; }
+    .btn-light-clean { background: #f4f1ee; color: #195042; }
+    .history-layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 18px; align-items: start; }
+    .history-panel { background: #fff; border: 1px solid #e4eee9; border-radius: 22px; box-shadow: 0 10px 28px rgba(25, 80, 66, .06); overflow: hidden; }
+    .panel-head { padding: 16px 18px; border-bottom: 1px solid #edf3f0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .student-search { margin: 14px; width: calc(100% - 28px); border: 1.5px solid #d6cabc; border-radius: 14px; padding: 11px 14px; outline: none; background: #fbfaf8; }
+    .student-list { max-height: 640px; overflow: auto; padding: 0 14px 14px; display: grid; gap: 10px; }
+    .student-button { border: 1px solid #edf1ee; background: #fbfdfa; color: #163f35; border-radius: 16px; padding: 12px; text-align: right; transition: .2s ease; width: 100%; }
+    .student-button:hover, .student-button.active { background: #195042; color: #fff; border-color: #195042; transform: translateY(-1px); }
+    .student-button small { display: block; opacity: .78; margin-top: 4px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding: 16px 18px; background: #fbfdfa; border-bottom: 1px solid #edf3f0; }
+    .summary-card { background: #fff; border: 1px solid #edf1ee; border-radius: 14px; padding: 12px; }
+    .summary-card small { color: #6b7280; font-weight: 800; display: block; margin-bottom: 4px; }
+    .summary-card strong { color: #195042; font-size: 1.1rem; }
+    .records-body { padding: 18px; }
+    .records-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+    .records-table th { background: #f4f1ee; color: #195042; padding: 12px; white-space: nowrap; }
+    .records-table td { background: #fff; border-top: 1px solid #edf1ee; border-bottom: 1px solid #edf1ee; padding: 12px; vertical-align: middle; }
+    .records-table td:first-child { border-radius: 0 14px 14px 0; }
+    .records-table td:last-child { border-radius: 14px 0 0 14px; }
+    .type-pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 5px 10px; background: #eef7f3; color: #195042; font-weight: 900; font-size: .85rem; }
+    .empty-state, .loading-state, .error-state { border: 1px dashed #d6cabc; border-radius: 18px; padding: 28px; text-align: center; color: #667085; background: #fffdfb; }
+    .error-state { border-color: #f1b4b4; color: #b42318; background: #fff8f8; }
+    @@media (max-width: 1050px) { .history-layout { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @@media (max-width: 700px) { .progress-history-page { padding: 12px; } .summary-grid { grid-template-columns: 1fr; } }
+</style>
 
-        @foreach (var halaqa in _progress.Halaqas)
-        {
-            <div class="card p-3 mb-3">
-                <h3>@halaqa.HalqaName</h3>
-                <p>@halaqa.StudentsCount students - @halaqa.ProgressEntriesCount entries - attendance @halaqa.AttendanceRatePercent%</p>
+<div class="progress-history-page">
+    <section class="history-hero">
+        <div>
+            <h1>السجل السابق</h1>
+            <p>يعرض آخر بيانات الطالب المختار من طلاب الحلقات المسندة لك.</p>
+        </div>
+        <button type="button" class="btn-clean btn-light-clean" @onclick="BackToDailyEntry"><i class="bi bi-pencil-square"></i> إدخال بيانات اليوم</button>
+    </section>
 
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Student</th>
-                            <th>Last page</th>
-                            <th>Memorization</th>
-                            <th>Level</th>
-                            <th>Attendance</th>
-                            <th>Last progress</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var student in halaqa.Students)
+    @if (_isLoading)
+    {
+        <div class="loading-state"><span class="spinner-border text-success"></span><div class="mt-3">جاري تحميل السجل...</div></div>
+    }
+    else if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <div class="error-state">@_errorMessage</div>
+    }
+    else
+    {
+        <div class="history-layout">
+            <aside class="history-panel">
+                <div class="panel-head"><strong><i class="bi bi-people ms-1"></i> طلاب حلقاتي</strong><span>@_students.Count</span></div>
+                <input class="student-search" @bind="_studentSearch" @bind:event="oninput" placeholder="ابحث عن طالب..." />
+                <div class="student-list">
+                    @if (!FilteredStudents.Any())
+                    {
+                        <div class="empty-state">لا يوجد طلاب مطابقون.</div>
+                    }
+                    else
+                    {
+                        @foreach (var student in FilteredStudents)
                         {
-                            <tr>
-                                <td>@student.StudentName</td>
-                                <td>@student.LatestPageNumber</td>
-                                <td>@student.MemorizationPercent%</td>
-                                <td>@student.LevelScore</td>
-                                <td>@student.AttendanceRatePercent%</td>
-                                <td>@FormatDate(student.LastProgressDate)</td>
-                            </tr>
+                            <button type="button" class="@GetStudentButtonClass(student.StudentId)" @onclick="() => SelectStudentAsync(student.StudentId)">
+                                <strong>@Display(student.StudentName)</strong>
+                                <small>@Display(student.HalqaName)</small>
+                            </button>
                         }
-                    </tbody>
-                </table>
-            </div>
-        }
-    </div>
-}
+                    }
+                </div>
+            </aside>
+
+            <main class="history-panel">
+                @if (SelectedStudent is null)
+                {
+                    <div class="records-body"><div class="empty-state">اختر طالباً حتى يظهر سجله السابق.</div></div>
+                }
+                else
+                {
+                    <div class="summary-grid">
+                        <div class="summary-card"><small>الطالب</small><strong>@SelectedStudent.StudentName</strong></div>
+                        <div class="summary-card"><small>الحلقة</small><strong>@SelectedStudent.HalqaName</strong></div>
+                        <div class="summary-card"><small>النقاط</small><strong>@SelectedStudent.Points</strong></div>
+                        <div class="summary-card"><small>آخر تقدم</small><strong>@FormatDate(SelectedStudent.LastProgressDate)</strong></div>
+                    </div>
+                    <div class="records-body">
+                        <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-3">
+                            <strong>آخر السجلات: @_totalCount</strong>
+                            <button type="button" class="btn-clean btn-primary-clean" @onclick="LoadSelectedHistoryAsync"><i class="bi bi-arrow-clockwise"></i> تحديث</button>
+                        </div>
+
+                        @if (_isHistoryLoading)
+                        {
+                            <div class="loading-state"><span class="spinner-border text-success"></span><div class="mt-3">جاري تحميل سجلات الطالب...</div></div>
+                        }
+                        else if (_records.Count == 0)
+                        {
+                            <div class="empty-state">لا يوجد سجل سابق لهذا الطالب ضمن آخر 30 يوم.</div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="records-table">
+                                    <thead>
+                                        <tr>
+                                            <th>التاريخ</th>
+                                            <th>النوع</th>
+                                            <th>النطاق</th>
+                                            <th>التقدير/النقاط</th>
+                                            <th>ملاحظات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var record in _records)
+                                        {
+                                            <tr>
+                                                <td>@record.Date.ToLocalTime().ToString("yyyy/MM/dd")</td>
+                                                <td><span class="type-pill">@RecordTypeLabel(record.RecordType)</span></td>
+                                                <td>@RecordRange(record)</td>
+                                                <td>@RecordScore(record)</td>
+                                                <td>@Display(record.Notes)</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                }
+            </main>
+        </div>
+    }
+</div>
 
 @code {
-    private TeacherHalaqaProgressResponse? _progress;
+    [SupplyParameterFromQuery(Name = "studentId")]
+    public Guid? StudentId { get; set; }
+
+    private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private readonly List<SelectableStudent> _students = new();
+    private List<StudentProgressRecordDto> _records = new();
+    private Guid? SelectedStudentId { get; set; }
+    private string _studentSearch = string.Empty;
     private bool _isLoading = true;
+    private bool _isHistoryLoading;
+    private int _totalCount;
     private string? _errorMessage;
+
+    private SelectableStudent? SelectedStudent => SelectedStudentId.HasValue ? _students.FirstOrDefault(s => s.StudentId == SelectedStudentId.Value) : null;
+    private IEnumerable<SelectableStudent> FilteredStudents => string.IsNullOrWhiteSpace(_studentSearch)
+        ? _students
+        : _students.Where(s => s.StudentName.Contains(_studentSearch.Trim(), StringComparison.OrdinalIgnoreCase) || s.HalqaName.Contains(_studentSearch.Trim(), StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-        await LoadProgressAsync();
+        await LoadPageAsync();
         StateHasChanged();
     }
 
-    private async Task LoadProgressAsync()
+    private async Task LoadPageAsync()
     {
         _isLoading = true;
         _errorMessage = null;
-        try { _progress = await TeacherApiClient.GetMyHalaqasProgressAsync(); }
-        catch (Exception ex) { _errorMessage = ex.Message; }
-        finally { _isLoading = false; }
+        try
+        {
+            var progress = await TeacherApiClient.GetMyHalaqasProgressAsync();
+            _students.Clear();
+            if (progress is not null)
+            {
+                _students.AddRange(progress.Halaqas.SelectMany(h => h.Students.Select(s => new SelectableStudent
+                {
+                    StudentId = s.StudentId,
+                    StudentName = s.StudentName,
+                    HalqaId = h.HalqaId,
+                    HalqaName = h.HalqaName,
+                    Points = s.Points,
+                    LatestPageNumber = s.LatestPageNumber,
+                    MemorizationPercent = s.MemorizationPercent,
+                    AttendanceRatePercent = s.AttendanceRatePercent,
+                    LastProgressDate = s.LastProgressDate
+                })).OrderBy(s => s.HalqaName).ThenBy(s => s.StudentName));
+            }
+
+            SelectedStudentId = StudentId.HasValue && _students.Any(s => s.StudentId == StudentId.Value)
+                ? StudentId.Value
+                : _students.FirstOrDefault()?.StudentId;
+
+            await LoadSelectedHistoryAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"تعذر تحميل سجل الطلاب: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
 
-    private static string FormatDate(DateTime? value) => value.HasValue ? value.Value.ToString("yyyy/MM/dd") : "-";
+    private async Task SelectStudentAsync(Guid studentId)
+    {
+        SelectedStudentId = studentId;
+        Navigation.NavigateTo($"/Teacher/Progress?studentId={studentId}", replace: true);
+        await LoadSelectedHistoryAsync();
+    }
+
+    private async Task LoadSelectedHistoryAsync()
+    {
+        _records = new();
+        _totalCount = 0;
+        if (!SelectedStudentId.HasValue)
+            return;
+
+        _isHistoryLoading = true;
+        _errorMessage = null;
+        try
+        {
+            var response = await GoalService.GetStudentProgressHistoryAsync(new GetStudentProgressHistoryRequest
+            {
+                StudentId = SelectedStudentId.Value,
+                PageNumber = 1,
+                PageSize = 50
+            });
+
+            if (!response.Success)
+            {
+                _errorMessage = string.IsNullOrWhiteSpace(response.Message) ? "فشل تحميل سجل الطالب." : response.Message;
+                return;
+            }
+
+            _records = DeserializeData<List<StudentProgressRecordDto>>(response.Data) ?? new();
+            _totalCount = response.TotalCount ?? _records.Count;
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"تعذر تحميل سجل الطالب: {ex.Message}";
+        }
+        finally
+        {
+            _isHistoryLoading = false;
+        }
+    }
+
+    private T? DeserializeData<T>(object? data)
+    {
+        if (data is null) return default;
+        if (data is T typed) return typed;
+        if (data is JsonElement element) return element.Deserialize<T>(_jsonOptions);
+        var json = JsonSerializer.Serialize(data, _jsonOptions);
+        return JsonSerializer.Deserialize<T>(json, _jsonOptions);
+    }
+
+    private void BackToDailyEntry() => Navigation.NavigateTo("/Teacher/Halaka");
+    private string GetStudentButtonClass(Guid studentId) => SelectedStudentId == studentId ? "student-button active" : "student-button";
+    private static string Display(string? value) => string.IsNullOrWhiteSpace(value) ? "-" : value;
+    private static string FormatDate(DateTime? value) => value.HasValue ? value.Value.ToLocalTime().ToString("yyyy/MM/dd") : "لا يوجد";
+    private static string RecordTypeLabel(ProgressRecordType type) => type switch { ProgressRecordType.Memorization => "تسميع", ProgressRecordType.Review => "مراجعة", ProgressRecordType.Exam => "اختبار", _ => "سجل" };
+    private static string RecordRange(StudentProgressRecordDto record)
+    {
+        if (record.RecordType == ProgressRecordType.Exam)
+            return $"جزء {record.JuzFrom ?? 0} - {record.JuzTo ?? 0}";
+        return $"جزء {record.JuzNumber ?? 0} / صفحة {record.FromPage ?? 0} - {record.ToPage ?? 0}";
+    }
+    private static string RecordScore(StudentProgressRecordDto record) => record.Score.HasValue ? record.Score.Value.ToString() : !string.IsNullOrWhiteSpace(record.GradeLabel) ? record.GradeLabel : record.Points.ToString();
+
+    private sealed class SelectableStudent
+    {
+        public Guid StudentId { get; set; }
+        public string StudentName { get; set; } = string.Empty;
+        public Guid HalqaId { get; set; }
+        public string HalqaName { get; set; } = string.Empty;
+        public int Points { get; set; }
+        public int LatestPageNumber { get; set; }
+        public int MemorizationPercent { get; set; }
+        public int AttendanceRatePercent { get; set; }
+        public DateTime? LastProgressDate { get; set; }
+    }
 }

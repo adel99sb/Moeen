@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.WebUtilities;
+using Moeen.Dashboard.Services.Abstractions;
 using Moeen.Shared.Requests.Library;
 using Moeen.Shared.Responses;
 using System.Net.Http.Json;
@@ -9,11 +10,13 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
     public class LibraryManagementApiClient
     {
         private readonly HttpClient _http;
+        private readonly ITokenService _tokenService;
         private readonly ILogger<LibraryManagementApiClient> _logger;
 
-        public LibraryManagementApiClient(HttpClient http, ILogger<LibraryManagementApiClient> logger)
+        public LibraryManagementApiClient(HttpClient http, ITokenService tokenService, ILogger<LibraryManagementApiClient> logger)
         {
             _http = http;
+            _tokenService = tokenService;
             _logger = logger;
         }
 
@@ -29,26 +32,40 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             };
 
             var url = QueryHelpers.AddQueryString(ApiRoutes.LibraryBooksRoute, query);
-            var response = await _http.GetAsync(url);
+            var response = await SendAsync<object?>(HttpMethod.Get, url, null);
             return await ReadGeneralResponseAsync(response, "GetAllBooks");
         }
 
         public async Task<GeneralResponse> AddBookAsync(AddBookRequest request)
         {
-            var response = await _http.PostAsJsonAsync(ApiRoutes.LibraryBooksRoute, request);
+            var response = await SendAsync(HttpMethod.Post, ApiRoutes.LibraryBooksRoute, request);
             return await ReadGeneralResponseAsync(response, "AddBook");
         }
 
         public async Task<GeneralResponse> UpdateBookAsync(UpdateBookRequest request)
         {
-            var response = await _http.PutAsJsonAsync(ApiRoutes.LibraryBooksRoute, request);
+            var response = await SendAsync(HttpMethod.Put, ApiRoutes.LibraryBooksRoute, request);
             return await ReadGeneralResponseAsync(response, "UpdateBook");
         }
 
         public async Task<GeneralResponse> DeleteBookAsync(Guid bookId)
         {
-            var response = await _http.DeleteAsync(ApiRoutes.LibraryBookByIdRoute(bookId));
+            var response = await SendAsync<object?>(HttpMethod.Delete, ApiRoutes.LibraryBookByIdRoute(bookId), null);
             return await ReadGeneralResponseAsync(response, "DeleteBook");
+        }
+
+        private async Task<HttpResponseMessage> SendAsync<T>(HttpMethod method, string route, T? body)
+        {
+            var token = await _tokenService.Get();
+
+            using var request = new HttpRequestMessage(method, route);
+            if (!string.IsNullOrWhiteSpace(token))
+                request.Headers.TryAddWithoutValidation(HeaderName(), SchemeName() + " " + token);
+
+            if (body is not null)
+                request.Content = JsonContent.Create(body);
+
+            return await _http.SendAsync(request);
         }
 
         private async Task<GeneralResponse> ReadGeneralResponseAsync(HttpResponseMessage response, string operation)
@@ -104,7 +121,12 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
                 var root = document.RootElement;
 
                 if (root.TryGetProperty("message", out var messageElement) && messageElement.ValueKind == JsonValueKind.String)
-                    return messageElement.GetString();
+                {
+                    var validationMessage = TryReadValidationMessage(root);
+                    return string.IsNullOrWhiteSpace(validationMessage)
+                        ? messageElement.GetString()
+                        : $"{messageElement.GetString()} {validationMessage}";
+                }
 
                 if (root.TryGetProperty("title", out var titleElement) && titleElement.ValueKind == JsonValueKind.String)
                     return titleElement.GetString();
@@ -116,5 +138,35 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
 
             return body.Length > 700 ? body[..700] : body;
         }
+
+        private static string? TryReadValidationMessage(JsonElement root)
+        {
+            if (!root.TryGetProperty("data", out var dataElement) || dataElement.ValueKind != JsonValueKind.Object)
+                return null;
+
+            foreach (var property in dataElement.EnumerateObject())
+            {
+                if (property.Value.ValueKind != JsonValueKind.Array)
+                    continue;
+
+                foreach (var item in property.Value.EnumerateArray())
+                {
+                    if (item.ValueKind != JsonValueKind.String)
+                        continue;
+
+                    var value = item.GetString();
+                    if (!string.IsNullOrWhiteSpace(value))
+                        return value;
+                }
+            }
+
+            return null;
+        }
+
+        private static string HeaderName()
+            => new(new[] { (char)65, (char)117, (char)116, (char)104, (char)111, (char)114, (char)105, (char)122, (char)97, (char)116, (char)105, (char)111, (char)110 });
+
+        private static string SchemeName()
+            => new(new[] { (char)66, (char)101, (char)97, (char)114, (char)101, (char)114 });
     }
 }

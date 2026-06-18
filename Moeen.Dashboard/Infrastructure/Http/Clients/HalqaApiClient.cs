@@ -29,6 +29,18 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             return await ReadGeneralResponseAsync(response, "GetAllHalqas");
         }
 
+        public async Task<GeneralResponse> GetAssignmentStudentsAsync(Guid? halqaId = null)
+        {
+            var query = new Dictionary<string, string?>
+            {
+                { "halqaId", halqaId?.ToString() }
+            };
+
+            var url = QueryHelpers.AddQueryString(ApiRoutes.GetHalqaAssignmentStudentsAsyncRoute, query);
+            var response = await _http.GetAsync(url);
+            return await ReadGeneralResponseAsync(response, "GetHalqaAssignmentStudents");
+        }
+
         public async Task<GeneralResponse> CreateAsync(CreateHalqaRequest request)
         {
             var response = await _http.PostAsJsonAsync(ApiRoutes.CreateHalqaAsyncRoute, request);

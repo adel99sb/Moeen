@@ -17,6 +17,9 @@ namespace Moeen.Dashboard.Services.Implementations
         public async Task<GeneralResponse> GetAllAsync(Guid? mosqueId = null)
             => await _client.GetAllAsync(mosqueId);
 
+        public async Task<GeneralResponse> GetAssignmentStudentsAsync(Guid? halqaId = null)
+            => await _client.GetAssignmentStudentsAsync(halqaId);
+
         public async Task<GeneralResponse> CreateAsync(CreateHalqaRequest request)
             => await _client.CreateAsync(request);
 

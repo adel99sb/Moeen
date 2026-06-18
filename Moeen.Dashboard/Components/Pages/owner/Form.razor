@@ -303,16 +303,6 @@
                 }
                 else
                 {
-                    <div class="type-tabs">
-                        @foreach (var type in _types)
-                        {
-                            <button type="button" class="@GetTypeTabClass(type.Value)" disabled="@(!CanChangeAccountType)" @onclick="() => ChangeTypeAsync(type.Value)">
-                                <i class="@type.Icon"></i>
-                                @type.Label
-                            </button>
-                        }
-                    </div>
-
                     @if (_loadedProfile != null)
                     {
                         <div class="profile-summary">

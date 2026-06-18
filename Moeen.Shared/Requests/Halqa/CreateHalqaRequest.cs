@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.Halqa
@@ -13,10 +14,12 @@ namespace Moeen.Shared.Requests.Halqa
         public Guid FoujId { get; set; }
 
         [Required(ErrorMessage = "Teacher ID is required")]
-        public Guid TeacherId { get; set; } // ملاحظة: في الكلاس الأصلي teacherId كان int، لكنه خطأ، يجب أن يكون Guid
+        public Guid TeacherId { get; set; }
 
         [Required(ErrorMessage = "Halqa type is required")]
         [StringLength(50, ErrorMessage = "Halqa type cannot exceed 50 characters")]
         public string Type { get; set; }
+
+        public List<Guid>? StudentIds { get; set; }
     }
 }

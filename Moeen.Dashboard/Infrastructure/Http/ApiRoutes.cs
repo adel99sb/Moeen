@@ -141,6 +141,7 @@
         public static string FoujRoute { get; } = "api/Fouj";
         public static string FoujByIdRoute(Guid foujId) => $"api/Fouj/{foujId}";
         public static string GetAllHalqasAsyncRoute { get; } = "api/HalqaQuery/all";
+        public static string GetHalqaAssignmentStudentsAsyncRoute { get; } = "api/HalqaQuery/assignment-students";
         public static string CreateHalqaAsyncRoute { get; } = "api/HalqaCommand/create";
         public static string UpdateHalqaAsyncRoute { get; } = "api/HalqaCommand/update";
         public static string DeleteHalqaAsyncRoute { get; } = "api/HalqaCommand/delete";

@@ -13,6 +13,7 @@ namespace Moeen.Api.Infrastructure.Data
         private static readonly Guid DevelopmentTeacherId = Guid.Parse("33333333-3333-3333-3333-333333333333");
         public const string DevelopmentSupervisorEmail = "supervisor@moeen.local";
         public const string DevelopmentTeacherEmail = "teacher@moeen.local";
+        public const string DevelopmentExamerEmail = "examer@moeen.local";
         private const string DevelopmentSupervisorPasswordConfigurationKey = "SeedUsers:DevelopmentSupervisorPassword";
 
         public static async Task SeedRolesAsync(RoleManager<IdentityRole<Guid>> roleManager)
@@ -48,6 +49,7 @@ namespace Moeen.Api.Infrastructure.Data
             await SeedDevelopmentMosqueAsync(context);
             await SeedDevelopmentSupervisorAsync(context, userManager, developmentSupervisorPassword);
             await SeedDevelopmentTeacherAsync(context, userManager, developmentSupervisorPassword);
+            await SeedDevelopmentExamerAsync(userManager, developmentSupervisorPassword);
         }
 
         private static async Task SeedDevelopmentMosqueAsync(AppDbContext context)
@@ -136,10 +138,10 @@ namespace Moeen.Api.Infrastructure.Data
                 userToUpdate.Email = DevelopmentTeacherEmail;
                 userToUpdate.EmailConfirmed = true;
                 userToUpdate.role = (int)Roles.Teacher;
+                userToUpdate.name = "معلم معين التجريبي";
 
                 if (teacher != null)
                 {
-                    teacher.name = "معلم معين التجريبي";
                     teacher.MosqueId = DevelopmentMosqueId;
                     teacher.Bio = string.IsNullOrWhiteSpace(teacher.Bio) ? "معلم seed محلي لاختبار لوحة المعلم والترقية." : teacher.Bio;
                     teacher.assigned_at = string.IsNullOrWhiteSpace(teacher.assigned_at) ? DateTime.UtcNow.ToString("yyyy-MM-dd") : teacher.assigned_at;
@@ -147,13 +149,15 @@ namespace Moeen.Api.Infrastructure.Data
                 }
                 else
                 {
-                    userToUpdate.name = "معلم معين التجريبي";
                     var updateResult = await userManager.UpdateAsync(userToUpdate);
                     if (!updateResult.Succeeded)
                     {
                         var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
                         throw new InvalidOperationException($"Failed to update development teacher user: {errors}");
                     }
+
+                    await EnsureDevelopmentTeacherRowAsync(context, userToUpdate.Id);
+                    teacher = await context.Teachers.FirstOrDefaultAsync(x => x.Id == userToUpdate.Id);
                 }
             }
 
@@ -162,6 +166,17 @@ namespace Moeen.Api.Infrastructure.Data
                 throw new InvalidOperationException("Development teacher user was not created.");
 
             await EnsureDevelopmentUserHasOnlyRoleAsync(userManager, teacherIdentityUser, Roles.Teacher, "development teacher");
+        }
+
+        private static async Task EnsureDevelopmentTeacherRowAsync(AppDbContext context, Guid teacherUserId)
+        {
+            var hasTeacherRow = await context.Teachers.AnyAsync(x => x.Id == teacherUserId);
+            if (hasTeacherRow)
+                return;
+
+            await context.Database.ExecuteSqlInterpolatedAsync($@"
+                INSERT INTO Teachers (Id, MosqueId, boi, assigned_at, DateOfBirth)
+                VALUES ({teacherUserId}, {DevelopmentMosqueId}, {"معلم seed محلي لاختبار لوحة المعلم والترقية."}, {DateTime.UtcNow.ToString("yyyy-MM-dd")}, NULL)");
         }
 
         private static async Task SeedDevelopmentSupervisorAsync(AppDbContext context, UserManager<User> userManager, string developmentSupervisorPassword)
@@ -231,6 +246,55 @@ namespace Moeen.Api.Infrastructure.Data
 
             await EnsureDevelopmentUserHasOnlyRoleAsync(userManager, supervisor, Roles.Admin, "development supervisor");
         }
+        private static async Task SeedDevelopmentExamerAsync(UserManager<User> userManager, string developmentPassword)
+        {
+            var examer = await userManager.FindByEmailAsync(DevelopmentExamerEmail);
+
+            if (examer == null)
+            {
+                examer = new User
+                {
+                    UserName = DevelopmentExamerEmail,
+                    Email = DevelopmentExamerEmail,
+                    EmailConfirmed = true,
+                    name = "فاحص معين التجريبي",
+                    gender = "Male",
+                    font_size = 16,
+                    role = (int)Roles.Examer,
+                    theme = "light",
+                    profile_imageUrl = null,
+                    created_at = DateTime.UtcNow,
+                    JoinedAt = DateTime.UtcNow,
+                    complaints = new List<Complaint>(),
+                    PosInteractions = new List<PosInteraction>()
+                };
+
+                var createResult = await userManager.CreateAsync(examer, developmentPassword);
+                if (!createResult.Succeeded)
+                {
+                    var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
+                    throw new InvalidOperationException($"Failed to create development examer: {errors}");
+                }
+            }
+            else
+            {
+                examer.UserName = DevelopmentExamerEmail;
+                examer.Email = DevelopmentExamerEmail;
+                examer.EmailConfirmed = true;
+                examer.name = "فاحص معين التجريبي";
+                examer.role = (int)Roles.Examer;
+
+                var updateResult = await userManager.UpdateAsync(examer);
+                if (!updateResult.Succeeded)
+                {
+                    var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+                    throw new InvalidOperationException($"Failed to update development examer: {errors}");
+                }
+            }
+
+            await EnsureDevelopmentUserHasOnlyRoleAsync(userManager, examer, Roles.Examer, "development examer");
+        }
+
         private static async Task EnsureDevelopmentUserHasOnlyRoleAsync(
             UserManager<User> userManager,
             User user,

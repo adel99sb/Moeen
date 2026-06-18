@@ -17,6 +17,23 @@ namespace Moeen.Dashboard.Services.Implementations
             _apiClient = apiClient;
         }
 
+        public async Task<WeeklyLessonDashboardDto> GetTeacherWeeklyDashboardAsync(DateTime? date = null)
+        {
+            var response = await _apiClient.GetTeacherWeeklyDashboardAsync(date);
+            EnsureSuccess(response);
+            return DeserializeData<WeeklyLessonDashboardDto>(response.Data) ?? new WeeklyLessonDashboardDto { Date = date ?? DateTime.Today };
+        }
+
+        public Task<GeneralResponse> RecordLessonAttendanceAsync(RecordAttendanceRequest request)
+            => _apiClient.RecordLessonAttendanceAsync(request);
+
+        public async Task<List<LessonHistoryItemDto>> GetLessonHistoryAsync(Guid circleId, int pageNumber = 1, int pageSize = 20)
+        {
+            var response = await _apiClient.GetLessonHistoryAsync(circleId, pageNumber, pageSize);
+            EnsureSuccess(response);
+            return DeserializeData<List<LessonHistoryItemDto>>(response.Data) ?? new List<LessonHistoryItemDto>();
+        }
+
         public async Task<List<WeeklyLessonManagementDto>> GetWeeklyLessonsAsync()
         {
             var response = await _apiClient.GetWeeklyLessonsAsync();
@@ -53,7 +70,13 @@ namespace Moeen.Dashboard.Services.Implementations
             if (data == null)
                 return default;
 
-            var json = JsonSerializer.Serialize(data);
+            if (data is T typed)
+                return typed;
+
+            if (data is JsonElement element)
+                return element.Deserialize<T>(JsonOptions);
+
+            var json = JsonSerializer.Serialize(data, JsonOptions);
             return JsonSerializer.Deserialize<T>(json, JsonOptions);
         }
     }
