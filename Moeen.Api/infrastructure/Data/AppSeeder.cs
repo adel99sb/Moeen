@@ -6,14 +6,20 @@ using Moeen.Shared.Constants;
 
 namespace Moeen.Api.Infrastructure.Data
 {
-    public static class AppSeeder
+    public static partial class AppSeeder
     {
         private static readonly Guid DevelopmentMosqueId = Guid.Parse("11111111-1111-1111-1111-111111111111");
         private static readonly Guid DevelopmentSupervisorId = Guid.Parse("22222222-2222-2222-2222-222222222222");
         private static readonly Guid DevelopmentTeacherId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+        private static readonly Guid DevelopmentStudentId = Guid.Parse("66666666-6666-6666-6666-666666666666");
+        private static readonly Guid DevelopmentParentId = Guid.Parse("77777777-7777-7777-7777-777777777777");
+        private const int DevelopmentStudentRole = 2;
+        private const int DevelopmentParentRole = 3;
         public const string DevelopmentSupervisorEmail = "supervisor@moeen.local";
         public const string DevelopmentTeacherEmail = "teacher@moeen.local";
         public const string DevelopmentExamerEmail = "examer@moeen.local";
+        public const string DevelopmentStudentEmail = "student@moeen.local";
+        public const string DevelopmentParentEmail = "parent@moeen.local";
         private const string DevelopmentSupervisorPasswordConfigurationKey = "SeedUsers:DevelopmentSupervisorPassword";
 
         public static async Task SeedRolesAsync(RoleManager<IdentityRole<Guid>> roleManager)
@@ -50,6 +56,7 @@ namespace Moeen.Api.Infrastructure.Data
             await SeedDevelopmentSupervisorAsync(context, userManager, developmentSupervisorPassword);
             await SeedDevelopmentTeacherAsync(context, userManager, developmentSupervisorPassword);
             await SeedDevelopmentExamerAsync(userManager, developmentSupervisorPassword);
+            await SeedDevelopmentMobileAccountsAsync(context, userManager, developmentSupervisorPassword);
         }
 
         private static async Task SeedDevelopmentMosqueAsync(AppDbContext context)

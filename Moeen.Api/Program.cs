@@ -161,6 +161,14 @@ builder.Services.AddScoped<IBackupService, BackupService>();
 builder.Services.AddScoped<IFoujService, FoujService>();
 builder.Services.AddScoped<IStudentNotesService, StudentNotesService>();
 builder.Services.AddScoped<IDailyAssignmentService, DailyAssignmentService>();
+builder.Services.AddScoped<IStudentMobileDashboardService, StudentMobileDashboardService>();
+builder.Services.AddScoped<IStudentMobileProgressService, StudentMobileProgressService>();
+builder.Services.AddScoped<IStudentMobileProfileService, StudentMobileProfileService>();
+builder.Services.AddScoped<IStudentMobilePostService, StudentMobilePostService>();
+builder.Services.AddScoped<IParentMobileDashboardService, ParentMobileDashboardService>();
+builder.Services.AddScoped<IParentMobileProgressService, ParentMobileProgressService>();
+builder.Services.AddScoped<IParentMobileProfileService, ParentMobileProfileService>();
+builder.Services.AddScoped<IParentMobilePostService, ParentMobilePostService>();
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
     {

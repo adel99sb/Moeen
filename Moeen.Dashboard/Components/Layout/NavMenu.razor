@@ -1,12 +1,12 @@
-﻿@rendermode InteractiveServer
+@rendermode InteractiveServer
 @using Moeen.Dashboard.Services.Abstractions
 @inject ITokenService TokenService
 @inject NavigationManager Nav
 
 <div class="sidebar-header">
-    <a class="sidebar-brand" href="">
+    <a class="sidebar-brand" href="@HomeRoute">
         <span class="sidebar-brand-icon bi bi-grid-1x2-fill" aria-hidden="true"></span>
-        <span>لوحة تحكم</span>
+        <span>لوحة معين</span>
     </a>
 
     <div class="sidebar-role-card">
@@ -16,7 +16,7 @@
         }
         else
         {
-            <span class="role-label">الدور الحالي</span>
+            <span class="role-label">نوع الحساب</span>
             <span class="role-value">
                 <span class="bi bi-person-badge" aria-hidden="true"></span>
                 @GetRoleLabel(userRole)
@@ -25,176 +25,27 @@
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<input type="checkbox" title="فتح القائمة" class="navbar-toggler" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler')?.click()">
     <nav class="sidebar-nav flex-column">
-        @if (userRole == "owner")
+        @foreach (var item in CurrentMenuItems)
         {
             <div class="nav-item">
-                <NavLink class="nav-link" href="/owner/dashboard" Match="NavLinkMatch.All">
-                    <span class="bi bi-house-door-fill"></span>
-                    <span>الرئيسية</span>
+                <NavLink class="nav-link" href="@item.Href" Match="@item.Match">
+                    <span class="@($"bi {item.Icon}")" aria-hidden="true"></span>
+                    <span>@item.Label</span>
                 </NavLink>
             </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="/owner/AccountManagement">
-                    <span class="bi bi-person-lines-fill"></span>
-                    <span>حسابات المستخدمين</span>
-                </NavLink>
-            </div>
+        }
 
-            <div class="nav-item">
-                <NavLink class="nav-link" href="/management/mosques-management">
-                    <span class="bi bi-building"></span>
-                    <span>إدارة المساجد</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="/settings">
-                    <span class="bi bi-gear" aria-hidden="true"></span>
-                    <span>إعدادات</span>
-                </NavLink>
-            </div>
-        }
-        else if (userRole == "supervisor")
+        @if (!isLoadingRole)
         {
-            <div class="nav-item">
-                <NavLink class="nav-link" href="/supervisor/SupervisorDashboard" Match="NavLinkMatch.All">
-                    <span class="bi bi-house-door-fill"></span>
-                    <span>إحصائيات رئيسية</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="supervisor/student">
-                    <span class="bi bi-mortarboard-fill"></span>
-                    <span>إدارة الطلاب</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="supervisor/teacher">
-                    <span class="bi bi-person-workspace"></span>
-                    <span>إدارة المعلمين</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="/supervisor/managementfouj">
-                    <span class="bi bi-diagram-3"></span>
-                    <span>الأفواج والحلقات</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="supervisor/book">
-                    <span class="bi bi-book-fill"></span>
-                    <span>إدارة الكتب</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="/parents">
-                    <span class="bi bi-people-fill"></span>
-                    <span>إدارة الأهالي</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="supervisor/posts">
-                    <span class="bi bi-megaphone-fill"></span>
-                    <span>المنشورات</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="supervisor/complaint-and-suggestions">
-                    <span class="bi bi-chat-dots-fill"></span>
-                    <span>الشكاوي</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="supervisor/saturdaylesson">
-                    <span class="bi bi-calendar-week-fill"></span>
-                    <span>الدروس الأسبوعية</span>
-                </NavLink>
-            </div>
-        }
-        else if (userRole == "teacher")
-        {
-            <div class="nav-item">
-                <NavLink class="nav-link" href="Teacher/TeacherDashboard" Match="NavLinkMatch.All">
-                    <span class="bi bi-house-door-fill"></span>
-                    <span>الرئيسية</span>
-                </NavLink>
-            </div>
-
-            <div class="nav-item">
-                <NavLink class="nav-link" href="Teacher/Halaka">
-                    <span class="bi bi-graph-up-arrow"></span>
-                    <span>تقدم حلقاتي</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="Teacher/WeekSessions">
-                    <span class="bi bi-calendar-check-fill"></span>
-                    <span>الدروس الأسبوعية</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="Teacher/Library">
-                    <span class="bi bi-journals"></span>
-                    <span>المكتبة</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="Teacher/Post">
-                    <span class="bi bi-megaphone-fill"></span>
-                    <span>الإعلانات</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="Teacher/Profile">
-                    <span class="bi bi-person-circle"></span>
-                    <span>ملفي الشخصي</span>
-                </NavLink>
-            </div>
-        }
-        else if (userRole == "examer")
-        {
-            <div class="nav-item">
-                <NavLink class="nav-link" href="/Examer/Dashboard" Match="NavLinkMatch.All">
-                    <span class="bi bi-house-door-fill"></span>
-                    <span>الرئيسية</span>
-                </NavLink>
-            </div>
-
-            <div class="nav-item">
-                <NavLink class="nav-link" href="examer/exam">
-                    <span class="bi bi-mortarboard-fill"></span>
-                    <span>إدارة الطلاب</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="examer/postexamer">
-                    <span class="bi bi-megaphone-fill"></span>
-                    <span>الإعلانات</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="examer/bookexamer">
-                    <span class="bi bi-journals"></span>
-                    <span>المكتبة</span>
-                </NavLink>
-            </div>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="examer/profileexamer">
-                    <span class="bi bi-person-circle"></span>
-                    <span>ملفي الشخصي</span>
-                </NavLink>
-            </div>
-        }
-        else
-        {
-            <div class="nav-item">
-                <NavLink class="nav-link" href="Teacher/Profile">
-                    <span class="bi bi-person-circle"></span>
-                    <span>ملفي الشخصي</span>
-                </NavLink>
+            <div class="nav-item nav-item-separator">
+                <button type="button" class="nav-link logout-link" @onclick="LogoutAsync">
+                    <span class="bi bi-box-arrow-right" aria-hidden="true"></span>
+                    <span>تسجيل الخروج</span>
+                </button>
             </div>
         }
     </nav>
@@ -202,7 +53,19 @@
 
 @code {
     private string? userRole;
+    private string homeRoute = "/";
     private bool isLoadingRole = true;
+
+    private string HomeRoute => string.IsNullOrWhiteSpace(homeRoute) ? "/" : homeRoute;
+
+    private IReadOnlyList<DashboardMenuItem> CurrentMenuItems => userRole switch
+    {
+        "owner" => OwnerMenu,
+        "supervisor" => SupervisorMenu,
+        "teacher" => TeacherMenu,
+        "examer" => ExamerMenu,
+        _ => Array.Empty<DashboardMenuItem>()
+    };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -217,17 +80,67 @@
         }
 
         userRole = session.PrimaryRole;
+        homeRoute = session.HomeRoute;
         isLoadingRole = false;
         StateHasChanged();
+    }
+
+    private async Task LogoutAsync()
+    {
+        await TokenService.Clear();
+        Nav.NavigateTo("/", replace: true);
     }
 
     private static string GetRoleLabel(string? role)
         => role switch
         {
-            "owner" => "مالك",
+            "owner" => "مالك النظام",
             "supervisor" => "مشرف",
-            "teacher" => "أستاذ",
-            "examer" => "مختبر",
-            _ => "غير معروف"
+            "teacher" => "معلم",
+            "examer" => "فاحص",
+            _ => "غير محدد"
         };
+
+    private sealed record DashboardMenuItem(string Label, string Href, string Icon, NavLinkMatch Match = NavLinkMatch.Prefix);
+
+    private static readonly IReadOnlyList<DashboardMenuItem> OwnerMenu = new[]
+    {
+        new DashboardMenuItem("الرئيسية", "/owner/dashboard", "bi-house-door-fill", NavLinkMatch.All),
+        new DashboardMenuItem("إدارة الحسابات", "/owner/AccountManagement", "bi-person-lines-fill"),
+        new DashboardMenuItem("إدارة المساجد", "/management/mosques-management", "bi-building"),
+        new DashboardMenuItem("الإعدادات", "/settings", "bi-gear")
+    };
+
+    private static readonly IReadOnlyList<DashboardMenuItem> SupervisorMenu = new[]
+    {
+        new DashboardMenuItem("الرئيسية", "/Supervisor/SupervisorDashboard", "bi-house-door-fill", NavLinkMatch.All),
+        new DashboardMenuItem("إدارة الطلاب", "/supervisor/student", "bi-mortarboard-fill"),
+        new DashboardMenuItem("إدارة المعلمين", "/supervisor/teacher", "bi-person-workspace"),
+        new DashboardMenuItem("إدارة الأفواج", "/supervisor/managementfouj", "bi-diagram-3"),
+        new DashboardMenuItem("إدارة الحلقات", "/supervisor/managementhalqa", "bi-diagram-2-fill"),
+        new DashboardMenuItem("إدارة الأهالي", "/parents", "bi-people-fill"),
+        new DashboardMenuItem("المكتبة", "/supervisor/book", "bi-book-fill"),
+        new DashboardMenuItem("المنشورات", "/supervisor/posts", "bi-megaphone-fill"),
+        new DashboardMenuItem("الشكاوى والاقتراحات", "/supervisor/complaint-and-suggestions", "bi-chat-dots-fill"),
+        new DashboardMenuItem("الدروس الأسبوعية", "/supervisor/saturdaylesson", "bi-calendar-week-fill")
+    };
+
+    private static readonly IReadOnlyList<DashboardMenuItem> TeacherMenu = new[]
+    {
+        new DashboardMenuItem("الرئيسية", "/Teacher/TeacherDashboard", "bi-house-door-fill", NavLinkMatch.All),
+        new DashboardMenuItem("حلقاتي", "/Teacher/Halaka", "bi-collection-fill"),
+        new DashboardMenuItem("جلسات الأسبوع", "/Teacher/WeekSessions", "bi-calendar-check-fill"),
+        new DashboardMenuItem("المكتبة", "/Teacher/Library", "bi-journals"),
+        new DashboardMenuItem("المنشورات", "/Teacher/Post", "bi-megaphone-fill"),
+        new DashboardMenuItem("الملف الشخصي", "/Teacher/Profile", "bi-person-circle")
+    };
+
+    private static readonly IReadOnlyList<DashboardMenuItem> ExamerMenu = new[]
+    {
+        new DashboardMenuItem("الرئيسية", "/Examer/Dashboard", "bi-house-door-fill", NavLinkMatch.All),
+        new DashboardMenuItem("الطلاب والاختبارات", "/examer/exam", "bi-mortarboard-fill"),
+        new DashboardMenuItem("المنشورات", "/examer/postexamer", "bi-megaphone-fill"),
+        new DashboardMenuItem("المكتبة", "/examer/bookexamer", "bi-journals"),
+        new DashboardMenuItem("الملف الشخصي", "/examer/profileexamer", "bi-person-circle")
+    };
 }
