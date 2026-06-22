@@ -1,40 +1,39 @@
-﻿@page "/Parent/Progress"
+@page "/Student/Progress"
+@using Moeen.App.Services.Abstractions
+@using Moeen.Shared.Constants
+@using Moeen.Shared.Responses.Mobile
+@using System.Globalization
+@inject IStudentProgressService ProgressService
+@inject AppSessionService AppSession
+@inject NavigationManager Navigation
 
 <style>
     :root {
-        /* الألوان الأساسية */
         --primary: #195042;
         --beige: #d6cabc;
         --bg-light: #f9f7f5;
         --white: #ffffff;
         --text-muted: #6c757d;
-        /* حالات النظام */
         --success: #28a745;
         --warning: #ffc107;
         --danger: #dc3545;
         --info: #17a2b8;
-        /* الظلال والحدود */
         --shadow-soft: 0 2px 8px rgba(0,0,0,.04);
         --shadow-card: 0 10px 30px rgba(0,0,0,.08);
         --border-soft: 1px solid rgba(214,202,188,.4);
         --focus-ring: rgba(25,80,66,.25);
-        /* الأبعاد والمسافات */
         --radius: 8px;
         --radius-lg: 20px;
         --space-1: 4px;
         --space-2: 8px;
         --space-3: 15px;
         --space-4: 25px;
-        /* الخطوط */
         --font: 'Segoe UI', Tahoma, Geneva, sans-serif;
         --text-sm: .8rem;
         --text-base: .9rem;
         --text-lg: 1.1rem;
     }
 
-    /* ═══════════════════════════════════════════════════════
-               📐 Base Layout - التخطيط الأساسي
-               ═══════════════════════════════════════════════════════ */
     .progress-container {
         background: var(--bg-light);
         font-family: var(--font);
@@ -74,60 +73,6 @@
         flex-shrink: 0;
     }
 
-    /* ═══════════════════════════════════════════════════════
-               🗂️ Tabs - التبويبات
-               ═══════════════════════════════════════════════════════ */
-    .tabs-wrapper {
-        margin-bottom: var(--space-4);
-    }
-
-    .tabs-container {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-bottom: 25px;
-        background: var(--white);
-        padding: 8px;
-        border-radius: var(--radius);
-        box-shadow: var(--shadow-soft);
-        border: var(--border-soft);
-    }
-
-    .tab-item {
-        flex: 1;
-        padding: 12px;
-        text-align: center;
-        cursor: pointer;
-        border-radius: var(--radius);
-        font-weight: 600;
-        transition: .3s;
-        color: var(--primary);
-        border: 1px solid transparent;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        text-decoration: none;
-        font-size: var(--text-base);
-    }
-
-        .tab-item.active {
-            background: var(--primary);
-            color: var(--beige);
-        }
-
-        .tab-item:not(.active):hover {
-            background: var(--bg-light);
-            border-color: var(--beige);
-        }
-
-        .tab-item i {
-            font-size: 1.1rem;
-        }
-
-    /* ═══════════════════════════════════════════════════════
-               📊 Statistics - الإحصائيات
-               ═══════════════════════════════════════════════════════ */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -162,9 +107,6 @@
         color: var(--beige);
     }
 
-    /* ═══════════════════════════════════════════════════════
-               🔍 Filter Bar - شريط التصفية
-               ═══════════════════════════════════════════════════════ */
     .filter-bar {
         background: var(--white);
         border: var(--border-soft);
@@ -175,6 +117,7 @@
         gap: var(--space-2);
         flex-wrap: wrap;
         align-items: center;
+        box-shadow: var(--shadow-soft);
     }
 
     .filter-group {
@@ -198,13 +141,13 @@
         min-width: 120px;
     }
 
-        .input:focus, .select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 .2rem var(--focus-ring);
-            outline: 0;
-        }
+    .input:focus, .select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 .2rem var(--focus-ring);
+        outline: 0;
+    }
 
-    .btn {
+    .btn-progress {
         background: var(--primary);
         color: var(--beige);
         font-size: var(--text-sm);
@@ -221,42 +164,26 @@
         text-decoration: none;
     }
 
-        .btn:hover {
-            background: var(--beige);
-            color: var(--primary);
-        }
-
-        .btn.outline {
-            background: transparent;
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-            .btn.outline:hover {
-                background: var(--primary);
-                color: var(--beige);
-            }
-
-    .btn-edit-record {
-        background: transparent;
+    .btn-progress:hover:not(:disabled) {
+        background: var(--beige);
         color: var(--primary);
-        border: 1px solid var(--beige);
-        padding: 6px 16px;
-        border-radius: var(--radius);
-        font-size: var(--text-sm);
-        cursor: pointer;
-        transition: .2s;
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-1);
-        text-decoration: none;
-        flex-shrink: 0;
     }
 
-        .btn-edit-record:hover {
-            background: var(--beige);
-            color: var(--primary);
-        }
+    .btn-progress:disabled {
+        opacity: .65;
+        cursor: not-allowed;
+    }
+
+    .btn-progress.outline {
+        background: transparent;
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .btn-progress.outline:hover:not(:disabled) {
+        background: var(--primary);
+        color: var(--beige);
+    }
 
     .progress-card {
         border: var(--border-soft);
@@ -277,6 +204,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: var(--space-2);
     }
 
     .card-body-custom {
@@ -289,15 +217,15 @@
         padding-left: 0;
     }
 
-        .timeline::before {
-            content: '';
-            position: absolute;
-            right: 14px;
-            top: 10px;
-            bottom: 10px;
-            width: 2px;
-            background: var(--beige);
-        }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        right: 14px;
+        top: 10px;
+        bottom: 10px;
+        width: 2px;
+        background: var(--beige);
+    }
 
     .timeline-item {
         position: relative;
@@ -310,23 +238,23 @@
         transition: transform .2s;
     }
 
-        .timeline-item:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-card);
-        }
+    .timeline-item:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-card);
+    }
 
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            right: -37px;
-            top: 26px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--primary);
-            border: 3px solid var(--beige);
-            z-index: 1;
-        }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        right: -37px;
+        top: 26px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--primary);
+        border: 3px solid var(--beige);
+        z-index: 1;
+    }
 
     .timeline-header {
         display: flex;
@@ -334,10 +262,6 @@
         justify-content: space-between;
         margin-bottom: var(--space-3);
         gap: var(--space-2);
-    }
-
-    .timeline-header-content {
-        flex: 1;
     }
 
     .timeline-date {
@@ -383,19 +307,11 @@
         font-size: var(--text-lg);
     }
 
-        .record-value.success {
-            color: var(--success);
-        }
+    .record-value.success { color: var(--success); }
+    .record-value.warning { color: #856404; }
+    .record-value.danger { color: var(--danger); }
 
-        .record-value.warning {
-            color: #856404;
-        }
-
-        .record-value.danger {
-            color: var(--danger);
-        }
-
-    .badge {
+    .badge-progress {
         display: inline-block;
         padding: 4px 12px;
         border-radius: 20px;
@@ -403,25 +319,11 @@
         font-weight: 500;
     }
 
-        .badge.excellent {
-            background: rgba(40,167,69,.15);
-            color: var(--success);
-        }
-
-        .badge.verygood {
-            background: rgba(23,162,184,.15);
-            color: var(--info);
-        }
-
-        .badge.good {
-            background: rgba(255,193,7,.15);
-            color: #856404;
-        }
-
-        .badge.repeat {
-            background: rgba(220,53,69,.15);
-            color: var(--danger);
-        }
+    .badge-progress.excellent { background: rgba(40,167,69,.15); color: var(--success); }
+    .badge-progress.verygood { background: rgba(23,162,184,.15); color: var(--info); }
+    .badge-progress.good { background: rgba(255,193,7,.15); color: #856404; }
+    .badge-progress.warning { background: rgba(255,193,7,.15); color: #856404; }
+    .badge-progress.repeat { background: rgba(220,53,69,.15); color: var(--danger); }
 
     .teacher-note {
         margin-top: var(--space-3);
@@ -437,6 +339,7 @@
         border-radius: var(--radius);
         padding: var(--space-3);
         margin-top: var(--space-4);
+        box-shadow: var(--shadow-soft);
     }
 
     .progress-section-header {
@@ -448,12 +351,12 @@
         border-bottom: 1px solid var(--bg-light);
     }
 
-        .progress-section-header h5 {
-            font-size: var(--text-base);
-            font-weight: 600;
-            color: var(--primary);
-            margin: 0;
-        }
+    .progress-section-header h5 {
+        font-size: var(--text-base);
+        font-weight: 600;
+        color: var(--primary);
+        margin: 0;
+    }
 
     .progress-grid {
         display: grid;
@@ -489,17 +392,9 @@
         white-space: nowrap;
     }
 
-        .progress-row-value.success {
-            color: var(--success);
-        }
-
-        .progress-row-value.warning {
-            color: var(--warning);
-        }
-
-        .progress-row-value.info {
-            color: var(--info);
-        }
+    .progress-row-value.success { color: var(--success); }
+    .progress-row-value.warning { color: var(--warning); }
+    .progress-row-value.info { color: var(--info); }
 
     .progress-row-bar {
         width: 100%;
@@ -514,437 +409,381 @@
         border-radius: 5px;
         transition: width .3s;
         display: block;
-    }
-
-    /* ═══════════════════════════════════════════════════════
-               🎨 Utility Classes - فئات مساعدة (بديلة للأنماط المضمنة)
-               ═══════════════════════════════════════════════════════ */
-
-    /* فئات عرض شريط التقدم */
-    .progress-fill-85 {
-        width: 85%;
         background: var(--primary);
     }
 
-    .progress-fill-92 {
-        width: 92%;
-        background: var(--primary);
-    }
-
-    .progress-fill-95 {
-        width: 95%;
-        background: var(--success);
-    }
-
-    .progress-fill-68 {
-        width: 68%;
-        background: var(--warning);
-    }
-
-    /* فئات النصوص والهوامش */
-    .text-center {
+    .state-box {
+        background: var(--white);
+        border: var(--border-soft);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-soft);
+        padding: var(--space-4);
         text-align: center;
+        color: var(--primary);
     }
 
-    .text-muted {
-        color: var(--text-muted);
-    }
+    .text-muted { color: var(--text-muted); }
+    .fw-bold { font-weight: 700; }
+    .opacity-75 { opacity: .75; }
+    .mb-0 { margin-bottom: 0; }
+    .mb-1 { margin-bottom: var(--space-1); }
+    .mb-3 { margin-bottom: var(--space-3); }
+    .mt-2 { margin-top: var(--space-2); }
+    .mt-3 { margin-top: var(--space-3); }
+    .mt-4 { margin-top: var(--space-4); }
+    .ms-1 { margin-right: 4px; }
+    .mx-2 { margin: 0 8px; }
+    .d-flex { display: flex; }
+    .align-items-center { align-items: center; }
+    .justify-content-between { justify-content: space-between; }
+    .small-note { font-size: var(--text-sm); }
 
-    .text-success {
-        color: var(--success);
-    }
-
-    .fw-bold {
-        font-weight: 700;
-    }
-
-    .opacity-75 {
-        opacity: .75;
-    }
-
-    .mt-2 {
-        margin-top: var(--space-2);
-    }
-
-    .mt-3 {
-        margin-top: var(--space-3);
-    }
-
-    .mt-4 {
-        margin-top: var(--space-4);
-    }
-
-    .mb-0 {
-        margin-bottom: 0;
-    }
-
-    .mb-1 {
-        margin-bottom: var(--space-1);
-    }
-
-    .mb-3 {
-        margin-bottom: var(--space-3);
-    }
-
-    .mb-5 {
-        margin-bottom: var(--space-4);
-    }
-
-    .ms-1 {
-        margin-right: 4px;
-    }
-
-    .ms-auto {
-        margin-right: auto;
-    }
-
-    .mx-2 {
-        margin: 0 8px;
-    }
-
-    /* فئات العرض والمرونة */
-    .d-flex {
-        display: flex;
-    }
-
-    .flex-wrap {
-        flex-wrap: wrap;
-    }
-
-    .justify-content-between {
-        justify-content: space-between;
-    }
-
-    .align-items-center {
-        align-items: center;
-    }
-
-    /* فئة حجم الخط الصغير للنص التوضيحي */
-    .text-note {
-        font-size: var(--text-sm);
-    }
-
-    /* ═══════════════════════════════════════════════════════
-               📱 Responsive - التجاوب مع الشاشات
-               ═══════════════════════════════════════════════════════ */
     @@media (max-width: 768px) {
-        .timeline {
-            padding-right: 35px;
-        }
-
-            .timeline::before {
-                right: 8px;
-            }
-
-        .timeline-item::before {
-            right: -33px;
-        }
-
-        .filter-bar {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .timeline-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .record-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .record-item {
-            align-items: flex-start;
-            text-align: right;
-        }
-
-        .col-md-6 {
-            flex: 0 0 100%;
-            max-width: 100%;
-        }
-
-        .progress-grid {
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-4);
-        }
-
-        .progress-row {
-            width: 100%;
-            gap: var(--space-2);
-        }
-
-        .progress-row-header {
-            margin-bottom: var(--space-1);
-        }
-
-        .progress-row-label {
-            font-size: var(--text-base);
-        }
-
-        .progress-row-value {
-            font-size: var(--text-lg);
-        }
-
-        .progress-row-bar {
-            height: 12px;
-        }
-
-        .tabs-container {
-            flex-direction: column;
-        }
-
-        .tab-item {
-            width: 100%;
-        }
+        .timeline { padding-right: 35px; }
+        .timeline::before { right: 8px; }
+        .timeline-item::before { right: -33px; }
+        .filter-bar { flex-direction: column; align-items: stretch; }
+        .filter-group { width: 100%; justify-content: space-between; }
+        .input, .select, .btn-progress { width: 100%; }
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .timeline-header { flex-direction: column; align-items: flex-start; }
+        .record-grid { grid-template-columns: repeat(2, 1fr); }
+        .progress-grid { display: flex; flex-direction: column; gap: var(--space-4); }
     }
 
     @@media (max-width: 480px) {
-        .stats-grid, .record-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .record-item {
-            align-items: flex-start;
-            text-align: right;
-        }
-
-        .student-info {
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .progress-section {
-            padding: var(--space-2);
-        }
-
-        .progress-row-bar {
-            height: 10px;
-        }
-    }
-
-    @@media print {
-        .filter-bar, .btn, .btn-edit-record, .tabs-wrapper {
-            display: none !important;
-        }
-
-        .progress-card {
-            break-inside: avoid;
-            box-shadow: none;
-            border: 1px solid #ddd;
-        }
+        .stats-grid, .record-grid { grid-template-columns: 1fr; }
+        .student-info { flex-direction: column; text-align: center; }
     }
 </style>
 
-@* ═══════════════════════════════════════════════════════
-   📄 Main Content - المحتوى الرئيسي
-   ═══════════════════════════════════════════════════════ *@
-
 <div class="progress-container">
-
-    @* Header: Student Info *@
-    <header class="header-custom">
-        <div class="student-info">
-            <div class="student-avatar">أ م</div>
-            <div>
-                <h1 class="fw-bold mb-1">أحمد محمد العبدالله</h1>
-                <p class="mb-0 opacity-75">
-                    <i class="bi bi-calendar3 ms-1"></i> مسجل منذ: 2024/01/15
-                    <span class="mx-2">•</span>
-                    <i class="bi bi-hash ms-1"></i> رقم الطالب: #1024
-                </p>
-            </div>
+    @if (_loading)
+    {
+        <div class="state-box">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+            <div class="mt-3">جاري تحميل سجل التقدم...</div>
         </div>
-    </header>
-
-    @* Statistics Cards *@
-    <div class="stats-grid">
-        <div class="stat-card">
-            <i class="bi bi-book stat-icon"></i>
-            <span class="stat-value">24</span>
-            <span class="stat-label">جلسة تسميع</span>
+    }
+    else if (!string.IsNullOrWhiteSpace(_error))
+    {
+        <div class="state-box">
+            <div class="mb-3">@_error</div>
+            <button type="button" class="btn-progress" @onclick="LoadProgressAsync">
+                <i class="bi bi-arrow-clockwise"></i>
+                إعادة المحاولة
+            </button>
         </div>
-        <div class="stat-card">
-            <i class="bi bi-arrow-repeat stat-icon"></i>
-            <span class="stat-value">18</span>
-            <span class="stat-label">مراجعة</span>
-        </div>
-        <div class="stat-card">
-            <i class="bi bi-trophy stat-icon"></i>
-            <span class="stat-value">3</span>
-            <span class="stat-label">اختبارات</span>
-        </div>
-        <div class="stat-card">
-            <i class="bi bi-star stat-icon"></i>
-            <span class="stat-value">145</span>
-            <span class="stat-label">نقاط مكتسبة</span>
-        </div>
-    </div>
-
-    @* Filter Controls *@
-    <div class="filter-bar">
-        <div class="filter-group">
-            <label class="filter-label">من:</label>
-            <input type="date" class="input" id="dateFrom">
-        </div>
-        <div class="filter-group">
-            <label class="filter-label">إلى:</label>
-            <input type="date" class="input" id="dateTo">
-        </div>
-        <div class="filter-group">
-            <label class="filter-label">النوع:</label>
-            <select class="select" id="recordType">
-                <option value="">الكل</option>
-                <option value="memorization">تسميع</option>
-                <option value="review">مراجعة</option>
-                <option value="test">اختبار</option>
-            </select>
-        </div>
-        <button class="btn outline ms-auto"><i class="bi bi-funnel"></i> تصفية</button>
-        <button class="btn"><i class="bi bi-printer"></i> طباعة</button>
-    </div>
-
-    @* Timeline Records *@
-    <div class="progress-card">
-        <div class="card-header-custom">
-            <span><i class="bi bi-clock-history ms-1"></i> سجل التقدم التفصيلي</span>
-            <small class="text-muted"><i class="bi bi-calendar-range ms-1"></i> آخر 30 يوم</small>
-        </div>
-        <div class="card-body-custom">
-            <div class="timeline">
-
-                @* Record: Test *@
-                <div class="timeline-item" data-type="test" data-date="2024-12-10">
-                    <div class="timeline-header">
-                        <div class="timeline-header-content">
-                            <div class="timeline-date"><i class="bi bi-calendar-check"></i> 10 ديسمبر 2024 - الثلاثاء</div>
-                            <div class="timeline-title"><i class="bi bi-clipboard-check"></i> اختبار مرحلي</div>
-                        </div>
-                        <button class="btn-edit-record" title="تعديل هذا السجل">
-                            <i class="bi bi-pencil"></i> تعديل
-                        </button>
-                    </div>
-                    <div class="record-grid">
-                        <div class="record-item"><span class="record-label">المرحلة</span><span class="record-value">الأولى</span></div>
-                        <div class="record-item"><span class="record-label">الأجزاء</span><span class="record-value">25-27</span></div>
-                        <div class="record-item"><span class="record-label">الدرجة</span><span class="record-value success">95/100</span></div>
-                        <div class="record-item"><span class="record-label">التقدير</span><span class="record-value success"><span class="badge excellent">ممتاز</span></span></div>
-                        <div class="record-item"><span class="record-label">النقاط</span><span class="record-value success">+25</span></div>
-                    </div>
-                </div>
-
-                @* Record: Memorization *@
-                <div class="timeline-item" data-type="memorization" data-date="2024-12-08">
-                    <div class="timeline-header">
-                        <div class="timeline-header-content">
-                            <div class="timeline-date"><i class="bi bi-calendar-check"></i> 8 ديسمبر 2024 - الأحد</div>
-                            <div class="timeline-title"><i class="bi bi-book"></i> تسميع جديد</div>
-                        </div>
-                        <button class="btn-edit-record" title="تعديل هذا السجل">
-                            <i class="bi bi-pencil"></i> تعديل
-                        </button>
-                    </div>
-                    <div class="record-grid">
-                        <div class="record-item"><span class="record-label">الجزء</span><span class="record-value">28</span></div>
-                        <div class="record-item"><span class="record-label">من صفحة</span><span class="record-value">535</span></div>
-                        <div class="record-item"><span class="record-label">إلى صفحة</span><span class="record-value">541</span></div>
-                        <div class="record-item"><span class="record-label">التقدير</span><span class="record-value warning"><span class="badge good">جيد</span></span></div>
-                        <div class="record-item"><span class="record-label">النقاط</span><span class="record-value">+3</span></div>
-                    </div>
-                    <div class="teacher-note">
-                        <small class="text-muted">
-                            <i class="bi bi-chat-square-text ms-1"></i>
-                            ملاحظة المعلم: يحتاج لمراجعة مخارج الحروف في الصفحة 538
-                        </small>
-                    </div>
-                </div>
-
-                @* Record: Review *@
-                <div class="timeline-item" data-type="review" data-date="2024-12-14">
-                    <div class="timeline-header">
-                        <div class="timeline-header-content">
-                            <div class="timeline-date"><i class="bi bi-calendar-check"></i> 14 ديسمبر 2024 - السبت</div>
-                            <div class="timeline-title"><i class="bi bi-arrow-repeat"></i> مراجعة يومية</div>
-                        </div>
-                        <button class="btn-edit-record" title="تعديل هذا السجل">
-                            <i class="bi bi-pencil"></i> تعديل
-                        </button>
-                    </div>
-                    <div class="record-grid">
-                        <div class="record-item"><span class="record-label">الجزء</span><span class="record-value">27</span></div>
-                        <div class="record-item"><span class="record-label">من صفحة</span><span class="record-value">520</span></div>
-                        <div class="record-item"><span class="record-label">إلى صفحة</span><span class="record-value">530</span></div>
-                        <div class="record-item"><span class="record-label">التقدير</span><span class="record-value success"><span class="badge verygood">جيد جداً</span></span></div>
-                        <div class="record-item"><span class="record-label">النقاط</span><span class="record-value success">+5</span></div>
-                    </div>
-                </div>
-
-            </div>
-            <div class="text-center mt-3">
-                <button class="btn outline"><i class="bi bi-plus-circle"></i> عرض المزيد من السجل</button>
-            </div>
-        </div>
-    </div>
-
-    @* Progress Summary Section *@
-    <div class="progress-section">
-        <div class="progress-section-header">
-            <h5><i class="bi bi-graph-up ms-1"></i> ملخص ديسمبر 2024</h5>
-        </div>
-        <div class="progress-grid">
-            <div class="progress-row">
-                <div class="progress-row-header">
-                    <span class="progress-row-label">نسبة إنجاز التسميع</span>
-                    <span class="progress-row-value">85%</span>
-                </div>
-                <div class="progress-row-bar">
-                    <div class="progress-row-bar-fill progress-fill-85"></div>
+    }
+    else if (_progress is not null)
+    {
+        <header class="header-custom">
+            <div class="student-info">
+                <div class="student-avatar">@_progress.StudentInitials</div>
+                <div>
+                    <h1 class="fw-bold mb-1">@SafeStudentName</h1>
+                    <p class="mb-0 opacity-75">
+                        <i class="bi bi-calendar3 ms-1"></i> مسجل منذ: @FormatDate(_progress.RegisteredSince)
+                        <span class="mx-2">•</span>
+                        <i class="bi bi-hash ms-1"></i> رقم الطالب: #@_progress.StudentNumber
+                    </p>
                 </div>
             </div>
-            <div class="progress-row">
-                <div class="progress-row-header">
-                    <span class="progress-row-label">نسبة إنجاز المراجعة</span>
-                    <span class="progress-row-value">92%</span>
-                </div>
-                <div class="progress-row-bar">
-                    <div class="progress-row-bar-fill progress-fill-92"></div>
-                </div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="bi bi-book stat-icon"></i>
+                <span class="stat-value">@_progress.Stats.MemorizationSessions</span>
+                <span class="stat-label">جلسة تسميع</span>
             </div>
-            <div class="progress-row">
-                <div class="progress-row-header">
-                    <span class="progress-row-label">متوسط التقدير</span>
-                    <span class="progress-row-value success">ممتاز</span>
-                </div>
-                <div class="progress-row-bar">
-                    <div class="progress-row-bar-fill progress-fill-95"></div>
-                </div>
+            <div class="stat-card">
+                <i class="bi bi-arrow-repeat stat-icon"></i>
+                <span class="stat-value">@_progress.Stats.ReviewSessions</span>
+                <span class="stat-label">مراجعة</span>
             </div>
-            <div class="progress-row">
-                <div class="progress-row-header">
-                    <span class="progress-row-label">النقاط المكتسبة هذا الشهر</span>
-                    <span class="progress-row-value warning">68 نقطة</span>
+            <div class="stat-card">
+                <i class="bi bi-trophy stat-icon"></i>
+                <span class="stat-value">@_progress.Stats.ExamsCount</span>
+                <span class="stat-label">اختبارات</span>
+            </div>
+            <div class="stat-card">
+                <i class="bi bi-star stat-icon"></i>
+                <span class="stat-value">@_progress.Stats.TotalPoints</span>
+                <span class="stat-label">نقاط مكتسبة</span>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label class="filter-label" for="dateFrom">من:</label>
+                <input type="date" class="input" id="dateFrom" value="@_fromDateText" @onchange="OnFromDateChanged" />
+            </div>
+            <div class="filter-group">
+                <label class="filter-label" for="dateTo">إلى:</label>
+                <input type="date" class="input" id="dateTo" value="@_toDateText" @onchange="OnToDateChanged" />
+            </div>
+            <div class="filter-group">
+                <label class="filter-label" for="recordType">النوع:</label>
+                <select class="select" id="recordType" @bind="_typeFilter">
+                    <option value="">الكل</option>
+                    <option value="1">تسميع</option>
+                    <option value="2">مراجعة</option>
+                    <option value="3">اختبار</option>
+                    <option value="4">استماع</option>
+                </select>
+            </div>
+            <button type="button" class="btn-progress outline" disabled="@_filtering" @onclick="ApplyFiltersAsync">
+                <i class="bi bi-funnel"></i> تصفية
+            </button>
+            <button type="button" class="btn-progress" disabled="@_filtering" @onclick="ResetFiltersAsync">
+                <i class="bi bi-arrow-counterclockwise"></i> آخر 30 يوم
+            </button>
+        </div>
+
+        <div class="progress-card">
+            <div class="card-header-custom">
+                <span><i class="bi bi-clock-history ms-1"></i> سجل التقدم التفصيلي</span>
+                <small class="text-muted"><i class="bi bi-calendar-range ms-1"></i> @_progress.Summary.PeriodTitle</small>
+            </div>
+            <div class="card-body-custom">
+                @if (_progress.Records.Count == 0)
+                {
+                    <div class="state-box">
+                        لا توجد سجلات تقدم ضمن الفلتر الحالي.
+                    </div>
+                }
+                else
+                {
+                    <div class="timeline">
+                        @foreach (var record in _progress.Records)
+                        {
+                            <div class="timeline-item" @key="record.Id">
+                                <div class="timeline-header">
+                                    <div>
+                                        <div class="timeline-date"><i class="bi bi-calendar-check"></i> @FormatDate(record.Date)</div>
+                                        <div class="timeline-title"><i class="@GetRecordIcon(record.Type)"></i> @record.Title</div>
+                                    </div>
+                                    <span class="badge-progress @SafeStatusClass(record.StatusKind)">@record.RatingText</span>
+                                </div>
+
+                                <div class="record-grid">
+                                    <div class="record-item"><span class="record-label">النوع</span><span class="record-value">@record.TypeText</span></div>
+                                    <div class="record-item"><span class="record-label">النطاق</span><span class="record-value">@DescribeRange(record)</span></div>
+                                    <div class="record-item"><span class="record-label">الدرجة</span><span class="record-value @ScoreValueClass(record)">@DescribeScore(record)</span></div>
+                                    <div class="record-item"><span class="record-label">النقاط</span><span class="record-value success">+@record.Points</span></div>
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(record.TeacherNote))
+                                {
+                                    <div class="teacher-note">
+                                        <small class="text-muted">
+                                            <i class="bi bi-chat-square-text ms-1"></i>
+                                            ملاحظة المعلم: @record.TeacherNote
+                                        </small>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-section-header">
+                <h5><i class="bi bi-graph-up ms-1"></i> ملخص @_progress.Summary.PeriodTitle</h5>
+            </div>
+            <div class="progress-grid">
+                <div class="progress-row">
+                    <div class="progress-row-header">
+                        <span class="progress-row-label">نسبة إنجاز التسميع</span>
+                        <span class="progress-row-value">@_progress.Summary.MemorizationCompletionPercentage%</span>
+                    </div>
+                    <div class="progress-row-bar">
+                        <div class="progress-row-bar-fill" style="width: @_progress.Summary.MemorizationCompletionPercentage%"></div>
+                    </div>
                 </div>
-                <div class="progress-row-bar">
-                    <div class="progress-row-bar-fill progress-fill-68"></div>
+                <div class="progress-row">
+                    <div class="progress-row-header">
+                        <span class="progress-row-label">نسبة إنجاز المراجعة</span>
+                        <span class="progress-row-value">@_progress.Summary.ReviewCompletionPercentage%</span>
+                    </div>
+                    <div class="progress-row-bar">
+                        <div class="progress-row-bar-fill" style="width: @_progress.Summary.ReviewCompletionPercentage%"></div>
+                    </div>
+                </div>
+                <div class="progress-row">
+                    <div class="progress-row-header">
+                        <span class="progress-row-label">متوسط التقدير</span>
+                        <span class="progress-row-value success">@_progress.Summary.AverageRatingText</span>
+                    </div>
+                    <div class="progress-row-bar">
+                        <div class="progress-row-bar-fill" style="width: @_progress.Summary.AverageRatingPercentage%"></div>
+                    </div>
+                </div>
+                <div class="progress-row">
+                    <div class="progress-row-header">
+                        <span class="progress-row-label">النقاط المكتسبة ضمن الفترة</span>
+                        <span class="progress-row-value warning">@_progress.Summary.PointsInPeriod نقطة</span>
+                    </div>
+                    <div class="progress-row-bar">
+                        <div class="progress-row-bar-fill" style="width: @_progress.Summary.PointsInPeriodPercentage%"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="text-center mt-4 mb-5">
-        <p class="text-muted mt-2 text-note">
+        <div class="text-muted mt-4 small-note">
             <i class="bi bi-info-circle ms-1"></i>
-            يتم تحديث هذا السجل تلقائياً عند حفظ أي تقدم جديد للطالب
-        </p>
-    </div>
-
+            يتم تحديث هذا السجل تلقائياً عند تسجيل التسميع أو المراجعة أو الاختبارات من قبل المعلم.
+        </div>
+    }
 </div>
 
 @code {
-    
+    private StudentProgressResponse? _progress;
+    private bool _loading = true;
+    private bool _filtering;
+    private string? _error;
+    private string _fromDateText = string.Empty;
+    private string _toDateText = string.Empty;
+    private string _typeFilter = string.Empty;
+
+    private string SafeStudentName => string.IsNullOrWhiteSpace(_progress?.StudentName) ? "الطالب" : _progress.StudentName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ResetFilterValues();
+        await LoadProgressAsync();
+    }
+
+    private async Task LoadProgressAsync()
+    {
+        if (AppSession.CurrentMode != AppUserMode.Student || !AppSession.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/", replace: true);
+            return;
+        }
+
+        _loading = true;
+        _error = null;
+
+        try
+        {
+            _progress = await ProgressService.GetMyProgressAsync(ParseDate(_fromDateText), ParseDate(_toDateText), ParseType(_typeFilter));
+        }
+        catch (Exception ex)
+        {
+            _progress = null;
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void OnFromDateChanged(ChangeEventArgs args)
+    {
+        _fromDateText = args.Value?.ToString() ?? string.Empty;
+    }
+
+    private void OnToDateChanged(ChangeEventArgs args)
+    {
+        _toDateText = args.Value?.ToString() ?? string.Empty;
+    }
+
+    private async Task ApplyFiltersAsync()
+    {
+        _filtering = true;
+        await LoadProgressAsync();
+        _filtering = false;
+    }
+
+    private async Task ResetFiltersAsync()
+    {
+        _filtering = true;
+        ResetFilterValues();
+        await LoadProgressAsync();
+        _filtering = false;
+    }
+
+    private void ResetFilterValues()
+    {
+        var today = DateTime.UtcNow.Date;
+        _fromDateText = today.AddDays(-30).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        _toDateText = today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        _typeFilter = string.Empty;
+    }
+
+    private static DateTime? ParseDate(string value)
+        => DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var result)
+            ? result.Date
+            : null;
+
+    private static ProgressRecordType? ParseType(string value)
+    {
+        if (!int.TryParse(value, out var parsed))
+            return null;
+
+        return Enum.IsDefined(typeof(ProgressRecordType), parsed)
+            ? (ProgressRecordType)parsed
+            : null;
+    }
+
+    private static string FormatDate(DateTime? date)
+        => date.HasValue ? date.Value.ToString("yyyy/MM/dd") : "غير محدد";
+
+    private static string GetRecordIcon(ProgressRecordType type)
+        => type switch
+        {
+            ProgressRecordType.Memorization => "bi bi-book",
+            ProgressRecordType.Review => "bi bi-arrow-repeat",
+            ProgressRecordType.Exam => "bi bi-clipboard-check",
+            ProgressRecordType.Listening => "bi bi-headphones",
+            _ => "bi bi-clock-history"
+        };
+
+    private static string DescribeRange(StudentProgressRecordDto record)
+    {
+        if (record.Type == ProgressRecordType.Exam)
+            return record.JuzFrom == record.JuzTo ? $"الجزء {record.JuzFrom}" : $"الأجزاء {record.JuzFrom}-{record.JuzTo}";
+
+        if (record.FromPage.HasValue && record.ToPage.HasValue)
+            return $"صفحة {record.FromPage}-{record.ToPage}";
+
+        if (record.JuzNumber.HasValue)
+            return $"الجزء {record.JuzNumber}";
+
+        return "غير محدد";
+    }
+
+    private static string DescribeScore(StudentProgressRecordDto record)
+    {
+        if (record.Type == ProgressRecordType.Exam && record.Mark.HasValue)
+            return $"{record.Mark}/100";
+
+        return record.Points > 0 ? $"{record.Points} نقاط" : "بانتظار التقييم";
+    }
+
+    private static string ScoreValueClass(StudentProgressRecordDto record)
+        => record.StatusKind switch
+        {
+            "excellent" or "verygood" => "success",
+            "repeat" => "danger",
+            "warning" => "warning",
+            _ => string.Empty
+        };
+
+    private static string SafeStatusClass(string? statusKind)
+        => statusKind switch
+        {
+            "excellent" => "excellent",
+            "verygood" => "verygood",
+            "good" => "good",
+            "warning" => "warning",
+            "repeat" => "repeat",
+            _ => "good"
+        };
 }

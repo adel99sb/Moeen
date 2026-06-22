@@ -442,7 +442,7 @@
                     MemberId = _form.Id.ToString(),
                     Name = _form.Name.Trim(),
                     Email = _form.Email.Trim(),
-                    Phone = _form.Phone?.Trim(),
+                    Phone = _form.Phone?.Trim() ?? string.Empty,
                     Gender = _form.Gender,
                     StudentId = _form.StudentId,
                     Relationship = _form.Relationship
@@ -487,7 +487,7 @@
         }
         catch (Exception ex)
         {
-            _dialogError = ex.Message;
+            _dialogError = $"تعذر حفظ بيانات ولي الأمر: {ex.Message}";
         }
         finally
         {
@@ -518,7 +518,7 @@
         }
         catch (Exception ex)
         {
-            _errorMessage = ex.Message;
+            _errorMessage = $"تعذر حذف ولي الأمر: {ex.Message}";
         }
     }
 

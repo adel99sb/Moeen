@@ -1,176 +1,330 @@
-﻿@page "/examer/exam"
-@rendermode InteractiveServer
-@inject NavigationManager NavManager
+@page "/examer/exam"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Text.Json
+@using Moeen.Dashboard.Application.Services.Abstractions
+@using Moeen.Shared.Requests.Enrollment
+@using Moeen.Shared.Responses.Enrollment
+@inject IEnrollmentService EnrollmentService
+@inject NavigationManager Navigation
+
+<PageTitle>طلاب الاختبارات</PageTitle>
+
 <style>
-    :root {
-        --primary-green: #195042;
-        --accent-beige: #d6cabc;
-        --light-beige: #f4f1ee;
-        --white: #ffffff;
-        --text-dark: #2d3436;
-        --status-green: #2ecc71;
-        --danger-red: #e74c3c;
-        --radius-md: 12px;
-        --shadow-sm: 0 3px 8px rgba(0,0,0,0.08);
-    }
-
-    body {
-        font-family: 'Tajawal', sans-serif;
-        background-color: #f9f9f9;
+    .exam-students-page {
         direction: rtl;
+        min-height: calc(100vh - 70px);
+        background: #faf7f0;
+        color: #163f35;
+        padding: 24px;
     }
 
-    .management-container {
-        background: var(--white);
-        margin: 20px;
-        padding: 30px;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    }
-    /* العنوان */
-    .page-title {
-        color: var(--primary-green);
-        position: relative;
-        padding-bottom: 10px; /* مسافة بين النص والخط */
-        border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
-        display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
-        margin-top: 15px;
+    .hero {
+        background: linear-gradient(135deg, #195042, #26735f);
+        color: #fff;
+        border-radius: 26px;
+        padding: 28px;
+        box-shadow: 0 18px 45px rgba(25, 80, 66, .18);
+        margin-bottom: 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        flex-wrap: wrap;
     }
 
+    .hero h1 {
+        margin: 0 0 8px;
+        font-weight: 900;
+    }
 
-    .search-wrapper {
-        position: relative;
-        flex: 1;
-        max-width: 400px;
+    .hero p {
+        margin: 0;
+        opacity: .88;
+    }
+
+    .hero-icon {
+        width: 86px;
+        height: 86px;
+        border-radius: 28px;
+        background: rgba(255,255,255,.16);
+        border: 1px solid rgba(255,255,255,.22);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.4rem;
+    }
+
+    .toolbar-card,
+    .table-card {
+        background: #fff;
+        border: 1px solid #e4eee9;
+        border-radius: 22px;
+        box-shadow: 0 10px 28px rgba(25, 80, 66, .06);
+    }
+
+    .toolbar-card {
+        padding: 16px;
+        margin-bottom: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
     }
 
     .search-input {
-        width: 100%;
-        padding: 12px 45px 12px 15px;
-        border: 1.5px solid var(--accent-beige);
+        border: 1.5px solid #d6cabc;
         border-radius: 12px;
+        padding: 10px 12px;
+        min-width: 280px;
         outline: none;
-        transition: 0.3s;
+        background: #fbfaf8;
     }
 
-        .search-input:focus {
-            border-color: var(--primary-green);
-            box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.1);
-        }
-
-    .search-wrapper i {
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--primary-green);
+    .search-input:focus {
+        border-color: #195042;
+        box-shadow: 0 0 0 4px rgba(25, 80, 66, .08);
+        background: #fff;
     }
 
-    .table {
-        width: 100%;
-        table-layout: fixed;
-        border-radius: var(--radius-md);
+    .table-card {
         overflow: hidden;
-        box-shadow: var(--shadow-sm);
-        font-family: 'Tajawal', sans-serif;
-        font-size: clamp(0.95rem,2.5vw,1.5rem);
-        text-align: center;
     }
 
-        .table th {
-            background-color: var(--light-beige);
-            color: var(--primary-green);
-            padding: 12px;
-        }
-
-        .table td {
-            background-color: var(--white);
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .table tbody tr:hover {
-            background-color: #fafafa;
-            transform: scale(1.01);
-        }
-
-    .table-wrapper {
-        overflow-x: auto;
+    .custom-table {
         width: 100%;
-        border-radius: var(--radius-md);
+        margin: 0;
+        border-collapse: collapse;
     }
 
-    @@media (max-width: 768px) {
-        .grid-row, .grid-row:nth-of-type(4) {
-            grid-template-columns: 1fr !important;
-        }
+    .custom-table th {
+        background: #f4f1ee;
+        color: #195042;
+        padding: 14px;
+        font-weight: 900;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .custom-table td {
+        padding: 13px 14px;
+        border-top: 1px solid #edf1ee;
+        color: #31443e;
+        vertical-align: middle;
+    }
+
+    .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 8px 11px;
+        font-weight: 900;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #fff;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .action-btn.add { background: #195042; }
+    .action-btn.details { background: #26735f; }
+
+    .action-btn:hover {
+        color: #d6cabc;
+    }
+
+    .state-box {
+        background: #fff;
+        border: 1px dashed #d6cabc;
+        border-radius: 18px;
+        padding: 28px;
+        text-align: center;
+        color: #667085;
+    }
+
+    .error-box {
+        background: #fff1f1;
+        border: 1px solid #f3c4c4;
+        color: #b42318;
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-bottom: 18px;
+    }
+
+    .muted {
+        color: #7b7067;
+        font-size: .88rem;
+    }
+
+    @@media (max-width: 900px) {
+        .table-card { overflow-x: auto; }
+        .custom-table { min-width: 820px; }
+    }
+
+    @@media (max-width: 640px) {
+        .exam-students-page { padding: 14px; }
+        .search-input { min-width: 100%; }
     }
 </style>
-<section class="management-container">
-    <header class="page-header mb-3">
-        <h2 class="page-title">جميع الطلاب</h2>
-    </header>
-    <br />
-    <div class="search-wrapper mb-3">
-        <i class="bi bi-search"></i>
-        <input type="text" class="search-input" placeholder="ابحث عن طالب...">
-    </div>
 
-    <!-- الجدول -->
-    <div class="table-wrapper">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>الاسم</th>
-                    <th>الحلقة</th>
-                    <th>الفوج</th>
-                    <th>العمر</th>
-                    <th>إجراءات</th>
-                </tr>
-            </thead>
+<div class="exam-students-page">
+    <section class="hero">
+        <div>
+            <h1>طلاب الاختبارات</h1>
+            <p>اختر الطالب المطلوب لإضافة اختبار أو استعراض تفاصيله.</p>
+        </div>
+        <div class="hero-icon"><i class="bi bi-people"></i></div>
+    </section>
 
-            <tbody>
+    <section class="toolbar-card">
+        <div>
+            <strong>قائمة الطلاب</strong>
+            <div class="muted">عدد الطلاب: @_students.Count</div>
+        </div>
+        <input class="search-input" placeholder="ابحث باسم الطالب أو الإيميل أو المسجد أو الحلقة..." @bind="_searchText" @bind:event="oninput" />
+    </section>
 
-                <tr>
-                    <td>محمد أحمد</td>
-                    <td>حلقة النور</td>
-                    <td>الفوج الأول</td>
-                    <td>14</td>
-                    <td>
-                        <a @onclick="AddExam"><button title="إضافة اختبار"><i class="bi bi-plus"></i></button></a>
+    @if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <div class="error-box">@_errorMessage</div>
+    }
 
-                        <a @onclick="InformationExam"><button title="تفاصيل"><i class="bi bi-info-circle"></i></button></a>
+    @if (_isLoading)
+    {
+        <div class="state-box">
+            <span class="spinner-border text-success" role="status"></span>
+            <div class="mt-3">جاري تحميل الطلاب...</div>
+        </div>
+    }
+    else if (!FilteredStudents.Any())
+    {
+        <div class="state-box">
+            <i class="bi bi-search fs-1 d-block mb-2"></i>
+            لا توجد نتائج مطابقة.
+        </div>
+    }
+    else
+    {
+        <div class="table-card">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>الإيميل</th>
+                        <th>العمر</th>
+                        <th>المسجد</th>
+                        <th>الحلقة</th>
+                        <th>النقاط</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var student in FilteredStudents)
+                    {
+                        <tr>
+                            <td>@Display(student.Name)</td>
+                            <td>@Display(student.Email)</td>
+                            <td>@student.Age</td>
+                            <td>@Display(student.MosqueName)</td>
+                            <td>@Display(student.SaturdayHalqeName)</td>
+                            <td>@student.Score</td>
+                            <td>
+                                <div class="actions">
+                                    <button type="button" class="action-btn add" @onclick="() => AddExam(student.Id)">
+                                        <i class="bi bi-plus-circle"></i> إضافة اختبار
+                                    </button>
+                                    <button type="button" class="action-btn details" @onclick="() => OpenDetails(student.Id)">
+                                        <i class="bi bi-info-circle"></i> التفاصيل
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
 
-                        <button class="bi bi-trash" title="حذف"></button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>علي حسن</td>
-                    <td>حلقة الفرقان</td>
-                    <td>الفوج الثاني</td>
-                    <td>15</td>
-                    <td>
-                        <a @onclick="AddExam"><button title="إضافة اختبار"><i class="bi bi-plus"></i></button></a>
-
-                        <a @onclick="InformationExam"><button title="تفاصيل"><i class="bi bi-info-circle"></i></button></a>
-
-                        <button class="bi bi-trash" title="حذف"></button>
-                    </td>
-                </tr>
-
-            </tbody>
-        </table>
-    </div>
-
-</section>
 @code {
-    private void AddExam()
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private readonly List<StudentDto> _students = new();
+    private bool _isLoading = true;
+    private string? _errorMessage;
+    private string _searchText = string.Empty;
+
+    private IEnumerable<StudentDto> FilteredStudents => string.IsNullOrWhiteSpace(_searchText)
+        ? _students
+        : _students.Where(student => Display(student.Name).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase)
+            || Display(student.Email).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase)
+            || Display(student.MosqueName).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase)
+            || Display(student.SaturdayHalqeName).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
     {
-        NavManager.NavigateTo("/examer/addexam");
+        await LoadStudentsAsync();
     }
-    private void InformationExam()
+
+    private async Task LoadStudentsAsync()
     {
-        NavManager.NavigateTo("/examer/information");
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            var response = await EnrollmentService.GetAllStudentsAsync(new GetAllStudentsRequest
+            {
+                PageNumber = 1,
+                PageSize = 500
+            });
+
+            if (response == null || !response.Success)
+            {
+                _errorMessage = response?.Message ?? "تعذر تحميل الطلاب.";
+                return;
+            }
+
+            _students.Clear();
+            var students = DeserializeData<List<StudentDto>>(response.Data) ?? new List<StudentDto>();
+            _students.AddRange(students.OrderBy(student => student.Name));
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"تعذر تحميل الطلاب: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
+
+    private void AddExam(Guid studentId)
+        => Navigation.NavigateTo($"/examer/addexam?studentId={studentId}");
+
+    private void OpenDetails(Guid studentId)
+        => Navigation.NavigateTo($"/examer/information?studentId={studentId}");
+
+    private static T? DeserializeData<T>(object? data)
+    {
+        if (data == null)
+            return default;
+
+        if (data is T typed)
+            return typed;
+
+        if (data is JsonElement element)
+            return element.Deserialize<T>(JsonOptions);
+
+        var json = JsonSerializer.Serialize(data, JsonOptions);
+        return JsonSerializer.Deserialize<T>(json, JsonOptions);
+    }
+
+    private static string Display(string? value)
+        => string.IsNullOrWhiteSpace(value) ? "غير متوفر" : value;
 }

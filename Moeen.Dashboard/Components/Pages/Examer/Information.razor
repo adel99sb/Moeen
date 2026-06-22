@@ -1,658 +1,411 @@
-﻿@page "/examer/information"
-@inject NavigationManager NavManager
-@rendermode InteractiveServer
+@page "/examer/information"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Text.Json
+@using Microsoft.AspNetCore.Components
+@using Moeen.Dashboard.Application.Services.Abstractions
+@using Moeen.Shared.Requests.Enrollment
+@using Moeen.Shared.Requests.ExamQuery
+@using Moeen.Shared.Responses.Enrollment
+@using Moeen.Shared.Responses.ExamCommand
+@using Moeen.Shared.Responses.ExamQuery
+@inject IEnrollmentService EnrollmentService
+@inject IExamQueryService ExamQueryService
 
-<h3>Alaa_info</h3>
+<PageTitle>تفاصيل اختبارات الطالب</PageTitle>
+
 <style>
-    /* ═══════════════════════════════════════════════════════
-           🎨 Design Variables - متغيرات التصميم
-           ═══════════════════════════════════════════════════════ */
-    :root {
-        /* الألوان الأساسية */
-        --primary: #195042;
-        --beige: #d6cabc;
-        --bg-light: #f9f7f5;
-        --white: #ffffff;
-        --text-muted: #6c757d;
-        /* حالات النظام */
-        --success: #28a745;
-        --warning: #ffc107;
-        --danger: #dc3545;
-        --info: #17a2b8;
-        /* الظلال والحدود */
-        --shadow-soft: 0 2px 8px rgba(0,0,0,.04);
-        --shadow-card: 0 10px 30px rgba(0,0,0,.08);
-        --border-soft: 1px solid rgba(214,202,188,.4);
-        --focus-ring: rgba(25,80,66,.25);
-        /* الأبعاد والمسافات */
-        --radius: 8px;
-        --radius-lg: 20px;
-        --space-1: 4px;
-        --space-2: 8px;
-        --space-3: 15px;
-        --space-4: 25px;
-        /* الخطوط */
-        --font: 'Segoe UI', Tahoma, Geneva, sans-serif;
-        --text-sm: .8rem;
-        --text-base: .9rem;
-        --text-lg: 1.1rem;
-    }
-    .management-container {
-background: var(--white);
-margin: 20px;
-padding: 30px;
-border-radius: 20px;
-box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-/* العنوان */
-.page-title {
-color: var(--primary-green);
-position: relative;
-padding-bottom: 10px; /* مسافة بين النص والخط */
-border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
-display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
-margin-top:15px;
-}
-    /* ═══════════════════════════════════════════════════════
-           📐 Base Layout - التخطيط الأساسي
-           ═══════════════════════════════════════════════════════ */
-    .progress-container {
-        background: var(--bg-light);
-        font-family: var(--font);
-        color: var(--primary);
-        line-height: 1.6;
-        min-height: 100vh;
-        padding: var(--space-3);
+    .info-page {
         direction: rtl;
+        min-height: calc(100vh - 70px);
+        background: #faf7f0;
+        color: #163f35;
+        padding: 24px;
     }
 
-    .header-custom {
-        background: var(--primary);
-        color: var(--beige);
-        padding: var(--space-4) var(--space-3);
-        border-bottom: 4px solid var(--beige);
-        margin-bottom: var(--space-4);
-        border-radius: var(--radius);
-    }
-
-    .student-info {
+    .hero {
+        background: linear-gradient(135deg, #195042, #26735f);
+        color: #fff;
+        border-radius: 26px;
+        padding: 28px;
+        box-shadow: 0 18px 45px rgba(25, 80, 66, .18);
+        margin-bottom: 22px;
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: var(--space-3);
+        gap: 18px;
         flex-wrap: wrap;
     }
 
-    .student-avatar {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: var(--beige);
-        color: var(--primary);
-        display: grid;
-        place-items: center;
-        font-weight: 700;
-        font-size: var(--text-lg);
-        flex-shrink: 0;
-    }
-    /* ═══════════════════════════════════════════════════════
-       📊 Statistics - الإحصائيات
-       ═══════════════════════════════════════════════════════ */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: var(--space-3);
-        margin-bottom: var(--space-4);
+    .hero h1 {
+        margin: 0 0 8px;
+        font-weight: 900;
     }
 
-    .stat-card {
-        background: var(--white);
-        border: var(--border-soft);
-        border-radius: var(--radius);
-        padding: var(--space-3);
-        text-align: center;
-        box-shadow: var(--shadow-soft);
+    .hero p {
+        margin: 0;
+        opacity: .88;
     }
 
-    .stat-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--primary);
-        display: block;
-        margin-top: var(--space-1);
-    }
-
-    .stat-label { font-size: var(--text-sm); color: var(--text-muted); }
-    .stat-icon { font-size: 1.5rem; color: var(--beige); }
-
-    /* ═══════════════════════════════════════════════════════
-       🔍 Filter Bar - شريط التصفية
-       ═══════════════════════════════════════════════════════ */
-    .filter-bar {
-        background: var(--white);
-        border: var(--border-soft);
-        border-radius: var(--radius);
-        padding: var(--space-3);
-        margin-bottom: var(--space-4);
-        display: flex;
-        gap: var(--space-2);
-        flex-wrap: wrap;
-        align-items: center;
-    }
-
-    .filter-group {
-        display: flex;
-        align-items: center;
-        gap: var(--space-1);
-    }
-
-    .filter-label { font-size: var(--text-sm); color: var(--text-muted); }
-
-    .input, .select {
-        border: 1px solid #e0e0e0;
-        border-radius: var(--radius);
-        padding: var(--space-2) var(--space-3);
-        font-size: var(--text-sm);
-        color: var(--primary);
-        background: var(--white);
-        min-width: 120px;
-    }
-
-    .input:focus, .select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 .2rem var(--focus-ring);
-        outline: 0;
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       🔘 Buttons - الأزرار
-       ═══════════════════════════════════════════════════════ */
-    .btn {
-        background: var(--primary);
-        color: var(--beige);
-        font-size: var(--text-sm);
-        padding: var(--space-2) var(--space-4);
-        border-radius: var(--radius);
-        border: 1px solid var(--primary);
-        transition: .3s;
-        cursor: pointer;
+    .hero-icon {
+        width: 86px;
+        height: 86px;
+        border-radius: 28px;
+        background: rgba(255,255,255,.16);
+        border: 1px solid rgba(255,255,255,.22);
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: var(--space-1);
-        font-weight: 600;
-        text-decoration: none;
+        font-size: 2.4rem;
     }
 
-    .btn:hover { background: var(--beige); color: var(--primary); }
-    .btn.outline { background: transparent; border-color: var(--primary); color: var(--primary); }
-    .btn.outline:hover { background: var(--primary); color: var(--beige); }
-
-    .btn-edit-record {
-        background: transparent;
-        color: var(--primary);
-        border: 1px solid var(--beige);
-        padding: 6px 16px;
-        border-radius: var(--radius);
-        font-size: var(--text-sm);
-        cursor: pointer;
-        transition: .2s;
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-1);
-        text-decoration: none;
-        flex-shrink: 0;
-    }
-
-    .btn-edit-record:hover { background: var(--beige); color: var(--primary); }
-
-    /* ═══════════════════════════════════════════════════════
-       📋 Progress Card & Timeline - البطاقة والجدول الزمني
-       ═══════════════════════════════════════════════════════ */
-    .progress-card {
-        border: var(--border-soft);
-        border-radius: var(--radius);
-        background: var(--white);
-        margin-bottom: var(--space-4);
-        overflow: hidden;
-        box-shadow: var(--shadow-soft);
-    }
-
-    .card-header-custom {
-        background: var(--white);
-        border-bottom: var(--border-soft);
-        color: var(--primary);
-        padding: var(--space-3);
-        font-weight: 600;
-        font-size: var(--text-base);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .card-body-custom { padding: var(--space-3); }
-
-    .timeline {
-        position: relative;
-        padding-right: 45px;
-        padding-left: 0;
-    }
-
-    .timeline::before {
-        content: '';
-        position: absolute;
-        right: 14px;
-        top: 10px;
-        bottom: 10px;
-        width: 2px;
-        background: var(--beige);
-    }
-
-    .timeline-item {
-        position: relative;
-        padding: var(--space-3);
-        margin-bottom: var(--space-3);
-        background: var(--white);
-        border: var(--border-soft);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow-soft);
-        transition: transform .2s;
-    }
-
-    .timeline-item:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-card);
-    }
-
-    .timeline-item::before {
-        content: '';
-        position: absolute;
-        right: -37px;
-        top: 26px;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: var(--primary);
-        border: 3px solid var(--beige);
-        z-index: 1;
-    }
-
-    .timeline-header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        margin-bottom: var(--space-3);
-        gap: var(--space-2);
-    }
-
-    .timeline-header-content { flex: 1; }
-
-    .timeline-date {
-        font-size: var(--text-sm);
-        color: var(--text-muted);
-        display: flex;
-        align-items: center;
-        gap: var(--space-1);
-        margin-bottom: var(--space-1);
-    }
-
-    .timeline-title {
-        font-weight: 600;
-        color: var(--primary);
-        font-size: var(--text-base);
-        display: flex;
-        align-items: center;
-        gap: var(--space-1);
-    }
-
-    .record-grid {
+    .metrics-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: var(--space-3);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 18px;
     }
 
-    .record-item {
+    .metric-card,
+    .content-card,
+    .exam-card {
+        background: #fff;
+        border: 1px solid #e4eee9;
+        border-radius: 22px;
+        box-shadow: 0 10px 28px rgba(25, 80, 66, .06);
+    }
+
+    .metric-card {
+        padding: 18px;
+    }
+
+    .metric-card small {
+        display: block;
+        color: #7b7067;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .metric-card strong {
+        color: #195042;
+        font-size: 1.7rem;
+        font-weight: 950;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: .85fr 1.15fr;
+        gap: 16px;
+        align-items: start;
+    }
+
+    .content-card {
+        padding: 20px;
+    }
+
+    .card-title {
+        margin: 0 0 14px;
+        color: #195042;
+        font-size: 1.15rem;
+        font-weight: 900;
         display: flex;
-        flex-direction: column;
-        gap: 2px;
-        align-items: flex-start; /* ✅ إصلاح محاذاة الجوال */
+        align-items: center;
+        gap: 8px;
     }
 
-    .record-label { font-size: var(--text-sm); color: var(--text-muted); font-weight: 500; }
-    .record-value { font-weight: 600; color: var(--primary); font-size: var(--text-lg); }
-
-    .record-value.success { color: var(--success); }
-    .record-value.warning { color: #856404; }
-    .record-value.danger { color: var(--danger); }
-
-    .badge {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: var(--text-sm);
-        font-weight: 500;
-    }
-
-    .badge.excellent { background: rgba(40,167,69,.15); color: var(--success); }
-    .badge.verygood { background: rgba(23,162,184,.15); color: var(--info); }
-    .badge.good { background: rgba(255,193,7,.15); color: #856404; }
-    .badge.repeat { background: rgba(220,53,69,.15); color: var(--danger); }
-
-    .teacher-note {
-        margin-top: var(--space-3);
-        padding: var(--space-2) var(--space-3);
-        background: var(--bg-light);
-        border-radius: var(--radius);
-        border-right: 3px solid var(--beige);
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       📈 Progress Summary - ملخص التقدم
-       ═══════════════════════════════════════════════════════ */
-    .progress-section {
-        background: var(--white);
-        border: var(--border-soft);
-        border-radius: var(--radius);
-        padding: var(--space-3);
-        margin-top: var(--space-4);
-    }
-
-    .progress-section-header {
+    .info-row {
+        border: 1px solid #edf1ee;
+        background: #fbfdfa;
+        border-radius: 16px;
+        padding: 13px 14px;
+        margin-bottom: 10px;
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        margin-bottom: var(--space-3);
-        padding-bottom: var(--space-2);
-        border-bottom: 1px solid var(--bg-light);
+        gap: 12px;
+        flex-wrap: wrap;
     }
 
-    .progress-section-header h5 {
-        font-size: var(--text-base);
-        font-weight: 600;
-        color: var(--primary);
+    .label {
+        color: #6b7280;
+        font-weight: 800;
+    }
+
+    .value {
+        color: #195042;
+        font-weight: 900;
+    }
+
+    .exam-card {
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+
+    .exam-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .exam-title {
+        color: #195042;
+        font-weight: 950;
         margin: 0;
     }
 
-    .progress-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--space-3) var(--space-4);
-    }
-
-    .progress-row {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-1);
-        width: 100%;
-    }
-
-    .progress-row-header {
-        display: flex;
-        justify-content: space-between;
+    .pill {
+        display: inline-flex;
         align-items: center;
-        width: 100%;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 6px 10px;
+        background: #eef7f3;
+        color: #195042;
+        font-size: .82rem;
+        font-weight: 900;
     }
 
-    .progress-row-label {
-        font-size: var(--text-sm);
-        color: var(--primary);
-        font-weight: 600;
-        white-space: nowrap;
+    .exam-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
     }
 
-    .progress-row-value {
-        font-size: var(--text-base);
-        font-weight: 700;
-        color: var(--primary);
-        white-space: nowrap;
+    .exam-field {
+        background: #fbfdfa;
+        border: 1px solid #edf1ee;
+        border-radius: 14px;
+        padding: 10px;
     }
 
-    .progress-row-value.success { color: var(--success); }
-    .progress-row-value.warning { color: var(--warning); }
-    .progress-row-value.info { color: var(--info); }
-
-    .progress-row-bar {
-        width: 100%;
-        height: 10px;
-        background: var(--bg-light);
-        border-radius: 5px;
-        overflow: hidden;
+    .notes {
+        margin-top: 10px;
+        background: #f7f2ea;
+        border-radius: 14px;
+        padding: 10px 12px;
+        color: #5f5348;
+        line-height: 1.7;
     }
 
-    .progress-row-bar-fill {
-        height: 100%;
-        border-radius: 5px;
-        transition: width .3s;
-        display: block;
+    .state-box {
+        background: #fff;
+        border: 1px dashed #d6cabc;
+        border-radius: 18px;
+        padding: 28px;
+        text-align: center;
+        color: #667085;
     }
 
-    /* ═══════════════════════════════════════════════════════
-       🧰 Utility Classes - أدوات مساعدة
-       ═══════════════════════════════════════════════════════ */
-    .text-center { text-align: center; }
-    .text-muted { color: var(--text-muted); }
-    .text-success { color: var(--success); }
-    .fw-bold { font-weight: 700; }
-    .opacity-75 { opacity: .75; }
-
-    .mt-2 { margin-top: var(--space-2); }
-    .mt-3 { margin-top: var(--space-3); }
-    .mt-4 { margin-top: var(--space-4); }
-    .mb-0 { margin-bottom: 0; }
-    .mb-3 { margin-bottom: var(--space-3); }
-    .mb-5 { margin-bottom: var(--space-4); }
-
-    .ms-1 { margin-right: 4px; }
-    .ms-auto { margin-right: auto; }
-    .mx-2 { margin: 0 8px; }
-
-    .d-flex { display: flex; }
-    .flex-wrap { flex-wrap: wrap; }
-    .justify-content-between { justify-content: space-between; }
-    .align-items-center { align-items: center; }
-
-    /* ═══════════════════════════════════════════════════════
-       📱 Responsive - التجاوب مع الشاشات
-       ═══════════════════════════════════════════════════════ */
-    @@media (max-width: 768px) {
-        .timeline { padding-right: 35px; }
-        .timeline::before { right: 8px; }
-        .timeline-item::before { right: -33px; }
-        
-        .filter-bar { flex-direction: column; align-items: stretch; }
-        .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        .timeline-header { flex-direction: column; align-items: flex-start; }
-        
-        .record-grid { grid-template-columns: repeat(2, 1fr); }
-        .record-item { align-items: flex-start; text-align: right; } /* ✅ ضمان المحاذاة */
-        
-        .col-md-6 { flex: 0 0 100%; max-width: 100%; }
-        
-        .progress-grid { display: flex; flex-direction: column; gap: var(--space-4); }
-        .progress-row { width: 100%; gap: var(--space-2); }
-        .progress-row-header { margin-bottom: var(--space-1); }
-        .progress-row-label { font-size: var(--text-base); }
-        .progress-row-value { font-size: var(--text-lg); }
-        .progress-row-bar { height: 12px; }
-        
-        .tabs-container { flex-direction: column; }
-        .tab-item { width: 100%; }
+    .error-box {
+        background: #fff1f1;
+        border: 1px solid #f3c4c4;
+        color: #b42318;
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-bottom: 18px;
     }
 
-    @@media (max-width: 480px) {
-        .stats-grid, .record-grid { grid-template-columns: 1fr; }
-        .record-item { align-items: flex-start; text-align: right; } /* ✅ ضمان المحاذاة */
-        
-        .student-info { flex-direction: column; text-align: center; }
-        .progress-section { padding: var(--space-2); }
-        .progress-row-bar { height: 10px; }
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 12px;
+        padding: 10px 14px;
+        background: #f4f1ee;
+        color: #195042;
+        font-weight: 900;
+        text-decoration: none;
+        margin-bottom: 16px;
     }
 
-    @@media print {
-        .filter-bar, .btn, .btn-edit-record, .tabs-wrapper { display: none !important; }
-        .progress-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+    @@media (max-width: 1100px) {
+        .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .content-grid { grid-template-columns: 1fr; }
+        .exam-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @@media (max-width: 640px) {
+        .info-page { padding: 14px; }
+        .metrics-grid, .exam-grid { grid-template-columns: 1fr; }
     }
 </style>
-<section class="management-container">
-<header class="page-header mb-3">
-  <h2 class="page-title">معلومات طالب</h2>
-</header>
-<br />
 
-    @* Statistics Cards *@
-    <div class="stats-grid">
-       
-        <div class="stat-card">
-            <i class="bi bi-trophy stat-icon"></i>
-            <span class="stat-value">3</span>
-            <span class="stat-label">اختبارات</span>
-        </div>
-        <div class="stat-card">
-            <i class="bi bi-star stat-icon"></i>
-            <span class="stat-value">145</span>
-            <span class="stat-label">نقاط مكتسبة</span>
-        </div>
-    </div>
+<div class="info-page">
+    <a class="btn-back" href="/examer/exam"><i class="bi bi-arrow-right"></i> رجوع لقائمة الطلاب</a>
 
-    @* Filter Controls *@
-    <div class="filter-bar">
-        <div class="filter-group">
-            <label class="filter-label">من:</label>
-            <input type="date" class="input" id="dateFrom">
+    <section class="hero">
+        <div>
+            <h1>تفاصيل اختبارات الطالب</h1>
+            <p>عرض بيانات الطالب وسجل الاختبارات المسجلة له.</p>
         </div>
-        <div class="filter-group">
-            <label class="filter-label">إلى:</label>
-            <input type="date" class="input" id="dateTo">
-        </div>
-        <div class="filter-group">
-            <label class="filter-label">النوع:</label>
-            <select class="select" id="recordType">
-                <option value="">الكل</option>
-                <option value="memorization">تسميع</option>
-                <option value="review">مراجعة</option>
-                <option value="test">اختبار</option>
-            </select>
-        </div>
-        <button class="btn outline ms-auto"><i class="bi bi-funnel"></i> تصفية</button>
-        <button class="btn"><i class="bi bi-printer"></i> طباعة</button>
-    </div>
-
-    @* Timeline Records *@
-    <div class="progress-card">
-        <div class="card-header-custom">
-            <span><i class="bi bi-clock-history ms-1"></i> سجل التقدم التفصيلي</span>
-           
-        </div>
-        <div class="card-body-custom">
-            <div class="timeline">
-                
-                @* Record: Test *@
-                <div class="timeline-item" data-type="test" data-date="2024-12-10">
-                    <div class="timeline-header">
-                        <div class="timeline-header-content">
-                            <div class="timeline-date"><i class="bi bi-calendar-check"></i> 10 ديسمبر 2024 - الثلاثاء</div>
-                            <div class="timeline-title"><i class="bi bi-clipboard-check"></i> اختبار مرحلي</div>
-                        </div>
-                        <button class="btn-edit-record" title="تعديل هذا السجل">
-                            <i class="bi bi-pencil"></i> تعديل
-                        </button>
-                    </div>
-                    <div class="record-grid">
-                        <div class="record-item"><span class="record-label">المرحلة</span><span class="record-value">الأولى</span></div>
-                        <div class="record-item"><span class="record-label">الأجزاء</span><span class="record-value">25-27</span></div>
-                        <div class="record-item"><span class="record-label">الدرجة</span><span class="record-value success">95/100</span></div>
-                        <div class="record-item"><span class="record-label">التقدير</span><span class="record-value success"><span class="badge excellent">ممتاز</span></span></div>
-                        <div class="record-item"><span class="record-label">النقاط</span><span class="record-value success">+25</span></div>
-                    </div>
-                </div>
-                  <div class="timeline">
-                
-                @* Record: Test *@
-                <div class="timeline-item" data-type="test" data-date="2023-8-10">
-                    <div class="timeline-header">
-                        <div class="timeline-header-content">
-                            <div class="timeline-date"><i class="bi bi-calendar-check"></i> 10 آب 2023 - الثلاثاء</div>
-                            <div class="timeline-title"><i class="bi bi-clipboard-check"></i> اختبار </div>
-                        </div>
-                        <button class="btn-edit-record" title="تعديل هذا السجل">
-                            <i class="bi bi-pencil"></i> تعديل
-                        </button>
-                    </div>
-                    <div class="record-grid">
-                        <div class="record-item"><span class="record-label">المرحلة</span><span class="record-value">-</span></div>
-                        <div class="record-item"><span class="record-label">الأجزاء</span><span class="record-value">2</span></div>
-                        <div class="record-item"><span class="record-label">الدرجة</span><span class="record-value success">98/100</span></div>
-                        <div class="record-item"><span class="record-label">التقدير</span><span class="record-value success"><span class="badge excellent">ممتاز</span></span></div>
-                        <div class="record-item"><span class="record-label">النقاط</span><span class="record-value success">+10</span></div>
-                    </div>
-                </div>
-            </div>
-            </div>
-
-            <div class="text-center mt-3">
-                <button class="btn outline"><i class="bi bi-plus-circle"></i> عرض المزيد من السجل</button>
-            </div>
-        </div>
-    </div>
-   
-
-
-    @* Progress Summary Section *@
-    <div class="progress-section">
-        <div class="progress-section-header">
-            <h5><i class="bi bi-graph-up ms-1"></i> ملخص ديسمبر 2024</h5>
-        </div>
-        <div class="progress-grid">
-            <div class="progress-row">
-                <div class="progress-row-header">
-                    <span class="progress-row-label">نسبة إنجاز التسميع</span>
-                    <span class="progress-row-value">85%</span>
-                </div>
-                <div class="progress-row-bar">
-                    <div class="progress-row-bar-fill" style="width:85%;background:var(--primary)"></div>
-                </div>
-            </div>
-            <div class="progress-row">
-                <div class="progress-row-header">
-                    <span class="progress-row-label">نسبة إنجاز المراجعة</span>
-                    <span class="progress-row-value">92%</span>
-                </div>
-                <div class="progress-row-bar">
-                    <div class="progress-row-bar-fill" style="width:92%;background:var(--primary)"></div>
-                </div>
-            </div>
-            <div class="progress-row">
-                <div class="progress-row-header">
-                    <span class="progress-row-label">متوسط التقدير</span>
-                    <span class="progress-row-value success">ممتاز</span>
-                </div>
-                <div class="progress-row-bar">
-                    <div class="progress-row-bar-fill" style="width:95%;background:var(--success)"></div>
-                </div>
-            </div>
-            <div class="progress-row">
-                <div class="progress-row-header">
-                    <span class="progress-row-label">النقاط المكتسبة هذا الشهر</span>
-                    <span class="progress-row-value warning">68 نقطة</span>
-                </div>
-                <div class="progress-row-bar">
-                    <div class="progress-row-bar-fill" style="width:68%;background:var(--warning)"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @* Footer Actions *@
-    <div class="text-center mt-4 mb-5">
-       
-        <p class="text-muted mt-2" style="font-size:var(--text-sm)">
-            <i class="bi bi-info-circle ms-1"></i> 
-            يتم تحديث هذا السجل تلقائياً عند حفظ أي تقدم جديد للطالب
-        </p>
-    </div>
-
-
+        <div class="hero-icon"><i class="bi bi-clipboard-data"></i></div>
     </section>
-	
-@code {
 
+    @if (_isLoading)
+    {
+        <div class="state-box">
+            <span class="spinner-border text-success" role="status"></span>
+            <div class="mt-3">جاري تحميل تفاصيل الطالب...</div>
+        </div>
+    }
+    else
+    {
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <div class="error-box">@_errorMessage</div>
+        }
+
+        @if (_selectedStudent is null)
+        {
+            <div class="state-box">لم يتم العثور على بيانات الطالب.</div>
+        }
+        else
+        {
+            <section class="metrics-grid">
+                <div class="metric-card"><small>عدد الاختبارات</small><strong>@_exams.Count</strong></div>
+                <div class="metric-card"><small>متوسط العلامة</small><strong>@FormatNumber(AverageScore)</strong></div>
+                <div class="metric-card"><small>أعلى علامة</small><strong>@(_exams.Count == 0 ? 0 : _exams.Max(exam => exam.Score))</strong></div>
+                <div class="metric-card"><small>نقاط الطالب</small><strong>@_selectedStudent.Score</strong></div>
+            </section>
+
+            <section class="content-grid">
+                <aside class="content-card">
+                    <h2 class="card-title"><i class="bi bi-person"></i> بيانات الطالب</h2>
+                    <div class="info-row"><span class="label">الاسم</span><span class="value">@Display(_selectedStudent.Name)</span></div>
+                    <div class="info-row"><span class="label">الإيميل</span><span class="value">@Display(_selectedStudent.Email)</span></div>
+                    <div class="info-row"><span class="label">العمر</span><span class="value">@_selectedStudent.Age</span></div>
+                    <div class="info-row"><span class="label">المسجد</span><span class="value">@Display(_selectedStudent.MosqueName)</span></div>
+                    <div class="info-row"><span class="label">الحلقة</span><span class="value">@Display(_selectedStudent.SaturdayHalqeName)</span></div>
+                    <div class="info-row"><span class="label">تاريخ الانضمام</span><span class="value">@FormatDate(_selectedStudent.JoinedAt)</span></div>
+                </aside>
+
+                <main class="content-card">
+                    <h2 class="card-title"><i class="bi bi-clock-history"></i> سجل الاختبارات</h2>
+
+                    @if (_exams.Count == 0)
+                    {
+                        <div class="state-box">لا توجد اختبارات مسجلة لهذا الطالب حالياً.</div>
+                    }
+                    else
+                    {
+                        @foreach (var exam in _exams.OrderByDescending(exam => exam.Date))
+                        {
+                            <article class="exam-card">
+                                <div class="exam-header">
+                                    <h3 class="exam-title">اختبار الأجزاء @exam.JuzFrom - @exam.JuzTo</h3>
+                                    <span class="pill"><i class="bi bi-calendar3"></i>@FormatDate(exam.Date)</span>
+                                </div>
+
+                                <div class="exam-grid">
+                                    <div class="exam-field"><span class="label">المعلم</span><div class="value">@Display(exam.TeacherName)</div></div>
+                                    <div class="exam-field"><span class="label">العلامة</span><div class="value">@exam.Score / 100</div></div>
+                                    <div class="exam-field"><span class="label">الدرجة</span><div class="value">@exam.Mark</div></div>
+                                    <div class="exam-field"><span class="label">التقدير</span><div class="value">@Display(exam.Grade)</div></div>
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(exam.Notes))
+                                {
+                                    <div class="notes"><strong>ملاحظات:</strong> @exam.Notes</div>
+                                }
+                            </article>
+                        }
+                    }
+                </main>
+            </section>
+        }
+    }
+</div>
+
+@code {
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    [SupplyParameterFromQuery(Name = "studentId")]
+    public Guid? StudentId { get; set; }
+
+    private readonly List<StudentDto> _students = new();
+    private readonly List<ExamResultDto> _exams = new();
+    private StudentDto? _selectedStudent;
+    private bool _isLoading = true;
+    private string? _errorMessage;
+
+    private double AverageScore => _exams.Count == 0 ? 0 : _exams.Average(exam => exam.Score);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDetailsAsync();
+    }
+
+    private async Task LoadDetailsAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            if (!StudentId.HasValue || StudentId.Value == Guid.Empty)
+            {
+                _errorMessage = "لم يتم تحديد الطالب.";
+                return;
+            }
+
+            await LoadStudentAsync(StudentId.Value);
+            await LoadStudentExamsAsync(StudentId.Value);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"تعذر تحميل تفاصيل الطالب: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadStudentAsync(Guid studentId)
+    {
+        var response = await EnrollmentService.GetAllStudentsAsync(new GetAllStudentsRequest { PageNumber = 1, PageSize = 500 });
+        if (response == null || !response.Success)
+            throw new InvalidOperationException(response?.Message ?? "تعذر تحميل بيانات الطالب.");
+
+        _students.Clear();
+        _students.AddRange(DeserializeData<List<StudentDto>>(response.Data) ?? new List<StudentDto>());
+        _selectedStudent = _students.FirstOrDefault(student => student.Id == studentId);
+    }
+
+    private async Task LoadStudentExamsAsync(Guid studentId)
+    {
+        var response = await ExamQueryService.GetStudentExamsAsync(new GetStudentExamsRequest { StudentId = studentId });
+        if (response == null || !response.Success)
+            throw new InvalidOperationException(response?.Message ?? "تعذر تحميل اختبارات الطالب.");
+
+        _exams.Clear();
+        var result = DeserializeData<GetStudentExamsResponse>(response.Data);
+        if (result?.Exams is not null)
+            _exams.AddRange(result.Exams);
+    }
+
+    private static T? DeserializeData<T>(object? data)
+    {
+        if (data == null)
+            return default;
+
+        if (data is T typed)
+            return typed;
+
+        if (data is JsonElement element)
+            return element.Deserialize<T>(JsonOptions);
+
+        var json = JsonSerializer.Serialize(data, JsonOptions);
+        return JsonSerializer.Deserialize<T>(json, JsonOptions);
+    }
+
+    private static string Display(string? value)
+        => string.IsNullOrWhiteSpace(value) ? "غير متوفر" : value;
+
+    private static string FormatDate(DateTime value)
+        => value == default ? "غير متوفر" : value.ToLocalTime().ToString("yyyy/MM/dd");
+
+    private static string FormatNumber(double value)
+        => value.ToString("0.##");
 }

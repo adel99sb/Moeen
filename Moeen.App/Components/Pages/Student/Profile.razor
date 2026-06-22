@@ -1,377 +1,197 @@
-﻿@page "/Student/Profile"
+@page "/Student/Profile"
+@using Moeen.App.Services.Abstractions
+@using Moeen.Shared.Responses.Mobile
+@inject IStudentProfileService ProfileService
+@inject AppSessionService AppSession
+@inject NavigationManager Navigation
 
 <style>
-    :root {
-        --color-primary-green: #195042;
-        --color-luxury-beige: #d6cabc;
-        --color-bg-light: #f4f7f6;
-        --color-white: #ffffff;
-        --color-text-muted: #5a6c7d;
-        --color-input-border: #d6cabc;
-        --color-input-bg: #fafbfb;
-        --color-btn-primary: #195042;
-        --color-btn-primary-hover: #246b59;
-        --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.08);
-        --shadow-card-hover: 0 14px 35px rgba(0, 0, 0, 0.12);
-        --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.04);
-        --radius-card: 20px;
-        --radius-input: 12px;
-        --radius-btn: 10px;
-        --font-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        --font-weight-semibold: 600;
-        --font-weight-bold: 700;
-        --font-size-sm: 0.88rem;
-        --font-size-base: 0.95rem;
-        --font-size-xl: 1.35rem;
-        --spacing-xs: 0.6rem;
-        --spacing-sm: 0.8rem;
-        --spacing-md: 1rem;
-        --spacing-lg: 1.5rem;
-        --spacing-xl: 2rem;
-        --spacing-xxl: 2.5rem;
-        --transition-base: 0.3s ease;
-        --border-header: 6px solid var(--color-luxury-beige);
-        --border-light: 1px solid var(--color-input-border);
-    }
-
-    .profile-wrapper {
-        direction: rtl;
-        text-align: right;
-        font-family: var(--font-base);
-        background-color: var(--color-bg-light);
-        padding-bottom: var(--spacing-xxl);
-        min-height: 100vh;
-    }
-
-    .header-custom {
-        background-color: var(--color-primary-green);
-        color: var(--color-luxury-beige);
-        padding: var(--spacing-xxl) 0;
-        border-bottom: var(--border-header);
-        margin-bottom: var(--spacing-xxl);
-    }
-
-    .profile-card {
-        background: var(--color-white);
-        border-radius: var(--radius-card);
-        box-shadow: var(--shadow-card);
-        padding: var(--spacing-xl);
-        margin-bottom: var(--spacing-lg);
-        transition: transform var(--transition-base), box-shadow var(--transition-base);
-    }
-
-        .profile-card:hover {
-            box-shadow: var(--shadow-card-hover);
-        }
-
-    .profile-title {
-        color: var(--color-primary-green);
-        font-weight: var(--font-weight-bold);
-        font-size: var(--font-size-xl);
-        margin-bottom: var(--spacing-lg);
-        padding-bottom: var(--spacing-sm);
-        border-bottom: var(--border-light);
-    }
-
-    /* شبكة وعرض البيانات */
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: var(--spacing-md);
-    }
-
-    .data-item {
-        display: flex;
-        align-items: center;
-        background: var(--color-input-bg);
-        border: var(--border-light);
-        border-radius: var(--radius-input);
-        padding: var(--spacing-sm) var(--spacing-md);
-        box-shadow: var(--shadow-soft);
-        transition: all var(--transition-base);
-    }
-
-        .data-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(25, 80, 66, 0.15);
-            border-color: var(--color-primary-green);
-        }
-
-    .data-icon {
-        font-size: 1.4rem;
-        color: var(--color-primary-green);
-        margin-left: var(--spacing-sm);
-        flex-shrink: 0;
-    }
-
-    .data-content {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-    }
-
-    .data-label {
-        font-size: var(--font-size-sm);
-        color: var(--color-text-muted);
-        font-weight: var(--font-weight-semibold);
-    }
-
-    .data-value {
-        font-size: var(--font-size-base);
-        color: var(--color-primary-green);
-        font-weight: var(--font-weight-bold);
-    }
-
-    .data-item.full-width {
-        grid-column: 1 / -1;
-        align-items: flex-start;
-    }
-
-        .data-item.full-width .data-value {
-            line-height: 1.8;
-            white-space: pre-wrap;
-            margin-top: var(--spacing-xs);
-        }
-
-    /* الجدول والشارات */
-    .schedule-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        border: var(--border-light);
-        border-radius: var(--radius-input);
-        overflow: hidden;
-        margin-top: var(--spacing-sm);
-    }
-
-        .schedule-table th, .schedule-table td {
-            padding: var(--spacing-sm);
-            text-align: center;
-            font-size: var(--font-size-base);
-        }
-
-        .schedule-table th {
-            background-color: var(--color-primary-green);
-            color: var(--color-white);
-            font-weight: var(--font-weight-semibold);
-        }
-
-        .schedule-table td {
-            background-color: var(--color-input-bg);
-            color: var(--color-text-muted);
-            border-bottom: 1px solid var(--color-input-border);
-        }
-
-        .schedule-table tr:last-child td {
-            border-bottom: none;
-        }
-
-    .status-badge {
-        display: inline-block;
-        padding: 0.25em 0.6em;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: var(--font-weight-semibold);
-    }
-
-    .status-active {
-        background-color: #d1e7dd;
-        color: #0f5132;
-    }
-
-    .status-upcoming {
-        background-color: #fff3cd;
-        color: #664d03;
-    }
-
-    /* نموذج الملاحظات */
-    .form-group {
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .form-label {
-        display: block;
-        color: var(--color-primary-green);
-        font-weight: var(--font-weight-semibold);
-        font-size: var(--font-size-base);
-        margin-bottom: var(--spacing-xs);
-    }
-
-    .form-control-custom {
-        width: 100%;
-        padding: var(--spacing-sm) var(--spacing-md);
-        border: var(--border-light);
-        border-radius: var(--radius-input);
-        background-color: var(--color-input-bg);
-        color: var(--color-text-muted);
-        font-family: var(--font-base);
-        font-size: var(--font-size-base);
-        box-shadow: var(--shadow-soft);
-        min-height: 120px;
-        resize: vertical;
-    }
-
-        .form-control-custom:focus {
-            outline: none;
-            border-color: var(--color-primary-green);
-            background-color: var(--color-white);
-            box-shadow: 0 4px 12px rgba(25, 80, 66, 0.15);
-        }
-
-    .btn {
-        border: none;
-        border-radius: var(--radius-btn);
-        padding: var(--spacing-sm) var(--spacing-lg);
-        font-size: var(--font-size-base);
-        font-weight: var(--font-weight-semibold);
-        font-family: var(--font-base);
-        cursor: pointer;
-        transition: all var(--transition-base);
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-        box-shadow: var(--shadow-soft);
-    }
-
-    .btn-primary {
-        background-color: var(--color-btn-primary);
-        color: var(--color-luxury-beige);
-    }
-
-        .btn-primary:hover {
-            background-color: var(--color-btn-primary-hover);
-            color: var(--color-white);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(25, 80, 66, 0.25);
-        }
-
-    @@media (max-width: 768px) {
-        .header-custom {
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-        }
-
-        .profile-card {
-            padding: 1.2rem;
-        }
-
-        .info-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .btn {
-            width: 100%;
-            justify-content: center;
-        }
-    }
+    .profile-wrapper { direction: rtl; min-height: 100vh; background: #f4f7f6; padding-bottom: 2rem; color: #195042; }
+    .profile-header { background: #195042; color: #d6cabc; padding: 2rem 1rem; border-bottom: 6px solid #d6cabc; text-align: center; }
+    .avatar { width: 74px; height: 74px; border-radius: 50%; background: #d6cabc; color: #195042; display: grid; place-items: center; margin: 0 auto .75rem; font-size: 1.5rem; font-weight: 800; }
+    .profile-card { background: #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,.08); padding: 1.25rem; margin: 1rem; }
+    .profile-title { font-size: 1.2rem; font-weight: 800; border-bottom: 1px solid #d6cabc; padding-bottom: .65rem; margin-bottom: 1rem; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: .75rem; }
+    .info-item { display: flex; gap: .7rem; align-items: center; background: #fafbfb; border: 1px solid #d6cabc; border-radius: 12px; padding: .8rem; }
+    .info-item i { font-size: 1.25rem; color: #195042; }
+    .label { display: block; color: #5a6c7d; font-size: .85rem; font-weight: 700; }
+    .value { display: block; color: #195042; font-weight: 800; }
+    .schedule-table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 12px; }
+    .schedule-table th { background: #195042; color: #fff; padding: .7rem; }
+    .schedule-table td { background: #fafbfb; border-bottom: 1px solid #d6cabc; padding: .7rem; text-align: center; }
+    .badge-state { background: #fff3cd; color: #664d03; border-radius: 999px; padding: .25rem .65rem; font-weight: 700; font-size: .8rem; }
+    .note-box { width: 100%; min-height: 120px; resize: none; border: 1px solid #d6cabc; border-radius: 12px; background: #fafbfb; padding: .85rem; }
+    .primary-btn { border: 0; border-radius: 10px; background: #195042; color: #d6cabc; padding: .75rem 1.25rem; font-weight: 800; }
+    .primary-btn:disabled { opacity: .65; }
+    .state-card { margin: 1rem; background: white; border-radius: 20px; padding: 1.5rem; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.08); }
+    .success { background: #d1e7dd; color: #0f5132; padding: .7rem; border-radius: 12px; margin-bottom: .75rem; }
+    .error { background: #f8d7da; color: #842029; padding: .7rem; border-radius: 12px; margin-bottom: .75rem; }
 </style>
 
 <div class="profile-wrapper">
-    <header class="header-custom text-center">
-        <div class="container">
-            <h1 class="fw-bold">الملف الشخصي للطالب</h1>
-            <p class="mb-0">إدارة البيانات الأكاديمية والجدول الدراسي</p>
-        </div>
+    <header class="profile-header">
+        <div class="avatar">@(_profile?.StudentInitials ?? "ط")</div>
+        <h1>الملف الشخصي للطالب</h1>
+        <p>@(_profile?.StudentName ?? "إدارة البيانات الأكاديمية والجدول الدراسي")</p>
     </header>
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-12">
-                <!-- بطاقة المعلومات الشخصية -->
-                <div class="profile-card">
-                    <h2 class="profile-title"><i class="bi bi-person-circle ms-2"></i> البيانات الشخصية</h2>
-                    <div class="info-grid">
-                        <div class="data-item">
-                            <i class="bi bi-person data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">اسم الطالب</span>
-                                <span class="data-value">احمد محمد العبدالله</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-calendar data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">العمر</span>
-                                <span class="data-value">14</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-people data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">اسم الفوج</span>
-                                <span class="data-value">فوج الصباحي</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-book data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">الحلقة / المستوى</span>
-                                <span class="data-value">حلقة المتوسطين</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-shield-check data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">ولي الأمر</span>
-                                <span class="data-value">خالد العلي</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-telephone data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">رقم التواصل</span>
-                                <span class="data-value">+966 55 123 4567</span>
-                            </div>
-                        </div>
-                        <div class="data-item full-width">
-                            <i class="bi bi-trophy data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">الإنجازات والحفظ</span>
-                                <div class="data-value">
-                                    - حفظ 5 أجزاء كاملة
-                                    - المركز الثاني في مسابقة التلاوة المحلية
-                                    - الالتزام الكامل بالحضور منذ بداية العام
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- بطاقة جدول الدروس -->
-                <div class="profile-card">
-                    <h2 class="profile-title"><i class="bi bi-calendar-week ms-2"></i> جدول الدروس الأسبوعي</h2>
-                    <div class="table-responsive">
-                        <table class="schedule-table">
-                            <thead>
-                                <tr><th>اليوم</th><th>الدرس / المادة</th><th>الوقت</th><th>الحالة</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>الأحد</td><td>حفظ القرآن</td><td>08:00 - 09:30</td><td><span class="status-badge status-active">مكتمل</span></td></tr>
-                                <tr><td>الثلاثاء</td><td>أحكام التجويد</td><td>08:00 - 09:30</td><td><span class="status-badge status-upcoming">قادم</span></td></tr>
-                                <tr><td>الخميس</td><td>مراجعة الحفظ</td><td>10:00 - 11:30</td><td><span class="status-badge status-upcoming">قادم</span></td></tr>
-                                <tr><td>السبت</td><td>ورشة التلاوة</td><td>04:00 - 05:30</td><td><span class="status-badge status-upcoming">قادم</span></td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- بطاقة الملاحظات أو الاستفسار -->
-                <div class="profile-card">
-                    <h2 class="profile-title"><i class="bi bi-chat-dots ms-2"></i> ملاحظة أو استفسار</h2>
-                    <form>
-                        <div class="form-group">
-                            <label class="form-label" for="feedback"><i class="bi bi-pencil-square ms-1"></i> اكتب ملاحظتك أو استفسارك</label>
-                            <textarea id="feedback" class="form-control-custom" style="resize: none;" placeholder="اكتب هنا ما تريد مشاركته مع الإدارة أو المعلم..."></textarea>
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary"><i class="bi bi-send-fill"></i> إرسال</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+    @if (_loading)
+    {
+        <div class="state-card">جاري تحميل الملف الشخصي...</div>
+    }
+    else if (!string.IsNullOrWhiteSpace(_error))
+    {
+        <div class="state-card">
+            <div class="error">@_error</div>
+            <button class="primary-btn" @onclick="LoadProfileAsync">إعادة المحاولة</button>
         </div>
-    </div>
+    }
+    else if (_profile is not null)
+    {
+        <section class="profile-card">
+            <h2 class="profile-title"><i class="bi bi-person-circle"></i> البيانات الشخصية</h2>
+            <div class="info-grid">
+                @Info("bi bi-person", "اسم الطالب", _profile.StudentName)
+                @Info("bi bi-calendar", "العمر", _profile.Age > 0 ? _profile.Age.ToString() : "غير محدد")
+                @Info("bi bi-gender-ambiguous", "الجنس", _profile.Gender)
+                @Info("bi bi-envelope", "الإيميل", Fallback(_profile.Email))
+                @Info("bi bi-telephone", "رقم الطالب", Fallback(_profile.PhoneNumber))
+                @Info("bi bi-building", "المسجد", Fallback(_profile.MosqueName))
+                @Info("bi bi-people", "الفوج", Fallback(_profile.FoujName))
+                @Info("bi bi-book", "الحلقة", Fallback(_profile.HalqaName))
+                @Info("bi bi-person-badge", "المعلم", Fallback(_profile.TeacherName))
+                @Info("bi bi-shield-check", "ولي الأمر", Fallback(_profile.ParentName))
+                @Info("bi bi-telephone-forward", "رقم ولي الأمر", Fallback(_profile.ParentPhoneNumber))
+                @Info("bi bi-star", "مجموع النقاط", _profile.TotalPoints.ToString())
+            </div>
+        </section>
+
+        <section class="profile-card">
+            <h2 class="profile-title"><i class="bi bi-trophy"></i> الإنجازات والحفظ</h2>
+            @foreach (var achievement in _profile.Achievements)
+            {
+                <div class="info-item mb-2"><i class="bi bi-check-circle"></i><span class="value">@achievement</span></div>
+            }
+        </section>
+
+        <section class="profile-card">
+            <h2 class="profile-title"><i class="bi bi-calendar-week"></i> جدول الدروس الأسبوعي</h2>
+            <table class="schedule-table">
+                <thead><tr><th>اليوم</th><th>الدرس</th><th>الوقت</th><th>الحالة</th></tr></thead>
+                <tbody>
+                    @foreach (var item in _profile.WeeklySchedule)
+                    {
+                        <tr>
+                            <td>@item.DayName</td>
+                            <td>@item.LessonTitle</td>
+                            <td>@item.TimeRange</td>
+                            <td><span class="badge-state">@item.StatusText</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+
+        <section class="profile-card">
+            <h2 class="profile-title"><i class="bi bi-chat-dots"></i> ملاحظة أو استفسار</h2>
+            @if (!string.IsNullOrWhiteSpace(_noteMessage))
+            {
+                <div class="@(_noteSuccess ? "success" : "error")">@_noteMessage</div>
+            }
+            <textarea class="note-box" placeholder="اكتب هنا ما تريد مشاركته مع الإدارة أو المعلم..." @bind="_noteText"></textarea>
+            <div class="text-center mt-3">
+                <button type="button" class="primary-btn" disabled="@_submittingNote" @onclick="SubmitNoteAsync">
+                    @(_submittingNote ? "جاري الإرسال..." : "إرسال")
+                </button>
+            </div>
+        </section>
+    }
 </div>
 
 @code {
+    private StudentProfileResponse? _profile;
+    private bool _loading = true;
+    private bool _submittingNote;
+    private bool _noteSuccess;
+    private string? _error;
+    private string? _noteMessage;
+    private string _noteText = string.Empty;
+
+    protected override async Task OnInitializedAsync() => await LoadProfileAsync();
+
+    private async Task LoadProfileAsync()
+    {
+        if (AppSession.CurrentMode != AppUserMode.Student || !AppSession.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/", replace: true);
+            return;
+        }
+
+        _loading = true;
+        _error = null;
+        try
+        {
+            _profile = await ProfileService.GetMyProfileAsync();
+        }
+        catch (Exception ex)
+        {
+            _profile = null;
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task SubmitNoteAsync()
+    {
+        _noteMessage = null;
+        _noteSuccess = false;
+
+        if (string.IsNullOrWhiteSpace(_noteText) || _noteText.Trim().Length < 5)
+        {
+            _noteMessage = "اكتب ملاحظة من 5 أحرف على الأقل.";
+            return;
+        }
+
+        _submittingNote = true;
+        try
+        {
+            await ProfileService.SubmitNoteAsync(_noteText.Trim());
+            _noteText = string.Empty;
+            _noteSuccess = true;
+            _noteMessage = "تم إرسال الملاحظة بنجاح.";
+        }
+        catch (Exception ex)
+        {
+            _noteMessage = ex.Message;
+        }
+        finally
+        {
+            _submittingNote = false;
+        }
+    }
+
+    private static string Fallback(string? value) => string.IsNullOrWhiteSpace(value) ? "غير محدد" : value;
+
+    private static RenderFragment Info(string icon, string label, string value) => builder =>
+    {
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "info-item");
+        builder.OpenElement(2, "i");
+        builder.AddAttribute(3, "class", icon);
+        builder.CloseElement();
+        builder.OpenElement(4, "div");
+        builder.OpenElement(5, "span");
+        builder.AddAttribute(6, "class", "label");
+        builder.AddContent(7, label);
+        builder.CloseElement();
+        builder.OpenElement(8, "span");
+        builder.AddAttribute(9, "class", "value");
+        builder.AddContent(10, value);
+        builder.CloseElement();
+        builder.CloseElement();
+        builder.CloseElement();
+    };
 }

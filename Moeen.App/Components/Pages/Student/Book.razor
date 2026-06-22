@@ -1,9 +1,14 @@
-﻿@page "/Student/Book"
+@page "/Student/Book"
+@using Microsoft.Maui.ApplicationModel
+@using Moeen.App.Infrastructure.Http
+@using Moeen.App.Services.Abstractions
+@using Moeen.Shared.Responses.Library
+@inject IStudentBookService BookService
+@inject AppSessionService AppSession
+@inject NavigationManager Navigation
 
 <style>
-   
     :root {
-        /* الألوان */
         --color-primary-green: #195042;
         --color-luxury-beige: #d6cabc;
         --color-bg-light: #f4f7f6;
@@ -12,47 +17,18 @@
         --color-btn-download: #246b59;
         --color-btn-download-hover: #195042;
         --color-btn-download-text: #ffffff;
-
-        /* الظلال */
         --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.08);
         --shadow-card-hover: 0 14px 35px rgba(0, 0, 0, 0.12);
-
-        /* الزوايا */
         --radius-card: 20px;
-        --radius-badge: 12px;
         --radius-btn: 10px;
-
-        /* الخطوط */
         --font-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        --font-weight-normal: 400;
-        --font-weight-semibold: 600;
-        --font-weight-bold: 700;
-
-        /* الأحجام */
-        --font-size-xs: 0.82rem;
-        --font-size-sm: 0.88rem;
-        --font-size-base: 0.92rem;
-        --font-size-lg: 1.25rem;
-        --font-size-icon: 3.5rem;
-        --font-size-header: 1.5rem;
-
-        /* المسافات */
-        --spacing-xxs: 0.4rem;
-        --spacing-xs: 0.6rem;
-        --spacing-sm: 0.8rem;
+        --spacing-xs: .6rem;
+        --spacing-sm: .8rem;
         --spacing-md: 1rem;
         --spacing-lg: 1.5rem;
         --spacing-xl: 2.5rem;
-
-        /* التحولات */
-        --transition-base: 0.3s ease;
-
-        /* الحدود */
-        --border-footer: 2px solid var(--color-luxury-beige);
-        --border-header: 6px solid var(--color-luxury-beige);
     }
 
-   /* اوية الصفحة والاتجاه */
     .library-wrapper {
         direction: rtl;
         text-align: right;
@@ -62,22 +38,38 @@
         min-height: 100vh;
     }
 
-   /*  الترويسة */
     .header-custom {
         background-color: var(--color-primary-green);
         color: var(--color-luxury-beige);
-        padding: var(--spacing-xl) 0;
-        border-bottom: var(--border-header);
-        margin-bottom: var(--spacing-xl);
+        padding: var(--spacing-xl) 1rem;
+        border-bottom: 6px solid var(--color-luxury-beige);
+        margin-bottom: var(--spacing-lg);
     }
 
-   /*  كارد الكتاب */
+    .toolbar-card {
+        background: var(--color-white);
+        border-radius: 18px;
+        box-shadow: var(--shadow-card);
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .search-input {
+        width: 100%;
+        border: 1px solid var(--color-luxury-beige);
+        background: #fafbfb;
+        border-radius: 12px;
+        padding: .85rem 1rem;
+        color: var(--color-primary-green);
+        outline: none;
+    }
+
     .book-card {
         background: var(--color-white);
         border-radius: var(--radius-card);
         box-shadow: var(--shadow-card);
         overflow: hidden;
-        transition: transform var(--transition-base), box-shadow var(--transition-base);
+        transition: transform .25s ease, box-shadow .25s ease;
         height: 100%;
         border: none;
         display: flex;
@@ -89,10 +81,9 @@
         box-shadow: var(--shadow-card-hover);
     }
 
-   
     .book-cover {
         background: linear-gradient(135deg, var(--color-primary-green) 0%, var(--color-btn-download) 100%);
-        height: 160px;
+        height: 155px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -112,12 +103,11 @@
     }
 
     .book-icon {
-        font-size: var(--font-size-icon);
+        font-size: 3.2rem;
         color: var(--color-luxury-beige);
         z-index: 1;
     }
 
-   /*  محتوى الكارد */
     .book-content {
         padding: var(--spacing-lg);
         flex-grow: 1;
@@ -127,193 +117,290 @@
 
     .book-title {
         color: var(--color-primary-green);
-        font-weight: var(--font-weight-bold);
-        font-size: var(--font-size-lg);
-        margin-bottom: var(--spacing-xs);
+        font-weight: 800;
+        font-size: 1.2rem;
+        margin-bottom: .55rem;
     }
 
     .book-desc {
         color: var(--color-text-muted);
-        font-size: var(--font-size-base);
+        font-size: .92rem;
         line-height: 1.65;
-        margin-bottom: var(--spacing-md);
+        margin-bottom: 1rem;
         flex-grow: 1;
     }
-/* 
-   معلومات زائد زر التحميل */ 
+
     .book-footer {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-top: var(--spacing-md);
-        border-top: var(--border-footer);
+        padding-top: 1rem;
+        border-top: 2px solid var(--color-luxury-beige);
         margin-top: auto;
         flex-wrap: wrap;
-        gap: var(--spacing-xs);
+        gap: .75rem;
+    }
+
+    .book-meta,
+    .book-date {
+        display: flex;
+        align-items: center;
+        gap: .35rem;
     }
 
     .book-meta {
-        font-size: var(--font-size-sm);
+        font-size: .88rem;
         color: var(--color-primary-green);
-        font-weight: var(--font-weight-semibold);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-xxs);
+        font-weight: 700;
     }
 
     .book-date {
-        font-size: var(--font-size-xs);
+        font-size: .8rem;
         color: var(--color-text-muted);
-        font-weight: var(--font-weight-normal);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-xxs);
     }
 
-    /* زر التحميل الجديد - بسيط ومعتمد على المتغيرات */
     .btn-download {
         background-color: var(--color-btn-download);
         color: var(--color-btn-download-text);
         border: none;
         border-radius: var(--radius-btn);
-        padding: var(--spacing-xxs) var(--spacing-sm);
-        font-size: var(--font-size-xs);
-        font-weight: var(--font-weight-semibold);
-        font-family: var(--font-base);
+        padding: .5rem .85rem;
+        font-size: .82rem;
+        font-weight: 700;
         cursor: pointer;
-        transition: all var(--transition-base);
         display: inline-flex;
         align-items: center;
-        gap: var(--spacing-xxs);
-        text-decoration: none;
+        justify-content: center;
+        gap: .4rem;
         white-space: nowrap;
     }
 
-    .btn-download:hover {
+    .btn-download:hover:not(:disabled) {
         background-color: var(--color-btn-download-hover);
         color: var(--color-luxury-beige);
-        transform: translateY(-1px);
     }
 
-    .btn-download:active {
-        transform: translateY(0);
-        opacity: 0.9;
+    .btn-download:disabled {
+        opacity: .6;
+        cursor: not-allowed;
     }
-   /*  التجاوب */
+
+    .state-card {
+        background: white;
+        color: var(--color-primary-green);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        text-align: center;
+        box-shadow: var(--shadow-card);
+    }
+
+    .alert-box {
+        border-radius: 12px;
+        padding: .8rem 1rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+
+    .alert-error { background: #f8d7da; color: #842029; }
+    .alert-success { background: #d1e7dd; color: #0f5132; }
+
     @@media (max-width: 768px) {
-        .header-custom { padding: 2rem 0; margin-bottom: 2rem; }
+        .header-custom { padding: 2rem 1rem; }
         .book-cover { height: 140px; }
         .book-content { padding: 1.2rem; }
-        .book-footer { flex-direction: column; align-items: flex-start; gap: var(--spacing-sm); }
-        .btn-download { width: 100%; justify-content: center; }
+        .book-footer { flex-direction: column; align-items: flex-start; }
+        .btn-download { width: 100%; }
     }
 </style>
 
 <div class="library-wrapper">
-    <!-- الترويسة -->
     <header class="header-custom text-center">
         <div class="container">
-            <h1 class="fw-bold">الكتب</h1>
-            <p class="mb-0">متابعة كل ما يخص الكتب</p>
+            <h1 class="fw-bold">المكتبة</h1>
+            <p class="mb-0">كتب وملفات تعليمية متاحة للطالب</p>
         </div>
     </header>
 
-    <!-- شبكة الكتب -->
     <div class="container">
-        <div class="row g-4">
-            
-            <!-- الكتاب الأول -->
-            <div class="col-lg-6">
-                <div class="book-card">
-                    <div class="book-cover">
-                        <i class="bi bi-book book-icon"></i>
-                    </div>
-                    <div class="book-content">
-                        <h3 class="book-title">رياض الصالحين</h3>
-                        <p class="book-desc">كتاب شامل في الآداب والأخلاق الإسلامية، يحتوي على أحاديث نبوية شريفة مختارة تغطي مختلف أبواب الدين والدنيا.</p>
-                        <div class="book-footer">
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span class="book-meta"><i class="bi bi-file-text me-2"></i>450 صفحة</span>
-                                <span class="book-date"><i class="bi bi-calendar3 me-1"></i>نشر: 2023</span>
-                            </div>
-                            <button class="btn-download" title="تحميل الكتاب">
-                                <i class="bi bi-download"></i> تحميل
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- الكتاب الثاني -->
-            <div class="col-lg-6">
-                <div class="book-card">
-                    <div class="book-cover">
-                        <i class="bi bi-journal-text book-icon"></i>
-                    </div>
-                    <div class="book-content">
-                        <h3 class="book-title">قصص الأنبياء</h3>
-                        <p class="book-desc">سرد قصص الأنبياء والرسل عليهم السلام بأسلوب شيق ومبسط، مستمد مباشرة من القرآن الكريم والسنة النبوية الشريفة.</p>
-                        <div class="book-footer">
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span class="book-meta"><i class="bi bi-file-text me-2"></i>380 صفحة</span>
-                                <span class="book-date"><i class="bi bi-calendar3 me-1"></i>نشر: 2022</span>
-                            </div>
-                            <button class="btn-download" title="تحميل الكتاب">
-                                <i class="bi bi-download"></i> تحميل
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- الكتاب الثالث -->
-            <div class="col-lg-6">
-                <div class="book-card">
-                    <div class="book-cover">
-                        <i class="bi bi-journal-text book-icon"></i>
-                    </div>
-                    <div class="book-content">
-                        <h3 class="book-title">العقيدة الإسلامية</h3>
-                        <p class="book-desc">شرح مبسط وواضح لعقيدة أهل السنة والجماعة، يتناول أصول الإيمان وأركانه الستة بطريقة منهجية سهلة الفهم.</p>
-                        <div class="book-footer">
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span class="book-meta"><i class="bi bi-file-text me-2"></i>320 صفحة</span>
-                                <span class="book-date"><i class="bi bi-calendar3 me-1"></i>نشر: 2023</span>
-                            </div>
-                            <button class="btn-download" title="تحميل الكتاب">
-                                <i class="bi bi-download"></i> تحميل
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- الكتاب الرابع -->
-            <div class="col-lg-6">
-                <div class="book-card">
-                    <div class="book-cover">
-                        <i class="bi bi-book-half book-icon"></i>
-                    </div>
-                    <div class="book-content">
-                        <h3 class="book-title">الأربعون النووية</h3>
-                        <p class="book-desc">مجموعة جامعة من الأحاديث النبوية الأساسية التي تضم أصول الدين وقواعده، مقدمة مع شروح موجزة وافية.</p>
-                        <div class="book-footer">
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span class="book-meta"><i class="bi bi-file-text me-2"></i>180 صفحة</span>
-                                <span class="book-date"><i class="bi bi-calendar3 me-1"></i>نشر: 2021</span>
-                            </div>
-                            <button class="btn-download" title="تحميل الكتاب">
-                                <i class="bi bi-download"></i> تحميل
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+        <div class="toolbar-card">
+            <input class="search-input" placeholder="ابحث باسم الكتاب أو الوصف أو الناشر..." @bind="_searchText" @bind:event="oninput" />
         </div>
+
+        @if (!string.IsNullOrWhiteSpace(_message))
+        {
+            <div class="alert-box @(_messageIsError ? "alert-error" : "alert-success")">@_message</div>
+        }
+
+        @if (_loading)
+        {
+            <div class="state-card">جاري تحميل كتب المكتبة...</div>
+        }
+        else if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <div class="state-card">
+                <div class="alert-box alert-error">@_error</div>
+                <button class="btn-download" @onclick="LoadBooksAsync">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    إعادة المحاولة
+                </button>
+            </div>
+        }
+        else if (!FilteredBooks.Any())
+        {
+            <div class="state-card">لا توجد كتب مطابقة حالياً.</div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var book in FilteredBooks)
+                {
+                    <div class="col-lg-6">
+                        <div class="book-card">
+                            <div class="book-cover">
+                                <i class="@GetBookIcon(book) book-icon"></i>
+                            </div>
+                            <div class="book-content">
+                                <h3 class="book-title">@Fallback(book.Title, "كتاب بدون عنوان")</h3>
+                                <p class="book-desc">@Fallback(book.Description, "لا يوجد وصف متاح لهذا الكتاب.")</p>
+                                <div class="book-footer">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <span class="book-meta"><i class="bi bi-person me-1"></i>@Fallback(book.Author, "مكتبة معين")</span>
+                                        <span class="book-date"><i class="bi bi-calendar3 me-1"></i>السنة: @GetBookYear(book)</span>
+                                    </div>
+                                    <button class="btn-download"
+                                            disabled="@(string.IsNullOrWhiteSpace(book.CoverImageUrl) || _openingBookId == book.Id)"
+                                            @onclick="() => OpenBookAsync(book)">
+                                        <i class="bi bi-download"></i>
+                                        @(_openingBookId == book.Id ? "جاري الفتح..." : "فتح / تحميل")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
     </div>
 </div>
 
 @code {
+    private List<BookResponseDto> _books = new();
+    private bool _loading = true;
+    private string? _error;
+    private string? _message;
+    private bool _messageIsError;
+    private string _searchText = string.Empty;
+    private Guid? _openingBookId;
 
+    private IEnumerable<BookResponseDto> FilteredBooks
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_searchText))
+                return _books;
+
+            var term = _searchText.Trim();
+            return _books.Where(book =>
+                Contains(book.Title, term) ||
+                Contains(book.Description, term) ||
+                Contains(book.Author, term));
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBooksAsync();
+    }
+
+    private async Task LoadBooksAsync()
+    {
+        if (AppSession.CurrentMode != AppUserMode.Student || !AppSession.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/", replace: true);
+            return;
+        }
+
+        _loading = true;
+        _error = null;
+        _message = null;
+
+        try
+        {
+            _books = await BookService.GetBooksAsync();
+        }
+        catch (Exception ex)
+        {
+            _books = new List<BookResponseDto>();
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OpenBookAsync(BookResponseDto book)
+    {
+        _message = null;
+        _messageIsError = false;
+
+        if (string.IsNullOrWhiteSpace(book.CoverImageUrl))
+        {
+            _message = "رابط الكتاب غير متوفر حالياً.";
+            _messageIsError = true;
+            return;
+        }
+
+        var url = BuildFileUrl(book.CoverImageUrl);
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            _message = "رابط الكتاب غير صالح.";
+            _messageIsError = true;
+            return;
+        }
+
+        _openingBookId = book.Id;
+        try
+        {
+            await Launcher.Default.OpenAsync(uri);
+            _message = "تم فتح رابط الكتاب.";
+        }
+        catch (Exception ex)
+        {
+            _message = $"تعذر فتح الكتاب: {ex.Message}";
+            _messageIsError = true;
+        }
+        finally
+        {
+            _openingBookId = null;
+        }
+    }
+
+    private static string BuildFileUrl(string fileUrl)
+    {
+        if (Uri.TryCreate(fileUrl, UriKind.Absolute, out _))
+            return fileUrl;
+
+        return $"{ApiRoutes.BaseUrl.TrimEnd('/')}/{fileUrl.TrimStart('/')}";
+    }
+
+    private static string Fallback(string? value, string fallback)
+        => string.IsNullOrWhiteSpace(value) ? fallback : value;
+
+    private static bool Contains(string? source, string term)
+        => !string.IsNullOrWhiteSpace(source) && source.Contains(term, StringComparison.OrdinalIgnoreCase);
+
+    private static string GetBookYear(BookResponseDto book)
+        => book.PublicationYear?.ToString() ?? (book.CreatedAt == default ? "غير محدد" : book.CreatedAt.Year.ToString());
+
+    private static string GetBookIcon(BookResponseDto book)
+    {
+        var title = book.Title ?? string.Empty;
+        if (title.Contains("تجويد", StringComparison.OrdinalIgnoreCase))
+            return "bi bi-journal-text";
+        if (title.Contains("حديث", StringComparison.OrdinalIgnoreCase))
+            return "bi bi-book-half";
+        return "bi bi-book";
+    }
 }

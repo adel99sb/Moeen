@@ -280,10 +280,10 @@
     private List<PostDto> FilteredPosts => string.IsNullOrWhiteSpace(_searchText)
         ? _posts
         : _posts.Where(p =>
-            (p.Title ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
-            (p.Body ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
-            (p.HalqaName ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
-            (p.MosqueName ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase)).ToList();
+            (p.Title ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            (p.Body ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            (p.HalqaName ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            (p.MosqueName ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -392,19 +392,15 @@
                 return;
             }
 
-            if (_isEditMode)
-            {
-                await PostService.UpdatePostAsync(new UpdatePostRequest
+            var response = _isEditMode
+                ? await PostService.UpdatePostAsync(new UpdatePostRequest
                 {
                     PostId = _form.Id,
                     Title = _form.Title.Trim(),
                     Body = _form.Body.Trim(),
                     ImageUrl = string.IsNullOrWhiteSpace(_form.ImageUrl) ? null : _form.ImageUrl.Trim()
-                });
-            }
-            else
-            {
-                await PostService.PublishPostAsync(new PublishPostRequest
+                })
+                : await PostService.PublishPostAsync(new PublishPostRequest
                 {
                     IsPublic = _form.IsPublic,
                     PostData = new RequstePostDto
@@ -415,6 +411,11 @@
                         HalqaId = _form.IsPublic ? null : _form.HalqaId
                     }
                 });
+
+            if (response == null || !response.Success)
+            {
+                _dialogError = response?.Message ?? "فشل حفظ بيانات المنشور.";
+                return;
             }
 
             _successMessage = _isEditMode ? "تم تعديل المنشور بنجاح." : "تم نشر المنشور بنجاح.";
@@ -423,7 +424,7 @@
         }
         catch (Exception ex)
         {
-            _dialogError = ex.Message;
+            _dialogError = $"تعذر حفظ بيانات المنشور: {ex.Message}";
         }
         finally
         {
@@ -442,13 +443,19 @@
 
         try
         {
-            await PostService.DeletePostAsync(new DeletePostRequest { PostId = post.Id });
+            var response = await PostService.DeletePostAsync(new DeletePostRequest { PostId = post.Id });
+            if (response == null || !response.Success)
+            {
+                _errorMessage = response?.Message ?? "فشل حذف المنشور.";
+                return;
+            }
+
             _successMessage = "تم حذف المنشور بنجاح.";
             await LoadPostsAsync();
         }
         catch (Exception ex)
         {
-            _errorMessage = ex.Message;
+            _errorMessage = $"تعذر حذف المنشور: {ex.Message}";
         }
     }
 

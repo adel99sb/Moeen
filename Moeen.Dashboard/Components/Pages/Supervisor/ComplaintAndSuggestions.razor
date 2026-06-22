@@ -373,10 +373,10 @@
             return items.ToList();
 
         return items.Where(item =>
-            item.UserId.ToString().Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
-            (item.Title ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
-            (item.Content ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
-            (item.Response ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase)).ToList();
+            item.UserId.ToString().Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            (item.Title ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            (item.Content ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            (item.Response ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
     }
 
     private async Task UpdateStatusAsync(FeedbackItemModel item, ChangeEventArgs args)
@@ -389,22 +389,23 @@
 
         try
         {
-            if (item.Type == FeedbackType.Complaint)
-            {
-                await FeedbackService.UpdateComplaintStatusAsync(new UpdateComplaintStatusRequest
+            var response = item.Type == FeedbackType.Complaint
+                ? await FeedbackService.UpdateComplaintStatusAsync(new UpdateComplaintStatusRequest
                 {
                     ComplaintId = item.Id,
                     Status = (ComplaintStatus)value,
                     Note = item.Response
-                });
-            }
-            else
-            {
-                await FeedbackService.UpdateSuggestionStatusAsync(new UpdateSuggestionStatusRequest
+                })
+                : await FeedbackService.UpdateSuggestionStatusAsync(new UpdateSuggestionStatusRequest
                 {
                     SuggestionId = item.Id,
                     Status = (SuggestionStatus)value
                 });
+
+            if (response == null || !response.Success)
+            {
+                _errorMessage = response?.Message ?? "فشل تحديث الحالة.";
+                return;
             }
 
             _successMessage = "تم تحديث الحالة بنجاح.";
@@ -412,7 +413,7 @@
         }
         catch (Exception ex)
         {
-            _errorMessage = ex.Message;
+            _errorMessage = $"تعذر تحديث الحالة: {ex.Message}";
         }
     }
 
@@ -449,32 +450,39 @@
 
         try
         {
-            if (_manageForm.Type == FeedbackType.Complaint)
-            {
-                await FeedbackService.UpdateComplaintStatusAsync(new UpdateComplaintStatusRequest
+            var statusResponse = _manageForm.Type == FeedbackType.Complaint
+                ? await FeedbackService.UpdateComplaintStatusAsync(new UpdateComplaintStatusRequest
                 {
                     ComplaintId = _manageForm.Id,
                     Status = (ComplaintStatus)_manageForm.StatusValue,
                     Note = string.IsNullOrWhiteSpace(_manageForm.Response) ? null : _manageForm.Response.Trim()
-                });
-            }
-            else
-            {
-                await FeedbackService.UpdateSuggestionStatusAsync(new UpdateSuggestionStatusRequest
+                })
+                : await FeedbackService.UpdateSuggestionStatusAsync(new UpdateSuggestionStatusRequest
                 {
                     SuggestionId = _manageForm.Id,
                     Status = (SuggestionStatus)_manageForm.StatusValue
                 });
+
+            if (statusResponse == null || !statusResponse.Success)
+            {
+                _dialogError = statusResponse?.Message ?? "فشل تحديث حالة السجل.";
+                return;
             }
 
             if (!string.IsNullOrWhiteSpace(_manageForm.Response))
             {
-                await FeedbackService.ManageFeedbackAsync(new ManageFeedbackRequest
+                var manageResponse = await FeedbackService.ManageFeedbackAsync(new ManageFeedbackRequest
                 {
                     Id = _manageForm.Id,
                     Type = _manageForm.Type,
                     Response = _manageForm.Response.Trim()
                 });
+
+                if (manageResponse == null || !manageResponse.Success)
+                {
+                    _dialogError = manageResponse?.Message ?? "فشل حفظ الرد الإداري.";
+                    return;
+                }
             }
 
             _successMessage = "تم حفظ التعديلات بنجاح.";
@@ -483,7 +491,7 @@
         }
         catch (Exception ex)
         {
-            _dialogError = ex.Message;
+            _dialogError = $"تعذر حفظ تعديلات السجل: {ex.Message}";
         }
         finally
         {
@@ -515,7 +523,7 @@
         }
         catch (Exception ex)
         {
-            _errorMessage = ex.Message;
+            _errorMessage = $"تعذر حذف السجل: {ex.Message}";
         }
     }
 

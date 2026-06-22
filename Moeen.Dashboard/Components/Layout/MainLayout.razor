@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @using Moeen.Dashboard.Services.Abstractions
 @inject ITokenService TokenService
 @inject NavigationManager Nav
@@ -30,9 +30,9 @@
 </div>
 
 <div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
+    حدث خطأ غير متوقع.
+    <a href="" class="reload">إعادة تحميل</a>
+    <a class="dismiss">×</a>
 </div>
 
 @code {
@@ -42,4 +42,3 @@
         Nav.NavigateTo("/", replace: true);
     }
 }
-

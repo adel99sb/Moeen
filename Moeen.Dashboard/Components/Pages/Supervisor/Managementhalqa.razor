@@ -363,17 +363,17 @@
     private List<HalqaDto> FilteredHalqas => string.IsNullOrWhiteSpace(_searchText)
         ? _halqas
         : _halqas.Where(h =>
-            (h.Name ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
-            (h.FoujName ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
-            (h.TeacherName ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
-            GetFoujName(h.FoujId).Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
-            GetTeacherName(h.TeacherId).Contains(_searchText, StringComparison.OrdinalIgnoreCase)).ToList();
+            (h.Name ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            (h.FoujName ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            (h.TeacherName ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            GetFoujName(h.FoujId).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            GetTeacherName(h.TeacherId).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
 
     private List<HalqaAssignmentStudentOptionDto> FilteredAssignmentStudents => string.IsNullOrWhiteSpace(_studentSearchText)
         ? _assignmentStudents
         : _assignmentStudents.Where(student =>
-            (student.Name ?? string.Empty).Contains(_studentSearchText, StringComparison.OrdinalIgnoreCase) ||
-            (student.Email ?? string.Empty).Contains(_studentSearchText, StringComparison.OrdinalIgnoreCase)).ToList();
+            (student.Name ?? string.Empty).Contains(_studentSearchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            (student.Email ?? string.Empty).Contains(_studentSearchText.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
 
     private List<HalqaAssignmentStudentOptionDto> SelectedStudents => _assignmentStudents
         .Where(student => _form.SelectedStudentIds.Contains(student.Id))
@@ -623,18 +623,18 @@
                 ? await HalqaService.UpdateAsync(new UpdateHalqaRequest
                 {
                     HalqaId = _form.Id,
-                    Name = _form.Name,
+                    Name = _form.Name.Trim(),
                     FoujId = _form.FoujId,
                     TeacherId = _form.TeacherId,
-                    Type = _form.Type,
+                    Type = _form.Type.Trim(),
                     StudentIds = selectedStudentIds
                 })
                 : await HalqaService.CreateAsync(new CreateHalqaRequest
                 {
-                    Name = _form.Name,
+                    Name = _form.Name.Trim(),
                     FoujId = _form.FoujId,
                     TeacherId = _form.TeacherId,
-                    Type = _form.Type,
+                    Type = _form.Type.Trim(),
                     StudentIds = selectedStudentIds
                 });
 
@@ -650,7 +650,7 @@
         }
         catch (Exception ex)
         {
-            _dialogError = ex.Message;
+            _dialogError = $"تعذر حفظ بيانات الحلقة: {ex.Message}";
         }
         finally
         {
@@ -681,7 +681,7 @@
         }
         catch (Exception ex)
         {
-            _errorMessage = ex.Message;
+            _errorMessage = $"تعذر حذف الحلقة: {ex.Message}";
         }
     }
 

@@ -10,6 +10,21 @@ main {
     padding-bottom: 75px; /* مساحة للقائمة السفلية */
 }
 
+.entry-page {
+    min-height: 100vh;
+    display: block;
+}
+
+.entry-main {
+    min-height: 100vh;
+    padding-bottom: 0;
+}
+
+.entry-content {
+    min-height: 100vh;
+    padding: 0;
+}
+
 .sidebar {
     background-color:#195042;
     position: fixed;

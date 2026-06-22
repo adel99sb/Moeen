@@ -1,4 +1,363 @@
 @page "/Student/Post"
-@using Moeen.App.Components.Pages.Shared
+@using Moeen.App.Services.Abstractions
+@using Moeen.Shared.Responses.Mobile
+@inject IStudentPostService StudentPostService
+@inject AppSessionService AppSession
+@inject NavigationManager Navigation
 
-<PostsList Title="إعلانات الطالب" Subtitle="متابعة آخر الإعلانات والتنبيهات الخاصة بالطلاب" />
+<style>
+    .student-posts-wrapper {
+        direction: rtl;
+        text-align: right;
+        background-color: #f4f7f6;
+        min-height: 100vh;
+        padding-bottom: 2.5rem;
+    }
+
+    .student-posts-header {
+        background-color: #195042;
+        color: #d6cabc;
+        padding: 2rem 1rem;
+        border-bottom: 6px solid #d6cabc;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .student-posts-container {
+        padding: 0 1rem;
+    }
+
+    .toolbar-card {
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.08);
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .search-input {
+        width: 100%;
+        border: 1px solid #d6cabc;
+        background: #fafbfb;
+        border-radius: 12px;
+        padding: .85rem 1rem;
+        color: #195042;
+        outline: none;
+    }
+
+    .student-post-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.08);
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .post-image {
+        height: 145px;
+        background: linear-gradient(135deg, #195042 0%, #246b59 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #d6cabc;
+        font-size: 2.4rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .post-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .post-content {
+        padding: 1.25rem;
+    }
+
+    .post-title {
+        color: #195042;
+        font-weight: 800;
+        font-size: 1.15rem;
+        margin-bottom: .65rem;
+    }
+
+    .post-body {
+        color: #5a6c7d;
+        font-size: .95rem;
+        line-height: 1.75;
+        white-space: pre-wrap;
+    }
+
+    .post-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        flex-wrap: wrap;
+        padding-top: 1rem;
+        border-top: 2px solid #d6cabc;
+        margin-top: 1rem;
+        color: #195042;
+        font-weight: 700;
+        font-size: .88rem;
+    }
+
+    .post-badge {
+        border-radius: 999px;
+        padding: .25rem .7rem;
+        background: rgba(25,80,66,.12);
+        color: #195042;
+        font-size: .8rem;
+        font-weight: 800;
+    }
+
+    .post-badge.private {
+        background: rgba(214,202,188,.55);
+    }
+
+    .actions {
+        display: flex;
+        gap: .65rem;
+        margin-top: 1rem;
+    }
+
+    .like-btn {
+        flex: 1;
+        border: 1px solid #d6cabc;
+        border-radius: 12px;
+        background: #fff;
+        color: #195042;
+        padding: .7rem .5rem;
+        font-weight: 800;
+    }
+
+    .like-btn.active {
+        background: #195042;
+        color: #d6cabc;
+        border-color: #195042;
+    }
+
+    .like-btn:disabled {
+        opacity: .65;
+    }
+
+    .state-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        color: #195042;
+        box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    }
+
+    .error-box {
+        color: #842029;
+        background: #f8d7da;
+        border: 1px solid #f5c2c7;
+    }
+
+    .post-error {
+        color: #842029;
+        font-size: .85rem;
+        margin-top: .75rem;
+        background: #f8d7da;
+        border-radius: 10px;
+        padding: .5rem .75rem;
+    }
+
+    @@media (max-width: 768px) {
+        .student-posts-header { padding: 1.75rem 1rem; }
+        .post-content { padding: 1rem; }
+        .post-image { height: 130px; }
+    }
+</style>
+
+<div class="student-posts-wrapper">
+    <header class="student-posts-header">
+        <h1>منشورات الطالب</h1>
+        <p class="mb-0">إعلانات المسجد ومنشورات الحلقة الخاصة بك</p>
+    </header>
+
+    <div class="student-posts-container">
+        <div class="toolbar-card">
+            <input class="search-input" placeholder="ابحث في المنشورات..." @bind="_searchText" @bind:event="oninput" />
+        </div>
+
+        @if (_loading)
+        {
+            <div class="state-box">
+                <div class="spinner-border text-success" role="status"></div>
+                <p class="mt-3 mb-0">جاري تحميل المنشورات...</p>
+            </div>
+        }
+        else if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <div class="state-box error-box">
+                <p class="mb-3">@_error</p>
+                <button class="btn btn-sm btn-outline-danger" @onclick="LoadPostsAsync">إعادة المحاولة</button>
+            </div>
+        }
+        else if (!FilteredPosts.Any())
+        {
+            <div class="state-box">لا توجد منشورات مطابقة حالياً.</div>
+        }
+        else
+        {
+            @foreach (var post in FilteredPosts)
+            {
+                var isBusy = _busyPostIds.Contains(post.Id);
+                _interactionErrors.TryGetValue(post.Id, out var postError);
+
+                <article class="student-post-card" @key="post.Id">
+                    <div class="post-image">
+                        @if (!string.IsNullOrWhiteSpace(post.ImageUrl))
+                        {
+                            <img src="@post.ImageUrl" alt="@post.Title" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-megaphone-fill"></i>
+                        }
+                    </div>
+                    <div class="post-content">
+                        <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap mb-2">
+                            <h3 class="post-title mb-0">@SafeTitle(post)</h3>
+                            <span class="post-badge @(post.IsAnnouncement ? string.Empty : "private")">
+                                @(post.IsAnnouncement ? "إعلان عام" : "منشور الحلقة")
+                            </span>
+                        </div>
+
+                        <p class="post-body">@SafeBody(post)</p>
+
+                        <div class="post-meta">
+                            <span><i class="bi bi-calendar3 ms-1"></i>@FormatDate(post.CreatedAt)</span>
+                            <span><i class="bi bi-chat-square-text ms-1"></i>@Fallback(post.HalqaName, "كل الطلاب")</span>
+                            <span><i class="bi bi-heart-fill ms-1"></i>@post.InteractionsCount تفاعل</span>
+                        </div>
+
+                        <div class="actions">
+                            <button class="like-btn @(post.IsLikedByCurrentStudent ? "active" : string.Empty)"
+                                    disabled="@isBusy"
+                                    @onclick="() => ToggleLikeAsync(post)">
+                                <i class="bi @(post.IsLikedByCurrentStudent ? "bi-heart-fill" : "bi-heart")"></i>
+                                @(post.IsLikedByCurrentStudent ? "تم التفاعل" : "تفاعل")
+                            </button>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(postError))
+                        {
+                            <div class="post-error">@postError</div>
+                        }
+                    </div>
+                </article>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private bool _loading = true;
+    private string? _error;
+    private string _searchText = string.Empty;
+    private List<StudentPostDto> _posts = new();
+    private readonly HashSet<Guid> _busyPostIds = new();
+    private readonly Dictionary<Guid, string> _interactionErrors = new();
+
+    private IEnumerable<StudentPostDto> FilteredPosts
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_searchText))
+                return _posts;
+
+            var term = _searchText.Trim();
+            return _posts.Where(post =>
+                Contains(post.Title, term) ||
+                Contains(post.Body, term) ||
+                Contains(post.HalqaName, term) ||
+                Contains(post.MosqueName, term));
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPostsAsync();
+    }
+
+    private async Task LoadPostsAsync()
+    {
+        if (AppSession.CurrentMode != AppUserMode.Student || !AppSession.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/", replace: true);
+            return;
+        }
+
+        _loading = true;
+        _error = null;
+        _interactionErrors.Clear();
+
+        try
+        {
+            _posts = await StudentPostService.GetMyPostsAsync();
+        }
+        catch (Exception ex)
+        {
+            _posts = new List<StudentPostDto>();
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task ToggleLikeAsync(StudentPostDto post)
+    {
+        if (_busyPostIds.Contains(post.Id))
+            return;
+
+        _busyPostIds.Add(post.Id);
+        _interactionErrors.Remove(post.Id);
+
+        var oldLiked = post.IsLikedByCurrentStudent;
+        var oldCount = post.InteractionsCount;
+        ApplyLocalLike(post, !oldLiked, oldLiked ? oldCount - 1 : oldCount + 1);
+
+        try
+        {
+            var result = await StudentPostService.ToggleLikeAsync(post.Id);
+            ApplyLocalLike(post, result.IsLikedByCurrentStudent, result.InteractionsCount);
+        }
+        catch (Exception ex)
+        {
+            ApplyLocalLike(post, oldLiked, oldCount);
+            _interactionErrors[post.Id] = ex.Message;
+        }
+        finally
+        {
+            _busyPostIds.Remove(post.Id);
+        }
+    }
+
+    private static void ApplyLocalLike(StudentPostDto post, bool isLiked, int count)
+    {
+        post.IsLikedByCurrentStudent = isLiked;
+        post.InteractionsCount = Math.Max(0, count);
+    }
+
+    private static string SafeTitle(StudentPostDto post)
+        => Fallback(post.Title, "منشور بدون عنوان");
+
+    private static string SafeBody(StudentPostDto post)
+        => Fallback(post.Body, "لا يوجد نص لهذا المنشور.");
+
+    private static string Fallback(string? value, string fallback)
+        => string.IsNullOrWhiteSpace(value) ? fallback : value;
+
+    private static bool Contains(string? source, string term)
+        => !string.IsNullOrWhiteSpace(source) && source.Contains(term, StringComparison.OrdinalIgnoreCase);
+
+    private static string FormatDate(DateTime date)
+        => date == default ? "غير محدد" : date.ToString("yyyy/MM/dd");
+}

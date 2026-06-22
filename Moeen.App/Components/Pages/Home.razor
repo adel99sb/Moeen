@@ -1,5 +1,532 @@
-﻿@page "/"
+@page "/"
+@using Moeen.App.Services.Abstractions
+@using Moeen.Shared.Requests.Identity
+@inject IAppAuthService AuthService
+@inject AppSessionService AppSession
+@inject NavigationManager Nav
 
-<h1>Hello, world!</h1>
+<PageTitle>معين</PageTitle>
 
-Welcome to your new app.
+<div class="mobile-auth-page" dir="rtl">
+    @if (_showSplash)
+    {
+        <section class="mobile-splash" aria-label="شاشة بداية معين">
+            <div class="splash-logo-shell">
+                <img src="image/LOGO.svg" alt="شعار معين" />
+            </div>
+            <h1>معين</h1>
+            <p>رحلة تعليمية أسهل للطالب والأهل</p>
+        </section>
+    }
+    else if (_selectedMode is null)
+    {
+        <main class="mobile-auth-main">
+            <section class="role-card" aria-labelledby="entry-title">
+                <div class="role-logo">
+                    <img src="image/LOGO.svg" alt="شعار معين" />
+                </div>
+
+                <p class="role-eyebrow">أهلاً بك في معين</p>
+                <h1 id="entry-title">اختر طريقة الدخول</h1>
+                <p class="role-subtitle">
+                    حدد نوع الحساب حتى تظهر لك تجربة مناسبة لك داخل التطبيق.
+                </p>
+
+                <div class="role-grid">
+                    <button type="button" class="role-option" @onclick="SelectParent">
+                        <span class="role-icon parent-icon"><i class="bi bi-people-fill"></i></span>
+                        <span class="role-copy">
+                            <strong>أهل</strong>
+                            <small>متابعة تقدم الطالب والإعلانات</small>
+                        </span>
+                    </button>
+
+                    <button type="button" class="role-option" @onclick="SelectStudent">
+                        <span class="role-icon student-icon"><i class="bi bi-mortarboard-fill"></i></span>
+                        <span class="role-copy">
+                            <strong>طالب</strong>
+                            <small>الدروس، الكتب، والتقدم الشخصي</small>
+                        </span>
+                    </button>
+
+                    <button type="button" class="role-option guest-option" @onclick="ContinueAsGuest">
+                        <span class="role-icon guest-icon"><i class="bi bi-person-walking"></i></span>
+                        <span class="role-copy">
+                            <strong>زائر</strong>
+                            <small>دخول مباشر بدون تسجيل دخول</small>
+                        </span>
+                    </button>
+                </div>
+            </section>
+        </main>
+    }
+    else
+    {
+        <main class="mobile-auth-main">
+            <section class="login-card" aria-labelledby="login-title">
+                <button type="button" class="back-button" @onclick="BackToRoleSelection">
+                    <i class="bi bi-arrow-right"></i>
+                    <span>رجوع</span>
+                </button>
+
+                <div class="login-logo">
+                    <img src="image/LOGO.svg" alt="شعار معين" />
+                </div>
+
+                <h1 id="login-title">@LoginTitle</h1>
+                <p class="login-subtitle">@LoginSubtitle</p>
+
+                <EditForm Model="_model" OnValidSubmit="HandleLogin" class="mobile-login-form">
+                    <DataAnnotationsValidator />
+
+                    <div class="moeen-field">
+                        <label for="email">البريد الإلكتروني</label>
+                        <InputText id="email"
+                                   @bind-Value="_model.Email"
+                                   type="email"
+                                   class="moeen-input"
+                                   placeholder="name@example.com" />
+                        <ValidationMessage For="@(() => _model.Email)" />
+                    </div>
+
+                    <div class="moeen-field">
+                        <label for="password">كلمة المرور</label>
+                        <InputText id="password"
+                                   @bind-Value="_model.Password"
+                                   type="password"
+                                   class="moeen-input"
+                                   placeholder="••••••••" />
+                        <ValidationMessage For="@(() => _model.Password)" />
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(_message))
+                    {
+                        <div class="login-alert" role="alert">
+                            @_message
+                        </div>
+                    }
+
+                    <button class="login-button" type="submit" disabled="@_isLoading">
+                        @if (_isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                            <span>جاري تسجيل الدخول...</span>
+                        }
+                        else
+                        {
+                            <span>@LoginButtonText</span>
+                        }
+                    </button>
+                </EditForm>
+            </section>
+        </main>
+    }
+</div>
+
+<style>
+    .mobile-auth-page {
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at 16% 12%, rgba(25, 80, 66, 0.14), transparent 30%),
+            radial-gradient(circle at 88% 88%, rgba(214, 202, 188, 0.45), transparent 34%),
+            linear-gradient(135deg, #f7f3ed 0%, #f2ede5 52%, #eee7dd 100%);
+        color: #163f35;
+        font-family: inherit;
+        overflow-x: hidden;
+    }
+
+    .mobile-splash {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 28px;
+        text-align: center;
+        animation: splashFadeIn 0.55s ease both;
+    }
+
+    .splash-logo-shell {
+        width: 132px;
+        height: 132px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        border-radius: 36px;
+        background: rgba(255, 255, 255, 0.82);
+        border: 1px solid rgba(25, 80, 66, 0.12);
+        box-shadow: 0 26px 70px rgba(25, 80, 66, 0.18);
+    }
+
+    .splash-logo-shell img,
+    .role-logo img,
+    .login-logo img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: contain;
+    }
+
+    .mobile-splash h1 {
+        margin: 14px 0 0;
+        color: #195042;
+        font-size: 2.4rem;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+    }
+
+    .mobile-splash p {
+        margin: 0;
+        color: #756b62;
+        font-weight: 700;
+    }
+
+    .mobile-auth-main {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 28px 18px;
+    }
+
+    .role-card,
+    .login-card {
+        width: min(100%, 520px);
+        border: 1px solid rgba(25, 80, 66, 0.12);
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 26px 80px rgba(25, 80, 66, 0.14);
+    }
+
+    .role-card {
+        padding: 32px 20px 24px;
+        text-align: center;
+    }
+
+    .role-logo,
+    .login-logo {
+        width: 90px;
+        height: 86px;
+        margin: 0 auto 14px;
+    }
+
+    .role-eyebrow {
+        margin: 0 0 6px;
+        color: #91855a;
+        font-size: 0.92rem;
+        font-weight: 900;
+    }
+
+    .role-card h1,
+    .login-card h1 {
+        margin: 0;
+        color: #195042;
+        font-size: 1.9rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+    }
+
+    .role-subtitle,
+    .login-subtitle {
+        max-width: 380px;
+        margin: 12px auto 24px;
+        color: #7b7067;
+        line-height: 1.8;
+    }
+
+    .role-grid {
+        display: grid;
+        gap: 14px;
+    }
+
+    .role-option {
+        width: 100%;
+        min-height: 88px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px;
+        border: 1px solid rgba(25, 80, 66, 0.12);
+        border-radius: 22px;
+        background: linear-gradient(135deg, #ffffff 0%, #fbf8f3 100%);
+        color: #173f35;
+        text-align: right;
+        cursor: pointer;
+        box-shadow: 0 12px 34px rgba(25, 80, 66, 0.08);
+        transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .role-option:hover,
+    .role-option:focus-visible {
+        transform: translateY(-2px);
+        border-color: rgba(25, 80, 66, 0.34);
+        box-shadow: 0 18px 42px rgba(25, 80, 66, 0.14);
+        outline: none;
+    }
+
+    .role-icon {
+        flex: 0 0 auto;
+        width: 56px;
+        height: 56px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 18px;
+        color: #ffffff;
+        font-size: 1.55rem;
+        background: #195042;
+    }
+
+    .student-icon {
+        background: #195042;
+    }
+
+    .parent-icon {
+        background: #796f4d;
+    }
+
+    .guest-icon {
+        background: #54766c;
+    }
+
+    .role-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .role-copy strong {
+        color: #195042;
+        font-size: 1.1rem;
+        font-weight: 900;
+    }
+
+    .role-copy small {
+        color: #766d65;
+        line-height: 1.6;
+    }
+
+    .login-card {
+        position: relative;
+        padding: 30px 22px 26px;
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 0;
+        background: transparent;
+        color: #195042;
+        font-weight: 800;
+        padding: 0;
+        margin-bottom: 8px;
+        cursor: pointer;
+    }
+
+    .mobile-login-form {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .moeen-field label {
+        display: block;
+        margin-bottom: 10px;
+        color: #263f37;
+        font-weight: 800;
+    }
+
+    .moeen-input {
+        width: 100%;
+        height: 54px;
+        padding: 0 16px;
+        border: 1px solid #ddd5cc;
+        border-radius: 14px;
+        background: #fff;
+        color: #173f35;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .moeen-input:focus {
+        border-color: #195042;
+        box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.12);
+    }
+
+    .moeen-input::placeholder {
+        color: #aaa19a;
+    }
+
+    .validation-message {
+        display: block;
+        margin-top: 8px;
+        color: #b42318;
+        font-size: 0.875rem;
+    }
+
+    .login-alert {
+        padding: 12px 14px;
+        border: 1px solid rgba(180, 35, 24, 0.20);
+        border-radius: 14px;
+        background: #fff3f1;
+        color: #9b1c13;
+        font-size: 0.95rem;
+        line-height: 1.7;
+    }
+
+    .login-button {
+        height: 56px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        border: 0;
+        border-radius: 15px;
+        background: #195042;
+        color: #fff;
+        font-size: 1.05rem;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 0 16px 32px rgba(25, 80, 66, 0.22);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .login-button:hover:not(:disabled) {
+        background: #123d32;
+        transform: translateY(-1px);
+        box-shadow: 0 18px 38px rgba(25, 80, 66, 0.26);
+    }
+
+    .login-button:disabled {
+        opacity: 0.72;
+        cursor: not-allowed;
+    }
+
+    @@keyframes splashFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(12px) scale(0.96);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @@media (max-width: 380px) {
+        .role-card,
+        .login-card {
+            border-radius: 24px;
+        }
+
+        .role-option {
+            min-height: 82px;
+            padding: 14px;
+        }
+
+        .role-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
+        }
+    }
+</style>
+
+@code {
+    private const int SplashDurationMilliseconds = 1600;
+
+    private bool _showSplash = true;
+    private AppUserMode? _selectedMode;
+    private LoginRequest _model = new();
+    private bool _isLoading;
+    private string? _message;
+
+    private string LoginTitle => _selectedMode == AppUserMode.Student
+        ? "تسجيل دخول الطالب"
+        : "تسجيل دخول الأهل";
+
+    private string LoginSubtitle => _selectedMode == AppUserMode.Student
+        ? "أدخل بيانات حساب الطالب للمتابعة إلى صفحة الطالب."
+        : "أدخل بيانات حساب الأهل لمتابعة الطالب والإعلانات.";
+
+    private string LoginButtonText => _selectedMode == AppUserMode.Student
+        ? "دخول كطالب"
+        : "دخول كأهل";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        await AppSession.InitializeAsync();
+        if (AppSession.IsAuthenticated && AppSession.CurrentMode is AppUserMode.Student or AppUserMode.Parent)
+        {
+            Nav.NavigateTo(AppSession.GetHomeRoute(), replace: true);
+            return;
+        }
+
+        await Task.Delay(SplashDurationMilliseconds);
+        _showSplash = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void SelectStudent()
+    {
+        SelectMode(AppUserMode.Student);
+    }
+
+    private void SelectParent()
+    {
+        SelectMode(AppUserMode.Parent);
+    }
+
+    private void SelectMode(AppUserMode mode)
+    {
+        _selectedMode = mode;
+        _model = new LoginRequest();
+        _message = null;
+    }
+
+    private void ContinueAsGuest()
+    {
+        AppSession.ContinueAsGuest();
+        Nav.NavigateTo(AppSession.GetHomeRoute(), replace: true);
+    }
+
+    private void BackToRoleSelection()
+    {
+        _selectedMode = null;
+        _model = new LoginRequest();
+        _message = null;
+        _isLoading = false;
+    }
+
+    private async Task HandleLogin()
+    {
+        if (_selectedMode is null)
+            return;
+
+        _message = null;
+
+        try
+        {
+            _isLoading = true;
+            var token = await AuthService.LoginAsync(_model, _selectedMode.Value);
+            await AppSession.SignInAsync(_selectedMode.Value, token);
+            Nav.NavigateTo(AppSession.GetHomeRoute(), replace: true);
+        }
+        catch (Exception ex)
+        {
+            _message = ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

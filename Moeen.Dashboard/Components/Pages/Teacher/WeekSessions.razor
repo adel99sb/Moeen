@@ -277,9 +277,9 @@
             };
 
             var response = await WeeklyLessonService.RecordLessonAttendanceAsync(request);
-            if (!response.Success)
+            if (response == null || !response.Success)
             {
-                _errorMessage = string.IsNullOrWhiteSpace(response.Message) ? "فشل حفظ حضور الحلقة." : response.Message;
+                _errorMessage = string.IsNullOrWhiteSpace(response?.Message) ? "فشل حفظ حضور الحلقة." : response.Message;
                 return;
             }
 

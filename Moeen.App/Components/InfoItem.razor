@@ -1,0 +1,14 @@
+<div class="info-item">
+    @if (!string.IsNullOrWhiteSpace(Icon))
+    {
+        <i class="@($"{Icon} ms-1")"></i>
+    }
+    <span class="info-label">@Label</span>
+    <span class="info-value">@Value</span>
+</div>
+
+@code {
+    [Parameter] public string Icon { get; set; } = string.Empty;
+    [Parameter] public string Label { get; set; } = string.Empty;
+    [Parameter] public string Value { get; set; } = string.Empty;
+}

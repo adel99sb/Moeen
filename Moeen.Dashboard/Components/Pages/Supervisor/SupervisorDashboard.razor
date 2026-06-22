@@ -1,4 +1,4 @@
-﻿@page "/Supervisor/SupervisorDashboard"
+@page "/Supervisor/SupervisorDashboard"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using Moeen.Dashboard.Infrastructure.Http.Clients
 @using Moeen.Shared.Responses.SupervisorDashboard
@@ -6,101 +6,22 @@
 @inject SupervisorDashboardApiClient DashboardApiClient
 @inject Moeen.Dashboard.Services.Abstractions.ITokenService TokenService
 
+<PageTitle>لوحة المشرف</PageTitle>
+
 <style>
-    .dashboard-container {
-        direction: rtl;
-        font-family: inherit;
-        padding: 10px;
-    }
-
-    .stat-card {
-        background: #fff;
-        border: 1px solid #9ccfc3;
-        border-radius: 15px;
-        padding: 20px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        height: 100%;
-        cursor: default;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-5px);
-        border-color: #195042;
-        box-shadow: 0 8px 20px rgba(25, 80, 66, 0.1);
-    }
-
-    .icon-box {
-        width: 45px;
-        height: 45px;
-        background: #f4f1e8;
-        color: #195042;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        margin-bottom: 15px;
-    }
-
-    .chart-card,
-    .student-list-wrapper {
-        background: #fff;
-        border: 1px solid #e3ddd5;
-        border-radius: 15px;
-        padding: 20px;
-        height: 100%;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-    }
-
-    .chart-wrap {
-        position: relative;
-        height: 300px;
-        width: 100%;
-    }
-
-    .section-title {
-        font-weight: 700;
-        color: #195042;
-        margin: 30px 0 20px;
-        font-size: 1.2rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        border-right: 4px solid #195042;
-        padding-right: 15px;
-    }
-
-    .student-toggle {
-        list-style: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 0;
-        color: #195042;
-        font-weight: 600;
-    }
-
-    .student-item {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 12px 0;
-        border-bottom: 1px solid #f4f1e8;
-    }
-
+    .dashboard-container { direction: rtl; font-family: inherit; padding: 10px; }
+    .stat-card { background: #fff; border: 1px solid #9ccfc3; border-radius: 15px; padding: 20px; transition: transform 0.3s ease, box-shadow 0.3s ease; height: 100%; cursor: default; }
+    .stat-card:hover { transform: translateY(-5px); border-color: #195042; box-shadow: 0 8px 20px rgba(25, 80, 66, 0.1); }
+    .icon-box { width: 45px; height: 45px; background: #f4f1e8; color: #195042; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 15px; }
+    .chart-card, .student-list-wrapper { background: #fff; border: 1px solid #e3ddd5; border-radius: 15px; padding: 20px; height: 100%; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+    .chart-wrap { position: relative; height: 300px; width: 100%; }
+    .section-title { font-weight: 700; color: #195042; margin: 30px 0 20px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; border-right: 4px solid #195042; padding-right: 15px; }
+    .student-toggle { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 12px 0; color: #195042; font-weight: 600; }
+    .student-item { display: flex; align-items: center; gap: 15px; padding: 12px 0; border-bottom: 1px solid #f4f1e8; }
     .student-item:last-child { border-bottom: none; }
-
     .toggle-arrow { transition: transform 0.3s ease; }
     details[open] .toggle-arrow { transform: rotate(180deg); }
-
-    .dashboard-state-card {
-        background: #fff;
-        border: 1px solid #e3ddd5;
-        border-radius: 18px;
-        padding: 24px;
-        color: #195042;
-    }
+    .dashboard-state-card { background: #fff; border: 1px solid #e3ddd5; border-radius: 18px; padding: 24px; color: #195042; }
 </style>
 
 <div class="dashboard-container">
@@ -108,58 +29,38 @@
     {
         <div class="dashboard-state-card d-flex align-items-center gap-3">
             <span class="spinner-border text-success" role="status"></span>
-            <span>جاري تحميل إحصائيات المشرف...</span>
+            <span>جاري تحميل لوحة المشرف...</span>
         </div>
     }
     else if (!string.IsNullOrWhiteSpace(_errorMessage))
     {
-        <div class="alert alert-danger">
-            @_errorMessage
-        </div>
+        <div class="alert alert-danger">@_errorMessage</div>
     }
     else if (_dashboard is not null)
     {
         <section>
-            <div class="section-title"><i class="bi bi-speedometer2"></i> مؤشرات الأداء العام</div>
+            <div class="section-title"><i class="bi bi-speedometer2"></i> المؤشرات العامة</div>
             <div class="row g-4">
                 <div class="col-xl-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="icon-box"><i class="bi bi-people-fill"></i></div>
-                        <small class="text-muted">إجمالي الطلاب</small>
-                        <h4 class="fw-bold m-0">@FormatNumber(_dashboard.TotalStudents)</h4>
-                    </div>
+                    <div class="stat-card"><div class="icon-box"><i class="bi bi-people-fill"></i></div><small class="text-muted">عدد الطلاب</small><h4 class="fw-bold m-0">@FormatNumber(_dashboard.TotalStudents)</h4></div>
                 </div>
                 <div class="col-xl-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="icon-box"><i class="bi bi-person-video3"></i></div>
-                        <small class="text-muted">إجمالي المعلمين</small>
-                        <h4 class="fw-bold m-0">@FormatNumber(_dashboard.TotalTeachers)</h4>
-                    </div>
+                    <div class="stat-card"><div class="icon-box"><i class="bi bi-person-video3"></i></div><small class="text-muted">عدد المعلمين</small><h4 class="fw-bold m-0">@FormatNumber(_dashboard.TotalTeachers)</h4></div>
                 </div>
                 <div class="col-xl-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="icon-box"><i class="bi bi-collection"></i></div>
-                        <small class="text-muted">إجمالي الحلقات</small>
-                        <h4 class="fw-bold m-0">@FormatNumber(_dashboard.TotalHalqas)</h4>
-                    </div>
+                    <div class="stat-card"><div class="icon-box"><i class="bi bi-collection"></i></div><small class="text-muted">عدد الحلقات</small><h4 class="fw-bold m-0">@FormatNumber(_dashboard.TotalHalqas)</h4></div>
                 </div>
                 <div class="col-xl-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="icon-box text-danger"><i class="bi bi-exclamation-octagon"></i></div>
-                        <small class="text-muted">التنبيهات والشكاوى</small>
-                        <h4 class="fw-bold text-danger m-0">@FormatNumber(_dashboard.OpenAlertsAndComplaints)</h4>
-                    </div>
+                    <div class="stat-card"><div class="icon-box text-danger"><i class="bi bi-exclamation-octagon"></i></div><small class="text-muted">تنبيهات مفتوحة</small><h4 class="fw-bold text-danger m-0">@FormatNumber(_dashboard.OpenAlertsAndComplaints)</h4></div>
                 </div>
             </div>
         </section>
 
         <section class="mt-5">
-            <div class="section-title"><i class="bi bi-bar-chart-steps"></i> أداء الحلقات شهرياً</div>
+            <div class="section-title"><i class="bi bi-bar-chart-steps"></i> أداء الحلقات</div>
             <div class="chart-card">
-                <h6 class="fw-bold mb-4 text-success"><i class="bi bi-diagram-3 me-2"></i> الاختبارات، التسميعات، والحضور</h6>
-                <div class="chart-wrap">
-                    <canvas id="chartAllCircles"></canvas>
-                </div>
+                <h6 class="fw-bold mb-4 text-success"><i class="bi bi-diagram-3 me-2"></i> اختبارات، تسميع، وحضور حسب الحلقة</h6>
+                <div class="chart-wrap"><canvas id="chartAllCircles"></canvas></div>
             </div>
         </section>
 
@@ -168,14 +69,11 @@
                 <div class="section-title"><i class="bi bi-graph-up text-success"></i> الطلاب المتميزون</div>
                 <div class="student-list-wrapper">
                     <details open>
-                        <summary class="student-toggle">
-                            <span><i class="bi bi-trophy text-warning me-2"></i> عرض قائمة المتميزين</span>
-                            <i class="bi bi-chevron-down toggle-arrow"></i>
-                        </summary>
+                        <summary class="student-toggle"><span><i class="bi bi-trophy text-warning me-2"></i> أفضل النتائج</span><i class="bi bi-chevron-down toggle-arrow"></i></summary>
                         <div class="py-2">
                             @if (_dashboard.ExcellentStudents.Count == 0)
                             {
-                                <div class="text-muted py-3">لا توجد بيانات كافية حالياً.</div>
+                                <div class="text-muted py-3">لا يوجد طلاب متميزون حالياً.</div>
                             }
                             else
                             {
@@ -183,7 +81,7 @@
                                 {
                                     <div class="student-item">
                                         <i class="bi bi-person-circle fs-4 text-secondary"></i>
-                                        <div class="flex-grow-1"><b>@student.StudentName</b> <br><small class="text-muted">@student.Reason</small></div>
+                                        <div class="flex-grow-1"><b>@student.StudentName</b><br><small class="text-muted">@student.Reason</small></div>
                                         <span class="badge bg-success-subtle text-success p-2">@student.Badge</span>
                                     </div>
                                 }
@@ -194,17 +92,14 @@
             </div>
 
             <div class="col-md-6">
-                <div class="section-title"><i class="bi bi-graph-down text-danger"></i> الطلاب المتراجعون</div>
+                <div class="section-title"><i class="bi bi-graph-down text-danger"></i> طلاب يحتاجون متابعة</div>
                 <div class="student-list-wrapper">
                     <details open>
-                        <summary class="student-toggle">
-                            <span><i class="bi bi-exclamation-circle text-danger me-2"></i> عرض حالات المتابعة</span>
-                            <i class="bi bi-chevron-down toggle-arrow"></i>
-                        </summary>
+                        <summary class="student-toggle"><span><i class="bi bi-exclamation-circle text-danger me-2"></i> أولوية المتابعة</span><i class="bi bi-chevron-down toggle-arrow"></i></summary>
                         <div class="py-2">
                             @if (_dashboard.StrugglingStudents.Count == 0)
                             {
-                                <div class="text-muted py-3">لا توجد حالات متابعة حالياً.</div>
+                                <div class="text-muted py-3">لا يوجد طلاب بحاجة لمتابعة حالياً.</div>
                             }
                             else
                             {
@@ -212,7 +107,7 @@
                                 {
                                     <div class="student-item">
                                         <i class="bi bi-person-circle fs-4 text-secondary"></i>
-                                        <div class="flex-grow-1"><b>@student.StudentName</b> <br><small class="text-muted">@student.Reason</small></div>
+                                        <div class="flex-grow-1"><b>@student.StudentName</b><br><small class="text-muted">@student.Reason</small></div>
                                         <span class="badge bg-warning-subtle text-warning p-2">@student.Badge</span>
                                     </div>
                                 }
@@ -229,52 +124,21 @@
     window.initSupervisorDashboardCharts = (circlesData) => {
         const ctx = document.getElementById('chartAllCircles');
         if (!ctx || typeof Chart === 'undefined') return;
-
-        if (ctx._chartInstance) {
-            try { ctx._chartInstance.destroy(); } catch { }
-        }
-
+        if (ctx._chartInstance) { try { ctx._chartInstance.destroy(); } catch { } }
         const data = Array.isArray(circlesData) ? circlesData : [];
         const labels = data.map(x => x.halqaName ?? x.HalqaName ?? 'حلقة');
-
         const chart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels,
                 datasets: [
-                    {
-                        label: 'اختبارات',
-                        data: data.map(x => x.tests ?? x.Tests ?? 0),
-                        backgroundColor: '#195042',
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'تسميعات',
-                        data: data.map(x => x.recitations ?? x.Recitations ?? 0),
-                        backgroundColor: '#2e7d6a',
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'حضور',
-                        data: data.map(x => x.attendance ?? x.Attendance ?? 0),
-                        backgroundColor: '#5a9f8e',
-                        borderRadius: 6
-                    }
+                    { label: 'اختبارات', data: data.map(x => x.tests ?? x.Tests ?? 0), backgroundColor: '#195042', borderRadius: 6 },
+                    { label: 'تسميع', data: data.map(x => x.recitations ?? x.Recitations ?? 0), backgroundColor: '#2e7d6a', borderRadius: 6 },
+                    { label: 'حضور', data: data.map(x => x.attendance ?? x.Attendance ?? 0), backgroundColor: '#5a9f8e', borderRadius: 6 }
                 ]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
-                    x: { grid: { display: false } }
-                },
-                plugins: {
-                    legend: { labels: { font: { family: 'Segoe UI, sans-serif' } } }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } } }
         });
-
         ctx._chartInstance = chart;
     };
 </script>
@@ -308,7 +172,7 @@
             var token = await TokenService.Get();
             if (string.IsNullOrWhiteSpace(token))
             {
-                _errorMessage = "تعذر تحميل إحصائيات المشرف: لم يتم العثور على رمز تسجيل الدخول. يرجى تسجيل الخروج ثم الدخول مجدداً.";
+                _errorMessage = "تعذر تحميل لوحة المشرف: لا يوجد رمز تسجيل دخول. يرجى تسجيل الدخول مرة أخرى.";
                 return;
             }
 
@@ -316,7 +180,7 @@
         }
         catch (Exception ex)
         {
-            _errorMessage = $"تعذر تحميل إحصائيات المشرف: {ex.Message}";
+            _errorMessage = $"تعذر تحميل لوحة المشرف: {ex.Message}";
         }
         finally
         {
@@ -324,6 +188,5 @@
         }
     }
 
-    private static string FormatNumber(int value)
-        => value.ToString("N0");
+    private static string FormatNumber(int value) => value.ToString("N0");
 }

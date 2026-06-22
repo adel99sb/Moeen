@@ -1,211 +1,183 @@
-﻿@page "/details"
-@inject NavigationManager NavManager
+@page "/details"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Text.Json
+@using Microsoft.AspNetCore.Components
+@using Moeen.Dashboard.Services.Abstractions
+@using Moeen.Shared.Requests.Mosuq
+@using Moeen.Shared.Responses.Mosuq
+@inject IMosquService MosquService
+@inject IDashboardErrorFormatter ErrorFormatter
+@inject NavigationManager Navigation
 
+<PageTitle>تفاصيل المسجد</PageTitle>
 
 <style>
-    :root {
-        /* الهوية البصرية الأساسية */
-        --primary-green: #195042;
-        --primary-green-dark: #123d32;
-        --accent-beige: #d6cabc;
-        --light-beige: #f4f1ee;
-        --white: #ffffff;
-        --text-gray: #636e72;
-        --status-green: #2ecc71;
-        --danger-red: #e74c3c;
-        --bg-gray: #f9f9f9;
-        --border-gray: #f1f1f1;
-        --bg-row-hover: #fafafa;
-        --font-main: 'Tajawal', sans-serif;
-        --radius-container: 20px;
-        --radius-badge: 20px;
-        --shadow-card: 0 10px 30px rgba(0,0,0,0.05);
-    }
-
-    body {
-        font-family: var(--font-main);
-        background-color: var(--bg-gray);
-        direction: rtl;
-        text-align: right;
-    }
-
-    .management-container {
-        background: var(--white);
-        margin: 20px;
-        padding: 30px;
-        border-radius: var(--radius-container);
-        box-shadow: var(--shadow-card);
-    }
-
-    h2 {
-        color: var(--primary-green);
-        margin: 25px 0 15px 0;
-        font-size: 1.5rem;
-    }
-
-    /* تنسيق الزر العلوي */
-    .btn-primary {
-        background-color: var(--primary-green);
-        border: none;
-        padding: 10px 20px;
-        border-radius: 10px;
-        transition: 0.3s;
-    }
-    .button-wrapper {
-    display: flex;
-    justify-content: flex-end; /* يدفع الزر لأقصى اليسار في وضعية RTL */
-    margin-bottom: -40px; /* لسحب الزر للأعلى بمحاذاة العنوان أو فوقه قليلاً */
-}
-
-        .btn-primary:hover {
-            background-color: var(--primary-green-dark);
-            transform: translateY(-2px);
-        }
-
-    /* الجدول الموحد */
-    .table-responsive {
-        width: 100%;
-        overflow-x: auto;
-        margin-bottom: 20px;
-    }
-
-    .data-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 8px;
-    }
-
-        .data-table th {
-            background-color: var(--light-beige);
-            color: var(--primary-green);
-            padding: 15px;
-            text-align: right;
-            border-radius: 0;
-        }
-
-        .data-table tbody tr {
-            background-color: var(--white);
-            transition: 0.3s;
-        }
-
-            .data-table tbody tr td {
-                padding: 15px;
-                border-top: 1px solid var(--border-gray);
-                border-bottom: 1px solid var(--border-gray);
-            }
-
-            .data-table tbody tr:hover {
-                background-color: var(--bg-row-hover);
-            }
-
-    /*badges الحالات */
-    .status-badge {
-        padding: 5px 12px;
-        border-radius: var(--radius-badge);
-        font-size: 0.85rem;
-        display: inline-block;
-    }
-
-        .status-badge.active {
-            background-color: rgba(46, 204, 113, 0.1);
-            color: var(--status-green);
-        }
-
-        .status-badge.inactive {
-            background-color: rgba(231, 76, 60, 0.1);
-            color: var(--danger-red);
-        }
-
-    /* الأزرار */
-    .btn-icon {
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: var(--danger-red);
-        font-size: 1.2rem;
-        transition: 0.3s;
-    }
-
-        .btn-icon:hover {
-            transform: scale(1.2);
-        }
+    .mosque-details-page { direction: rtl; padding: 12px; color: #24342f; }
+    .details-hero { background: linear-gradient(135deg, #195042, #28715f); color: #fff; border-radius: 24px; padding: 26px; margin-bottom: 22px; box-shadow: 0 18px 45px rgba(25, 80, 66, .16); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
+    .details-hero h1 { margin: 0 0 8px; font-weight: 900; }
+    .details-hero p { margin: 0; opacity: .92; }
+    .details-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .details-panel { background: #fff; border: 1px solid #e4eee9; border-radius: 22px; padding: 22px; box-shadow: 0 10px 30px rgba(25, 80, 66, .06); margin-bottom: 18px; }
+    .details-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .metric-card { background: #f9fbfa; border: 1px solid #e4eee9; border-radius: 18px; padding: 18px; min-height: 120px; }
+    .metric-card small { color: #667085; font-weight: 800; }
+    .metric-card strong { display: block; color: #195042; font-size: 1.8rem; margin-top: 8px; }
+    .info-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .info-item { background: #fbfdfa; border: 1px solid #edf3f0; border-radius: 16px; padding: 14px; }
+    .info-item span { display: block; color: #667085; font-size: .9rem; font-weight: 800; margin-bottom: 6px; }
+    .info-item strong { color: #24342f; overflow-wrap: anywhere; }
+    .btn-owner-primary, .btn-owner-light, .btn-owner-danger { border: 0; border-radius: 14px; padding: 11px 18px; font-weight: 900; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+    .btn-owner-primary { background: #195042; color: #fff; }
+    .btn-owner-light { background: #f4f1ee; color: #195042; }
+    .btn-owner-danger { background: #fff1f1; color: #b42318; border: 1px solid #ffd7d7; }
+    .state-card { background: #fff; border: 1px solid #e4eee9; border-radius: 18px; padding: 24px; color: #195042; }
+    .map-placeholder { min-height: 170px; border: 1px dashed #d6cabc; background: #faf7f0; border-radius: 18px; display: flex; align-items: center; justify-content: center; text-align: center; color: #667085; padding: 20px; }
+    @@media (max-width: 1000px) { .details-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @@media (max-width: 640px) { .details-grid, .info-grid { grid-template-columns: 1fr; } }
 </style>
-<section class="management-container">
-    
-    <div class="button-wrapper">
-        <button class="btn btn-primary" @onclick="moveTopage">إضافة مشرف +</button>
-    </div>
 
-    <h2>الفوج الأول</h2>
-    <div class="table-responsive">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>اسم الأستاذ</th>
-                    <th>الحالة</th>
-                    <th>المشرف</th>
-                    <th style="text-align: center;">الإجراء</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>محمود جاسم</td>
-                    <td><span class="status-badge active">نشط</span></td>
-                    <td>مصطفى علي</td>
-                    <td style="text-align: center;">
-                        <button class="btn-icon" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>أحمد العبدالله</td>
-                    <td><span class="status-badge inactive">متوقف</span></td>
-                    <td>مصطفى علي</td>
-                    <td style="text-align: center;">
-                        <button class="btn-icon" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+<div class="mosque-details-page">
+    @if (_isLoading)
+    {
+        <div class="state-card d-flex align-items-center gap-3">
+            <span class="spinner-border text-success" role="status"></span>
+            <span>جاري تحميل تفاصيل المسجد...</span>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <div class="alert alert-danger rounded-4">@_errorMessage</div>
+        <button type="button" class="btn-owner-light" @onclick="BackToList">
+            <i class="bi bi-arrow-right"></i>
+            <span>العودة إلى إدارة المساجد</span>
+        </button>
+    }
+    else if (_mosque is not null)
+    {
+        <section class="details-hero">
+            <div>
+                <h1>@Display(_mosque.name)</h1>
+                <p>@Display(_mosque.Description)</p>
+            </div>
+            <div class="details-actions">
+                <button type="button" class="btn-owner-light" @onclick="BackToList">
+                    <i class="bi bi-arrow-right"></i>
+                    <span>رجوع</span>
+                </button>
+                <button type="button" class="btn-owner-primary" @onclick="EditMosque">
+                    <i class="bi bi-pencil-square"></i>
+                    <span>تعديل المسجد</span>
+                </button>
+            </div>
+        </section>
 
-    <hr />
+        <section class="details-grid">
+            <article class="metric-card">
+                <small>الحلقات</small>
+                <strong>@(_statistics?.CirclesCount ?? 0)</strong>
+            </article>
+            <article class="metric-card">
+                <small>الطلاب</small>
+                <strong>@(_statistics?.StudentsCount ?? 0)</strong>
+            </article>
+            <article class="metric-card">
+                <small>المعلمون</small>
+                <strong>@(_statistics?.TeachersCount ?? 0)</strong>
+            </article>
+            <article class="metric-card">
+                <small>نسبة الإشغال</small>
+                <strong>@FormatPercent(_statistics?.OccupancyRate)</strong>
+            </article>
+        </section>
 
-    <h2>الفوج الثاني</h2>
-    <div class="table-responsive">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>اسم الأستاذ</th>
-                    <th>الحالة</th>
-                    <th>المشرف</th>
-                    <th style="text-align: center;">الإجراء</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>ياسين محمد</td>
-                    <td><span class="status-badge active">نشط</span></td>
-                    <td>عمر الخطيب</td>
-                    <td style="text-align: center;">
-                        <button class="btn-icon" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>علي محمد</td>
-                    <td><span class="status-badge active">نشط</span></td>
-                    <td>عمر الخطيب</td>
-                    <td style="text-align: center;">
-                        <button class="btn-icon" title="حذف"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</section>
+        <section class="details-panel">
+            <h3 class="mb-3 text-success fw-bold"><i class="bi bi-info-circle ms-1"></i> معلومات المسجد</h3>
+            <div class="info-grid">
+                <div class="info-item"><span>العنوان</span><strong>@Display(_mosque.address)</strong></div>
+                <div class="info-item"><span>رقم التواصل</span><strong>@Display(_mosque.contactPhone)</strong></div>
+                <div class="info-item"><span>خط العرض</span><strong>@_mosque.Latitude</strong></div>
+                <div class="info-item"><span>خط الطول</span><strong>@_mosque.Longitude</strong></div>
+            </div>
+        </section>
+
+        <section class="details-panel">
+            <h3 class="mb-3 text-success fw-bold"><i class="bi bi-geo-alt ms-1"></i> الموقع</h3>
+            <div class="map-placeholder">
+                @if (_mosque.Latitude == 0 && _mosque.Longitude == 0)
+                {
+                    <span>لم يتم تحديد إحداثيات المسجد بعد.</span>
+                }
+                else
+                {
+                    <span>الإحداثيات المسجلة: @_mosque.Latitude, @_mosque.Longitude</span>
+                }
+            </div>
+        </section>
+    }
+</div>
 
 @code {
-    private void moveTopage()
+    [SupplyParameterFromQuery(Name = "mosqueId")]
+    public Guid? MosqueId { get; set; }
+
+    private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private MosquDto? _mosque;
+    private MosqueStatisticsDto? _statistics;
+    private bool _isLoading = true;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
     {
-        NavManager.NavigateTo("/owner/Form");
+        if (!MosqueId.HasValue || MosqueId.Value == Guid.Empty)
+        {
+            _errorMessage = "لم يتم تحديد المسجد المطلوب عرضه.";
+            _isLoading = false;
+            return;
+        }
+
+        await LoadDetailsAsync(MosqueId.Value);
     }
+
+    private async Task LoadDetailsAsync(Guid mosqueId)
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            _mosque = await MosquService.GetMosqueByIdAsync(mosqueId);
+            var statisticsResponse = await MosquService.GetMosqueStatisticsAsync(new GetMosqueStatisticsRequest { MosqueId = mosqueId });
+            if (statisticsResponse.Success)
+                _statistics = ParseData<MosqueStatisticsDto>(statisticsResponse.Data);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ErrorFormatter.FromException(ex, "تحميل تفاصيل المسجد");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private T? ParseData<T>(object? data)
+    {
+        if (data is null) return default;
+        if (data is T typed) return typed;
+        if (data is JsonElement element) return element.Deserialize<T>(_jsonOptions);
+        var json = JsonSerializer.Serialize(data, _jsonOptions);
+        return JsonSerializer.Deserialize<T>(json, _jsonOptions);
+    }
+
+    private void BackToList() => Navigation.NavigateTo("/management/mosques-management");
+
+    private void EditMosque()
+    {
+        if (MosqueId.HasValue)
+            Navigation.NavigateTo($"/management/mosques-management/edit/{MosqueId.Value}");
+    }
+
+    private static string Display(string? value) => string.IsNullOrWhiteSpace(value) ? "غير متوفر" : value;
+
+    private static string FormatPercent(double? value) => value.HasValue ? $"{value.Value:0.##}%" : "0%";
 }

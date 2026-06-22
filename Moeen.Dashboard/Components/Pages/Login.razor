@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @layout Moeen.Dashboard.Components.Layout.LoginLayout
 
 @using Moeen.Dashboard.Services.Abstractions
@@ -8,7 +8,7 @@
 @inject NavigationManager Nav
 @rendermode InteractiveServer
 
-<PageTitle>تسجيل الدخول - معين</PageTitle>
+<PageTitle>تسجيل الدخول - لوحة معين</PageTitle>
 
 <div class="moeen-login-page" dir="rtl">
     <header class="moeen-login-header">
@@ -23,7 +23,7 @@
 
             <h1 id="login-title">تسجيل الدخول</h1>
             <p class="moeen-login-subtitle">
-                أهلاً بك، سجّل دخولك للوصول إلى لوحة التحكم المناسبة لصلاحياتك.
+                أدخل بيانات حسابك للوصول إلى لوحة التحكم وإدارة مهامك حسب صلاحياتك.
             </p>
 
             <EditForm Model="_model" OnValidSubmit="HandleLogin" class="moeen-login-form">
@@ -45,7 +45,7 @@
                                @bind-Value="_model.Password"
                                type="password"
                                class="moeen-input"
-                               placeholder="••••••••" />
+                               placeholder="********" />
                     <ValidationMessage For="@(() => _model.Password)" />
                 </div>
 
@@ -265,7 +265,7 @@
             }
 
             ShowMessage = true;
-            Message = "فشل تسجيل الدخول، يرجى التأكد من البريد الإلكتروني وكلمة المرور.";
+            Message = "فشل تسجيل الدخول. تأكد من البريد الإلكتروني وكلمة المرور.";
         }
         catch (Exception ex)
         {

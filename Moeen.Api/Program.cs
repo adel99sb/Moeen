@@ -226,18 +226,10 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// Seeders
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-    await AppSeeder.SeedRolesAsync(roleManager);
-}
+await InitializeDatabaseAsync(app);
 
 if (app.Environment.IsDevelopment())
 {
-    await AppSeeder.SeedDevelopmentDataAsync(app.Services, app.Configuration);
-    await LocalDevData.ApplyAsync(app.Services);
-
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -247,10 +239,98 @@ app.UseAuthentication();
 app.UseMiddleware<ApiRequestLoggingMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
+app.MapGet("/health", () => Results.Ok(new
+{
+    Status = "Healthy",
+    Service = "Moeen.Api",
+    Environment = app.Environment.EnvironmentName,
+    UtcTime = DateTimeOffset.UtcNow
+}));
+app.MapGet("/api/health", () => Results.Ok(new
+{
+    Status = "Healthy",
+    Service = "Moeen.Api",
+    Environment = app.Environment.EnvironmentName,
+    UtcTime = DateTimeOffset.UtcNow
+}));
 app.MapGet("/api/teacher-dashboard/overview", GetCurrentTeacherOverviewAsync).RequireAuthorization();
 app.MapGet("/api/teacher-dashboard/my-halaqas-progress", GetCurrentTeacherHalaqasProgressAsync).RequireAuthorization();
 
 app.Run();
+
+static async Task InitializeDatabaseAsync(WebApplication app)
+{
+    var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup.Database");
+
+    try
+    {
+        using var scope = app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+
+        logger.LogInformation(
+            "Database startup initialization. Environment={Environment}, Provider={Provider}, Connection={Connection}",
+            app.Environment.EnvironmentName,
+            context.Database.ProviderName,
+            MaskConnectionString(context.Database.GetDbConnection().ConnectionString));
+
+        if (app.Environment.IsDevelopment())
+        {
+            logger.LogInformation("Applying EF Core migrations for local development startup...");
+            await context.Database.MigrateAsync();
+            logger.LogInformation("EF Core migrations are up to date.");
+        }
+        else
+        {
+            logger.LogInformation("Skipping automatic migrations because the environment is not Development.");
+        }
+
+        logger.LogInformation("Ensuring application roles exist...");
+        await AppSeeder.SeedRolesAsync(roleManager);
+        logger.LogInformation("Application roles are ready.");
+
+        if (app.Environment.IsDevelopment())
+        {
+            logger.LogInformation("Seeding development data if missing...");
+            await AppSeeder.SeedDevelopmentDataAsync(app.Services, app.Configuration);
+            await LocalDevData.ApplyAsync(app.Services);
+            logger.LogInformation("Development seed data is ready.");
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogCritical(
+            ex,
+            "Moeen API startup database initialization failed. Check SQL Server/LocalDB is installed and running, the connection string is correct, and the database user has permission to create/update the database.");
+        throw;
+    }
+}
+
+static string MaskConnectionString(string? connectionString)
+{
+    if (string.IsNullOrWhiteSpace(connectionString))
+        return "<empty>";
+
+    var parts = connectionString.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .Select(part =>
+        {
+            var separatorIndex = part.IndexOf('=');
+            if (separatorIndex <= 0)
+                return part;
+
+            var key = part[..separatorIndex].Trim();
+            var value = part[(separatorIndex + 1)..].Trim();
+            var normalizedKey = key.Replace(" ", string.Empty, StringComparison.OrdinalIgnoreCase).ToLowerInvariant();
+
+            if (normalizedKey is "password" or "pwd" or "user id" or "userid" or "uid")
+                return $"{key}=***";
+
+            return $"{key}={value}";
+        });
+
+    return string.Join(';', parts);
+}
+
 static async Task<IResult> GetCurrentTeacherOverviewAsync(ClaimsPrincipal user, AppDbContext context)
 {
     if (!user.IsInRole("Teacher"))

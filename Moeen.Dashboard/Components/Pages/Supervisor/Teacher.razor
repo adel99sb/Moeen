@@ -365,7 +365,7 @@
                     MemberId = _form.Id.ToString(),
                     Name = _form.Name,
                     Email = _form.Email,
-                    Phone = _form.Phone,
+                    Phone = _form.Phone?.Trim() ?? string.Empty,
                     Gender = _form.Gender,
                     Bio = _form.Bio,
                     AssignedAt = _form.AssignedAt
@@ -399,8 +399,8 @@
                     Email = _form.Email,
                     Password = _form.Password!,
                     ConfirmPassword = _form.Password!,
-                    Phone = _form.Phone ?? string.Empty,
-                    PhoneNumber = _form.Phone ?? string.Empty,
+                    Phone = _form.Phone?.Trim() ?? string.Empty,
+                    PhoneNumber = _form.Phone?.Trim() ?? string.Empty,
                     Gender = _form.Gender,
                     MosqueId = _form.MosqueId,
                     Bio = _form.Bio ?? string.Empty,
@@ -423,7 +423,7 @@
         }
         catch (Exception ex)
         {
-            _dialogError = ex.Message;
+            _dialogError = $"تعذر حفظ بيانات المعلم: {ex.Message}";
         }
         finally
         {
@@ -454,7 +454,7 @@
         }
         catch (Exception ex)
         {
-            _errorMessage = ex.Message;
+            _errorMessage = $"تعذر حذف المعلم: {ex.Message}";
         }
     }
 

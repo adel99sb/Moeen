@@ -555,10 +555,7 @@
     private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
     private readonly List<AccountTypeOption> _types = new()
     {
-        new("Supervisor", "مشرف", "bi bi-person-badge"),
-        new("Teacher", "معلم", "bi bi-person-video3"),
-        new("Student", "طالب", "bi bi-mortarboard"),
-        new("Parent", "ولي أمر", "bi bi-people")
+        new("Supervisor", "مشرف", "bi bi-person-badge")
     };
 
     private AccountFormModel _model = new();
@@ -578,15 +575,15 @@
     private bool IsExistingMember => _memberId.HasValue;
     private bool IsEditMode => _isEditMode;
     private bool IsViewMode => _isViewMode;
-    private bool CanChangeAccountType => !IsExistingMember && !IsViewMode;
+    private bool CanChangeAccountType => false;
     private string FormTitle => IsViewMode ? $"تفاصيل حساب {CurrentTypeLabel}" : IsEditMode ? $"تعديل حساب {CurrentTypeLabel}" : $"إضافة حساب {CurrentTypeLabel}";
     private string CurrentTypeLabel => _types.FirstOrDefault(t => t.Value == _model.Type)?.Label ?? "مستخدم";
     private string HeaderIcon => IsViewMode ? "bi bi-eye" : IsEditMode ? "bi bi-pencil-square" : "bi bi-person-plus";
     private string HeaderDescription => IsViewMode
-        ? "عرض بيانات الحساب والتفاصيل المرتبطة به بدون تعديل."
+        ? "عرض بيانات المشرف بدون تعديل."
         : IsEditMode
-            ? "عدّل البيانات المتاحة ثم اضغط حفظ التعديل."
-            : "أدخل البيانات المطلوبة ثم اضغط حفظ. الحقول تتغير حسب نوع الحساب.";
+            ? "عدّل بيانات المشرف المتاحة ثم اضغط حفظ التعديل."
+            : "أدخل بيانات المشرف وحدد المسجد المرتبط به ثم اضغط حفظ.";
     private string SaveButtonText => IsEditMode ? "حفظ التعديل" : "حفظ البيانات";
 
     protected override async Task OnInitializedAsync()
@@ -605,10 +602,10 @@
         _isEditMode = _memberId.HasValue && !_isViewMode;
 
         var requestedType = NormalizeType(Type);
-        if (!_memberId.HasValue && requestedType != "Supervisor")
+        if (!_memberId.HasValue && !string.IsNullOrWhiteSpace(Type) && requestedType != "Supervisor")
         {
             requestedType = "Supervisor";
-            _errorMessage = "Owner can add supervisors only.";
+            _errorMessage = "المالك يستطيع إضافة المشرفين فقط من هذه الشاشة.";
         }
 
         _model = new AccountFormModel
@@ -633,7 +630,7 @@
             if (_mosques.Count > 0 && string.IsNullOrWhiteSpace(_selectedMosqueId))
                 _selectedMosqueId = _mosques[0].Id.ToString();
 
-            await LoadStudentsAsync();
+            // لا يتم تحميل الطلاب هنا لأن صفحة المالك مخصصة للمشرفين فقط.
         }
         catch (Exception ex)
         {
@@ -694,7 +691,7 @@
             if (!string.Equals(profile.MemberType, "Supervisor", StringComparison.OrdinalIgnoreCase))
             {
                 _loadedProfile = null;
-                _errorMessage = "Owner cannot manage this account type.";
+                _errorMessage = "المالك يستطيع إدارة حسابات المشرفين فقط من هذه الشاشة.";
                 return;
             }
 
@@ -774,16 +771,15 @@
                 return;
             }
 
+            if (_model.Type != "Supervisor")
+            {
+                _errorMessage = "المالك يستطيع حفظ حسابات المشرفين فقط من هذه الشاشة.";
+                return;
+            }
+
             var response = IsEditMode
                 ? await UpdateExistingMemberAsync()
-                : _model.Type switch
-                {
-                    "Supervisor" => await SaveSupervisorAsync(),
-                    "Teacher" => await SaveTeacherAsync(),
-                    "Student" => await SaveStudentAsync(),
-                    "Parent" => await SaveParentAsync(),
-                    _ => GeneralResponse.BadRequest("نوع الحساب غير مدعوم.")
-                };
+                : await SaveSupervisorAsync();
 
             if (!response.Success)
             {
@@ -920,11 +916,11 @@
         if (!IsExistingMember && (string.IsNullOrWhiteSpace(_model.Password) || _model.Password.Length < 6))
             return "كلمة المرور مطلوبة ويجب أن تكون 6 أحرف على الأقل.";
 
-        if (!IsExistingMember && _model.Type != "Parent" && !Guid.TryParse(_selectedMosqueId, out _))
-            return "يجب اختيار المسجد.";
+        if (_model.Type != "Supervisor")
+            return "هذه الشاشة مخصصة لإدارة المشرفين فقط.";
 
-        if (!IsExistingMember && _model.Type == "Parent" && !Guid.TryParse(_selectedStudentId, out _))
-            return "يجب اختيار الطالب المرتبط بولي الأمر.";
+        if (!IsExistingMember && !Guid.TryParse(_selectedMosqueId, out _))
+            return "يجب اختيار المسجد.";
 
         return null;
     }
@@ -963,13 +959,7 @@
         => _model.Type == type ? "type-tab active" : "type-tab";
 
     private static string NormalizeType(string? type)
-        => type?.Trim().ToLowerInvariant() switch
-        {
-            "teacher" => "Teacher",
-            "student" => "Student",
-            "parent" => "Parent",
-            _ => "Supervisor"
-        };
+        => "Supervisor";
 
     private static Guid? TryParseGuid(string? value)
         => Guid.TryParse(value, out var id) && id != Guid.Empty ? id : null;

@@ -302,12 +302,12 @@
     private List<WeeklyLessonManagementDto> FilteredLessons => string.IsNullOrWhiteSpace(_searchText)
         ? _lessons
         : _lessons.Where(l =>
-            (l.Title ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
-            (l.Description ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
+            (l.Title ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            (l.Description ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
             l.Assignments.Any(a =>
-                (a.TeacherName ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
-                (a.HalqaName ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
-                (a.FoujName ?? string.Empty).Contains(_searchText, StringComparison.OrdinalIgnoreCase)))
+                (a.TeacherName ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                (a.HalqaName ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                (a.FoujName ?? string.Empty).Contains(_searchText.Trim(), StringComparison.OrdinalIgnoreCase)))
             .ToList();
 
     private List<HalqaDto> HalqasForSelectedTeacher => _rowForm.TeacherId == Guid.Empty
@@ -402,7 +402,7 @@
             _isLessonDialogOpen = false;
             await LoadAllAsync();
         }
-        catch (Exception ex) { _dialogError = ex.Message; }
+        catch (Exception ex) { _dialogError = $"تعذر حفظ بيانات الدرس: {ex.Message}"; }
         finally { _isSaving = false; }
     }
 
@@ -451,6 +451,7 @@
             if (_rowForm.TeacherId == Guid.Empty) { _dialogError = "يرجى اختيار المعلم."; return; }
             if (_rowForm.HalqaId == Guid.Empty) { _dialogError = "يرجى اختيار الحلقة."; return; }
             if (!TimeSpan.TryParse(_rowForm.StartTimeText, out var start) || !TimeSpan.TryParse(_rowForm.EndTimeText, out var end)) { _dialogError = "صيغة الوقت يجب أن تكون مثل 10:00."; return; }
+            if (end <= start) { _dialogError = "وقت النهاية يجب أن يكون بعد وقت البداية."; return; }
             var response = _isEditRowMode
                 ? await WeeklyLessonService.UpdateWeeklyLessonRowAsync(_rowForm.Id, new UpdateWeeklyLessonAssignmentRequest { Id = _rowForm.Id, WeeklyLessonId = _rowForm.WeeklyLessonId, TeacherId = _rowForm.TeacherId, HalqaId = _rowForm.HalqaId, StartTime = start, EndTime = end })
                 : await WeeklyLessonService.CreateWeeklyLessonRowAsync(_rowForm.WeeklyLessonId, new CreateWeeklyLessonAssignmentRequest { WeeklyLessonId = _rowForm.WeeklyLessonId, TeacherId = _rowForm.TeacherId, HalqaId = _rowForm.HalqaId, StartTime = start, EndTime = end });
@@ -459,7 +460,7 @@
             _isRowDialogOpen = false;
             await LoadAllAsync();
         }
-        catch (Exception ex) { _dialogError = ex.Message; }
+        catch (Exception ex) { _dialogError = $"تعذر حفظ موعد الحلقة: {ex.Message}"; }
         finally { _isSaving = false; }
     }
 

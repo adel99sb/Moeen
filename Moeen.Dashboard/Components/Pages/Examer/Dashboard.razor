@@ -1,306 +1,325 @@
-﻿@page "/Examer/Dashboard"
+@page "/Examer/Dashboard"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Text.Json
+@using Moeen.Dashboard.Application.Services.Abstractions
+@using Moeen.Shared.Requests.ExamQuery
+@using Moeen.Shared.Responses.ExamQuery
+@inject IExamQueryService ExamQueryService
 
-@rendermode InteractiveServer
-@inject IJSRuntime JS
+<PageTitle>لوحة الفاحص</PageTitle>
 
 <style>
-    :root {
-        /* لوحة الألوان الأساسية للمشروع */
-        /* أخضر فاتح للحدود */
-    }
-
-    /* --- التنسيقات العامة للمحتوى --- */
-    .dashboard-container {
+    .dashboard-page {
         direction: rtl;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        padding: 10px;
+        min-height: calc(100vh - 70px);
+        background: #faf7f0;
+        color: #163f35;
+        padding: 24px;
     }
 
-    /* --- كاردات الإحصائيات (Stat Cards) --- */
-    .stat-card {
-        background: var(--card-white);
-        border: 2px solid var(--soft-green);
-        border-radius: 15px;
-        padding: 20px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        height: 100%;
-        cursor: default;
-    }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-green);
-            box-shadow: 0 8px 20px rgba(25, 80, 66, 0.1);
-        }
-
-    .icon-box {
-        width: 45px;
-        height: 45px;
-        background: var(--light-beige);
-        color: var(--primary-green);
-        border-radius: 12px;
+    .hero {
+        background: linear-gradient(135deg, #195042, #26735f);
+        color: #fff;
+        border-radius: 26px;
+        padding: 28px;
+        box-shadow: 0 18px 45px rgba(25, 80, 66, .18);
+        margin-bottom: 22px;
         display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        flex-wrap: wrap;
+    }
+
+    .hero h1 {
+        margin: 0 0 8px;
+        font-weight: 900;
+    }
+
+    .hero p {
+        margin: 0;
+        opacity: .88;
+    }
+
+    .hero-icon {
+        width: 86px;
+        height: 86px;
+        border-radius: 28px;
+        background: rgba(255,255,255,.16);
+        border: 1px solid rgba(255,255,255,.22);
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.2rem;
-        margin-bottom: 15px;
+        font-size: 2.5rem;
     }
 
-    /* --- الرسوم البيانية (Charts) --- */
-    .chart-card {
-        background: var(--card-white);
-        border: 1px solid var(--border-color);
-        border-radius: 15px;
-        padding: 20px;
-        height: 100%;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    .toolbar-card,
+    .metric-card,
+    .content-card {
+        background: #fff;
+        border: 1px solid #e4eee9;
+        border-radius: 22px;
+        box-shadow: 0 10px 28px rgba(25, 80, 66, .06);
     }
 
-    .chart-wrap {
-        position: relative;
-        height: 300px; /* زيادة الطول قليلاً للوضوح */
-        width: 100%;
-    }
-
-    /* --- عناوين الأقسام --- */
-    .section-title {
-        font-weight: 700;
-        color: var(--primary-green);
-        margin: 30px 0 20px;
-        font-size: 1.2rem;
+    .toolbar-card {
+        padding: 16px;
+        margin-bottom: 18px;
         display: flex;
-        align-items: center;
-        gap: 10px;
-        border-right: 4px solid var(--primary-green);
-        padding-right: 15px;
-    }
-
-    /* --- قائمة الطلاب وخصائص الـ Toggle --- */
-    .student-list-wrapper {
-        background: var(--card-white);
-        border-radius: 15px;
-        border: 1px solid var(--border-color);
-        padding: 10px 20px;
-    }
-
-    .student-toggle {
-        list-style: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
         justify-content: space-between;
-        padding: 12px 0;
-        color: var(--primary-green);
-        font-weight: 600;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
     }
 
-    .student-item {
+    .date-control {
+        border: 1.5px solid #d6cabc;
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: #fbfaf8;
+        color: #195042;
+        outline: none;
+    }
+
+    .btn-refresh {
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 16px;
+        background: #195042;
+        color: #fff;
+        font-weight: 900;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .metric-card {
+        padding: 18px;
+    }
+
+    .metric-card small {
+        display: block;
+        color: #7b7067;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .metric-card strong {
+        color: #195042;
+        font-size: 1.7rem;
+        font-weight: 950;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
+    }
+
+    .content-card {
+        padding: 20px;
+    }
+
+    .card-title {
+        margin: 0 0 14px;
+        color: #195042;
+        font-size: 1.15rem;
+        font-weight: 900;
         display: flex;
         align-items: center;
-        gap: 15px;
-        padding: 12px 0;
-        border-bottom: 1px solid var(--light-beige);
+        gap: 8px;
     }
 
-        .student-item:last-child {
-            border-bottom: none;
-        }
-
-    .toggle-arrow {
-        transition: transform 0.3s ease;
+    .info-row {
+        border: 1px solid #edf1ee;
+        background: #fbfdfa;
+        border-radius: 16px;
+        padding: 13px 14px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
     }
 
-    details[open] .toggle-arrow {
-        transform: rotate(180deg);
+    .label {
+        color: #6b7280;
+        font-weight: 800;
+    }
+
+    .value {
+        color: #195042;
+        font-weight: 900;
+    }
+
+    .state-box {
+        background: #fff;
+        border: 1px dashed #d6cabc;
+        border-radius: 18px;
+        padding: 28px;
+        text-align: center;
+        color: #667085;
+    }
+
+    .error-box {
+        background: #fff1f1;
+        border: 1px solid #f3c4c4;
+        color: #b42318;
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-bottom: 18px;
+    }
+
+    @@media (max-width: 1100px) {
+        .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .content-grid { grid-template-columns: 1fr; }
+    }
+
+    @@media (max-width: 640px) {
+        .dashboard-page { padding: 14px; }
+        .metrics-grid { grid-template-columns: 1fr; }
     }
 </style>
 
-<div class="dashboard-container">
+<div class="dashboard-page">
+    <section class="hero">
+        <div>
+            <h1>لوحة الفاحص</h1>
+            <p>ملخص سريع لإحصائيات الاختبارات ونتائج الطلاب ضمن النظام.</p>
+        </div>
+        <div class="hero-icon"><i class="bi bi-clipboard-check"></i></div>
+    </section>
 
-    <section>
-        <div class="section-title"><i class="bi bi-speedometer2"></i> مؤشرات الأداء العام</div>
-        <div class="row g-4">
-            <div class="col-xl-3 col-md-6">
-                <div class="stat-card">
-                    <div class="icon-box"><i class="bi bi-journal-check"></i></div>
-                    <small class="text-muted">إجمالي الاختبارات المنجزة للفوج</small>
-                    <h4 class="fw-bold m-0">248</h4>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6">
-                <div class="stat-card">
-                    <div class="icon-box"><i class="bi bi-graph-up-arrow"></i></div>
-                    <small class="text-muted">نسبة النجاح الإجمالية</small>
-                    <h4 class="fw-bold m-0">76%</h4>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6">
-                <div class="stat-card">
-                    <div class="icon-box"><i class="bi bi-arrow-repeat"></i></div>
-                    <small class="text-muted">نسبة إعادة الاختبارات</small>
-                    <h4 class="fw-bold m-0">14%</h4>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6">
-                <div class="stat-card">
-                    <div class="icon-box text-primary"><i class="bi bi-star"></i></div>
-                    <small class="text-muted">نقاط اختبارات هذا الشهر</small>
-                    <h4 class="fw-bold m-0">3,250</h4>
-                </div>
-            </div>
+    <section class="toolbar-card">
+        <div>
+            <strong class="value">نطاق الإحصائيات</strong>
+            <div class="text-muted small">اترك التاريخ فارغاً لعرض كامل البيانات المتاحة.</div>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <input type="date" class="date-control" @bind="_fromDate" />
+            <input type="date" class="date-control" @bind="_toDate" />
+            <button type="button" class="btn-refresh" @onclick="LoadDashboardAsync" disabled="@_isLoading">
+                <i class="bi bi-arrow-clockwise"></i>
+                تحديث
+            </button>
         </div>
     </section>
 
-    <section class="mt-5">
-        <div class="section-title"><i class="bi bi-bar-chart-steps"></i> الإحصائيات الشهرية للفوج والحلقات</div>
-        <div class="row g-4">
-            <div class="col-lg-6">
-                <div class="chart-card">
-                    <h6 class="fw-bold mb-4 text-success"><i class="bi bi-circle-fill me-2"></i> فوج التميز</h6>
-                    <div class="chart-wrap">
-                        <canvas id="chartLab1"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="chart-card">
-                    <h6 class="fw-bold mb-4 text-info"><i class="bi bi-circle-fill me-2"></i> فوج الإتقان</h6>
-                    <div class="chart-wrap">
-                        <canvas id="chartLab2"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    @if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <div class="error-box">@_errorMessage</div>
+    }
 
-    <section class="row mt-4 g-4">
-        <div class="col-md-6">
-            <div class="section-title"><i class="bi bi-graph-up text-success"></i> الطلاب الأكثر تميزاً في الاختبارات</div>
-            <div class="student-list-wrapper">
-                <details open>
-                    <summary class="student-toggle">
-                        <span><i class="bi bi-trophy text-warning me-2"></i> عرض قائمة المتفوقين</span>
-                        <i class="bi bi-chevron-down toggle-arrow"></i>
-                    </summary>
-                    <div class="py-2">
-                        <div class="student-item">
-                            <i class="bi bi-person-circle fs-4 text-secondary"></i>
-                            <div class="flex-grow-1"><b>سعد العلي</b> <br><small class="text-muted">حقق 95% في اختبار المنهج</small></div>
-                            <span class="badge bg-success-subtle text-success p-2">+150 نقطة</span>
-                        </div>
-                        <div class="student-item">
-                            <i class="bi bi-person-circle fs-4 text-secondary"></i>
-                            <div class="flex-grow-1"><b>ليلى حسن</b> <br><small class="text-muted">أنهت 12 اختباراً بدون إعادة</small></div>
-                            <span class="badge bg-success-subtle text-success p-2">+130 نقطة</span>
-                        </div>
-                    </div>
-                </details>
-            </div>
+    @if (_isLoading)
+    {
+        <div class="state-box">
+            <span class="spinner-border text-success" role="status"></span>
+            <div class="mt-3">جاري تحميل إحصائيات الاختبارات...</div>
         </div>
+    }
+    else if (_statistics is null)
+    {
+        <div class="state-box">لا توجد إحصائيات اختبارات متاحة حالياً.</div>
+    }
+    else
+    {
+        <section class="metrics-grid">
+            <div class="metric-card"><small>عدد الاختبارات</small><strong>@_statistics.TotalExams</strong></div>
+            <div class="metric-card"><small>متوسط العلامة</small><strong>@FormatNumber(_statistics.AverageScore)</strong></div>
+            <div class="metric-card"><small>نسبة النجاح</small><strong>@FormatPercent(_statistics.PassRate)</strong></div>
+            <div class="metric-card"><small>الناجحون</small><strong>@_statistics.PassCount</strong></div>
+        </section>
 
-        <div class="col-md-6">
-            <div class="section-title"><i class="bi bi-graph-down text-danger"></i> الطلاب الأقل تميزاً في الاختبارات</div>
-            <div class="student-list-wrapper">
-                <details open>
-                    <summary class="student-toggle">
-                        <span><i class="bi bi-exclamation-circle text-danger me-2"></i> عرض حالات المتابعة</span>
-                        <i class="bi bi-chevron-down toggle-arrow"></i>
-                    </summary>
-                    <div class="py-2">
-                        <div class="student-item">
-                            <i class="bi bi-person-circle fs-4 text-secondary"></i>
-                            <div class="flex-grow-1"><b>مازن خالد</b> <br><small class="text-muted">أعاد 4 اختبارات متتالية</small></div>
-                            <span class="badge bg-danger-subtle text-danger p-2">مراجعة إلزامية</span>
-                        </div>
-                        <div class="student-item">
-                            <i class="bi bi-person-circle fs-4 text-secondary"></i>
-                            <div class="flex-grow-1"><b>نورة سليم</b> <br><small class="text-muted">نسبة نجاح 45% في آخر 3 اختبارات</small></div>
-                            <span class="badge bg-warning-subtle text-warning p-2">خطة علاجية</span>
-                        </div>
-                    </div>
-                </details>
+        <section class="content-grid">
+            <div class="content-card">
+                <h2 class="card-title"><i class="bi bi-bar-chart"></i> تفاصيل العلامات</h2>
+                <div class="info-row"><span class="label">أعلى علامة</span><span class="value">@FormatNumber(_statistics.HighestScore)</span></div>
+                <div class="info-row"><span class="label">أدنى علامة</span><span class="value">@FormatNumber(_statistics.LowestScore)</span></div>
+                <div class="info-row"><span class="label">متوسط العلامة</span><span class="value">@FormatNumber(_statistics.AverageScore)</span></div>
             </div>
-        </div>
-    </section>
+
+            <div class="content-card">
+                <h2 class="card-title"><i class="bi bi-pie-chart"></i> حالة النتائج</h2>
+                <div class="info-row"><span class="label">الطلاب الناجحون</span><span class="value">@_statistics.PassCount</span></div>
+                <div class="info-row"><span class="label">الطلاب الراسبون</span><span class="value">@_statistics.FailedCount</span></div>
+                <div class="info-row"><span class="label">نسبة النجاح</span><span class="value">@FormatPercent(_statistics.PassRate)</span></div>
+            </div>
+        </section>
+    }
 </div>
 
 @code {
-    private bool _chartsInitialized;
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private ExamStatisticsDto? _statistics;
+    private bool _isLoading = true;
+    private string? _errorMessage;
+    private DateTime? _fromDate;
+    private DateTime? _toDate;
+
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender && !_chartsInitialized)
-        {
-            await JS.InvokeVoidAsync("initLabCharts");
-            _chartsInitialized = true;
-        }
+        await LoadDashboardAsync();
     }
-}
 
-<script>
-    window.initLabCharts = () => {
-        const Config = {
-            fontFamily: "'Segoe UI', sans-serif",
-            colors: {
-                completed: '#195042',
-                passed: '#2e7d6a',
-                failed: '#c82333'
-            }
-        };
+    private async Task LoadDashboardAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
 
-        const metrics = [
-            { k: 'completed', l: 'اختبارات منجزة', c: Config.colors.completed },
-            { k: 'passed', l: 'طلاب ناجحون', c: Config.colors.passed },
-            { k: 'failed', l: 'طلاب راسبون', c: Config.colors.failed }
-        ];
-
-        function createLabChart(elementId, dataset) {
-            const ctx = document.getElementById(elementId);
-            if (!ctx) return;
-            if (ctx._chartInstance) { try { ctx._chartInstance.destroy(); } catch { } }
-
-            const chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: dataset.map(d => d.circleName),
-                    datasets: metrics.map(m => ({
-                        label: m.l,
-                        data: dataset.map(d => d[m.k]),
-                        backgroundColor: m.c,
-                        borderRadius: 6
-                    }))
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
-                        x: { grid: { display: false } }
-                    },
-                    plugins: {
-                        legend: { labels: { font: { family: Config.fontFamily } } }
-                    }
-                }
+        try
+        {
+            var response = await ExamQueryService.GetExamStatisticsAsync(new GetExamStatisticsRequest
+            {
+                FromDate = _fromDate,
+                ToDate = _toDate
             });
 
-            ctx._chartInstance = chart;
-            return chart;
+            if (response == null || !response.Success)
+            {
+                _statistics = null;
+                _errorMessage = response?.Message ?? "تعذر تحميل إحصائيات الاختبارات.";
+                return;
+            }
+
+            _statistics = DeserializeData<ExamStatisticsDto>(response.Data);
         }
+        catch (Exception ex)
+        {
+            _statistics = null;
+            _errorMessage = $"تعذر تحميل إحصائيات الاختبارات: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
 
-        // بيانات مقارنة الحلقات داخل فوج التميز
-        const batch1Data = [
-            { circleName: 'حلقة الأساسيات', completed: 18, passed: 15, failed: 3 },
-            { circleName: 'حلقة التطبيق', completed: 14, passed: 10, failed: 4 },
-            { circleName: 'حلقة المراجعة', completed: 16, passed: 14, failed: 2 }
-        ];
+    private static T? DeserializeData<T>(object? data)
+    {
+        if (data == null)
+            return default;
 
-        // بيانات مقارنة الحلقات داخل فوج الإتقان
-        const batch2Data = [
-            { circleName: 'حلقة المنهج الأول', completed: 12, passed: 8, failed: 4 },
-            { circleName: 'حلقة المنهج الثاني', completed: 10, passed: 6, failed: 4 },
-            { circleName: 'حلقة الدعم', completed: 15, passed: 12, failed: 3 }
-        ];
+        if (data is T typed)
+            return typed;
 
-        createLabChart('chartLab1', batch1Data);
-        createLabChart('chartLab2', batch2Data);
-    };
-</script>
+        if (data is JsonElement element)
+            return element.Deserialize<T>(JsonOptions);
+
+        var json = JsonSerializer.Serialize(data, JsonOptions);
+        return JsonSerializer.Deserialize<T>(json, JsonOptions);
+    }
+
+    private static string FormatNumber(double value)
+        => value.ToString("0.##");
+
+    private static string FormatPercent(double value)
+        => $"{value:0.##}%";
+}

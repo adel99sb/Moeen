@@ -1,404 +1,478 @@
-﻿@page "/examer/addexam"
-@rendermode InteractiveServer
-@inject NavigationManager NavManager
+@page "/examer/addexam"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Text.Json
+@using Microsoft.AspNetCore.Components
+@using Moeen.Dashboard.Application.Services.Abstractions
+@using Moeen.Dashboard.Services.Abstractions
+@using Moeen.Shared.Requests.Enrollment
+@using Moeen.Shared.Requests.ExamCommand
+@using Moeen.Shared.Responses.Enrollment
+@inject IEnrollmentService EnrollmentService
+@inject IExamCommandService ExamCommandService
+@inject NavigationManager Navigation
+
+<PageTitle>إضافة اختبار</PageTitle>
+
 <style>
-    :root {
-        --primary-green: #195042;
-        --accent-beige: #d6cabc;
-        --light-beige: #f4f1ee;
-        --white: #ffffff;
-        --text-dark: #2d3436;
-        --status-green: #2ecc71;
-        --danger-red: #e74c3c;
-        --radius-md: 12px;
-        --shadow-sm: 0 3px 8px rgba(0,0,0,0.08);
-    }
-
-    body {
-        font-family: 'Tajawal', sans-serif;
-        background-color: #f9f9f9;
+    .exam-form-page {
         direction: rtl;
+        min-height: calc(100vh - 70px);
+        background: #faf7f0;
+        color: #163f35;
+        padding: 24px;
     }
 
-    .management-container {
-        background: var(--white);
-        margin: 20px;
-        padding: 30px;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    }
-    /* العنوان */
-    .page-title {
-        color: var(--primary-green);
-        position: relative;
-        padding-bottom: 10px; /* مسافة بين النص والخط */
-        border-bottom: 3px solid #d6cabc; /* جعل الخط بلون البيج */
-        display: inline-block; /* ليصبح طول الخط على قدر الكلمة فقط */
-        margin-top: 15px;
-    }
-
-    .form-container, .form-container * {
-        box-sizing: border-box;
-    }
-
-
-    .form-container {
-        max-width: 850px;
-        margin: 2rem auto;
-        background: var(--white);
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        direction: rtl;
-        overflow: hidden;
-    }
-
-    .form-header {
-        background: var(--accent-beige);
-        color: var(--white);
-        padding: 1.2rem;
-        text-align: center;
-    }
-
-    form {
-        padding: 2rem;
-    }
-
-    .grid-row {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-        margin-bottom: 1.2rem;
-    }
-
-        .grid-row:nth-of-type(4) {
-            grid-template-columns: repeat(3, 1fr);
-        }
-
-    .input-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-        .input-group label {
-            color: var(--text-dark);
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-align: right;
-        }
-
-    /* حل مشكلة الأيقونات والمحاذاة */
-    .input-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-        width: 100%;
-    }
-
-        .input-wrapper i {
-            position: absolute;
-            right: 12px; /* تثبيت الأيقونة جهة اليمين */
-            color: var(--primary-green);
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        .input-wrapper input,
-        .input-wrapper select {
-            width: 100%;
-            padding: 10px 35px 10px 10px;
-            border: 1px solid var(--accent-beige);
-            border-radius: 8px;
-            background: var(--light-beige);
-            font-size: 0.9rem;
-            height: 45px;
-            outline: none;
-            transition: var(--transition);
-        }
-
-            .input-wrapper input:focus,
-            .input-wrapper select:focus {
-                border-color: var(--primary-green);
-                background: #fff;
-            }
-
-    .actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #eee;
-    }
-
-        .actions button, .actions a {
-            flex: 1;
-            height: 48px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .actions .save {
-            background: var(--primary-green);
-            color: white;
-        }
-
-        .actions .parent {
-            background: var(--accent-beige);
-            color: white;
-        }
-
-        .actions .cancel {
-            background: #f8f9fa;
-            color: #dc3545;
-        }
-
-
-    @@media (max-width: 768px) {
-        .grid-row, .grid-row:nth-of-type(4) {
-            grid-template-columns: 1fr !important;
-        }
-    }
-
-    .select {
-        padding: 5px;
-        border-radius: 7px;
-        border: 1px solid #ccc;
-        font-family: 'Tajawal', sans-serif;
-        background-color: var(--white);
-        font-size: 1rem;
-        transition: border-color 0.3s ease;
-    }
-    /* الأزرار*/
-    .action-bar {
+    .hero {
+        background: linear-gradient(135deg, #195042, #26735f);
+        color: #fff;
+        border-radius: 26px;
+        padding: 28px;
+        box-shadow: 0 18px 45px rgba(25, 80, 66, .18);
+        margin-bottom: 22px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 25px;
+        gap: 18px;
         flex-wrap: wrap;
-        gap: 15px;
     }
 
-    .parts-grid {
+    .hero h1 {
+        margin: 0 0 8px;
+        font-weight: 900;
+    }
+
+    .hero p {
+        margin: 0;
+        opacity: .88;
+    }
+
+    .hero-icon {
+        width: 86px;
+        height: 86px;
+        border-radius: 28px;
+        background: rgba(255,255,255,.16);
+        border: 1px solid rgba(255,255,255,.22);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.4rem;
+    }
+
+    .content-grid {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 10px;
-        margin-top: 10px;
+        grid-template-columns: .85fr 1.15fr;
+        gap: 16px;
+        align-items: start;
     }
 
-        .parts-grid label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+    .card {
+        background: #fff;
+        border: 1px solid #e4eee9;
+        border-radius: 22px;
+        box-shadow: 0 10px 28px rgba(25, 80, 66, .06);
+        padding: 20px;
+    }
 
-    .group-select {
-        display: inline-block;
-        margin-top: 10px;
-        font-weight: bold;
+    .card-title {
+        margin: 0 0 14px;
+        color: #195042;
+        font-size: 1.15rem;
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .info-row {
+        border: 1px solid #edf1ee;
+        background: #fbfdfa;
+        border-radius: 16px;
+        padding: 13px 14px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .label {
+        color: #6b7280;
+        font-weight: 800;
+    }
+
+    .value {
+        color: #195042;
+        font-weight: 900;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .form-field label {
+        display: block;
+        margin-bottom: 7px;
+        color: #31443e;
+        font-weight: 900;
+        font-size: .9rem;
+    }
+
+    .form-control-clean,
+    .form-select-clean {
+        width: 100%;
+        border: 1.5px solid #d6cabc;
+        border-radius: 12px;
+        padding: 10px 12px;
+        min-height: 45px;
+        background: #fbfaf8;
+        outline: none;
+        color: #163f35;
+    }
+
+    textarea.form-control-clean {
+        min-height: 105px;
+        resize: vertical;
+    }
+
+    .full {
+        grid-column: 1 / -1;
+    }
+
+    .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 18px;
+        flex-wrap: wrap;
+    }
+
+    .btn-save,
+    .btn-cancel {
+        border: 0;
+        border-radius: 12px;
+        padding: 11px 16px;
+        font-weight: 900;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-save {
+        background: #195042;
+        color: #fff;
+    }
+
+    .btn-cancel {
+        background: #f4f1ee;
+        color: #195042;
+    }
+
+    .state-box {
+        background: #fff;
+        border: 1px dashed #d6cabc;
+        border-radius: 18px;
+        padding: 28px;
+        text-align: center;
+        color: #667085;
+    }
+
+    .error-box,
+    .success-box {
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-bottom: 18px;
+    }
+
+    .error-box {
+        background: #fff1f1;
+        border: 1px solid #f3c4c4;
+        color: #b42318;
+    }
+
+    .success-box {
+        background: #eaf8f0;
+        border: 1px solid #bde6cc;
+        color: #14723a;
+    }
+
+    @@media (max-width: 1000px) {
+        .content-grid { grid-template-columns: 1fr; }
+    }
+
+    @@media (max-width: 640px) {
+        .exam-form-page { padding: 14px; }
+        .form-grid { grid-template-columns: 1fr; }
     }
 </style>
-<section class="management-container">
-    <header class="page-header mb-3">
-        <h2 class="page-title">إضافة اختبار</h2>
-    </header>
-    <br />
-    <div class="form-container">
-        <div class="form-header">
-            <h2><i class="bi bi-filter-left"></i> بيانات الاختبار</h2>
+
+<div class="exam-form-page">
+    <section class="hero">
+        <div>
+            <h1>إضافة اختبار</h1>
+            <p>سجّل نتيجة اختبار للطالب المختار مع تحديد المعلم المسؤول ونطاق الأجزاء.</p>
         </div>
-        <form>
-            <div class="grid-row">
-                <div class="input-group">
-                    <label>الاسم الكامل</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-person"></i>
-                        <input type="text" placeholder="أدخل الاسم">
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>تاريخ الاختبار</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-calendar-event"></i>
-                        <input type="date" placeholder="أدخل تاريخ الاختبار">
-                    </div>
-                </div>
-            </div>
-            <div class="grid-row">
-                <div class="input-group">
-                    <label>اسم المعلم/ة </label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-person"></i>
-                        <input type="text" placeholder="أدخل الاسم">
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>اسم المختبر/ة </label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-person"></i>
-                        <input type="text" placeholder="أدخل الاسم">
-                    </div>
-                </div>
-            </div>
+        <div class="hero-icon"><i class="bi bi-clipboard-plus"></i></div>
+    </section>
 
-            <div class="grid-row">
-                <div class="input-group">
-                    <label>الفوج</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-layers"></i>
-                        <select>
-                            <option>الفوج الأول</option>
-                            <option>الفوج الثاني</option>
+    @if (_isLoading)
+    {
+        <div class="state-box">
+            <span class="spinner-border text-success" role="status"></span>
+            <div class="mt-3">جاري تحميل بيانات النموذج...</div>
+        </div>
+    }
+    else
+    {
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <div class="error-box">@_errorMessage</div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(_successMessage))
+        {
+            <div class="success-box">@_successMessage</div>
+        }
+
+        <div class="content-grid">
+            <aside class="card">
+                <h2 class="card-title"><i class="bi bi-person"></i> الطالب المختار</h2>
+                @if (_selectedStudent is null)
+                {
+                    <div class="state-box">لم يتم العثور على الطالب. ارجع لقائمة الطلاب واختر طالباً من جديد.</div>
+                }
+                else
+                {
+                    <div class="info-row"><span class="label">الاسم</span><span class="value">@Display(_selectedStudent.Name)</span></div>
+                    <div class="info-row"><span class="label">الإيميل</span><span class="value">@Display(_selectedStudent.Email)</span></div>
+                    <div class="info-row"><span class="label">المسجد</span><span class="value">@Display(_selectedStudent.MosqueName)</span></div>
+                    <div class="info-row"><span class="label">الحلقة</span><span class="value">@Display(_selectedStudent.SaturdayHalqeName)</span></div>
+                    <div class="info-row"><span class="label">النقاط</span><span class="value">@_selectedStudent.Score</span></div>
+                }
+            </aside>
+
+            <main class="card">
+                <h2 class="card-title"><i class="bi bi-pencil-square"></i> بيانات الاختبار</h2>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label>المعلم المسؤول</label>
+                        <select class="form-select-clean" @bind="_form.TeacherId">
+                            <option value="@Guid.Empty">اختر المعلم</option>
+                            @foreach (var teacher in _teachers)
+                            {
+                                <option value="@teacher.Id">@Display(teacher.Name) - @Display(teacher.MosqueName)</option>
+                            }
                         </select>
                     </div>
-                </div>
-                <div class="input-group">
-                    <label>الحلقة</label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-layers"></i>
-                        <select>
-                            <option>الحلقة الاولى</option>
-                            <option>الحلقة الثانية</option>
-                        </select>
+
+                    <div class="form-field">
+                        <label>العلامة</label>
+                        <input type="number" min="0" max="100" class="form-control-clean" @bind="_form.Score" />
                     </div>
-                </div>
-            </div>
-            <label>اختر الأجزاء</label>
 
-            <div class="grid-row">
+                    <div class="form-field">
+                        <label>من جزء</label>
+                        <input type="number" min="1" max="30" class="form-control-clean" @bind="_form.JuzFrom" />
+                    </div>
 
-                <div class="input-group">
+                    <div class="form-field">
+                        <label>إلى جزء</label>
+                        <input type="number" min="1" max="30" class="form-control-clean" @bind="_form.JuzTo" />
+                    </div>
 
-                    <div class="parts-grid">
-
-                        <label><input type="checkbox" class="g1"> 1</label>
-                        <label><input type="checkbox" class="g1"> 2</label>
-                        <label><input type="checkbox" class="g1"> 3</label>
-                        <label><input type="checkbox" class="g1"> 4</label>
-                        <label><input type="checkbox" class="g1"> 5</label>
-
-                        <label><input type="checkbox"> 6</label>
-                        <label><input type="checkbox"> 7</label>
-                        <label><input type="checkbox"> 8</label>
-                        <label><input type="checkbox"> 9</label>
-                        <label><input type="checkbox"> 10</label>
+                    <div class="form-field full">
+                        <label>ملاحظات الفاحص</label>
+                        <textarea class="form-control-clean" maxlength="500" @bind="_form.Notes" placeholder="اكتب ملاحظات مختصرة عن أداء الطالب..."></textarea>
                     </div>
                 </div>
 
-
-                <div class="input-group">
-
-                    <div class="parts-grid">
-
-                        <label><input type="checkbox" class="g1"> 11</label>
-                        <label><input type="checkbox" class="g1"> 12</label>
-                        <label><input type="checkbox" class="g1"> 13</label>
-                        <label><input type="checkbox" class="g1"> 14</label>
-                        <label><input type="checkbox" class="g1"> 15</label>
-
-                        <label><input type="checkbox"> 16</label>
-                        <label><input type="checkbox"> 17</label>
-                        <label><input type="checkbox"> 18</label>
-                        <label><input type="checkbox"> 19</label>
-                        <label><input type="checkbox"> 20</label>
-                    </div>
+                <div class="actions">
+                    <button type="button" class="btn-save" disabled="@(_isSaving || _selectedStudent is null)" @onclick="SaveExamAsync">
+                        @if (_isSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm"></span><span>جاري الحفظ...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-check2-all"></i><span>حفظ الاختبار</span>
+                        }
+                    </button>
+                    <a class="btn-cancel" href="/examer/exam"><i class="bi bi-arrow-right"></i> رجوع</a>
                 </div>
+            </main>
+        </div>
+    }
+</div>
 
-
-
-                <div class="input-group">
-
-                    <div class="parts-grid">
-
-                        <label><input type="checkbox" class="g1"> 21</label>
-                        <label><input type="checkbox" class="g1"> 22</label>
-                        <label><input type="checkbox" class="g1"> 23</label>
-                        <label><input type="checkbox" class="g1"> 24</label>
-                        <label><input type="checkbox" class="g1"> 25</label>
-
-                        <label><input type="checkbox"> 26</label>
-                        <label><input type="checkbox"> 27</label>
-                        <label><input type="checkbox"> 28</label>
-                        <label><input type="checkbox"> 29</label>
-                        <label><input type="checkbox"> 30</label>
-                    </div>
-                </div>
-
-
-            </div>
-            <label>اختر المرحلة</label>
-
-            <div class="grid-row">
-                <div class="input-group">
-
-                    <div class="parts-grid">
-
-                        <label><input type="checkbox" class="g1"> 1-5</label>
-                        <label><input type="checkbox" class="g1"> 5-10</label>
-                        <label><input type="checkbox" class="g1"> 1-10</label>
-                        <label><input type="checkbox" class="g1"> 11-15</label>
-                        <label><input type="checkbox" class="g1"> 1-15</label>
-                        <label><input type="checkbox" class="g1"> 15-20</label>
-                        <label><input type="checkbox" class="g1"> 1-20</label>
-                        <label><input type="checkbox" class="g1"> 20-25</label>
-                        <label><input type="checkbox" class="g1"> 1-25</label>
-                        <label><input type="checkbox" class="g1"> 25-30</label>
-                        <label><input type="checkbox" class="g1"> 1-30</label>
-
-
-                    </div>
-                </div>
-            </div>
-
-            <br>
-            <div class="grid-row">
-                <div class="input-group">
-                    <label>ادخل العلامة</label>
-                    <div class="input-wrapper">
-                        <i class="bi-percent"></i>
-                        <input type="number" placeholder="أدخل العلامة">
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label>التقدير</label>
-                    <div class="input-wrapper">
-                        <i class="bi-award"></i>
-                        <select>
-                            <option>إعادة</option>
-                            <option>وسط</option>
-                            <option>جيد</option>
-                            <option>جيد جدا</option>
-                            <option>ممتاز</option>
-
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label>ملاجظات المختبر </label>
-                <div class="input-wrapper">
-                    <i class="bi bi-chat-right-text"></i>
-                    <input type="text" placeholder="اكتب هنا...">
-                </div>
-            </div>
-
-            <div class="actions">
-                <button type="submit" class="save"><i class="bi bi-check2-all"></i> حفظ البيانات</button>
-                <a href="/examer/exam" class="cancel"><i class="bi bi-x-lg"></i> إلغاء</a>
-            </div>
-        </form>
-    </div>
-
-</section>
 @code {
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
+    [SupplyParameterFromQuery(Name = "studentId")]
+    public Guid? StudentId { get; set; }
+
+    private readonly List<StudentDto> _students = new();
+    private readonly List<TeacherDto> _teachers = new();
+    private StudentDto? _selectedStudent;
+    private ExamForm _form = new();
+    private bool _isLoading = true;
+    private bool _isSaving;
+    private string? _errorMessage;
+    private string? _successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFormDataAsync();
+    }
+
+    private async Task LoadFormDataAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            if (!StudentId.HasValue || StudentId.Value == Guid.Empty)
+            {
+                _errorMessage = "لم يتم تحديد الطالب.";
+                return;
+            }
+
+            await LoadStudentsAsync();
+            await LoadTeachersAsync();
+
+            _selectedStudent = _students.FirstOrDefault(student => student.Id == StudentId.Value);
+            if (_selectedStudent is null)
+            {
+                _errorMessage = "تعذر العثور على الطالب المحدد.";
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"تعذر تحميل بيانات النموذج: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadStudentsAsync()
+    {
+        var response = await EnrollmentService.GetAllStudentsAsync(new GetAllStudentsRequest { PageNumber = 1, PageSize = 500 });
+        if (response == null || !response.Success)
+            throw new InvalidOperationException(response?.Message ?? "تعذر تحميل الطلاب.");
+
+        _students.Clear();
+        _students.AddRange(DeserializeData<List<StudentDto>>(response.Data) ?? new List<StudentDto>());
+    }
+
+    private async Task LoadTeachersAsync()
+    {
+        var response = await EnrollmentService.GetAllTeachersAsync(new GetAllTeachersRequest { PageNumber = 1, PageSize = 500 });
+        if (response == null || !response.Success)
+            throw new InvalidOperationException(response?.Message ?? "تعذر تحميل المعلمين.");
+
+        _teachers.Clear();
+        var teachers = DeserializeData<List<TeacherDto>>(response.Data) ?? new List<TeacherDto>();
+        _teachers.AddRange(teachers.OrderBy(teacher => teacher.Name));
+    }
+
+    private async Task SaveExamAsync()
+    {
+        _errorMessage = null;
+        _successMessage = null;
+
+        if (_selectedStudent is null)
+        {
+            _errorMessage = "اختر الطالب أولاً.";
+            return;
+        }
+
+        var validation = ValidateForm();
+        if (!string.IsNullOrWhiteSpace(validation))
+        {
+            _errorMessage = validation;
+            return;
+        }
+
+        _isSaving = true;
+
+        try
+        {
+            var response = await ExamCommandService.RegisterExamAsync(new RegisterExamRequest
+            {
+                StudentId = _selectedStudent.Id,
+                TeacherId = _form.TeacherId,
+                JuzFrom = _form.JuzFrom,
+                JuzTo = _form.JuzTo,
+                Score = Math.Clamp(_form.Score, 0, 100),
+                Mark = Math.Clamp(_form.Score, 0, 100),
+                Notes = string.IsNullOrWhiteSpace(_form.Notes) ? string.Empty : _form.Notes.Trim()
+            });
+
+            _successMessage = string.IsNullOrWhiteSpace(response.Message) ? "تم حفظ الاختبار بنجاح." : response.Message;
+            _form = new ExamForm();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"تعذر حفظ الاختبار: {ex.Message}";
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private string? ValidateForm()
+    {
+        if (_form.TeacherId == Guid.Empty)
+            return "اختر المعلم المسؤول عن الطالب.";
+
+        if (_form.JuzFrom < 1 || _form.JuzFrom > 30)
+            return "جزء البداية يجب أن يكون بين 1 و 30.";
+
+        if (_form.JuzTo < 1 || _form.JuzTo > 30)
+            return "جزء النهاية يجب أن يكون بين 1 و 30.";
+
+        if (_form.JuzFrom > _form.JuzTo)
+            return "جزء البداية يجب أن يكون قبل أو يساوي جزء النهاية.";
+
+        if (_form.Score < 0 || _form.Score > 100)
+            return "العلامة يجب أن تكون بين 0 و 100.";
+
+        if (_form.Notes?.Length > 500)
+            return "الملاحظات يجب ألا تتجاوز 500 حرف.";
+
+        return null;
+    }
+
+    private static T? DeserializeData<T>(object? data)
+    {
+        if (data == null)
+            return default;
+
+        if (data is T typed)
+            return typed;
+
+        if (data is JsonElement element)
+            return element.Deserialize<T>(JsonOptions);
+
+        var json = JsonSerializer.Serialize(data, JsonOptions);
+        return JsonSerializer.Deserialize<T>(json, JsonOptions);
+    }
+
+    private static string Display(string? value)
+        => string.IsNullOrWhiteSpace(value) ? "غير متوفر" : value;
+
+    private sealed class ExamForm
+    {
+        public Guid TeacherId { get; set; }
+        public int JuzFrom { get; set; } = 1;
+        public int JuzTo { get; set; } = 1;
+        public int Score { get; set; }
+        public string? Notes { get; set; }
+    }
 }

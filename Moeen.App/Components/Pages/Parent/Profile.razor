@@ -1,310 +1,442 @@
-﻿@page "/Parent/Profile"
+@page "/Parent/Profile"
+@using Moeen.App.Services
+@using Moeen.App.Services.Abstractions
+@using Moeen.Shared.Responses.Mobile
+@using System.Globalization
+@inject IParentProfileService ParentProfileService
+@inject AppSessionService AppSession
+@inject NavigationManager Navigation
 
 <style>
-    :root {
-        --color-primary-green: #195042;
-        --color-luxury-beige: #d6cabc;
-        --color-bg-light: #f4f7f6;
-        --color-white: #ffffff;
-        --color-text-muted: #5a6c7d;
-        --color-input-border: #d6cabc;
-        --color-input-bg: #fafbfb;
-        --color-btn-primary: #195042;
-        --color-btn-primary-hover: #246b59;
-        --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.08);
-        --shadow-card-hover: 0 14px 35px rgba(0, 0, 0, 0.12);
-        --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.04);
-        --radius-card: 20px;
-        --radius-input: 12px;
-        --radius-btn: 10px;
-        --font-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        --font-weight-semibold: 600;
-        --font-weight-bold: 700;
-        --font-size-sm: 0.88rem;
-        --font-size-base: 0.95rem;
-        --font-size-xl: 1.35rem;
-        --spacing-xs: 0.6rem;
-        --spacing-sm: 0.8rem;
-        --spacing-md: 1rem;
-        --spacing-lg: 1.5rem;
-        --spacing-xl: 2rem;
-        --spacing-xxl: 2.5rem;
-        --transition-base: 0.3s ease;
-        --border-header: 6px solid var(--color-luxury-beige);
-        --border-light: 1px solid var(--color-input-border);
-    }
-
-    .profile-wrapper {
+    .parent-profile-page {
         direction: rtl;
         text-align: right;
-        font-family: var(--font-base);
-        background-color: var(--color-bg-light);
-        padding-bottom: var(--spacing-xxl);
         min-height: 100vh;
+        background: #f9f7f5;
+        padding: 1rem;
+        color: #195042;
     }
 
-    .header-custom {
-        background-color: var(--color-primary-green);
-        color: var(--color-luxury-beige);
-        padding: var(--spacing-xxl) 0;
-        border-bottom: var(--border-header);
-        margin-bottom: var(--spacing-xxl);
+    .profile-hero {
+        background: linear-gradient(135deg, #195042 0%, #24705d 100%);
+        color: #ffffff;
+        border-radius: 1.1rem;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 10px 24px rgba(25, 80, 66, 0.16);
     }
 
-    .profile-card {
-        background: var(--color-white);
-        border-radius: var(--radius-card);
-        box-shadow: var(--shadow-card);
-        padding: var(--spacing-xl);
-        margin-bottom: var(--spacing-lg);
-        transition: transform var(--transition-base), box-shadow var(--transition-base);
-    }
-
-        .profile-card:hover {
-            box-shadow: var(--shadow-card-hover);
-        }
-
-    .profile-title {
-        color: var(--color-primary-green);
-        font-weight: var(--font-weight-bold);
-        font-size: var(--font-size-xl);
-        margin-bottom: var(--spacing-lg);
-        padding-bottom: var(--spacing-sm);
-        border-bottom: var(--border-light);
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: var(--spacing-md);
-    }
-
-    .data-item {
+    .profile-line {
         display: flex;
         align-items: center;
-        background: var(--color-input-bg);
-        border: var(--border-light);
-        border-radius: var(--radius-input);
-        padding: var(--spacing-sm) var(--spacing-md);
-        box-shadow: var(--shadow-soft);
-        transition: all var(--transition-base);
+        gap: 0.9rem;
     }
 
-        .data-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(25, 80, 66, 0.15);
-            border-color: var(--color-primary-green);
-        }
-
-    .data-icon {
-        font-size: 1.4rem;
-        color: var(--color-primary-green);
-        margin-left: var(--spacing-sm);
+    .profile-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #d6cabc;
+        color: #195042;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.15rem;
         flex-shrink: 0;
     }
 
-    .data-content {
+    .profile-card,
+    .state-box {
+        background: #ffffff;
+        border: 1px solid rgba(214, 202, 188, 0.55);
+        border-radius: 1rem;
+        box-shadow: 0 6px 16px rgba(25, 80, 66, 0.08);
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+
+    .card-titlebar {
+        background: #195042;
+        color: #ffffff;
+        padding: 0.85rem 1rem;
         display: flex;
-        flex-direction: column;
-        flex: 1;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
     }
 
-    .data-label {
-        font-size: var(--font-size-sm);
-        color: var(--color-text-muted);
-        font-weight: var(--font-weight-semibold);
+    .card-titlebar h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 800;
     }
 
-    .data-value {
-        font-size: var(--font-size-base);
-        color: var(--color-primary-green);
-        font-weight: var(--font-weight-bold);
+    .card-body-custom {
+        padding: 1rem;
     }
 
-    .form-group {
-        margin-bottom: var(--spacing-lg);
-        resize: none;
+    .info-grid,
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0.75rem;
     }
 
-    .form-label {
+    .info-item,
+    .stat-item {
+        background: #fbfaf7;
+        border: 1px solid #eae6d9;
+        border-radius: 0.85rem;
+        padding: 0.85rem;
+    }
+
+    .info-label,
+    .stat-label {
         display: block;
-        color: var(--color-primary-green);
-        font-weight: var(--font-weight-semibold);
-        font-size: var(--font-size-base);
-        margin-bottom: var(--spacing-xs);
+        color: #6c757d;
+        font-size: 0.78rem;
+        margin-bottom: 0.25rem;
+        font-weight: 700;
     }
 
-    .form-control-custom {
-        width: 100%;
-        padding: var(--spacing-sm) var(--spacing-md);
-        border: var(--border-light);
-        border-radius: var(--radius-input);
-        background-color: var(--color-input-bg);
-        color: var(--color-text-muted);
-        font-family: var(--font-base);
-        font-size: var(--font-size-base);
-        box-shadow: var(--shadow-soft);
-        min-height: 120px;
-        resize: vertical;
+    .info-value,
+    .stat-value {
+        display: block;
+        color: #195042;
+        font-weight: 800;
+        overflow-wrap: anywhere;
     }
 
-        .form-control-custom:focus {
-            outline: none;
-            border-color: var(--color-primary-green);
-            background-color: var(--color-white);
-            box-shadow: 0 4px 12px rgba(25, 80, 66, 0.15);
-        }
+    .stat-value {
+        font-size: 1.35rem;
+    }
 
-    .btn {
-        border: none;
-        border-radius: var(--radius-btn);
-        padding: var(--spacing-sm) var(--spacing-lg);
-        font-size: var(--font-size-base);
-        font-weight: var(--font-weight-semibold);
-        font-family: var(--font-base);
-        cursor: pointer;
-        transition: all var(--transition-base);
+    .child-card {
+        border: 1px solid #eae6d9;
+        border-radius: 0.9rem;
+        padding: 0.9rem;
+        background: #fbfaf7;
+        margin-bottom: 0.75rem;
+    }
+
+    .child-head {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .child-avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: #195042;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .badge-soft {
         display: inline-flex;
         align-items: center;
-        gap: var(--spacing-xs);
-        box-shadow: var(--shadow-soft);
+        gap: 0.35rem;
+        background: #eef2f1;
+        color: #195042;
+        border-radius: 999px;
+        padding: 0.25rem 0.65rem;
+        font-size: 0.76rem;
+        font-weight: 800;
+        white-space: nowrap;
     }
 
-    .btn-primary {
-        background-color: var(--color-btn-primary);
-        color: var(--color-luxury-beige);
+    .note-input {
+        width: 100%;
+        min-height: 115px;
+        border: 1px solid #e4ded2;
+        border-radius: 0.85rem;
+        padding: 0.75rem;
+        resize: vertical;
+        background: #fbfaf7;
+        color: #195042;
+        outline: none;
     }
 
-        .btn-primary:hover {
-            background-color: var(--color-btn-primary-hover);
-            color: var(--color-white);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(25, 80, 66, 0.25);
+    .note-input:focus {
+        border-color: #195042;
+        background: #ffffff;
+    }
+
+    .btn-parent {
+        border: none;
+        border-radius: 0.75rem;
+        background: #195042;
+        color: #ffffff;
+        padding: 0.62rem 1rem;
+        font-weight: 800;
+    }
+
+    .btn-parent:disabled {
+        opacity: 0.65;
+    }
+
+    .btn-parent.outline {
+        background: #ffffff;
+        color: #195042;
+        border: 1px solid #195042;
+    }
+
+    .state-box {
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .error-box {
+        background: #f8d7da;
+        border-color: #f5c2c7;
+        color: #842029;
+    }
+
+    .success-message {
+        margin-top: 0.75rem;
+        color: #0f5132;
+        background: #d1e7dd;
+        border-radius: 0.75rem;
+        padding: 0.65rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    @@media (max-width: 680px) {
+        .profile-line,
+        .child-head {
+            align-items: flex-start;
         }
 
-    @@media (max-width: 768px) {
-        .header-custom {
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-        }
-
-        .profile-card {
-            padding: 1.2rem;
-        }
-
-        .info-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .btn {
-            width: 100%;
-            justify-content: center;
+        .stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
     }
 </style>
 
-<div class="profile-wrapper">
-    <header class="header-custom text-center">
-        <div class="container">
-            <h1 class="fw-bold">الملف الشخصي لولي الأمر</h1>
-            <p class="mb-0">متابعة الأبناء والتواصل المباشر مع المؤسسة</p>
+<div class="parent-profile-page">
+    @if (_loading)
+    {
+        <div class="state-box">
+            <div class="spinner-border text-success" role="status"></div>
+            <p class="mt-3 mb-0">جاري تحميل ملف ولي الأمر...</p>
         </div>
-    </header>
-
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-12">
-                <!-- بطاقة بيانات ولي الأمر -->
-                <div class="profile-card">
-                    <h2 class="profile-title"><i class="bi bi-person-badge ms-2"></i> بيانات ولي الأمر</h2>
-                    <div class="info-grid">
-                        <div class="data-item">
-                            <i class="bi bi-person data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">الاسم الكامل</span>
-                                <span class="data-value">محمد العبدالله</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-phone data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">رقم الجوال</span>
-                                <span class="data-value">+966 55 123 4567</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-envelope data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">البريد الإلكتروني</span>
-                                <span class="data-value">khaled@example.com</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-geo-alt data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">العنوان</span>
-                                <span class="data-value">الرياض، حي النرجس</span>
-                            </div>
-                        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(_error))
+    {
+        <div class="state-box error-box">
+            <p class="mb-3">@_error</p>
+            <button class="btn-parent outline" @onclick="LoadAsync">إعادة المحاولة</button>
+        </div>
+    }
+    else if (_profile is not null)
+    {
+        <section class="profile-hero">
+            <div class="profile-line">
+                <div class="profile-avatar">@Fallback(_profile.ParentInitials, "و")</div>
+                <div class="flex-grow-1">
+                    <h4 class="fw-bold mb-1">@Fallback(_profile.ParentName, "ولي الأمر")</h4>
+                    <div class="small opacity-75">
+                        @Fallback(_profile.Email, "لا يوجد بريد إلكتروني")
+                        <span class="mx-2">•</span>
+                        @Fallback(_profile.PhoneNumber, "لا يوجد رقم هاتف")
                     </div>
-                </div>
-
-                <!-- بطاقة الأبناء المسجلين -->
-                <div class="profile-card">
-                    <h2 class="profile-title"><i class="bi bi-people ms-2"></i> معلومات تخص الابن</h2>
-                    <div class="info-grid">
-                        <div class="data-item">
-                            <i class="bi bi-person-check data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">اسم الابن/الابنة</span>
-                                <span class="data-value"> احمد محمد العبدالله</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-bookmark data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">المرحلة / الحلقة</span>
-                                <span class="data-value">حلقة المتوسطين</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-person-badge ms-2"></i>
-                            <div class="data-content">
-                                <span class="data-label">اسم المعلم</span>
-                                <span class="data-value">محمد الاحمد</span>
-                            </div>
-                        </div>
-                        <div class="data-item">
-                            <i class="bi bi-phone data-icon"></i>
-                            <div class="data-content">
-                                <span class="data-label">رقم التواصل</span>
-                                <span class="data-value">+966 55 123 4567</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- بطاقة التواصل والاستفسار -->
-                <div class="profile-card">
-                    <h2 class="profile-title"><i class="bi bi-chat-dots ms-2"></i> تواصل مع الإدارة</h2>
-                    <form>
-                        <div class="form-group">
-                            <label class="form-label" for="feedback"><i class="bi bi-pencil-square ms-1"></i> ملاحظة أو استفسار</label>
-                            <textarea id="feedback" class="form-control-custom" style="resize: none;" placeholder="اكتب استفسارك أو ملاحظتك بخصوص الأبناء أو الخدمات التعليمية..."></textarea>
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary"><i class="bi bi-send-fill"></i> إرسال</button>
-                        </div>
-                    </form>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
+
+        <section class="stats-grid mb-3">
+            <div class="stat-item text-center">
+                <span class="stat-label">عدد الأبناء</span>
+                <span class="stat-value">@_profile.ChildrenCount</span>
+            </div>
+            <div class="stat-item text-center">
+                <span class="stat-label">مجموع نقاط الأبناء</span>
+                <span class="stat-value">@_profile.TotalChildrenPoints</span>
+            </div>
+            <div class="stat-item text-center">
+                <span class="stat-label">الجنس</span>
+                <span class="stat-value">@Fallback(_profile.Gender, "غير محدد")</span>
+            </div>
+            <div class="stat-item text-center">
+                <span class="stat-label">تاريخ الانضمام</span>
+                <span class="stat-value">@FormatDate(_profile.JoinedAt)</span>
+            </div>
+        </section>
+
+        <section class="profile-card">
+            <div class="card-titlebar">
+                <h5><i class="bi bi-person-badge ms-1"></i>بيانات ولي الأمر</h5>
+            </div>
+            <div class="card-body-custom">
+                <div class="info-grid">
+                    <InfoItem Icon="bi bi-person" Label="الاسم الكامل" Value="@Fallback(_profile.ParentName, "غير محدد")" />
+                    <InfoItem Icon="bi bi-phone" Label="رقم الهاتف" Value="@Fallback(_profile.PhoneNumber, "غير متوفر")" />
+                    <InfoItem Icon="bi bi-envelope" Label="البريد الإلكتروني" Value="@Fallback(_profile.Email, "غير متوفر")" />
+                    <InfoItem Icon="bi bi-calendar-check" Label="تاريخ الانضمام" Value="@FormatDate(_profile.JoinedAt)" />
+                </div>
+            </div>
+        </section>
+
+        <section class="profile-card">
+            <div class="card-titlebar">
+                <h5><i class="bi bi-people ms-1"></i>الأبناء المرتبطون بالحساب</h5>
+                <span class="badge-soft">@_profile.ChildrenCount طالب</span>
+            </div>
+            <div class="card-body-custom">
+                @if (!_profile.Children.Any())
+                {
+                    <div class="text-center text-muted py-3">لا يوجد طلاب مرتبطون بحساب ولي الأمر الحالي.</div>
+                }
+                else
+                {
+                    @foreach (var child in _profile.Children)
+                    {
+                        <article class="child-card" @key="child.StudentId">
+                            <div class="child-head">
+                                <div class="child-avatar">@Fallback(child.StudentInitials, "ط")</div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold">@Fallback(child.StudentName, "طالب")</div>
+                                    <div class="small text-muted">
+                                        @Fallback(child.MosqueName, "مسجد غير محدد")
+                                        <span class="mx-1">•</span>
+                                        @Fallback(child.HalqaName, "حلقة غير محددة")
+                                    </div>
+                                </div>
+                                <span class="badge-soft"><i class="bi bi-star-fill"></i>@child.TotalPoints نقطة</span>
+                            </div>
+
+                            <div class="info-grid">
+                                <InfoItem Icon="bi bi-person" Label="العمر" Value="@AgeText(child.Age)" />
+                                <InfoItem Icon="bi bi-gender-ambiguous" Label="الجنس" Value="@Fallback(child.Gender, "غير محدد")" />
+                                <InfoItem Icon="bi bi-diagram-3" Label="الفوج" Value="@Fallback(child.FoujName, "غير محدد")" />
+                                <InfoItem Icon="bi bi-person-workspace" Label="المعلم" Value="@Fallback(child.TeacherName, "غير محدد")" />
+                                <InfoItem Icon="bi bi-calendar2-check" Label="تاريخ التسجيل" Value="@FormatDate(child.EnrollmentDate)" />
+                                <InfoItem Icon="bi bi-activity" Label="الحالة" Value="@StatusText(child.Status)" />
+                            </div>
+                        </article>
+                    }
+                }
+            </div>
+        </section>
+
+        <section class="profile-card">
+            <div class="card-titlebar">
+                <h5><i class="bi bi-chat-dots ms-1"></i>إرسال ملاحظة للإدارة</h5>
+            </div>
+            <div class="card-body-custom">
+                <form @onsubmit="SubmitNoteAsync" @onsubmit:preventDefault="true">
+                    <textarea class="note-input" @bind="_note" placeholder="اكتب ملاحظتك أو اقتراحك حول متابعة الأبناء أو استخدام التطبيق..."></textarea>
+                    <div class="d-flex justify-content-between align-items-center gap-2 mt-3 flex-wrap">
+                        <small class="text-muted">الحد المسموح: من 5 إلى 1000 حرف</small>
+                        <button type="submit" class="btn-parent" disabled="@_submitting">
+                            @if (_submitting)
+                            {
+                                <span class="spinner-border spinner-border-sm ms-1" role="status"></span>
+                            }
+                            <span>إرسال</span>
+                        </button>
+                    </div>
+                </form>
+
+                @if (!string.IsNullOrWhiteSpace(_noteMessage))
+                {
+                    <div class="success-message">@_noteMessage</div>
+                }
+            </div>
+        </section>
+    }
 </div>
 
 @code {
-}
+    private ParentProfileResponse? _profile;
+    private bool _loading = true;
+    private bool _submitting;
+    private string? _error;
+    private string? _noteMessage;
+    private string _note = string.Empty;
 
-@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
 
+    private async Task LoadAsync()
+    {
+        if (AppSession.CurrentMode != AppUserMode.Parent || !AppSession.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/", replace: true);
+            return;
+        }
+
+        _loading = true;
+        _error = null;
+        _noteMessage = null;
+
+        try
+        {
+            _profile = await ParentProfileService.GetMyProfileAsync();
+        }
+        catch (Exception ex)
+        {
+            _profile = null;
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task SubmitNoteAsync()
+    {
+        _noteMessage = null;
+        var content = _note.Trim();
+
+        if (content.Length < 5)
+        {
+            _noteMessage = "اكتب ملاحظة من 5 أحرف على الأقل.";
+            return;
+        }
+
+        _submitting = true;
+        try
+        {
+            await ParentProfileService.SubmitNoteAsync(content);
+            _note = string.Empty;
+            _noteMessage = "تم إرسال الملاحظة بنجاح.";
+        }
+        catch (Exception ex)
+        {
+            _noteMessage = ex.Message;
+        }
+        finally
+        {
+            _submitting = false;
+        }
+    }
+
+    private static string Fallback(string? value, string fallback)
+        => string.IsNullOrWhiteSpace(value) ? fallback : value;
+
+    private static string FormatDate(DateTime? date)
+        => date.HasValue ? date.Value.ToString("yyyy/MM/dd", CultureInfo.InvariantCulture) : "غير محدد";
+
+    private static string AgeText(int age)
+        => age > 0 ? $"{age} سنة" : "غير محدد";
+
+    private static string StatusText(int status)
+        => status switch
+        {
+            1 => "نشط",
+            0 => "غير نشط",
+            _ => "غير محدد"
+        };
 }

@@ -414,6 +414,7 @@
                             <th>البريد الإلكتروني</th>
                             <th>رقم الهاتف</th>
                             <th>العمر</th>
+                            <th>المسجد</th>
                             <th>النقاط</th>
                             <th>الحالة</th>
                             <th>إجراءات</th>
@@ -423,7 +424,7 @@
                         @if (_students.Count == 0)
                         {
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">لا يوجد طلاب حالياً.</td>
+                                <td colspan="8" class="text-center text-muted py-4">لا يوجد طلاب حالياً.</td>
                             </tr>
                         }
                         else
@@ -440,10 +441,14 @@
                                     <td>@student.Email</td>
                                     <td>@(string.IsNullOrWhiteSpace(student.Phone) ? "—" : student.Phone)</td>
                                     <td>@student.Age</td>
+                                    <td>@Display(student.MosqueName)</td>
                                     <td>@student.Score</td>
                                     <td><span class="status-pill @GetStatusClass(student.Status)">@GetStatusLabel(student.Status)</span></td>
                                     <td>
                                         <div class="row-actions">
+                                            <button class="icon-btn" type="button" title="عرض التفاصيل" @onclick="() => OpenDetailsDialog(student)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
                                             <button class="icon-btn" type="button" title="تعديل" @onclick="() => OpenEditDialog(student)">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
@@ -468,10 +473,10 @@
                 <div class="student-dialog-header">
                     <div>
                         <h3 class="student-dialog-title">
-                            <i class="@(_isEditMode ? "bi bi-pencil-square" : "bi bi-person-plus")"></i>
-                            @(_isEditMode ? "تعديل بيانات الطالب" : "إضافة طالب جديد")
+                            <i class="@(_isViewMode ? "bi bi-eye" : _isEditMode ? "bi bi-pencil-square" : "bi bi-person-plus")"></i>
+                            @(_isViewMode ? "تفاصيل الطالب" : _isEditMode ? "تعديل بيانات الطالب" : "إضافة طالب جديد")
                         </h3>
-                        <p class="student-dialog-subtitle">املأ البيانات ثم اضغط تطبيق، سيتم تحديث الجدول تلقائياً بعد الحفظ.</p>
+                        <p class="student-dialog-subtitle">@(_isViewMode ? "عرض بيانات الطالب بدون تعديل." : "املأ البيانات ثم اضغط تطبيق، سيتم تحديث الجدول تلقائياً بعد الحفظ.")</p>
                     </div>
                     <button class="dialog-close-btn" type="button" @onclick="CloseDialog" disabled="@_isSaving">
                         <i class="bi bi-x-lg"></i>
@@ -489,22 +494,22 @@
                         <div class="form-grid">
                             <div class="form-field">
                                 <label>الاسم الكامل</label>
-                                <InputText class="form-control moeen-control" @bind-Value="_form.Name" placeholder="مثال: أحمد محمد" />
+                                <InputText class="form-control moeen-control" @bind-Value="_form.Name" placeholder="مثال: أحمد محمد" disabled="@_isViewMode" />
                                 <ValidationMessage For="@(() => _form.Name)" />
                             </div>
                             <div class="form-field">
                                 <label>البريد الإلكتروني</label>
-                                <InputText class="form-control moeen-control" @bind-Value="_form.Email" placeholder="name@example.com" />
+                                <InputText class="form-control moeen-control" @bind-Value="_form.Email" placeholder="name@example.com" disabled="@_isViewMode" />
                                 <ValidationMessage For="@(() => _form.Email)" />
                             </div>
                             <div class="form-field">
                                 <label>رقم الهاتف</label>
-                                <InputText class="form-control moeen-control" @bind-Value="_form.Phone" placeholder="اختياري" />
+                                <InputText class="form-control moeen-control" @bind-Value="_form.Phone" placeholder="اختياري" disabled="@_isViewMode" />
                                 <ValidationMessage For="@(() => _form.Phone)" />
                             </div>
                             <div class="form-field">
                                 <label>الجنس</label>
-                                <InputSelect class="form-control moeen-control" @bind-Value="_form.Gender">
+                                <InputSelect class="form-control moeen-control" @bind-Value="_form.Gender" disabled="@_isViewMode">
                                     <option value="Male">ذكر</option>
                                     <option value="Female">أنثى</option>
                                 </InputSelect>
@@ -512,17 +517,17 @@
                             </div>
                             <div class="form-field">
                                 <label>العمر</label>
-                                <InputNumber class="form-control moeen-control" @bind-Value="_form.Age" />
+                                <InputNumber class="form-control moeen-control" @bind-Value="_form.Age" disabled="@_isViewMode" />
                                 <ValidationMessage For="@(() => _form.Age)" />
                             </div>
                             <div class="form-field">
                                 <label>تاريخ التسجيل</label>
-                                <InputDate class="form-control moeen-control" @bind-Value="_form.EnrollmentDate" />
+                                <InputDate class="form-control moeen-control" @bind-Value="_form.EnrollmentDate" disabled="@_isViewMode" />
                                 <ValidationMessage For="@(() => _form.EnrollmentDate)" />
                             </div>
                             <div class="form-field">
                                 <label>حالة الحساب</label>
-                                <InputSelect class="form-control moeen-control" @bind-Value="_form.Status">
+                                <InputSelect class="form-control moeen-control" @bind-Value="_form.Status" disabled="@_isViewMode">
                                     <option value="0">نشط</option>
                                     <option value="1">متوقف</option>
                                     <option value="2">متخرج</option>
@@ -531,10 +536,10 @@
                             </div>
                             <div class="form-field">
                                 <label>النقاط</label>
-                                <InputNumber class="form-control moeen-control" @bind-Value="_form.Score" />
+                                <InputNumber class="form-control moeen-control" @bind-Value="_form.Score" disabled="@_isViewMode" />
                                 <ValidationMessage For="@(() => _form.Score)" />
                             </div>
-                            @if (!_isEditMode)
+                            @if (!_isEditMode && !_isViewMode)
                             {
                                 <div class="form-field">
                                     <label>المسجد</label>
@@ -557,21 +562,24 @@
                     </div>
 
                     <div class="student-dialog-footer">
-                        <button class="btn-moeen-primary" type="submit" disabled="@_isSaving">
-                            @if (_isSaving)
-                            {
-                                <span class="spinner-border spinner-border-sm"></span>
-                                <span>جاري التطبيق...</span>
-                            }
-                            else
-                            {
-                                <i class="bi bi-check2-circle"></i>
-                                <span>تطبيق</span>
-                            }
-                        </button>
+                        @if (!_isViewMode)
+                        {
+                            <button class="btn-moeen-primary" type="submit" disabled="@_isSaving">
+                                @if (_isSaving)
+                                {
+                                    <span class="spinner-border spinner-border-sm"></span>
+                                    <span>جاري التطبيق...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-check2-circle"></i>
+                                    <span>تطبيق</span>
+                                }
+                            </button>
+                        }
                         <button class="btn-moeen-light" type="button" @onclick="CloseDialog" disabled="@_isSaving">
                             <i class="bi bi-x-circle"></i>
-                            <span>إلغاء</span>
+                            <span>@(_isViewMode ? "إغلاق" : "إلغاء")</span>
                         </button>
                     </div>
                 </EditForm>
@@ -591,6 +599,7 @@
     private bool _isSaving;
     private bool _isDialogOpen;
     private bool _isEditMode;
+    private bool _isViewMode;
     private string _searchText = string.Empty;
     private string? _errorMessage;
     private string? _successMessage;
@@ -681,6 +690,7 @@
         _successMessage = null;
         _dialogError = null;
         _isEditMode = false;
+        _isViewMode = false;
         _form = new StudentDialogModel
         {
             EnrollmentDate = DateTime.Today,
@@ -694,6 +704,29 @@
         _successMessage = null;
         _dialogError = null;
         _isEditMode = true;
+        _isViewMode = false;
+        _form = new StudentDialogModel
+        {
+            Id = student.Id,
+            Name = student.Name,
+            Email = student.Email,
+            Phone = student.Phone,
+            Gender = string.Equals(student.Gender, "Female", StringComparison.OrdinalIgnoreCase) ? "Female" : "Male",
+            Age = student.Age <= 0 ? 12 : student.Age,
+            EnrollmentDate = student.EnrollmentDate == default ? DateTime.Today : student.EnrollmentDate,
+            Status = student.Status,
+            Score = student.Score,
+            MosqueId = student.MosqueId
+        };
+        _isDialogOpen = true;
+    }
+
+    private void OpenDetailsDialog(StudentRow student)
+    {
+        _successMessage = null;
+        _dialogError = null;
+        _isEditMode = true;
+        _isViewMode = true;
         _form = new StudentDialogModel
         {
             Id = student.Id,
@@ -716,11 +749,15 @@
             return;
 
         _isDialogOpen = false;
+        _isViewMode = false;
         _dialogError = null;
     }
 
     private async Task ApplyDialogAsync()
     {
+        if (_isViewMode)
+            return;
+
         _isSaving = true;
         _dialogError = null;
         _successMessage = null;
@@ -734,7 +771,7 @@
                     MemberId = _form.Id.ToString(),
                     Name = _form.Name,
                     Email = _form.Email,
-                    Phone = _form.Phone,
+                    Phone = _form.Phone?.Trim() ?? string.Empty,
                     Gender = _form.Gender,
                     Age = _form.Age,
                     Status = _form.Status,
@@ -759,7 +796,7 @@
 
                 if (string.IsNullOrWhiteSpace(_form.Password))
                 {
-                    _dialogError = "Password is required when creating a student.";
+                    _dialogError = "كلمة المرور مطلوبة عند إضافة طالب جديد.";
                     return;
                 }
 
@@ -769,7 +806,7 @@
                     Email = _form.Email,
                     Password = _form.Password,
                     ConfirmPassword = _form.Password,
-                    Phone = _form.Phone,
+                    Phone = _form.Phone?.Trim() ?? string.Empty,
                     Gender = _form.Gender,
                     Age = _form.Age,
                     EnrollmentDate = _form.EnrollmentDate,
@@ -792,7 +829,7 @@
         }
         catch (Exception ex)
         {
-            _dialogError = ex.Message;
+            _dialogError = $"تعذر حفظ بيانات الطالب: {ex.Message}";
         }
         finally
         {
@@ -823,9 +860,12 @@
         }
         catch (Exception ex)
         {
-            _errorMessage = ex.Message;
+            _errorMessage = $"تعذر حذف الطالب: {ex.Message}";
         }
     }
+
+    private static string Display(string? value)
+        => string.IsNullOrWhiteSpace(value) ? "—" : value;
 
     private static string GetStatusLabel(int status)
         => status switch

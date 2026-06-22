@@ -1,6 +1,27 @@
-﻿<Router AppAssembly="@typeof(MauiProgram).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-</Router>
+@inject AppSessionService AppSession
+
+@if (!_isSessionReady)
+{
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;direction:rtl;background:#f7f3ed;color:#195042;font-weight:800;">
+        جاري تجهيز الجلسة...
+    </div>
+}
+else
+{
+    <Router AppAssembly="@typeof(MauiProgram).Assembly">
+        <Found Context="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)" />
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+    </Router>
+}
+
+@code {
+    private bool _isSessionReady;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AppSession.InitializeAsync();
+        _isSessionReady = true;
+    }
+}
