@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.ExamCommand
@@ -13,6 +13,6 @@ namespace Moeen.Shared.Requests.ExamCommand
         public int NewScore { get; set; }
 
         [StringLength(500, ErrorMessage = "Notes cannot exceed 500 characters")]
-        public string Notes { get; set; }
+        public string Notes { get; set; } = string.Empty;
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -11,6 +11,6 @@ namespace Moeen.Shared.Requests.LessonManagement
 
         [Required(ErrorMessage = "Materials list is required")]
         [MinLength(1, ErrorMessage = "At least one material is required")]
-        public List<MaterialDto> Materials { get; set; }
+        public List<MaterialDto> Materials { get; set; } = new List<MaterialDto>();
     }
 }

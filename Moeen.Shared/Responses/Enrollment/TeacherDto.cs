@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Moeen.Shared.Responses.Enrollment
@@ -6,23 +6,23 @@ namespace Moeen.Shared.Responses.Enrollment
     public class TeacherDto
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
-        public string Email { get; set; }
-        public string Phone { get; set; }
-        public string Gender { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public string Gender { get; set; } = string.Empty;
         public int FontSize { get; set; }
         public int Role { get; set; } // Should be 1 for Teacher
-        public string Theme { get; set; }
-        public string ProfileImageUrl { get; set; }
+        public string Theme { get; set; } = string.Empty;
+        public string ProfileImageUrl { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime JoinedAt { get; set; }
 
         // Teacher specific
         public Guid MosqueId { get; set; }
-        public string Bio { get; set; }
-        public string AssignedAt { get; set; }
+        public string Bio { get; set; } = string.Empty;
+        public string AssignedAt { get; set; } = string.Empty;
 
         // Navigation
-        public string MosqueName { get; set; }
+        public string MosqueName { get; set; } = string.Empty;
     }
 }

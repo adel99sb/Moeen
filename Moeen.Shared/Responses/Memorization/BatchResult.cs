@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Moeen.Shared.Responses.Memorization
 {
@@ -7,6 +7,6 @@ namespace Moeen.Shared.Responses.Memorization
         public int TotalPoints { get; set; }
         public int SuccessCount { get; set; }
         public int FailedCount { get; set; }
-        public List<BatchItemResult> Items { get; set; }
+        public List<BatchItemResult> Items { get; set; } = new List<BatchItemResult>();
     }
 }

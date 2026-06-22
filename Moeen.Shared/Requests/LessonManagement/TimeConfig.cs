@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.LessonManagement
@@ -11,6 +11,6 @@ namespace Moeen.Shared.Requests.LessonManagement
         [Required(ErrorMessage = "End time is required")]
         public TimeSpan EndTime { get; set; }
 
-        public string DaysOfWeek { get; set; } // مثلاً "Mon,Wed,Fri"
+        public string DaysOfWeek { get; set; } = string.Empty; // مثلاً "Mon,Wed,Fri"
     }
 }

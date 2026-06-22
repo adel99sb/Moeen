@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,11 +10,11 @@ namespace Moeen.Api.Core.Entities
     {
         public Guid Id {  get; set; }
         public Guid MosqueId { get; set; }
-        public string title { get; set; }
-        public string description { get; set; }
-        public Mosque Mosque { get; set; } 
-        public ICollection<PdfFile> pdfFiles { get; set; }
-        public ICollection<SaturdayHalqa> saturdayHalqes { get; set; }
+        public string title { get; set; } = string.Empty;
+        public string description { get; set; } = string.Empty;
+        public Mosque Mosque { get; set; } = null!; 
+        public ICollection<PdfFile> pdfFiles { get; set; } = new List<PdfFile>();
+        public ICollection<SaturdayHalqa> saturdayHalqes { get; set; } = new List<SaturdayHalqa>();
 
 
     }

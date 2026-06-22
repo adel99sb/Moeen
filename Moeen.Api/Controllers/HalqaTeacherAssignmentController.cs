@@ -2,7 +2,6 @@
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Shared.Requests.CircleTeacherAssignment;
 using Moeen.Shared.Requests.HalqaTeacherAssignment;
-using Moeen.Shared.Requests.HalqaTeacherAssignment;
 using Moeen.Shared.Responses;
 
 namespace Moeen.Api.Controllers

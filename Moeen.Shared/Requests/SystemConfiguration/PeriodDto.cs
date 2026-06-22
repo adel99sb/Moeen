@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.SystemConfiguration
@@ -7,7 +7,7 @@ namespace Moeen.Shared.Requests.SystemConfiguration
     {
         [Required(ErrorMessage = "Period name is required")]
         [StringLength(100, ErrorMessage = "Period name cannot exceed 100 characters")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Start date is required")]
         public DateTime StartDate { get; set; }

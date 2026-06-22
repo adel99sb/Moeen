@@ -1,4 +1,4 @@
-﻿using Moeen.Shared.Constants;
+using Moeen.Shared.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.Attendance

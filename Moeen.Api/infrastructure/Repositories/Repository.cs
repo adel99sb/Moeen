@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.infrastructure.Data;
 
@@ -17,10 +17,10 @@ namespace Moeen.Api.infrastructure.Repositories
 
         public async Task<T> GetByIdAsync(Guid id)
         {
-            return await _dbSet.FindAsync(id);
+            return (await _dbSet.FindAsync(id))!;
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync(ISpecification<T> specification = null)
+        public async Task<IEnumerable<T>> GetAllAsync(ISpecification<T>? specification = null)
         {
             IQueryable<T> query = _dbSet;
 
@@ -63,14 +63,16 @@ namespace Moeen.Api.infrastructure.Repositories
             await _dbSet.AddAsync(entity);
         }
 
-        public async Task UpdateAsync(T entity)
+        public Task UpdateAsync(T entity)
         {
             _dbSet.Update(entity);
+            return Task.CompletedTask;
         }
 
-        public async Task DeleteAsync(T entity)
+        public Task DeleteAsync(T entity)
         {
             _dbSet.Remove(entity);
+            return Task.CompletedTask;
         }
 
         public async Task SaveAsync()

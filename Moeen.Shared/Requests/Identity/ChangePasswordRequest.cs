@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.Identity
 {
@@ -9,6 +9,6 @@ namespace Moeen.Shared.Requests.Identity
         [Required(ErrorMessage = "New password is required")]
         [StringLength(100, MinimumLength = 6, ErrorMessage = "New password must be at least 6 characters")]
         [DataType(DataType.Password)]
-        public string NewPassword { get; set; }
+        public string NewPassword { get; set; } = string.Empty;
     }
 }

@@ -1,9 +1,9 @@
-﻿namespace Moeen.Shared.Responses.ImportExport
+namespace Moeen.Shared.Responses.ImportExport
 {
     public class ExportStudentRecordResponse
     {
         public byte[] FileContent { get; set; }
-        public string FileName { get; set; }
-        public string ContentType { get; set; } // مثال: "application/pdf", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        public string FileName { get; set; } = string.Empty;
+        public string ContentType { get; set; } = string.Empty; // مثال: "application/pdf", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     }
 }

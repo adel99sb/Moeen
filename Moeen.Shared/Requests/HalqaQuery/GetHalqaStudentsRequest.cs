@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.HalqaQuery
@@ -8,6 +8,6 @@ namespace Moeen.Shared.Requests.HalqaQuery
         [Required(ErrorMessage = "Halqa ID is required")]
         public Guid HalqaId { get; set; }
 
-        public StudentFilterDto Filter { get; set; } // يمكن أن يكون null
+        public StudentFilterDto Filter { get; set; } = null!; // يمكن أن يكون null
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.SystemConfiguration
@@ -12,7 +12,7 @@ namespace Moeen.Shared.Requests.SystemConfiguration
         public TimeSpan EndTime { get; set; }
 
         [StringLength(100, ErrorMessage = "Timezone cannot exceed 100 characters")]
-        public string Timezone { get; set; }
+        public string Timezone { get; set; } = string.Empty;
 
         public bool IsActive { get; set; }
     }

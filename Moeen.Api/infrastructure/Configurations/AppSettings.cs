@@ -1,4 +1,4 @@
-﻿namespace Moeen.Api.infrastructure.Configurations
+namespace Moeen.Api.infrastructure.Configurations
 {
     public class AppSettings
     {
@@ -7,8 +7,8 @@
 
         public static AppSettings Instance => _instance.Value;
 
-        public JwtSettings JwtSettings { get; private set; }
-        public SmtpSettings SmtpSettings { get; private set; }
+        public JwtSettings JwtSettings { get; private set; } = null!;
+        public SmtpSettings SmtpSettings { get; private set; } = null!;
         public string ConnectionString { get; private set; }
 
         private AppSettings()
@@ -23,22 +23,22 @@
             IConfiguration configuration = configBuilder.Build();
             if (environment == "Production")
             {
-                //JwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
+                //JwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>() ?? new JwtSettings();
                 //JwtSettings.SecretKey = Environment.GetEnvironmentVariable("SecretKey") ?? JwtSettings.SecretKey;
                 ////
-                //SmtpSettings = configuration.GetSection("SmtpSettings").Get<SmtpSettings>();
+                //SmtpSettings = configuration.GetSection("SmtpSettings").Get<SmtpSettings>() ?? new SmtpSettings();
                 //SmtpSettings.SenderPassword = Environment.GetEnvironmentVariable("SenderPassword") ?? SmtpSettings.SenderPassword;                              
                 ////
                 //ConnectionString = Environment.GetEnvironmentVariable("DefaultConnection") ?? configuration.GetConnectionString("DefaultConnection");
-                JwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
-                SmtpSettings = configuration.GetSection("SmtpSettings").Get<SmtpSettings>();
-                ConnectionString = configuration.GetConnectionString("DefaultConnection");
+                JwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>() ?? new JwtSettings();
+                SmtpSettings = configuration.GetSection("SmtpSettings").Get<SmtpSettings>() ?? new SmtpSettings();
+                ConnectionString = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
             }
             else
             {
-                JwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
-                SmtpSettings = configuration.GetSection("SmtpSettings").Get<SmtpSettings>();
-                ConnectionString = configuration.GetConnectionString("DefaultConnection");
+                JwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>() ?? new JwtSettings();
+                SmtpSettings = configuration.GetSection("SmtpSettings").Get<SmtpSettings>() ?? new SmtpSettings();
+                ConnectionString = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
             }
         }
     }

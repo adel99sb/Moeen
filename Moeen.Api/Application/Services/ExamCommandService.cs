@@ -1,4 +1,4 @@
-﻿using Moeen.Api.Core.Contracts.Application;
+using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
 using Moeen.Shared.Requests.ExamCommand;
@@ -82,7 +82,7 @@ namespace Moeen.Api.Application.Services
                 // 5. إرجاع الاستجابة الموحدة
                 return GeneralResponse.Ok("تم حذف نتيجة الامتحان بنجاح.", resultDto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // ⚠️ يفضل تسجيل الخطأ هنا بـ ILogger في البيئة الحقيقية
                 return GeneralResponse.InternalError("حدث خطأ داخلي أثناء حذف نتيجة الامتحان.");
@@ -147,7 +147,7 @@ namespace Moeen.Api.Application.Services
 
                 return GeneralResponse.Ok("تم تسجيل الاختبار بنجاح.", dto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // ⚠️ يُفضل تسجيل الـ ex باستخدام ILogger في الإنتاج
                 return GeneralResponse.InternalError("حدث خطأ داخلي أثناء تسجيل الاختبار.");

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.LessonManagement
@@ -6,12 +6,12 @@ namespace Moeen.Shared.Requests.LessonManagement
     public class RequsteLessonDto
     {
         [StringLength(100, MinimumLength = 2, ErrorMessage = "Title must be between 2 and 100 characters")]
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
 
         public int? Order { get; set; }
 

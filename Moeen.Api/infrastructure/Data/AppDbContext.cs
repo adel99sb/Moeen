@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Enities;
@@ -30,7 +30,7 @@ namespace Moeen.Api.infrastructure.Data
         public DbSet<Student> Students { get; set; }
         public DbSet<Supervisor> Supervisors { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
-        public DbSet<User> Users { get; set; }
+        public new DbSet<User> Users { get; set; }
         public DbSet <TeacherExam> TeacherExams { get; set; }
         public DbSet<ExamTeacherHalqa> ExamTeacherHalqa { get; set; }
         override protected void OnModelCreating(ModelBuilder modelBuilder)

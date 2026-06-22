@@ -151,8 +151,52 @@ ipconfig
 
 استخدم IPv4 الخاص بالـ Wi-Fi.
 
+## تشغيل الموبايل على جهاز Android متصل
+
+قبل تشغيل الموبايل، شغّل الـ API أولاً واترك نافذته مفتوحة:
+
+```powershell
+.\scripts\run-api.ps1
+```
+
+بعدها وصل الموبايل USB وفعل Developer Options + USB debugging، ثم شغّل:
+
+```powershell
+.\scripts\run-mobile.ps1
+```
+
+السكريبت يقوم تلقائياً بـ:
+
+- فحص dotnet، وإذا كان ناقصاً يحاول تثبيت .NET SDK 9 عبر winget.
+- فحص winget، وإذا كان ناقصاً يحاول تثبيت Microsoft App Installer من الرابط الرسمي `https://aka.ms/getwinget`.
+- فحص Java، وإذا كانت ناقصة يحاول تثبيت Microsoft OpenJDK 17 عبر winget.
+- فحص MAUI/Android workload، وإذا ناقصة يحاول تثبيتها عبر dotnet workload.
+- البحث أولاً عن Android SDK موجود من `ANDROID_HOME` أو `ANDROID_SDK_ROOT` أو المسارات المعروفة.
+- إذا Android SDK موجود يستخدمه ولا ينزله من جديد.
+- إذا Android SDK موجود لكن ناقصه command-line tools أو packages، يثبت الناقص فقط.
+- إذا لا يوجد Android SDK أبداً، ينشئ واحداً محلياً خارج Visual Studio تحت `%LOCALAPPDATA%\Android\Sdk`.
+- تنزيل Android command-line tools مباشرة من Google عند الحاجة.
+- تثبيت Android SDK packages الناقصة: `platform-tools`, `platforms;android-35`, `build-tools;35.0.0`.
+- قبول Android SDK licenses.
+- ضبط `ANDROID_HOME` و `ANDROID_SDK_ROOT` للمستخدم الحالي.
+- فحص وجود جهاز Android متصل.
+- فحص API health.
+- تشغيل `adb reverse tcp:5055 tcp:5055` حتى يرى الموبايل الـ API على `http://127.0.0.1:5055/`.
+- بناء APK ثابت.
+- تثبيت أو تحديث التطبيق.
+- تشغيل التطبيق على الموبايل.
+
+إذا كان أكثر من موبايل متصل، استخدم:
+
+```powershell
+adb devices
+.\scripts\run-mobile.ps1 -DeviceId DEVICE_ID
+```
+
+ملاحظة: الموبايل حالياً مضبوط في `Moeen.App/Infrastructure/Http/ApiRouts.cs` لاستخدام `http://127.0.0.1:5055/` على Android، وهذا يعتمد على `adb reverse`. لذلك لا تحتاج لتغيير IP عند استخدام USB.
+
 ## ملاحظات مهمة
 
 - لا تحتاج لتطبيق migrations يدوياً في Development؛ الـ API يطبقها عند التشغيل.
 - seed لا ينشئ نسخ مكررة لنفس الحسابات التجريبية، لأنه يفحص وجودها أولاً.
-- في حال حدث خطأ تشغيل، انسخ آخر 30 سطر من نافذة API أو Dashboard وأرسلها للمطور.
+- في حال حدث خطأ تشغيل، انسخ آخر 30 سطر من نافذة API أو Dashboard أو run-mobile وأرسلها للمطور.

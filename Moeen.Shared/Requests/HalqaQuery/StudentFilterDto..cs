@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 
 namespace Moeen.Shared.Requests.HalqaQuery
 {
     public class StudentFilterDto
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public int? AgeFrom { get; set; }
         public int? AgeTo { get; set; }
-        public string Gender { get; set; }
+        public string Gender { get; set; } = string.Empty;
         public int? Status { get; set; }
         public int? MinScore { get; set; }
         public int? MaxScore { get; set; }

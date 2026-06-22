@@ -1,19 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Moeen.Api.Core.Entities
 {
     public class Teacher : User
     {
         public Guid MosqueId { get; set; }
-        public Mosque Mosque { get; set; }
+        public Mosque Mosque { get; set; } = null!;
 
         [Column("boi")]
-        public string Bio { get; set; }
+        public string Bio { get; set; } = string.Empty;
 
-        public string assigned_at { get; set; }
-        public ICollection<Halqa> halaqas { get; set; }
-        public ICollection<ProgressEntry> ProgressEntrys { get; set; }
-        public ICollection<Attendance> Attendances { get; set; }
+        public string assigned_at { get; set; } = string.Empty;
+        public ICollection<Halqa> halaqas { get; set; } = new List<Halqa>();
+        public ICollection<ProgressEntry> ProgressEntrys { get; set; } = new List<ProgressEntry>();
+        public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
         public DateTime? DateOfBirth { get; set; }
     }
 }

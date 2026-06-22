@@ -1,8 +1,8 @@
-﻿namespace Moeen.Shared.Responses.Points
+namespace Moeen.Shared.Responses.Points
 {
     public class SetupPointsSystemResponse
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
     }
 }

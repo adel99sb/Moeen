@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.LessonManagement
@@ -9,6 +9,6 @@ namespace Moeen.Shared.Requests.LessonManagement
         public Guid LessonId { get; set; }
 
         [Required(ErrorMessage = "Time configuration is required")]
-        public TimeConfig Config { get; set; }
+        public TimeConfig Config { get; set; } = null!;
     }
 }

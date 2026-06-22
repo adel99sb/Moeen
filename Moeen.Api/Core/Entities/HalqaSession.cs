@@ -1,4 +1,4 @@
-﻿namespace Moeen.Api.Core.Entities
+namespace Moeen.Api.Core.Entities
 {
     public class HalqaSession
     {
@@ -7,8 +7,8 @@
         public DateTime date { get; set; }
         public TimeSpan start_time { get; set; }
         public TimeSpan end_time { get; set; }
-        public Halqa Halqa { get; set; }
-        public ICollection<Attendance> Attendances { get; set; } 
+        public Halqa Halqa { get; set; } = null!;
+        public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>(); 
 
 
     }

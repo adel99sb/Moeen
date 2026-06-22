@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.ContentSharing
 {
     public class PublishPostRequest
     {
         [Required(ErrorMessage = "Post data is required")]
-        public RequstePostDto PostData { get; set; }
+        public RequstePostDto PostData { get; set; } = null!;
 
         public bool IsPublic { get; set; } = true;
     }

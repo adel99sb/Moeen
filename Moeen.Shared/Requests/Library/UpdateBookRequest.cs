@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.Library
@@ -9,6 +9,6 @@ namespace Moeen.Shared.Requests.Library
         public Guid Id { get; set; }
 
         [Required(ErrorMessage = "Book data is required")]
-        public BookDto BookData { get; set; }
+        public BookDto BookData { get; set; } = null!;
     }
 }

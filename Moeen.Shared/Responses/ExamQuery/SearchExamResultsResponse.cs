@@ -1,11 +1,11 @@
-﻿using Moeen.Shared.Responses.ExamCommand;
+using Moeen.Shared.Responses.ExamCommand;
 using System.Collections.Generic;
 
 namespace Moeen.Shared.Responses.ExamQuery
 {
     public class SearchExamResultsResponse
     {
-        public List<ExamResultDto> Results { get; set; }
+        public List<ExamResultDto> Results { get; set; } = new List<ExamResultDto>();
         public int TotalCount { get; set; }
         public int PageNumber { get; set; }
         public int PageSize { get; set; }

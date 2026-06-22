@@ -1,4 +1,4 @@
-﻿using Moeen.Api.Core.Entities;
+using Moeen.Api.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +10,10 @@ namespace Moeen.Api.Core.Enities
 {
     public class ParentSudent : User
     {
-        public Guid Id { get; set; }
+        public new Guid Id { get; set; }
         public Guid userid { get; set; }
         public Guid Studentid { get; set; }
-        public Student Student { get; set; }
+        public Student Student { get; set; } = null!;
 
     }
 }

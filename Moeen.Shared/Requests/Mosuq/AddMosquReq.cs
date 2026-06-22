@@ -1,4 +1,4 @@
-﻿namespace Moeen.Shared.Requests.Mosuq
+namespace Moeen.Shared.Requests.Mosuq
 {
     using System.ComponentModel.DataAnnotations;
 
@@ -6,18 +6,18 @@
     {
         [Required]
         [StringLength(150, MinimumLength = 3)]
-        public string name { get; set; }
+        public string name { get; set; } = string.Empty;
 
         [Required]
         [StringLength(250)]
-        public string address { get; set; }
+        public string address { get; set; } = string.Empty;
 
         [Required]
         [Phone]
-        public string contact_phone { get; set; }
+        public string contact_phone { get; set; } = string.Empty;
 
         [StringLength(1000)]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [Required]
         [Range(-90, 90, ErrorMessage = "Latitude must be between -90 and 90")]

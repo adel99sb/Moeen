@@ -1,13 +1,13 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Moeen.Shared.Responses
 {
     public class GeneralResponse
     {
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public bool Success { get; set; }
         public int StatusCode { get; set; }
-        public object Data { get; set; }
+        public object? Data { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? Page { get; set; }
@@ -20,7 +20,7 @@ namespace Moeen.Shared.Responses
                                     ? (int)Math.Ceiling((double)TotalCount.Value / PageSize.Value)
                                     : null;
 
-        public GeneralResponse(string message = null, bool success = true, int statusCode = 200, object data = null)
+        public GeneralResponse(string? message = null, bool success = true, int statusCode = 200, object? data = null)
         {
             Message = message ?? (success ? "Success" : "Failure");
             Success = success;
@@ -28,7 +28,7 @@ namespace Moeen.Shared.Responses
             Data = data;
         }
 
-        public static GeneralResponse Ok(string message = "Success", object data = null,
+        public static GeneralResponse Ok(string message = "Success", object? data = null,
                                          int? page = null, int? pageSize = null, int? totalCount = null)
         {
             return new GeneralResponse(message, true, 200, data)
@@ -39,16 +39,16 @@ namespace Moeen.Shared.Responses
             };
         }
 
-        public static GeneralResponse BadRequest(string message = "Bad Request", object data = null) =>
+        public static GeneralResponse BadRequest(string message = "Bad Request", object? data = null) =>
             new GeneralResponse(message, false, 400, data);
 
-        public static GeneralResponse NotFound(string message = "Not Found", object data = null) =>
+        public static GeneralResponse NotFound(string message = "Not Found", object? data = null) =>
             new GeneralResponse(message, false, 404, data);
 
-        public static GeneralResponse Unauthorized(string message = "Unauthorized", object data = null) =>
+        public static GeneralResponse Unauthorized(string message = "Unauthorized", object? data = null) =>
             new GeneralResponse(message, false, 401, data);
 
-        public static GeneralResponse InternalError(string message = "Internal Server Error", object data = null) =>
+        public static GeneralResponse InternalError(string message = "Internal Server Error", object? data = null) =>
             new GeneralResponse(message, false, 500, data);
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -11,6 +11,6 @@ namespace Moeen.Shared.Requests.ContentSharing
 
         [Required(ErrorMessage = "Media URLs list is required")]
         [MinLength(1, ErrorMessage = "At least one media URL is required")]
-        public List<string> MediaUrls { get; set; }
+        public List<string> MediaUrls { get; set; } = new List<string>();
     }
 }

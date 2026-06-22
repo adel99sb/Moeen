@@ -6,7 +6,7 @@ namespace Moeen.Shared.Requests.Enrollment
     public class UpdateMemberInfoRequest
     {
         [Required(ErrorMessage = "Member ID is required")]
-        public string MemberId { get; set; }
+        public string MemberId { get; set; } = string.Empty;
 
         // Optional fields that can be updated
         [StringLength(100, MinimumLength = 2, ErrorMessage = "Name must be between 2 and 100 characters")]

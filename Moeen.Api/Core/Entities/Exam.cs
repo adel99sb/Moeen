@@ -1,4 +1,4 @@
-﻿namespace Moeen.Api.Core.Entities
+namespace Moeen.Api.Core.Entities
 {
     public class Exam
     {
@@ -10,12 +10,12 @@
         public int score { get; set; }
         public DateTime date { get; set; }
 
-        public string notes { get; set; }
+        public string notes { get; set; } = string.Empty;
         public int mark { get; set; }
-        public Student Student { get; set; }
-        public Teacher Teacher { get; set; }
+        public Student Student { get; set; } = null!;
+        public Teacher Teacher { get; set; } = null!;
         public Guid TeacherExamId { get; set; }
-        public TeacherExam TeacherExams { get; set; }
+        public TeacherExam TeacherExams { get; set; } = null!;
 
     }
 }

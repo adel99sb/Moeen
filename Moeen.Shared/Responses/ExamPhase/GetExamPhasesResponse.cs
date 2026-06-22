@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Moeen.Shared.Responses.ExamPhase
 {
     public class GetExamPhasesResponse
     {
-        public List<ExamPhaseDto> Phases { get; set; }
+        public List<ExamPhaseDto> Phases { get; set; } = new List<ExamPhaseDto>();
         public int TotalCount { get; set; }
         public int PageNumber { get; set; }
         public int PageSize { get; set; }

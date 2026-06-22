@@ -1,7 +1,7 @@
-﻿namespace Moeen.Shared.Responses.SystemConfiguration
+namespace Moeen.Shared.Responses.SystemConfiguration
 {
     public class MonitorSystemHealthResponse
     {
-        public SystemHealthDto Health { get; set; }
+        public SystemHealthDto Health { get; set; } = null!;
     }
 }

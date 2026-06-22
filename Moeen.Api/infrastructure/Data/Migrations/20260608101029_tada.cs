@@ -1,4 +1,5 @@
-﻿using System;
+#pragma warning disable CS8981
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -211,3 +212,5 @@ namespace Moeen.Api.infrastructure.Data.Migrations
         }
     }
 }
+
+#pragma warning restore CS8981

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -11,6 +11,6 @@ namespace Moeen.Shared.Requests.LessonManagement
 
         [Required(ErrorMessage = "Lesson IDs list is required")]
         [MinLength(1, ErrorMessage = "At least one lesson ID is required")]
-        public List<Guid> LessonIds { get; set; }
+        public List<Guid> LessonIds { get; set; } = new List<Guid>();
     }
 }

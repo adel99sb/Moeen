@@ -1,4 +1,4 @@
-﻿using Moeen.Shared.Constants;
+using Moeen.Shared.Constants;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -17,6 +17,6 @@ namespace Moeen.Shared.Requests.Memorization
         public Grade Grade { get; set; }  // استخدام enum
 
         [StringLength(500, ErrorMessage = "Notes cannot exceed 500 characters")]
-        public string Notes { get; set; }
+        public string Notes { get; set; } = string.Empty;
     }
 }

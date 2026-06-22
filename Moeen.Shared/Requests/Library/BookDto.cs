@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.Library
 {
@@ -6,26 +6,26 @@ namespace Moeen.Shared.Requests.Library
     {
         [Required(ErrorMessage = "Title is required")]
         [StringLength(200, MinimumLength = 1, ErrorMessage = "Title must be between 1 and 200 characters")]
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Author is required")]
         [StringLength(200, MinimumLength = 1, ErrorMessage = "Author must be between 1 and 200 characters")]
-        public string Author { get; set; }
+        public string Author { get; set; } = string.Empty;
 
         [StringLength(20, ErrorMessage = "ISBN cannot exceed 20 characters")]
-        public string ISBN { get; set; }
+        public string ISBN { get; set; } = string.Empty;
 
         [StringLength(100, ErrorMessage = "Publisher cannot exceed 100 characters")]
-        public string Publisher { get; set; }
+        public string Publisher { get; set; } = string.Empty;
 
         [Range(1000, 2100, ErrorMessage = "Publication year must be between 1000 and 2100")]
         public int? PublicationYear { get; set; }
 
         [StringLength(1000, ErrorMessage = "Description cannot exceed 1000 characters")]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [Url(ErrorMessage = "Invalid cover image URL")]
-        public string CoverImageUrl { get; set; }
+        public string CoverImageUrl { get; set; } = string.Empty;
         public string? DownloadUrl { get; set; }
     }
 }

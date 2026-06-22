@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.Goal
 {
@@ -14,6 +14,6 @@ namespace Moeen.Shared.Requests.Goal
         public int ReviewPages { get; set; } // عدد صفحات المراجعة (اختياري)
 
         [StringLength(500, ErrorMessage = "Notes cannot exceed 500 characters")]
-        public string Notes { get; set; }
+        public string Notes { get; set; } = string.Empty;
     }
 }

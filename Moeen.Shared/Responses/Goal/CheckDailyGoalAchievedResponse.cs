@@ -1,8 +1,8 @@
-﻿namespace Moeen.Shared.Responses.Goal
+namespace Moeen.Shared.Responses.Goal
 {
     public class CheckDailyGoalAchievedResponse
     {
         public bool IsAchieved { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -11,6 +11,6 @@ namespace Moeen.Shared.Requests.Review
 
         [Required(ErrorMessage = "Juz reviews list is required")]
         [MinLength(1, ErrorMessage = "At least one juz review must be provided")]
-        public List<JuzReviewInputDto> JuzReviews { get; set; }
+        public List<JuzReviewInputDto> JuzReviews { get; set; } = new List<JuzReviewInputDto>();
     }
 }

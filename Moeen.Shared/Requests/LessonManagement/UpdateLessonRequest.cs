@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.LessonManagement
@@ -9,6 +9,6 @@ namespace Moeen.Shared.Requests.LessonManagement
         public Guid Id { get; set; }
 
         [Required(ErrorMessage = "Lesson data is required")]
-        public RequsteLessonDto LessonData { get; set; }
+        public RequsteLessonDto LessonData { get; set; } = null!;
     }
 }

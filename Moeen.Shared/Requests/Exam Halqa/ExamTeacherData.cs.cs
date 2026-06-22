@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Api.Shared.Requests.Exam_Halqa
 {
@@ -24,7 +24,7 @@ namespace Moeen.Api.Shared.Requests.Exam_Halqa
         // ✅ أضف AssignedDate إذا لازم
         public DateTime? AssignedDate { get; set; }
         public bool IsActive { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public Guid TeacherExamId { get; set; }
         public Guid MosquId { get; set; }
 

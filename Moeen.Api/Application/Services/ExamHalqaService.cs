@@ -1,4 +1,4 @@
-﻿
+
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 
 namespace Moeen.Api.Application.Services
     {

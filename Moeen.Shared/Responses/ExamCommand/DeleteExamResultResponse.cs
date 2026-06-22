@@ -1,8 +1,8 @@
-﻿namespace Moeen.Shared.Responses.ExamCommand
+namespace Moeen.Shared.Responses.ExamCommand
 {
     public class DeleteExamResultResponse
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
     }
 }

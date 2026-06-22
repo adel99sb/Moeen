@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Moeen.Api.Core.Entities
 {
@@ -38,8 +38,8 @@ namespace Moeen.Api.Core.Entities
         [Column("deleted_at")]
         public DateTime? DeletedAt { get; set; }
 
-        public Student Student { get; set; }
-        public Halqa Halqa { get; set; }
-        public Teacher Teacher { get; set; }
+        public Student Student { get; set; } = null!;
+        public Halqa Halqa { get; set; } = null!;
+        public Teacher Teacher { get; set; } = null!;
     }
 }

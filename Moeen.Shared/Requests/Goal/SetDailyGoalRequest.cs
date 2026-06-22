@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.Goal
@@ -9,6 +9,6 @@ namespace Moeen.Shared.Requests.Goal
         public Guid StudentId { get; set; }
 
         [Required(ErrorMessage = "Daily goal is required")]
-        public DailyGoalDto Goal { get; set; }
+        public DailyGoalDto Goal { get; set; } = null!;
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.Core.Contracts.infrastructure.Repositories;
@@ -504,7 +504,7 @@ namespace Moeen.Api.Application.Services
 
                 return GeneralResponse.Ok("تم جلب جميع المنشورات.", dtos);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return GeneralResponse.InternalError("حدث خطأ أثناء جلب المنشورات.");
             }

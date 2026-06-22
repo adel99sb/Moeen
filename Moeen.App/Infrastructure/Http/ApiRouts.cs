@@ -3,7 +3,8 @@
     public static class ApiRoutes
     {
 #if ANDROID
-        public static string BaseUrl { get; } = "http://192.168.1.100:5055/";
+        // Physical Android devices can reach the local API over USB via `adb reverse tcp:5055 tcp:5055`.
+        public static string BaseUrl { get; } = "http://127.0.0.1:5055/";
 #else
         public static string BaseUrl { get; } = "https://localhost:7023/";
 #endif

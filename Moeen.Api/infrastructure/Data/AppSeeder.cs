@@ -27,7 +27,7 @@ namespace Moeen.Api.Infrastructure.Data
             foreach (var role in Enum.GetNames(typeof(Roles)))
             {
                 if (!await roleManager.RoleExistsAsync(role))
-                {
+                { 
                     await roleManager.CreateAsync(new IdentityRole<Guid>
                     {
                         Id = Guid.NewGuid(),

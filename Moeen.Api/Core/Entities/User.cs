@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Moeen.Api.Core.Entities
 {
     public class User : IdentityUser<Guid>
     {
-        public string name { get; set; }
+        public string name { get; set; } = string.Empty;
         public string? gender { get; set; }
         public int font_size { get; set; }
         public int role { get; set; }
@@ -16,7 +16,7 @@ namespace Moeen.Api.Core.Entities
         [Column("joinef_at")]
         public DateTime JoinedAt { get; set; }
 
-        public ICollection<Complaint> complaints { get; set; }
-        public ICollection<PosInteraction> PosInteractions { get; set; }
+        public ICollection<Complaint> complaints { get; set; } = new List<Complaint>();
+        public ICollection<PosInteraction> PosInteractions { get; set; } = new List<PosInteraction>();
     }
 }

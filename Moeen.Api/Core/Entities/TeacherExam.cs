@@ -1,16 +1,16 @@
-﻿namespace Moeen.Api.Core.Entities
+namespace Moeen.Api.Core.Entities
 {
     public class TeacherExam : User
     {
         internal DateTime CreatedAt;
 
-        public Guid Id { get; set; }
+        public new Guid Id { get; set; }
         public string? Name { get; set; }
         public Guid MosquId { get; set; }
         public string? Bio { get; set; }
-        public Mosque Mosque { get; set; }
+        public Mosque Mosque { get; set; } = null!;
 
-        public ICollection<ExamTeacherHalqa> ExamTeacherHalqas { get; set; }
+        public ICollection<ExamTeacherHalqa> ExamTeacherHalqas { get; set; } = new List<ExamTeacherHalqa>();
     }
 }
 

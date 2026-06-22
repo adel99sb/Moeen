@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.Attendance
@@ -7,6 +7,6 @@ namespace Moeen.Shared.Requests.Attendance
     {
         [Required(ErrorMessage = "Entries list is required")]
         [MinLength(1, ErrorMessage = "At least one attendance entry is required")]
-        public List<AttendanceEntry> Entries { get; set; }
+        public List<AttendanceEntry> Entries { get; set; } = new List<AttendanceEntry>();
     }
 }

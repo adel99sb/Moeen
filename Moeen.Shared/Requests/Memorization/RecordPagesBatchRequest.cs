@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -11,6 +11,6 @@ namespace Moeen.Shared.Requests.Memorization
 
         [Required(ErrorMessage = "Pages grades list is required")]
         [MinLength(1, ErrorMessage = "At least one page must be provided")]
-        public List<PageGradeDto> PagesGrades { get; set; }
+        public List<PageGradeDto> PagesGrades { get; set; } = new List<PageGradeDto>();
     }
 }

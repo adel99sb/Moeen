@@ -1,8 +1,8 @@
-﻿namespace Moeen.Shared.Responses.SystemConfiguration
+namespace Moeen.Shared.Responses.SystemConfiguration
 {
     public class IssueUserLicenseResponse
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
     }
 }

@@ -1,4 +1,4 @@
-﻿using Moeen.Shared.Constants;
+using Moeen.Shared.Constants;
 
 namespace Moeen.Api.Core.Entities
 {
@@ -13,9 +13,9 @@ namespace Moeen.Api.Core.Entities
         public AttendanceStatus Status { get; set; }
         public string? Note { get; set; }
 
-        public SaturdayLesson SaturdayLesson { get; set; }
-        public Teacher Teacher { get; set; }
-        public HalqaSession HalqeSession { get; set; }
-        public Student Student { get; set; }
+        public SaturdayLesson SaturdayLesson { get; set; } = null!;
+        public Teacher Teacher { get; set; } = null!;
+        public HalqaSession HalqeSession { get; set; } = null!;
+        public Student Student { get; set; } = null!;
     }
 }

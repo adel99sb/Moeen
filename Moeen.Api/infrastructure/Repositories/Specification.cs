@@ -1,4 +1,4 @@
-﻿using Moeen.Api.Core.Contracts.infrastructure.Repositories;
+using Moeen.Api.Core.Contracts.infrastructure.Repositories;
 using Moeen.Api.Core.Entities;
 using System.Linq.Expressions;
 
@@ -18,7 +18,7 @@ namespace Moeen.Api.infrastructure.Repositories
         public Expression<Func<T, object>>? OrderByDescending { get; private set; }
         public int? Skip { get; private set; }
         public int? Take { get; private set; }
-        public Expression<Func<Exam, bool>> Predicate { get; internal set; }
+        public Expression<Func<Exam, bool>>? Predicate { get; internal set; }
 
         public Specification(Expression<Func<T, bool>> criteria) => Criteria = criteria;
 
