@@ -300,7 +300,37 @@ h1, h2, h3 {
 }
 
 .validation-message {
+    display: block;
+    margin-top: 6px;
     color: var(--color-danger);
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.6;
+}
+
+.validation-errors {
+    margin: 0 0 16px;
+    padding: 12px 18px 12px 12px;
+    border: 1px solid #fecdca;
+    border-radius: 14px;
+    background: #fff3f1;
+    color: #9b1c13;
+    line-height: 1.8;
+}
+
+.validation-errors li {
+    font-weight: 700;
+}
+
+input.invalid,
+select.invalid,
+textarea.invalid,
+.form-control.invalid,
+.moeen-input.invalid,
+.moeen-control.invalid {
+    border-color: var(--color-danger) !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(229, 0, 0, 0.12) !important;
 }
 /*AccountManagement style*/
 :root {

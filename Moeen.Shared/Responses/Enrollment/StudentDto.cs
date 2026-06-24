@@ -24,6 +24,10 @@ namespace Moeen.Shared.Responses.Enrollment
         public int Score { get; set; }
         public Guid MosqueId { get; set; }
         public Guid? SaturdayHalqeId { get; set; }
+        public Guid? HalqaId { get; set; }
+        public string HalqaName { get; set; } = string.Empty;
+        public Guid? FoujId { get; set; }
+        public string FoujName { get; set; } = string.Empty;
 
         // Navigation properties (simplified)
         public string MosqueName { get; set; } = string.Empty;

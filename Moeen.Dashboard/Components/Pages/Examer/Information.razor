@@ -1,4 +1,4 @@
-@page "/examer/information"
+﻿@page "/examer/information"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using System.Text.Json
 @using Microsoft.AspNetCore.Components
@@ -298,7 +298,8 @@
                                 </div>
 
                                 <div class="exam-grid">
-                                    <div class="exam-field"><span class="label">المعلم</span><div class="value">@Display(exam.TeacherName)</div></div>
+                                    <div class="exam-field"><span class="label">معلم الحلقة</span><div class="value">@Display(exam.HalqaTeacherName)</div></div>
+                                    <div class="exam-field"><span class="label">المختبر</span><div class="value">@Display(exam.ExaminerName)</div></div>
                                     <div class="exam-field"><span class="label">العلامة</span><div class="value">@exam.Score / 100</div></div>
                                     <div class="exam-field"><span class="label">الدرجة</span><div class="value">@exam.Mark</div></div>
                                     <div class="exam-field"><span class="label">التقدير</span><div class="value">@Display(exam.Grade)</div></div>
@@ -380,9 +381,16 @@
             throw new InvalidOperationException(response?.Message ?? "تعذر تحميل اختبارات الطالب.");
 
         _exams.Clear();
-        var result = DeserializeData<GetStudentExamsResponse>(response.Data);
-        if (result?.Exams is not null)
-            _exams.AddRange(result.Exams);
+        _exams.AddRange(ExtractExamList(response.Data));
+    }
+
+    private static List<ExamResultDto> ExtractExamList(object? data)
+    {
+        var dto = DeserializeData<GetStudentExamsResponse>(data);
+        if (dto?.Exams is not null)
+            return dto.Exams;
+
+        return DeserializeData<List<ExamResultDto>>(data) ?? new List<ExamResultDto>();
     }
 
     private static T? DeserializeData<T>(object? data)

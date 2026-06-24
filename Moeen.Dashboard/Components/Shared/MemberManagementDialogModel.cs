@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Dashboard.Components.Shared
 {
@@ -29,6 +29,8 @@ namespace Moeen.Dashboard.Components.Shared
         public int Score { get; set; }
 
         public Guid MosqueId { get; set; }
+        public Guid FoujId { get; set; }
+        public Guid? HalqaId { get; set; }
 
         [StringLength(100, MinimumLength = 6, ErrorMessage = "كلمة المرور يجب أن تكون 6 أحرف على الأقل")]
         public string? Password { get; set; }
@@ -36,6 +38,6 @@ namespace Moeen.Dashboard.Components.Shared
         [StringLength(500, ErrorMessage = "النبذة لا يجب أن تتجاوز 500 حرف")]
         public string? Bio { get; set; }
 
-        public string? AssignedAt { get; set; }
+        public DateTime? AssignedAt { get; set; } = DateTime.Today;
     }
 }

@@ -1,4 +1,6 @@
 @using Moeen.Shared.Responses.Mosuq
+@using Moeen.Shared.Responses.Fouj
+@using Moeen.Shared.Responses.Halqa
 
 @if (IsOpen)
 {
@@ -19,6 +21,7 @@
 
             <EditForm Model="Model" OnValidSubmit="ApplyAsync">
                 <DataAnnotationsValidator />
+                <DashboardValidationSummary />
                 <div class="moeen-dialog-body">
                     @if (!string.IsNullOrWhiteSpace(ErrorMessage))
                     {
@@ -97,6 +100,34 @@
                             </div>
                         }
 
+                        @if (ShowFouj)
+                        {
+                            <div class="moeen-form-field">
+                                <label>الفوج</label>
+                                <InputSelect class="form-control moeen-control" @bind-Value="Model.FoujId" disabled="@DisableFoujAndHalqa">
+                                    <option value="@Guid.Empty">اختر الفوج</option>
+                                    @foreach (var fouj in Foujs)
+                                    {
+                                        <option value="@fouj.Id">@fouj.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        }
+
+                        @if (ShowHalqa)
+                        {
+                            <div class="moeen-form-field">
+                                <label>الحلقة</label>
+                                <InputSelect class="form-control moeen-control" @bind-Value="Model.HalqaId" disabled="@DisableFoujAndHalqa">
+                                    <option value="">اختر الحلقة</option>
+                                    @foreach (var halqa in DialogHalqas)
+                                    {
+                                        <option value="@halqa.Id">@halqa.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        }
+
                         @if (ShowPassword)
                         {
                             <div class="moeen-form-field">
@@ -109,8 +140,9 @@
                         @if (ShowAssignedAt)
                         {
                             <div class="moeen-form-field">
-                                <label>تاريخ/مكان التعيين</label>
-                                <InputText class="form-control moeen-control" @bind-Value="Model.AssignedAt" placeholder="مثال: مسجد معين التجريبي" />
+                                <label>تاريخ التعيين</label>
+                                <InputDate class="form-control moeen-control" @bind-Value="Model.AssignedAt" />
+                                <ValidationMessage For="@(() => Model.AssignedAt)" />
                             </div>
                         }
 
@@ -319,8 +351,13 @@
     [Parameter] public string? ErrorMessage { get; set; }
     [Parameter] public MemberManagementDialogModel Model { get; set; } = new();
     [Parameter] public List<MosquDto> Mosques { get; set; } = new();
+    [Parameter] public List<FoujDto> Foujs { get; set; } = new();
+    [Parameter] public List<HalqaDto> Halqas { get; set; } = new();
     [Parameter] public bool ShowMosque { get; set; } = true;
     [Parameter] public bool DisableMosque { get; set; }
+    [Parameter] public bool ShowFouj { get; set; }
+    [Parameter] public bool ShowHalqa { get; set; }
+    [Parameter] public bool DisableFoujAndHalqa { get; set; }
     [Parameter] public bool ShowPassword { get; set; } = true;
     [Parameter] public bool ShowJoinedAt { get; set; } = true;
     [Parameter] public bool ShowStatus { get; set; }
@@ -329,6 +366,10 @@
     [Parameter] public bool ShowAssignedAt { get; set; }
     [Parameter] public EventCallback OnApply { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
+
+    private IEnumerable<HalqaDto> DialogHalqas => Model.FoujId == Guid.Empty
+        ? Halqas
+        : Halqas.Where(halqa => halqa.FoujId == Model.FoujId);
 
     private async Task ApplyAsync()
         => await OnApply.InvokeAsync();

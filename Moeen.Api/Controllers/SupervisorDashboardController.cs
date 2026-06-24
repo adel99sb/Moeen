@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Moeen.Api.Application.Services;
 using Moeen.Api.infrastructure.Data;
 using Moeen.Shared.Constants;
 using Moeen.Shared.Responses.SupervisorDashboard;
@@ -48,6 +49,7 @@ namespace Moeen.Api.Controllers
 
             var fromDate = DateTime.UtcNow.Date.AddDays(-30);
             var mosqueUserIds = await GetMosqueUserIdsAsync(mosqueId.Value);
+            var studentPerformances = await BuildStudentAssessmentPerformanceAsync(mosqueId.Value, fromDate);
 
             var halqas = await _context.Halqas
                 .AsNoTracking()
@@ -67,8 +69,8 @@ namespace Moeen.Api.Controllers
                     c.Status != ComplaintStatus.Resolved &&
                     c.Status != ComplaintStatus.Delete),
                 HalqaPerformance = await BuildHalqaPerformanceAsync(halqas, fromDate),
-                ExcellentStudents = await BuildExcellentStudentsAsync(mosqueId.Value),
-                StrugglingStudents = await BuildStrugglingStudentsAsync(mosqueId.Value, fromDate)
+                ExcellentStudents = SupervisorDashboardStudentClassifier.BuildExcellentStudents(studentPerformances),
+                StrugglingStudents = SupervisorDashboardStudentClassifier.BuildStrugglingStudents(studentPerformances)
             };
 
             return Ok(response);
@@ -141,62 +143,55 @@ namespace Moeen.Api.Controllers
             return result;
         }
 
-        private async Task<List<DashboardStudentDto>> BuildExcellentStudentsAsync(Guid mosqueId)
+        private async Task<List<SupervisorDashboardStudentPerformance>> BuildStudentAssessmentPerformanceAsync(Guid mosqueId, DateTime fromDate)
         {
-            return await _context.Students
+            var examScores = await _context.Exams
                 .AsNoTracking()
-                .Where(s => s.MosqueId == mosqueId)
-                .OrderByDescending(s => s.score)
-                .ThenBy(s => s.name)
-                .Take(5)
-                .Select(s => new DashboardStudentDto
-                {
-                    StudentId = s.Id,
-                    StudentName = s.name,
-                    Score = s.score,
-                    Badge = s.score >= 90 ? "ممتاز" : "متميز",
-                    Reason = "من أعلى الطلاب نقاطاً خلال الفترة الحالية"
-                })
+                .Where(e => e.date >= fromDate && e.Student.MosqueId == mosqueId)
+                .Select(e => new StudentAssessmentScore(e.StudentId, e.score))
                 .ToListAsync();
-        }
 
-        private async Task<List<DashboardStudentDto>> BuildStrugglingStudentsAsync(Guid mosqueId, DateTime fromDate)
-        {
-            var absenceCounts = await _context.Attendances
+            var recitationScores = await _context.ProgressEntries
                 .AsNoTracking()
-                .Where(a =>
-                    a.HalqeSession.date >= fromDate &&
-                    a.Status == AttendanceStatus.Absent &&
-                    a.Student.MosqueId == mosqueId)
-                .GroupBy(a => a.StudentId)
-                .Select(g => new { StudentId = g.Key, Absences = g.Count() })
-                .ToDictionaryAsync(x => x.StudentId, x => x.Absences);
+                .Where(p => !p.IsDeleted && p.Date >= fromDate && p.Student.MosqueId == mosqueId)
+                .Select(p => new StudentAssessmentScore(p.StudentId, p.LevelScore))
+                .ToListAsync();
+
+            var performanceByStudent = examScores
+                .Concat(recitationScores)
+                .GroupBy(score => score.StudentId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => new
+                    {
+                        AverageScore = group.Average(score => score.Score),
+                        AssessmentCount = group.Count()
+                    });
+
+            if (performanceByStudent.Count == 0)
+                return new List<SupervisorDashboardStudentPerformance>();
+
+            var studentIds = performanceByStudent.Keys.ToList();
 
             var students = await _context.Students
                 .AsNoTracking()
-                .Where(s => s.MosqueId == mosqueId)
-                .OrderBy(s => s.score)
-                .ThenBy(s => s.name)
-                .Take(5)
+                .Where(s => s.MosqueId == mosqueId && studentIds.Contains(s.Id))
                 .Select(s => new { s.Id, s.name, s.score })
                 .ToListAsync();
 
             return students.Select(s =>
             {
-                absenceCounts.TryGetValue(s.Id, out var absences);
-                return new DashboardStudentDto
-                {
-                    StudentId = s.Id,
-                    StudentName = s.name,
-                    Score = s.score,
-                    Badge = absences >= 3 ? "تنبيه غياب" : "متابعة خطة",
-                    Reason = absences >= 3
-                        ? $"غياب متكرر عن الحصص ({absences} أيام)"
-                        : "يحتاج متابعة بسبب انخفاض النقاط الحالية"
-                };
+                var performance = performanceByStudent[s.Id];
+                return new SupervisorDashboardStudentPerformance(
+                    s.Id,
+                    s.name ?? string.Empty,
+                    s.score,
+                    performance.AverageScore,
+                    performance.AssessmentCount);
             }).ToList();
         }
 
         private sealed record HalqaLookup(Guid Id, string Name);
+        private sealed record StudentAssessmentScore(Guid StudentId, int Score);
     }
 }

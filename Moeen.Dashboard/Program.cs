@@ -141,7 +141,7 @@ builder.Services.AddHttpClient<OwnerDashboardApiClient>(client =>
 builder.Services.AddHttpClient<InstructorHomeApiClient>(client =>
 {
     client.BaseAddress = new Uri(ApiRoutes.BaseUrl);
-});
+}).AddHttpMessageHandler<AuthHandler>();
 
 // 1. تسجيل الـ HttpClient الخاص بالـ User وتحديد الرابط الأساسي من الـ ApiRoutes عندكِ
 builder.Services.AddHttpClient<UserApiClient>(client =>

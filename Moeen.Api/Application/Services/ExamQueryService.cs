@@ -69,9 +69,11 @@ namespace Moeen.Api.Application.Services
             {
                 Id = exam.Id,
                 StudentId = exam.StudentId,
-                StudentName = exam.Student?.name,
+                StudentName = exam.Student?.name ?? string.Empty,
                 TeacherId = exam.TeacherId,
-                TeacherName = exam.Teacher?.name,
+                TeacherName = exam.Teacher?.name ?? string.Empty,
+                HalqaTeacherName = exam.Student?.Halqa?.Teacher?.name ?? string.Empty,
+                ExaminerName = exam.Teacher?.name ?? string.Empty,
                 JuzFrom = exam.juz_form,
                 JuzTo = exam.juz_to,
                 Score = exam.score,
@@ -170,6 +172,7 @@ namespace Moeen.Api.Application.Services
                 HighestScore = await query.MaxAsync(e => e.score),
                 LowestScore = await query.MinAsync(e => e.score),
                 PassCount = await query.CountAsync(e => e.score >= 50),
+                FailedCount = await query.CountAsync(e => e.score < 50),
                 PassRate = (double)await query.CountAsync(e => e.score >= 50) / await query.CountAsync() * 100
             };
 
@@ -215,16 +218,32 @@ namespace Moeen.Api.Application.Services
                 .AsNoTracking()
                 .Where(e => e.StudentId == request.StudentId)
                 .OrderByDescending(e => e.date)
-                .Select(e => new ExamSummaryDto
+                .Select(e => new ExamResultDto
                 {
-                    ExamId = e.Id,
-                    StudentName = e.Student.name,
+                    Id = e.Id,
+                    StudentId = e.StudentId,
+                    StudentName = e.Student != null ? e.Student.name : string.Empty,
+                    TeacherId = e.TeacherId,
+                    TeacherName = e.Teacher != null ? e.Teacher.name : string.Empty,
+                    HalqaTeacherName = e.Student != null && e.Student.Halqa != null && e.Student.Halqa.Teacher != null ? e.Student.Halqa.Teacher.name : string.Empty,
+                    ExaminerName = e.Teacher != null ? e.Teacher.name : string.Empty,
+                    JuzFrom = e.juz_form,
+                    JuzTo = e.juz_to,
                     Score = e.score,
-                    Date = e.date
+                    Mark = e.mark,
+                    Date = e.date,
+                    Notes = e.notes,
+                    Grade = CalculateGrade(e.score)
                 })
                 .ToListAsync();
 
-            return GeneralResponse.Ok("تم جلب اختبارات الطالب.", exams);
+            var response = new GetStudentExamsResponse
+            {
+                Exams = exams,
+                TotalCount = exams.Count
+            };
+
+            return GeneralResponse.Ok("تم جلب اختبارات الطالب.", response);
         }
 
         public async Task<GeneralResponse> GetStudentExamsByDateRangeAsync(GetStudentExamsByDateRequest request)
@@ -236,16 +255,32 @@ namespace Moeen.Api.Application.Services
                 .AsNoTracking()
                 .Where(e => e.StudentId == request.StudentId && e.date >= request.FromDate && e.date <= request.ToDate)
                 .OrderByDescending(e => e.date)
-                .Select(e => new ExamSummaryDto
+                .Select(e => new ExamResultDto
                 {
-                    ExamId = e.Id,
-                    StudentName = e.Student.name,
+                    Id = e.Id,
+                    StudentId = e.StudentId,
+                    StudentName = e.Student != null ? e.Student.name : string.Empty,
+                    TeacherId = e.TeacherId,
+                    TeacherName = e.Teacher != null ? e.Teacher.name : string.Empty,
+                    HalqaTeacherName = e.Student != null && e.Student.Halqa != null && e.Student.Halqa.Teacher != null ? e.Student.Halqa.Teacher.name : string.Empty,
+                    ExaminerName = e.Teacher != null ? e.Teacher.name : string.Empty,
+                    JuzFrom = e.juz_form,
+                    JuzTo = e.juz_to,
                     Score = e.score,
-                    Date = e.date
+                    Mark = e.mark,
+                    Date = e.date,
+                    Notes = e.notes,
+                    Grade = CalculateGrade(e.score)
                 })
                 .ToListAsync();
 
-            return GeneralResponse.Ok("تم جلب اختبارات الطالب ضمن الفترة المحددة.", exams);
+            var response = new GetStudentExamsResponse
+            {
+                Exams = exams,
+                TotalCount = exams.Count
+            };
+
+            return GeneralResponse.Ok("تم جلب اختبارات الطالب ضمن الفترة المحددة.", response);
         }
 
         public async Task<GeneralResponse> PrepareExamDataForExportAsync(PrepareExportRequest request)
@@ -317,6 +352,8 @@ namespace Moeen.Api.Application.Services
                     StudentName = e.Student.name,
                     TeacherId = e.TeacherId,
                     TeacherName = e.Teacher.name,
+                    HalqaTeacherName = e.Student != null && e.Student.Halqa != null && e.Student.Halqa.Teacher != null ? e.Student.Halqa.Teacher.name : string.Empty,
+                    ExaminerName = e.Teacher != null ? e.Teacher.name : string.Empty,
                     JuzFrom = e.juz_form,
                     JuzTo = e.juz_to,
                     Score = e.score,

@@ -21,6 +21,10 @@ namespace Moeen.Shared.Responses.Enrollment
         public Guid MosqueId { get; set; }
         public string Bio { get; set; } = string.Empty;
         public string AssignedAt { get; set; } = string.Empty;
+        public Guid? HalqaId { get; set; }
+        public string HalqaName { get; set; } = string.Empty;
+        public Guid? FoujId { get; set; }
+        public string FoujName { get; set; } = string.Empty;
 
         // Navigation
         public string MosqueName { get; set; } = string.Empty;

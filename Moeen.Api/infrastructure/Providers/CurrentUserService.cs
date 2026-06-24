@@ -17,8 +17,14 @@ namespace Moeen.Api.infrastructure.Providers
         {
             get
             {
-                var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst("UserIdentifier")?.Value
-                    ?? _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var user = _httpContextAccessor.HttpContext?.User;
+                if (user == null)
+                    return null;
+
+                var userIdClaim = user.FindFirst("UserIdentifier")?.Value
+                    ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? user.FindFirst("sub")?.Value
+                    ?? user.FindFirst("nameid")?.Value;
 
                 return Guid.TryParse(userIdClaim, out var parsedUserId) ? parsedUserId : null;
             }

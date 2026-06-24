@@ -9,6 +9,8 @@ namespace Moeen.Shared.Responses.ExamCommand
         public string StudentName { get; set; } = string.Empty;
         public Guid TeacherId { get; set; }
         public string TeacherName { get; set; } = string.Empty;
+        public string HalqaTeacherName { get; set; } = string.Empty;
+        public string ExaminerName { get; set; } = string.Empty;
         public int JuzFrom { get; set; }
         public int JuzTo { get; set; }
         public int Score { get; set; }

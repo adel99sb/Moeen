@@ -85,6 +85,20 @@ namespace Moeen.Api.Application.Services
                     return GeneralResponse.NotFound("الحلقة غير موجودة.");
             }
 
+            Halqa? regularHalqa = null;
+            if (request.HalqaId.HasValue && request.HalqaId.Value != Guid.Empty)
+            {
+                regularHalqa = await _context.Halqas
+                    .Include(h => h.Fouj)
+                    .FirstOrDefaultAsync(h => h.Id == request.HalqaId.Value);
+
+                if (regularHalqa == null)
+                    return GeneralResponse.NotFound("الحلقة غير موجودة.");
+
+                if (regularHalqa.Fouj == null || regularHalqa.Fouj.MosqueId != request.MosqueId)
+                    return GeneralResponse.BadRequest("الحلقة المختارة لا تتبع المسجد المحدد.");
+            }
+
             var student = new Student
             {
                 Id = Guid.NewGuid(),
@@ -104,8 +118,8 @@ namespace Moeen.Api.Application.Services
                 status = request.Status,
                 score = request.Score,
                 MosqueId = request.MosqueId,
-                HalqaId = null,
-                Halqa = null,
+                HalqaId = regularHalqa?.Id,
+                Halqa = regularHalqa,
                 SaturdayHalqeId = request.SaturdayHalqeId ?? Guid.Empty
             };
 
@@ -144,6 +158,20 @@ namespace Moeen.Api.Application.Services
             if (mosque == null)
                 return GeneralResponse.NotFound("المسجد غير موجود.");
 
+            Halqa? assignedHalqa = null;
+            if (request.HalqaId.HasValue && request.HalqaId.Value != Guid.Empty)
+            {
+                assignedHalqa = await _context.Halqas
+                    .Include(h => h.Fouj)
+                    .FirstOrDefaultAsync(h => h.Id == request.HalqaId.Value);
+
+                if (assignedHalqa == null)
+                    return GeneralResponse.NotFound("الحلقة غير موجودة.");
+
+                if (assignedHalqa.Fouj == null || assignedHalqa.Fouj.MosqueId != request.MosqueId)
+                    return GeneralResponse.BadRequest("الحلقة المختارة لا تتبع المسجد المحدد.");
+            }
+
             var teacher = new Teacher
             {
                 Id = Guid.NewGuid(),
@@ -173,6 +201,13 @@ namespace Moeen.Api.Application.Services
             var teacherRoleError = await EnsureIdentityRoleAsync(teacher, Roles.Teacher.ToString());
             if (teacherRoleError != null)
                 return teacherRoleError;
+
+            if (assignedHalqa != null)
+            {
+                assignedHalqa.TeacherId = teacher.Id;
+                await _context.SaveChangesAsync();
+                teacher.halaqas.Add(assignedHalqa);
+            }
 
             teacher.Mosque = mosque;
             return GeneralResponse.Ok("تم إضافة المعلم بنجاح.", MapTeacherDto(teacher));
@@ -438,6 +473,28 @@ namespace Moeen.Api.Application.Services
 
                 if (request.SaturdayHalqeId.HasValue)
                     student.SaturdayHalqeId = request.SaturdayHalqeId.Value;
+
+                if (request.HalqaId.HasValue)
+                {
+                    if (request.HalqaId.Value == Guid.Empty)
+                    {
+                        student.HalqaId = null;
+                    }
+                    else
+                    {
+                        var selectedHalqa = await _context.Halqas
+                            .Include(h => h.Fouj)
+                            .FirstOrDefaultAsync(h => h.Id == request.HalqaId.Value);
+
+                        if (selectedHalqa == null)
+                            return GeneralResponse.NotFound("الحلقة غير موجودة.");
+
+                        if (selectedHalqa.Fouj == null || selectedHalqa.Fouj.MosqueId != student.MosqueId)
+                            return GeneralResponse.BadRequest("الحلقة المختارة لا تتبع مسجد الطالب.");
+
+                        student.HalqaId = selectedHalqa.Id;
+                    }
+                }
             }
 
             var teacher = await _context.Teachers.FindAsync(memberId);
@@ -448,6 +505,21 @@ namespace Moeen.Api.Application.Services
 
                 if (!string.IsNullOrWhiteSpace(request.AssignedAt))
                     teacher.assigned_at = request.AssignedAt;
+
+                if (request.HalqaId.HasValue && request.HalqaId.Value != Guid.Empty)
+                {
+                    var selectedHalqa = await _context.Halqas
+                        .Include(h => h.Fouj)
+                        .FirstOrDefaultAsync(h => h.Id == request.HalqaId.Value);
+
+                    if (selectedHalqa == null)
+                        return GeneralResponse.NotFound("الحلقة غير موجودة.");
+
+                    if (selectedHalqa.Fouj == null || selectedHalqa.Fouj.MosqueId != teacher.MosqueId)
+                        return GeneralResponse.BadRequest("الحلقة المختارة لا تتبع مسجد المعلم.");
+
+                    selectedHalqa.TeacherId = teacher.Id;
+                }
             }
 
             if (request.StudentId.HasValue)
@@ -492,6 +564,8 @@ namespace Moeen.Api.Application.Services
             var query = _context.Students
                 .Include(s => s.Mosque)
                 .Include(s => s.SaturdayHalqa)
+                .Include(s => s.Halqa)
+                    .ThenInclude(h => h.Fouj)
                 .Where(s => s.role == StudentRole);
 
             if (!string.IsNullOrWhiteSpace(request.Name))
@@ -523,7 +597,11 @@ namespace Moeen.Api.Application.Services
             int page = Math.Max(1, request.PageNumber);
             int pageSize = Math.Max(1, request.PageSize);
 
-            var query = _context.Teachers.Include(t => t.Mosque).AsQueryable();
+            var query = _context.Teachers
+                .Include(t => t.Mosque)
+                .Include(t => t.halaqas)
+                    .ThenInclude(h => h.Fouj)
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(request.Name))
                 query = query.Where(t => EF.Functions.Like(t.name, $"%{request.Name}%"));
@@ -876,14 +954,38 @@ namespace Moeen.Api.Application.Services
             if (request == null || request.StudentId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف الطالب غير صالح.");
 
-            var student = await _context.Students.Include(s => s.Children).FirstOrDefaultAsync(s => s.Id == request.StudentId);
+            var student = await _context.Students
+                .Include(s => s.Children)
+                .FirstOrDefaultAsync(s => s.Id == request.StudentId);
+
             if (student == null)
                 return GeneralResponse.NotFound("الطالب غير موجود.");
 
-            if (student.Children != null)
+            var blockers = new List<string>();
+
+            if (student.Children?.Any() == true)
+                blockers.Add($"مرتبط كولي أمر مع {student.Children.Count} طالب/طلاب");
+
+            var parentStudentLinksCount = await _context.ParentSudents.CountAsync(p => p.Studentid == student.Id);
+            if (parentStudentLinksCount > 0)
+                blockers.Add($"مرتبط مع {parentStudentLinksCount} ولي أمر");
+
+            var attendanceCount = await _context.Attendances.CountAsync(a => a.StudentId == student.Id);
+            if (attendanceCount > 0)
+                blockers.Add($"لديه {attendanceCount} سجل حضور");
+
+            var examCount = await _context.Exams.CountAsync(e => e.StudentId == student.Id);
+            if (examCount > 0)
+                blockers.Add($"لديه {examCount} اختبار");
+
+            var progressCount = await _context.ProgressEntries.CountAsync(p => p.StudentId == student.Id);
+            if (progressCount > 0)
+                blockers.Add($"لديه {progressCount} سجل تقدم");
+
+            if (blockers.Count > 0)
             {
-                foreach (var child in student.Children)
-                    child.ParentId = null;
+                var blockerText = string.Join("، ", blockers);
+                return GeneralResponse.BadRequest($"لا يمكن حذف الطالب لأنه مرتبط ببيانات أخرى: {blockerText}. يرجى فك هذه الارتباطات أو حذف البيانات التابعة أولاً ثم إعادة المحاولة.");
             }
 
             var result = await _userManager.DeleteAsync(student);
@@ -908,7 +1010,38 @@ namespace Moeen.Api.Application.Services
 
             var hasHalaqas = await _context.Halqas.AnyAsync(h => h.TeacherId == teacher.Id);
             if (hasHalaqas)
-                return GeneralResponse.BadRequest("لا يمكن حذف المعلم لارتباطه بحلقات.");
+                return GeneralResponse.BadRequest("لا يمكن حذف المعلم لارتباطه بحلقات. يرجى إزالة المعلم من الحلقات أولاً.");
+
+            var hasSaturdayHalaqas = await _context.SaturdayHalqes.AnyAsync(h => h.TeacherId == teacher.Id);
+            if (hasSaturdayHalaqas)
+                return GeneralResponse.BadRequest("لا يمكن حذف المعلم لارتباطه بحلقات السبت. يرجى نقل الحلقات إلى معلم آخر أولاً.");
+
+            var hasProgressEntries = await _context.ProgressEntries.AnyAsync(p => p.TeacherId == teacher.Id);
+            if (hasProgressEntries)
+                return GeneralResponse.BadRequest("لا يمكن حذف المعلم لوجود سجلات تقدم مرتبطة به.");
+
+            var hasAttendances = await _context.Attendances.AnyAsync(a => a.TeacherId == teacher.Id);
+            if (hasAttendances)
+                return GeneralResponse.BadRequest("لا يمكن حذف المعلم لوجود سجلات حضور مرتبطة به.");
+
+            var hasExams = await _context.Exams.AnyAsync(e => e.TeacherId == teacher.Id);
+            if (hasExams)
+                return GeneralResponse.BadRequest("لا يمكن حذف المعلم لوجود اختبارات مرتبطة به.");
+
+            var hasSaturdayLessons = await _context.Set<SaturdayLesson>().AnyAsync(l => l.TeacherId == teacher.Id);
+            if (hasSaturdayLessons)
+                return GeneralResponse.BadRequest("لا يمكن حذف المعلم لوجود دروس أسبوعية مرتبطة به.");
+
+            var roles = await _userManager.GetRolesAsync(teacher);
+            if (roles.Count > 0)
+            {
+                var removeRolesResult = await _userManager.RemoveFromRolesAsync(teacher, roles);
+                if (!removeRolesResult.Succeeded)
+                {
+                    var errors = string.Join("; ", removeRolesResult.Errors.Select(e => e.Description));
+                    return GeneralResponse.BadRequest($"فشل إزالة صلاحيات المعلم قبل الحذف: {errors}");
+                }
+            }
 
             var result = await _userManager.DeleteAsync(teacher);
             if (!result.Succeeded)
@@ -1278,6 +1411,10 @@ namespace Moeen.Api.Application.Services
                 Score = student.score,
                 MosqueId = student.MosqueId,
                 SaturdayHalqeId = student.SaturdayHalqeId,
+                HalqaId = student.HalqaId,
+                HalqaName = student.Halqa?.Name ?? string.Empty,
+                FoujId = student.Halqa?.FoujId,
+                FoujName = student.Halqa?.Fouj?.name ?? string.Empty,
                 MosqueName = student.Mosque?.name ?? string.Empty,
                 SaturdayHalqeName = student.SaturdayHalqa?.name ?? string.Empty
             };
@@ -1285,6 +1422,8 @@ namespace Moeen.Api.Application.Services
 
         private static TeacherDto MapTeacherDto(Teacher teacher)
         {
+            var primaryHalqa = teacher.halaqas?.OrderBy(h => h.Name).FirstOrDefault();
+
             return new TeacherDto
             {
                 Id = teacher.Id,
@@ -1301,6 +1440,10 @@ namespace Moeen.Api.Application.Services
                 MosqueId = teacher.MosqueId,
                 Bio = teacher.Bio,
                 AssignedAt = teacher.assigned_at,
+                HalqaId = primaryHalqa?.Id,
+                HalqaName = primaryHalqa?.Name ?? string.Empty,
+                FoujId = primaryHalqa?.FoujId,
+                FoujName = primaryHalqa?.Fouj?.name ?? string.Empty,
                 MosqueName = teacher.Mosque?.name ?? string.Empty
             };
         }

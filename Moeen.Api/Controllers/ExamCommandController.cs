@@ -29,7 +29,7 @@ namespace Moeen.Api.Controllers
             try
             {
                 var result = await _examCommandService.RegisterExamAsync(request);
-                return Ok(GeneralResponse.Ok("تم تسجيل الاختبار بنجاح.", result));
+                return StatusCode(result.StatusCode, result);
             }
             catch (ArgumentException ex)
             {
@@ -50,7 +50,7 @@ namespace Moeen.Api.Controllers
             try
             {
                 var result = await _examCommandService.UpdateExamResultAsync(request);
-                return Ok(GeneralResponse.Ok("تم تحديث نتيجة الاختبار بنجاح.", result));
+                return StatusCode(result.StatusCode, result);
             }
             catch (ArgumentException ex)
             {
@@ -71,7 +71,7 @@ namespace Moeen.Api.Controllers
             try
             {
                 var result = await _examCommandService.UpdateExamInfoAsync(request);
-                return Ok(GeneralResponse.Ok("تم تحديث بيانات الاختبار بنجاح.", result));
+                return StatusCode(result.StatusCode, result);
             }
             catch (ArgumentException ex)
             {
@@ -92,7 +92,7 @@ namespace Moeen.Api.Controllers
             try
             {
                 var result = await _examCommandService.AddExamFeedbackAsync(request);
-                return Ok(GeneralResponse.Ok("تم إضافة ملاحظات الامتحان بنجاح.", result));
+                return StatusCode(result.StatusCode, result);
             }
             catch (ArgumentException ex)
             {
@@ -113,7 +113,7 @@ namespace Moeen.Api.Controllers
             try
             {
                 var result = await _examCommandService.DeleteExamResultAsync(request);
-                return Ok(GeneralResponse.Ok(result.Message ?? "تم حذف نتيجة الاختبار بنجاح.", result));
+                return StatusCode(result.StatusCode, result);
             }
             catch (ArgumentException ex)
             {

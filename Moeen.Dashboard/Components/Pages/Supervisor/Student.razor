@@ -6,10 +6,15 @@
 @using Moeen.Dashboard.Services.Abstractions
 @using Moeen.Shared.Requests.Enrollment
 @using Moeen.Shared.Requests.Mosuq
+@using Moeen.Shared.Requests.Fouj
+@using Moeen.Shared.Responses.Fouj
+@using Moeen.Shared.Responses.Halqa
 @using Moeen.Shared.Responses.Enrollment
 @using Moeen.Shared.Responses.Mosuq
 @inject IEnrollmentService EnrollmentService
 @inject IMosquService MosquService
+@inject IFoujManagementService FoujService
+@inject IHalqaManagementService HalqaService
 @inject IJSRuntime JS
 
 <style>
@@ -485,6 +490,7 @@
 
                 <EditForm Model="_form" OnValidSubmit="ApplyDialogAsync">
                     <DataAnnotationsValidator />
+                    <DashboardValidationSummary />
                     <div class="student-dialog-body">
                         @if (!string.IsNullOrWhiteSpace(_dialogError))
                         {
@@ -539,19 +545,39 @@
                                 <InputNumber class="form-control moeen-control" @bind-Value="_form.Score" disabled="@_isViewMode" />
                                 <ValidationMessage For="@(() => _form.Score)" />
                             </div>
+                            <div class="form-field">
+                                <label>المسجد</label>
+                                <InputSelect class="form-control moeen-control" @bind-Value="_form.MosqueId" disabled="@_isViewMode">
+                                    <option value="@Guid.Empty">اختر المسجد</option>
+                                    @foreach (var mosque in _mosques)
+                                    {
+                                        <option value="@mosque.Id">@mosque.name</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => _form.MosqueId)" />
+                            </div>
+                            <div class="form-field">
+                                <label>الفوج</label>
+                                <InputSelect class="form-control moeen-control" @bind-Value="_form.FoujId" disabled="@_isViewMode">
+                                    <option value="@Guid.Empty">اختر الفوج</option>
+                                    @foreach (var fouj in DialogFoujs)
+                                    {
+                                        <option value="@fouj.Id">@fouj.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="form-field">
+                                <label>الحلقة</label>
+                                <InputSelect class="form-control moeen-control" @bind-Value="_form.HalqaId" disabled="@_isViewMode">
+                                    <option value="">اختر الحلقة</option>
+                                    @foreach (var halqa in DialogHalqas)
+                                    {
+                                        <option value="@halqa.Id">@halqa.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
                             @if (!_isEditMode && !_isViewMode)
                             {
-                                <div class="form-field">
-                                    <label>المسجد</label>
-                                    <InputSelect class="form-control moeen-control" @bind-Value="_form.MosqueId">
-                                        <option value="@Guid.Empty">اختر المسجد</option>
-                                        @foreach (var mosque in _mosques)
-                                        {
-                                            <option value="@mosque.Id">@mosque.name</option>
-                                        }
-                                    </InputSelect>
-                                    <ValidationMessage For="@(() => _form.MosqueId)" />
-                                </div>
                                 <div class="form-field">
                                     <label>كلمة المرور</label>
                                     <InputText type="password" class="form-control moeen-control" @bind-Value="_form.Password" placeholder="كلمة مرور الطالب" />
@@ -593,6 +619,8 @@
 
     private readonly List<StudentRow> _students = new();
     private List<MosquDto> _mosques = new();
+    private List<FoujDto> _foujs = new();
+    private List<HalqaDto> _halqas = new();
     private StudentDialogModel _form = new();
 
     private bool _isLoading = true;
@@ -622,6 +650,7 @@
         try
         {
             await LoadMosquesAsync();
+            await LoadStructureAsync();
             await LoadStudentsAsync();
         }
         catch (Exception ex)
@@ -646,6 +675,27 @@
         }
     }
 
+    private async Task LoadStructureAsync()
+    {
+        try
+        {
+            var foujResponse = await FoujService.GetAllAsync(new GetAllFoujsRequest());
+            _foujs = foujResponse?.Success == true
+                ? JsonSerializer.Deserialize<List<FoujDto>>(JsonSerializer.Serialize(foujResponse.Data), JsonOptions) ?? new()
+                : new();
+
+            var halqaResponse = await HalqaService.GetAllAsync();
+            _halqas = halqaResponse?.Success == true
+                ? JsonSerializer.Deserialize<List<HalqaDto>>(JsonSerializer.Serialize(halqaResponse.Data), JsonOptions) ?? new()
+                : new();
+        }
+        catch
+        {
+            _foujs = new();
+            _halqas = new();
+        }
+    }
+
     private async Task LoadStudentsAsync()
     {
         _errorMessage = null;
@@ -667,10 +717,10 @@
             }
 
             var json = JsonSerializer.Serialize(response.Data);
-            var members = JsonSerializer.Deserialize<List<MemberProfileDto>>(json, JsonOptions) ?? new();
+            var students = JsonSerializer.Deserialize<List<StudentDto>>(json, JsonOptions) ?? new();
 
             _students.Clear();
-            _students.AddRange(members.Select(StudentRow.FromMember));
+            _students.AddRange(students.Select(StudentRow.FromDto));
         }
         catch (Exception ex)
         {
@@ -694,7 +744,9 @@
         _form = new StudentDialogModel
         {
             EnrollmentDate = DateTime.Today,
-            MosqueId = _mosques.FirstOrDefault()?.Id ?? Guid.Empty
+            MosqueId = _mosques.FirstOrDefault()?.Id ?? Guid.Empty,
+            FoujId = _foujs.FirstOrDefault()?.Id ?? Guid.Empty,
+            HalqaId = _halqas.FirstOrDefault()?.Id
         };
         _isDialogOpen = true;
     }
@@ -716,7 +768,9 @@
             EnrollmentDate = student.EnrollmentDate == default ? DateTime.Today : student.EnrollmentDate,
             Status = student.Status,
             Score = student.Score,
-            MosqueId = student.MosqueId
+            MosqueId = student.MosqueId,
+            FoujId = student.FoujId ?? Guid.Empty,
+            HalqaId = student.HalqaId
         };
         _isDialogOpen = true;
     }
@@ -738,7 +792,9 @@
             EnrollmentDate = student.EnrollmentDate == default ? DateTime.Today : student.EnrollmentDate,
             Status = student.Status,
             Score = student.Score,
-            MosqueId = student.MosqueId
+            MosqueId = student.MosqueId,
+            FoujId = student.FoujId ?? Guid.Empty,
+            HalqaId = student.HalqaId
         };
         _isDialogOpen = true;
     }
@@ -775,7 +831,8 @@
                     Gender = _form.Gender,
                     Age = _form.Age,
                     Status = _form.Status,
-                    Score = _form.Score
+                    Score = _form.Score,
+                    HalqaId = _form.HalqaId
                 });
 
                 if (response == null || !response.Success)
@@ -812,7 +869,9 @@
                     EnrollmentDate = _form.EnrollmentDate,
                     Status = _form.Status,
                     Score = _form.Score,
-                    MosqueId = _form.MosqueId
+                    MosqueId = _form.MosqueId,
+                    FoujId = _form.FoujId == Guid.Empty ? null : _form.FoujId,
+                    HalqaId = _form.HalqaId
                 });
 
                 if (response == null || !response.Success)
@@ -867,6 +926,14 @@
     private static string Display(string? value)
         => string.IsNullOrWhiteSpace(value) ? "—" : value;
 
+    private IEnumerable<FoujDto> DialogFoujs => _form.MosqueId == Guid.Empty
+        ? _foujs
+        : _foujs.Where(fouj => fouj.MosqueId == _form.MosqueId);
+
+    private IEnumerable<HalqaDto> DialogHalqas => _form.FoujId == Guid.Empty
+        ? _halqas
+        : _halqas.Where(halqa => halqa.FoujId == _form.FoujId);
+
     private static string GetStatusLabel(int status)
         => status switch
         {
@@ -898,21 +965,29 @@
         public int Score { get; set; }
         public Guid MosqueId { get; set; }
         public string MosqueName { get; set; } = string.Empty;
+        public Guid? FoujId { get; set; }
+        public string FoujName { get; set; } = string.Empty;
+        public Guid? HalqaId { get; set; }
+        public string HalqaName { get; set; } = string.Empty;
 
-        public static StudentRow FromMember(MemberProfileDto member)
+        public static StudentRow FromDto(StudentDto dto)
             => new()
             {
-                Id = member.Id,
-                Name = member.Name ?? string.Empty,
-                Email = member.Email ?? string.Empty,
-                Phone = member.Phone,
-                Gender = member.Gender,
-                Age = member.StudentDetails?.Age ?? 0,
-                EnrollmentDate = member.StudentDetails?.EnrollmentDate ?? member.JoinedAt,
-                Status = member.Status,
-                Score = member.StudentDetails?.Score ?? 0,
-                MosqueId = member.MosqueId ?? Guid.Empty,
-                MosqueName = member.MosqueName ?? string.Empty
+                Id = dto.Id,
+                Name = dto.Name ?? string.Empty,
+                Email = dto.Email ?? string.Empty,
+                Phone = dto.Phone,
+                Gender = dto.Gender,
+                Age = dto.Age,
+                EnrollmentDate = dto.EnrollmentDate,
+                Status = dto.Status,
+                Score = dto.Score,
+                MosqueId = dto.MosqueId,
+                MosqueName = dto.MosqueName ?? string.Empty,
+                FoujId = dto.FoujId,
+                FoujName = dto.FoujName ?? string.Empty,
+                HalqaId = dto.HalqaId,
+                HalqaName = dto.HalqaName ?? string.Empty
             };
     }
 
@@ -946,6 +1021,8 @@
         public int Score { get; set; }
 
         public Guid MosqueId { get; set; }
+        public Guid FoujId { get; set; }
+        public Guid? HalqaId { get; set; }
 
         [StringLength(100, MinimumLength = 6, ErrorMessage = "كلمة المرور يجب أن تكون 6 أحرف على الأقل")]
         public string? Password { get; set; }

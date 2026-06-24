@@ -38,6 +38,9 @@ namespace Moeen.Shared.Requests.Enrollment
         [Required(ErrorMessage = "Mosque ID is required")]
         public Guid MosqueId { get; set; }
 
+        public Guid? FoujId { get; set; }
+        public Guid? HalqaId { get; set; }
+
         [StringLength(500, ErrorMessage = "Bio cannot exceed 500 characters")]
         public string Bio { get; set; } = string.Empty; // was 'boi' in entity
 

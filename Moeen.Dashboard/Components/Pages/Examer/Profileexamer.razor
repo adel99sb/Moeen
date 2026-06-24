@@ -8,7 +8,7 @@
 @inject ITokenService TokenService
 @inject IExamQueryService ExamQueryService
 
-<PageTitle>ملف الفاحص</PageTitle>
+<PageTitle>ملف المختبر</PageTitle>
 
 <style>
     .profile-page {
@@ -191,14 +191,14 @@
     {
         <div class="state-box">
             <span class="spinner-border text-success" role="status"></span>
-            <div class="mt-3">جاري تحميل ملف الفاحص...</div>
+            <div class="mt-3">جاري تحميل ملف المختبر...</div>
         </div>
     }
     else
     {
         <section class="profile-hero">
             <div>
-                <h1>ملف الفاحص</h1>
+                <h1>ملف المختبر</h1>
                 <p>صفحة تعريفية مبنية على صلاحيات الحساب وإحصائيات الاختبارات المتاحة.</p>
             </div>
             <div class="hero-avatar"><i class="bi bi-person-check"></i></div>
@@ -232,17 +232,17 @@
             </div>
 
             <div class="content-card">
-                <h2 class="card-title"><i class="bi bi-list-check"></i> مهام الفاحص</h2>
+                <h2 class="card-title"><i class="bi bi-list-check"></i> مهام المختبر</h2>
                 <div class="info-row"><span class="label">تسجيل نتائج الاختبارات</span><span class="pill"><i class="bi bi-check2-circle"></i> متاح</span></div>
                 <div class="info-row"><span class="label">متابعة إحصائيات الاختبارات</span><span class="pill"><i class="bi bi-check2-circle"></i> متاح</span></div>
                 <div class="info-row"><span class="label">استعراض الكتب</span><span class="pill"><i class="bi bi-eye"></i> قراءة فقط</span></div>
                 <div class="info-row"><span class="label">استعراض المنشورات</span><span class="pill"><i class="bi bi-eye"></i> قراءة فقط</span></div>
 
                 <h2 class="card-title mt-4"><i class="bi bi-compass"></i> روابط سريعة</h2>
-                <div class="action-row"><a class="route-link" href="/Examer/Dashboard"><i class="bi bi-speedometer2"></i> لوحة الفاحص</a></div>
+                <div class="action-row"><a class="route-link" href="/Examer/Dashboard"><i class="bi bi-speedometer2"></i> لوحة المختبر</a></div>
                 <div class="action-row"><a class="route-link" href="/examer/exam"><i class="bi bi-clipboard-check"></i> إدارة الاختبارات</a></div>
-                <div class="action-row"><a class="route-link" href="/examer/bookexamer"><i class="bi bi-book"></i> مكتبة الفاحص</a></div>
-                <div class="action-row"><a class="route-link" href="/examer/postexamer"><i class="bi bi-megaphone"></i> منشورات الفاحص</a></div>
+                <div class="action-row"><a class="route-link" href="/examer/bookexamer"><i class="bi bi-book"></i> مكتبة المختبر</a></div>
+                <div class="action-row"><a class="route-link" href="/examer/postexamer"><i class="bi bi-megaphone"></i> منشورات المختبر</a></div>
             </div>
         </section>
     }
@@ -273,7 +273,7 @@
             if (response == null || !response.Success)
             {
                 _statistics = null;
-                _errorMessage = response?.Message ?? "تعذر تحميل إحصائيات الفاحص.";
+                _errorMessage = response?.Message ?? "تعذر تحميل إحصائيات المختبر.";
                 return;
             }
 
@@ -282,7 +282,7 @@
         catch (Exception ex)
         {
             _statistics = null;
-            _errorMessage = $"تعذر تحميل ملف الفاحص: {ex.Message}";
+            _errorMessage = $"تعذر تحميل ملف المختبر: {ex.Message}";
         }
         finally
         {
@@ -320,7 +320,7 @@
 
         return role.Trim().ToLowerInvariant() switch
         {
-            "examer" => "فاحص",
+            "examer" => "مختبر",
             "teacher" => "معلم",
             "supervisor" => "مشرف",
             "owner" => "مالك النظام",

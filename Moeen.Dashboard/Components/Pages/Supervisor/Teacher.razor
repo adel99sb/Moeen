@@ -6,10 +6,15 @@
 @using Moeen.Dashboard.Services.Abstractions
 @using Moeen.Shared.Requests.Enrollment
 @using Moeen.Shared.Requests.Mosuq
+@using Moeen.Shared.Requests.Fouj
+@using Moeen.Shared.Responses.Fouj
+@using Moeen.Shared.Responses.Halqa
 @using Moeen.Shared.Responses.Enrollment
 @using Moeen.Shared.Responses.Mosuq
 @inject IEnrollmentService EnrollmentService
 @inject IMosquService MosquService
+@inject IFoujManagementService FoujService
+@inject IHalqaManagementService HalqaService
 @inject IJSRuntime JS
 
 <style>
@@ -152,8 +157,12 @@
                             ErrorMessage="@_dialogError"
                             Model="@_form"
                             Mosques="@_mosques"
+                            Foujs="@_foujs"
+                            Halqas="@_halqas"
                             ShowMosque="true"
                             DisableMosque="@_isEditMode"
+                            ShowFouj="true"
+                            ShowHalqa="true"
                             ShowPassword="@(!_isEditMode)"
                             ShowJoinedAt="true"
                             ShowStatus="false"
@@ -173,6 +182,8 @@
 
     private readonly List<TeacherRow> _teachers = new();
     private List<MosquDto> _mosques = new();
+    private List<FoujDto> _foujs = new();
+    private List<HalqaDto> _halqas = new();
     private MemberManagementDialogModel _form = new();
     private MemberDetailsDialogModel _detailsModel = new();
 
@@ -203,6 +214,7 @@
         try
         {
             await LoadMosquesAsync();
+            await LoadStructureAsync();
             await LoadTeachersAsync();
         }
         catch (Exception ex)
@@ -224,6 +236,27 @@
         catch
         {
             _mosques = new();
+        }
+    }
+
+    private async Task LoadStructureAsync()
+    {
+        try
+        {
+            var foujResponse = await FoujService.GetAllAsync(new GetAllFoujsRequest());
+            _foujs = foujResponse?.Success == true
+                ? JsonSerializer.Deserialize<List<FoujDto>>(JsonSerializer.Serialize(foujResponse.Data), JsonOptions) ?? new()
+                : new();
+
+            var halqaResponse = await HalqaService.GetAllAsync();
+            _halqas = halqaResponse?.Success == true
+                ? JsonSerializer.Deserialize<List<HalqaDto>>(JsonSerializer.Serialize(halqaResponse.Data), JsonOptions) ?? new()
+                : new();
+        }
+        catch
+        {
+            _foujs = new();
+            _halqas = new();
         }
     }
 
@@ -275,7 +308,10 @@
         {
             Gender = "Male",
             JoinedAt = DateTime.Today,
-            MosqueId = _mosques.FirstOrDefault()?.Id ?? Guid.Empty
+            MosqueId = _mosques.FirstOrDefault()?.Id ?? Guid.Empty,
+            FoujId = _foujs.FirstOrDefault()?.Id ?? Guid.Empty,
+            HalqaId = _halqas.FirstOrDefault()?.Id,
+            AssignedAt = DateTime.Today
         };
         _isDialogOpen = true;
     }
@@ -294,8 +330,10 @@
             Gender = string.Equals(teacher.Gender, "Female", StringComparison.OrdinalIgnoreCase) ? "Female" : "Male",
             JoinedAt = teacher.JoinedAt == default ? DateTime.Today : teacher.JoinedAt,
             MosqueId = teacher.MosqueId,
+            FoujId = teacher.FoujId ?? Guid.Empty,
+            HalqaId = teacher.HalqaId,
             Bio = teacher.Bio,
-            AssignedAt = teacher.AssignedAt
+            AssignedAt = ParseAssignedDate(teacher.AssignedAt)
         };
         _isDialogOpen = true;
     }
@@ -335,7 +373,7 @@
                     Title = "الخبرة والتعيين",
                     Items = new List<MemberDetailsItemModel>
                     {
-                        Item("مكان/تاريخ التعيين", teacher.AssignedAt),
+                        Item("تاريخ التعيين", FormatAssignedDateForDisplay(teacher.AssignedAt)),
                         Item("لمحة عن الخبرات", teacher.Bio, wide: true)
                     }
                 }
@@ -368,7 +406,8 @@
                     Phone = _form.Phone?.Trim() ?? string.Empty,
                     Gender = _form.Gender,
                     Bio = _form.Bio,
-                    AssignedAt = _form.AssignedAt
+                    AssignedAt = FormatAssignedDateForRequest(_form.AssignedAt),
+                    HalqaId = _form.HalqaId
                 });
 
                 if (response == null || !response.Success)
@@ -403,10 +442,12 @@
                     PhoneNumber = _form.Phone?.Trim() ?? string.Empty,
                     Gender = _form.Gender,
                     MosqueId = _form.MosqueId,
+                    FoujId = _form.FoujId == Guid.Empty ? null : _form.FoujId,
+                    HalqaId = _form.HalqaId,
                     Bio = _form.Bio ?? string.Empty,
-                    AssignedAt = _form.AssignedAt ?? string.Empty,
+                    AssignedAt = FormatAssignedDateForRequest(_form.AssignedAt),
                     Experiences = string.IsNullOrWhiteSpace(_form.Bio) ? null : new List<string> { _form.Bio },
-                    TeachingPlaces = string.IsNullOrWhiteSpace(_form.AssignedAt) ? null : new List<string> { _form.AssignedAt }
+                    TeachingPlaces = null
                 });
 
                 if (response == null || !response.Success)
@@ -472,6 +513,28 @@
     private static string FormatDate(DateTime date)
         => date == default ? "—" : date.ToString("yyyy/MM/dd");
 
+    private static DateTime? ParseAssignedDate(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        return DateTime.TryParse(value, out var parsed) ? parsed.Date : null;
+    }
+
+    private static string FormatAssignedDateForRequest(DateTime? value)
+        => value.HasValue ? value.Value.ToString("yyyy-MM-dd") : string.Empty;
+
+    private static string FormatAssignedDateForDisplay(string? value)
+        => DateTime.TryParse(value, out var parsed) ? parsed.ToString("yyyy/MM/dd") : value ?? string.Empty;
+
+    private IEnumerable<FoujDto> DialogFoujs => _form.MosqueId == Guid.Empty
+        ? _foujs
+        : _foujs.Where(fouj => fouj.MosqueId == _form.MosqueId);
+
+    private IEnumerable<HalqaDto> DialogHalqas => _form.FoujId == Guid.Empty
+        ? _halqas
+        : _halqas.Where(halqa => halqa.FoujId == _form.FoujId);
+
     private sealed class TeacherRow
     {
         public Guid Id { get; set; }
@@ -482,6 +545,10 @@
         public DateTime JoinedAt { get; set; }
         public Guid MosqueId { get; set; }
         public string MosqueName { get; set; } = string.Empty;
+        public Guid? FoujId { get; set; }
+        public string FoujName { get; set; } = string.Empty;
+        public Guid? HalqaId { get; set; }
+        public string HalqaName { get; set; } = string.Empty;
         public string? Bio { get; set; }
         public string? AssignedAt { get; set; }
 
@@ -496,6 +563,10 @@
                 JoinedAt = dto.JoinedAt,
                 MosqueId = dto.MosqueId,
                 MosqueName = dto.MosqueName ?? string.Empty,
+                FoujId = dto.FoujId,
+                FoujName = dto.FoujName ?? string.Empty,
+                HalqaId = dto.HalqaId,
+                HalqaName = dto.HalqaName ?? string.Empty,
                 Bio = dto.Bio,
                 AssignedAt = dto.AssignedAt
             };

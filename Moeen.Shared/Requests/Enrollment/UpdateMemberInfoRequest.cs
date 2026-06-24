@@ -40,6 +40,11 @@ namespace Moeen.Shared.Requests.Enrollment
         public int? Score { get; set; }
 
         public Guid? SaturdayHalqeId { get; set; }
+        public Guid? FoujId { get; set; }
+        public Guid? HalqaId { get; set; }
+
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "New password must be at least 6 characters")]
+        public string? NewPassword { get; set; }
 
         // Teacher specific
         [StringLength(500, ErrorMessage = "Bio cannot exceed 500 characters")]

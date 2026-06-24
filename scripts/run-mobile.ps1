@@ -12,6 +12,11 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+try {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+} catch {
+    # Continue with the runtime default if this PowerShell version handles TLS differently.
+}
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
@@ -36,6 +41,94 @@ function Write-Info([string]$Message) {
 function Fail([string]$Message) {
     Write-Host "[ERROR] $Message" -ForegroundColor Red
     exit 1
+}
+
+function Get-RetryDelaySeconds([int]$Attempt) {
+    return [int][Math]::Min(30, 2 * $Attempt)
+}
+
+function Invoke-TextRequestWithRetry {
+    param(
+        [string]$Uri,
+        [string]$Description,
+        [int]$TimeoutSec = 60,
+        [int]$MaxAttempts = 5
+    )
+
+    for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
+        try {
+            if ($attempt -gt 1) {
+                Write-Info "Retrying $Description download ($attempt/$MaxAttempts)..."
+            }
+
+            $response = Invoke-WebRequest -UseBasicParsing -Uri $Uri -TimeoutSec $TimeoutSec
+            if ([string]::IsNullOrWhiteSpace($response.Content)) {
+                throw "$Description download returned empty content."
+            }
+
+            return $response.Content
+        }
+        catch {
+            $message = $_.Exception.Message
+            if ($attempt -ge $MaxAttempts) {
+                Fail "Could not download $Description after $MaxAttempts attempts. Check internet or VPN access to Google Android downloads, then run the script again. Last error: $message"
+            }
+
+            Write-Warning "Could not download $Description ($attempt/$MaxAttempts): $message"
+            Start-Sleep -Seconds (Get-RetryDelaySeconds $attempt)
+        }
+    }
+}
+
+function Invoke-FileDownloadWithRetry {
+    param(
+        [string]$Uri,
+        [string]$OutFile,
+        [string]$Description,
+        [int]$TimeoutSec = 300,
+        [int]$MaxAttempts = 5
+    )
+
+    $curl = Get-Command curl.exe -ErrorAction SilentlyContinue
+
+    for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
+        try {
+            if (Test-Path $OutFile) {
+                Remove-Item -Force $OutFile -ErrorAction SilentlyContinue
+            }
+
+            if ($attempt -gt 1) {
+                Write-Info "Retrying $Description download ($attempt/$MaxAttempts)..."
+            }
+
+            if ($curl) {
+                & $curl.Source --fail --location --retry 3 --retry-delay 2 --connect-timeout 30 --max-time $TimeoutSec --output $OutFile $Uri
+                if ($LASTEXITCODE -ne 0) {
+                    throw "curl.exe exited with code $LASTEXITCODE."
+                }
+            }
+            else {
+                Invoke-WebRequest -UseBasicParsing -Uri $Uri -OutFile $OutFile -TimeoutSec $TimeoutSec
+            }
+
+            $downloadedFile = Get-Item $OutFile -ErrorAction SilentlyContinue
+            if (-not $downloadedFile -or $downloadedFile.Length -le 0) {
+                throw "$Description download produced an empty file."
+            }
+
+            Write-Ok "$Description downloaded successfully."
+            return
+        }
+        catch {
+            $message = $_.Exception.Message
+            if ($attempt -ge $MaxAttempts) {
+                Fail "Could not download $Description after $MaxAttempts attempts. Check internet or VPN access to Google Android downloads, then run the script again. Last error: $message"
+            }
+
+            Write-Warning "Could not download $Description ($attempt/$MaxAttempts): $message"
+            Start-Sleep -Seconds (Get-RetryDelaySeconds $attempt)
+        }
+    }
 }
 
 function Refresh-PathFromMachineAndUser {
@@ -236,7 +329,7 @@ function Get-AndroidCommandLineToolsUrl {
     $repositoryUrl = 'https://dl.google.com/android/repository/repository2-1.xml'
     Write-Info "Reading Android repository metadata from Google..."
 
-    [xml]$repository = (Invoke-WebRequest -UseBasicParsing -Uri $repositoryUrl -TimeoutSec 60).Content
+    [xml]$repository = Invoke-TextRequestWithRetry -Uri $repositoryUrl -Description 'Android repository metadata' -TimeoutSec 60 -MaxAttempts 5
     $packageNode = $repository.SelectSingleNode("//remotePackage[@path='cmdline-tools;latest']")
     if (-not $packageNode) {
         Fail "Could not find cmdline-tools;latest in Google's Android repository metadata."
@@ -278,7 +371,7 @@ function Install-AndroidCommandLineTools([string]$SdkRoot) {
         $toolsUrl = Get-AndroidCommandLineToolsUrl
         $zipPath = Join-Path $tempRoot 'commandlinetools-win.zip'
         Write-Info "Downloading Android command-line tools..."
-        Invoke-WebRequest -UseBasicParsing -Uri $toolsUrl -OutFile $zipPath -TimeoutSec 300
+        Invoke-FileDownloadWithRetry -Uri $toolsUrl -OutFile $zipPath -Description 'Android command-line tools' -TimeoutSec 300 -MaxAttempts 5
 
         Write-Info "Extracting Android command-line tools..."
         Expand-Archive -Path $zipPath -DestinationPath $tempRoot -Force

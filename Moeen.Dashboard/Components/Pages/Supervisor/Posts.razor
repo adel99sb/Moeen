@@ -205,9 +205,11 @@
                         {
                             <div class="form-field">
                                 <label>نوع المنشور</label>
-                                <select class="form-control-moeen" @bind="_form.IsPublic">
-                                    <option value="true">عام</option>
-                                    <option value="false">خاص بحلقة</option>
+                                <select class="form-control-moeen" @bind="_form.Scope">
+                                    @foreach (var option in PostScopeSelection.Options)
+                                    {
+                                        <option value="@option.Value">@option.Label</option>
+                                    }
                                 </select>
                             </div>
 
@@ -332,7 +334,7 @@
         _successMessage = null;
         _dialogError = null;
         _isEditMode = false;
-        _form = new PostFormModel { IsPublic = true };
+        _form = new PostFormModel { Scope = PostScopeSelection.Public };
 
         if (_halqas.Count == 0)
             await LoadHalqasAsync();
@@ -351,7 +353,7 @@
             Title = post.Title,
             Body = post.Body,
             ImageUrl = post.ImageUrl,
-            IsPublic = !post.HalqaId.HasValue,
+            Scope = PostScopeSelection.FromIsPublic(!post.HalqaId.HasValue),
             HalqaId = post.HalqaId
         };
         _isDialogOpen = true;
@@ -514,7 +516,8 @@
         public string Title { get; set; } = string.Empty;
         public string Body { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
-        public bool IsPublic { get; set; } = true;
+        public string Scope { get; set; } = PostScopeSelection.Public;
+        public bool IsPublic => PostScopeSelection.IsPublic(Scope);
         public Guid? HalqaId { get; set; }
     }
 }

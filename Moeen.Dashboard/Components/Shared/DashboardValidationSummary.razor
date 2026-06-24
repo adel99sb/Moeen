@@ -1,0 +1,98 @@
+@implements IDisposable
+
+@if (_messages.Count > 0)
+{
+    <div class="dashboard-validation-summary" role="alert" aria-live="assertive" dir="rtl">
+        <div class="dashboard-validation-summary-title">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>يرجى تصحيح الأخطاء التالية:</span>
+        </div>
+        <ul>
+            @foreach (var message in _messages)
+            {
+                <li>@message</li>
+            }
+        </ul>
+    </div>
+}
+
+<style>
+    .dashboard-validation-summary {
+        margin: 0 0 16px;
+        padding: 14px 16px;
+        border: 1px solid #fecdca;
+        border-radius: 16px;
+        background: #fff3f1;
+        color: #9b1c13;
+        box-shadow: 0 10px 24px rgba(180, 35, 24, 0.08);
+    }
+
+    .dashboard-validation-summary-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-weight: 900;
+    }
+
+    .dashboard-validation-summary ul {
+        margin: 0;
+        padding-inline-start: 22px;
+        line-height: 1.8;
+    }
+
+    .dashboard-validation-summary li {
+        font-weight: 700;
+    }
+</style>
+
+@code {
+    [CascadingParameter] private EditContext? CurrentEditContext { get; set; }
+
+    private EditContext? _subscribedEditContext;
+    private IReadOnlyList<string> _messages = Array.Empty<string>();
+
+    protected override void OnParametersSet()
+    {
+        if (CurrentEditContext is null)
+        {
+            Unsubscribe();
+            _messages = Array.Empty<string>();
+            return;
+        }
+
+        if (ReferenceEquals(CurrentEditContext, _subscribedEditContext))
+            return;
+
+        Unsubscribe();
+        _subscribedEditContext = CurrentEditContext;
+        _subscribedEditContext.OnValidationStateChanged += HandleValidationStateChanged;
+        RefreshMessages();
+    }
+
+    private void HandleValidationStateChanged(object? sender, ValidationStateChangedEventArgs e)
+    {
+        RefreshMessages();
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void RefreshMessages()
+    {
+        _messages = _subscribedEditContext?
+            .GetValidationMessages()
+            .Where(message => !string.IsNullOrWhiteSpace(message))
+            .Distinct()
+            .ToList() ?? new List<string>();
+    }
+
+    private void Unsubscribe()
+    {
+        if (_subscribedEditContext is not null)
+            _subscribedEditContext.OnValidationStateChanged -= HandleValidationStateChanged;
+
+        _subscribedEditContext = null;
+    }
+
+    public void Dispose()
+        => Unsubscribe();
+}

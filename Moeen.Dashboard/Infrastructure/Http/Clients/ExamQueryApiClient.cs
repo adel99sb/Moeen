@@ -80,8 +80,12 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
         }
         public async Task<GeneralResponse> GetExamStatisticsAsync(GetExamStatisticsRequest request)
         {
-            // الكنترولر بيقراها FromQuery كـ Object كامل
-            var query = new Dictionary<string, string?>(); // لو الـ Request فيه حقول مستقبلاً بتنزل هون
+            var query = new Dictionary<string, string?>
+            {
+                { "fromDate", request.FromDate?.ToString("o") },
+                { "toDate", request.ToDate?.ToString("o") }
+            };
+
             var url = QueryHelpers.AddQueryString(ApiRoutes.GetExamStatisticsAsyncRoute, query);
             return await _http.GetFromJsonAsync<GeneralResponse>(url) ?? GeneralResponse.BadRequest("خطأ في الاتصال");
         }

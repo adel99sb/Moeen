@@ -45,6 +45,8 @@ namespace Moeen.Shared.Requests.Enrollment
         [Required(ErrorMessage = "Mosque ID is required")]
         public Guid MosqueId { get; set; }
 
+        public Guid? FoujId { get; set; }
+        public Guid? HalqaId { get; set; }
         public Guid? SaturdayHalqeId { get; set; } // Optional
         public string? LabCategory { get; set; } // "التزام", "تميز", أو null
 

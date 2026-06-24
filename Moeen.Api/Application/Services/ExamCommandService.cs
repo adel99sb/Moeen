@@ -136,6 +136,8 @@ namespace Moeen.Api.Application.Services
                     StudentName = student.name,       // افتراض أن خاصية الاسم هي 'name' في الـ User/Student
                     TeacherId = exam.TeacherId,
                     TeacherName = teacher.name,
+                    HalqaTeacherName = string.Empty,
+                    ExaminerName = teacher.name,
                     JuzFrom = exam.juz_form,
                     JuzTo = exam.juz_to,
                     Score = exam.score,
@@ -200,6 +202,8 @@ namespace Moeen.Api.Application.Services
                     StudentName = student?.name ?? "غير معروف",
                     TeacherId = exam.TeacherId,
                     TeacherName = teacher?.name ?? "غير معروف",
+                    HalqaTeacherName = string.Empty,
+                    ExaminerName = teacher?.name ?? "غير معروف",
                     JuzFrom = exam.juz_form,
                     JuzTo = exam.juz_to,
                     Score = exam.score,

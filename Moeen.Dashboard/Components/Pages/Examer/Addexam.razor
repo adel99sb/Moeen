@@ -1,4 +1,4 @@
-@page "/examer/addexam"
+﻿@page "/examer/addexam"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using System.Text.Json
 @using Microsoft.AspNetCore.Components
@@ -257,9 +257,9 @@
                 <h2 class="card-title"><i class="bi bi-pencil-square"></i> بيانات الاختبار</h2>
                 <div class="form-grid">
                     <div class="form-field">
-                        <label>المعلم المسؤول</label>
+                        <label>المختبر</label>
                         <select class="form-select-clean" @bind="_form.TeacherId">
-                            <option value="@Guid.Empty">اختر المعلم</option>
+                            <option value="@Guid.Empty">اختر المختبر</option>
                             @foreach (var teacher in _teachers)
                             {
                                 <option value="@teacher.Id">@Display(teacher.Name) - @Display(teacher.MosqueName)</option>
@@ -283,7 +283,7 @@
                     </div>
 
                     <div class="form-field full">
-                        <label>ملاحظات الفاحص</label>
+                        <label>ملاحظات المختبر</label>
                         <textarea class="form-control-clean" maxlength="500" @bind="_form.Notes" placeholder="اكتب ملاحظات مختصرة عن أداء الطالب..."></textarea>
                     </div>
                 </div>
@@ -429,7 +429,7 @@
     private string? ValidateForm()
     {
         if (_form.TeacherId == Guid.Empty)
-            return "اختر المعلم المسؤول عن الطالب.";
+            return "اختر المختبر المسؤول عن الاختبار.";
 
         if (_form.JuzFrom < 1 || _form.JuzFrom > 30)
             return "جزء البداية يجب أن يكون بين 1 و 30.";
