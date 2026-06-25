@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moeen.Api.infrastructure.Data;
@@ -31,7 +31,7 @@ namespace Moeen.Api.Controllers
                 TotalMosques = await _context.Mosques.AsNoTracking().CountAsync(),
                 TotalSupervisors = await _context.Supervisors.AsNoTracking().CountAsync(),
                 TotalTeachers = await _context.Teachers.AsNoTracking().CountAsync(),
-                TotalStudents = await _context.Students.AsNoTracking().CountAsync(),
+                TotalStudents = await _context.Students.AsNoTracking().CountAsync(s => s.role == 2 && s.status == 0),
                 TotalHalqas = await _context.Halqas.AsNoTracking().CountAsync(),
                 TotalOpenComplaints = await _context.Complaints.AsNoTracking().CountAsync(c => c.Status != ComplaintStatus.Resolved),
                 TotalPosts = await _context.Posts.AsNoTracking().CountAsync(),
@@ -57,7 +57,7 @@ namespace Moeen.Api.Controllers
             var summaries = new List<OwnerMosqueSummaryDto>();
             foreach (var mosque in mosques)
             {
-                var userIds = await _context.Students.AsNoTracking().Where(s => s.MosqueId == mosque.Id).Select(s => s.Id)
+                var userIds = await _context.Students.AsNoTracking().Where(s => s.MosqueId == mosque.Id && s.role == 2 && s.status == 0).Select(s => s.Id)
                     .Concat(_context.Teachers.AsNoTracking().Where(t => t.MosqueId == mosque.Id).Select(t => t.Id))
                     .Concat(_context.Supervisors.AsNoTracking().Where(s => s.MosqueId == mosque.Id).Select(s => s.Id))
                     .Distinct()
@@ -70,7 +70,7 @@ namespace Moeen.Api.Controllers
                     Address = mosque.address,
                     Supervisors = await _context.Supervisors.AsNoTracking().CountAsync(s => s.MosqueId == mosque.Id),
                     Teachers = await _context.Teachers.AsNoTracking().CountAsync(t => t.MosqueId == mosque.Id),
-                    Students = await _context.Students.AsNoTracking().CountAsync(s => s.MosqueId == mosque.Id),
+                    Students = await _context.Students.AsNoTracking().CountAsync(s => s.MosqueId == mosque.Id && s.role == 2 && s.status == 0),
                     Halqas = await _context.Halqas.AsNoTracking().CountAsync(h => h.Fouj.MosqueId == mosque.Id),
                     OpenComplaints = userIds.Count == 0
                         ? 0

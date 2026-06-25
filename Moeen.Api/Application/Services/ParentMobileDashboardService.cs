@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Data;
@@ -33,7 +33,7 @@ namespace Moeen.Api.Application.Services
                 .AsNoTracking()
                 .Include(s => s.Mosque)
                 .Include(s => s.Halqa)
-                .Where(s => s.ParentId == parentId)
+                .Where(s => s.ParentId == parentId && s.status == 0)
                 .OrderBy(s => s.name)
                 .ToListAsync();
 

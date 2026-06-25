@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Data;
@@ -36,7 +36,7 @@ namespace Moeen.Api.Application.Services
                     .ThenInclude(h => h.Fouj)
                 .Include(s => s.Halqa)
                     .ThenInclude(h => h.Teacher)
-                .Where(s => s.ParentId == parentId)
+                .Where(s => s.ParentId == parentId && s.status == 0)
                 .OrderBy(s => s.name)
                 .ToListAsync();
 

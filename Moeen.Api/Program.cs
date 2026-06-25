@@ -381,10 +381,10 @@ static async Task<IResult> GetCurrentTeacherOverviewAsync(ClaimsPrincipal user, 
     var studentRows = halaqaIds.Count == 0
         ? new List<TeacherDashboardStudentLookup>()
         : (await context.Students.AsNoTracking()
-            .Where(s =>
-                (s.HalqaId.HasValue && halaqaIds.Contains(s.HalqaId.Value)) ||
+            .Where(s => s.status == 0 &&
+                ((s.HalqaId.HasValue && halaqaIds.Contains(s.HalqaId.Value)) ||
                 (s.SaturdayHalqaId.HasValue && halaqaIds.Contains(s.SaturdayHalqaId.Value)) ||
-                (s.SaturdayHalqeId != Guid.Empty && halaqaIds.Contains(s.SaturdayHalqeId)))
+                (s.SaturdayHalqeId != Guid.Empty && halaqaIds.Contains(s.SaturdayHalqeId))))
             .Select(s => new
             {
                 s.Id,
@@ -416,8 +416,11 @@ static async Task<IResult> GetCurrentTeacherOverviewAsync(ClaimsPrincipal user, 
         .Select(g => g.First())
         .ToList();
 
-    var progress = await LoadTeacherProgressRowsAsync(context, teacherId.Value, halaqaIds);
-    var attendance = await LoadTeacherAttendanceRowsAsync(context, teacherId.Value, students.Select(s => s.Id).ToList());
+    var activeStudentIds = students.Select(s => s.Id).ToHashSet();
+    var progress = (await LoadTeacherProgressRowsAsync(context, teacherId.Value, halaqaIds))
+        .Where(p => activeStudentIds.Contains(p.StudentId))
+        .ToList();
+    var attendance = await LoadTeacherAttendanceRowsAsync(context, teacherId.Value, activeStudentIds.ToList());
     var latest = GetLatestTeacherProgressByStudent(progress);
     var today = DateTime.UtcNow.Date;
     var monthStart = new DateTime(today.Year, today.Month, 1);
@@ -527,10 +530,10 @@ static async Task<IResult> GetCurrentTeacherHalaqasProgressAsync(ClaimsPrincipal
     var studentRows = halaqaIds.Count == 0
         ? new List<TeacherDashboardStudentLookup>()
         : (await context.Students.AsNoTracking()
-            .Where(s =>
-                (s.HalqaId.HasValue && halaqaIds.Contains(s.HalqaId.Value)) ||
+            .Where(s => s.status == 0 &&
+                ((s.HalqaId.HasValue && halaqaIds.Contains(s.HalqaId.Value)) ||
                 (s.SaturdayHalqaId.HasValue && halaqaIds.Contains(s.SaturdayHalqaId.Value)) ||
-                (s.SaturdayHalqeId != Guid.Empty && halaqaIds.Contains(s.SaturdayHalqeId)))
+                (s.SaturdayHalqeId != Guid.Empty && halaqaIds.Contains(s.SaturdayHalqeId))))
             .Select(s => new
             {
                 s.Id,
@@ -562,8 +565,11 @@ static async Task<IResult> GetCurrentTeacherHalaqasProgressAsync(ClaimsPrincipal
         .Select(g => g.First())
         .ToList();
 
-    var progress = await LoadTeacherProgressRowsAsync(context, teacherId.Value, halaqaIds);
-    var attendance = await LoadTeacherAttendanceRowsAsync(context, teacherId.Value, students.Select(s => s.Id).ToList());
+    var activeStudentIds = students.Select(s => s.Id).ToHashSet();
+    var progress = (await LoadTeacherProgressRowsAsync(context, teacherId.Value, halaqaIds))
+        .Where(p => activeStudentIds.Contains(p.StudentId))
+        .ToList();
+    var attendance = await LoadTeacherAttendanceRowsAsync(context, teacherId.Value, activeStudentIds.ToList());
     var latest = GetLatestTeacherProgressByStudent(progress);
 
     var response = new TeacherHalaqaProgressResponse

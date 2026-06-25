@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.Core.Entities;
@@ -124,7 +124,7 @@ namespace Moeen.Api.Application.Services
         {
             return await _context.Students
                 .AsNoTracking()
-                .Where(s => s.ParentId == parentId)
+                .Where(s => s.ParentId == parentId && s.status == 0)
                 .ToListAsync();
         }
 

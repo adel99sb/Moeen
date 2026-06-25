@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Data;
@@ -34,7 +34,7 @@ namespace Moeen.Api.Application.Services
                     .ThenInclude(h => h.Fouj)
                 .Include(s => s.Halqa)
                     .ThenInclude(h => h.Teacher)
-                .FirstOrDefaultAsync(s => s.Id == studentId);
+                .FirstOrDefaultAsync(s => s.Id == studentId && s.status == 0);
 
             if (student == null)
                 return GeneralResponse.NotFound("الطالب غير موجود.");
@@ -87,7 +87,7 @@ namespace Moeen.Api.Application.Services
             if (content.Length > 1000)
                 return GeneralResponse.BadRequest("الملاحظة يجب ألا تتجاوز 1000 حرف.");
 
-            var exists = await _context.Students.AsNoTracking().AnyAsync(s => s.Id == studentId);
+            var exists = await _context.Students.AsNoTracking().AnyAsync(s => s.Id == studentId && s.status == 0);
             if (!exists)
                 return GeneralResponse.NotFound("الطالب غير موجود.");
 

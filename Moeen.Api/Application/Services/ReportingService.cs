@@ -24,12 +24,13 @@ namespace Moeen.Api.Application.Services
 
         public async Task<GeneralResponse> GetGeneralPerformanceIndicatorsAsync(GetGeneralPerformanceIndicatorsRequest request)
         {
-            var totalStudents = await _context.Students.AsNoTracking().CountAsync();
+            var totalStudents = await _context.Students.AsNoTracking().CountAsync(s => s.role == 2 && s.status == 0);
             var totalTeachers = await _context.Teachers.AsNoTracking().CountAsync();
             var totalCircles = await _context.Halqas.AsNoTracking().CountAsync();
             var totalComplaints = await _context.Complaints.AsNoTracking().CountAsync();
 
             var topStudents = await _context.Students.AsNoTracking()
+                .Where(s => s.role == 2 && s.status == 0)
                 .OrderByDescending(s => s.score)
                 .Take(5)
                 .Select(s => new StudentScoreDto
@@ -41,6 +42,7 @@ namespace Moeen.Api.Application.Services
                 .ToListAsync();
 
             var lowStudents = await _context.Students.AsNoTracking()
+                .Where(s => s.role == 2 && s.status == 0)
                 .OrderBy(s => s.score)
                 .Take(5)
                 .Select(s => new StudentScoreDto
@@ -93,7 +95,7 @@ namespace Moeen.Api.Application.Services
                 .ToDictionaryAsync(x => x.HalqaId, x => x.Count);
 
             var progressQuery = _context.ProgressEntries.AsNoTracking()
-                .Where(p => circleIds.Contains(p.HalqaId) && !p.IsDeleted && p.Date >= fromDate && p.Date <= toDate);
+                .Where(p => circleIds.Contains(p.HalqaId) && !p.IsDeleted && p.Student.status == 0 && p.Date >= fromDate && p.Date <= toDate);
 
             var memorizationDict = await progressQuery
                 .Where(p => p.NextTarget > 0)
@@ -108,8 +110,8 @@ namespace Moeen.Api.Application.Services
                 .ToDictionaryAsync(x => x.HalqaId, x => x.Count);
 
             var examDict = await _context.Exams
-                .Join(_context.Students, e => e.StudentId, s => s.Id, (e, s) => new { e, s.HalqaId })
-                .Where(x => x.HalqaId.HasValue && circleIds.Contains(x.HalqaId.Value) && x.e.date >= fromDate && x.e.date <= toDate)
+                .Join(_context.Students, e => e.StudentId, s => s.Id, (e, s) => new { e, s.HalqaId, StudentStatus = s.status })
+                .Where(x => x.StudentStatus == 0 && x.HalqaId.HasValue && circleIds.Contains(x.HalqaId.Value) && x.e.date >= fromDate && x.e.date <= toDate)
                 .GroupBy(x => x.HalqaId.Value)
                 .Select(g => new { HalqaId = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(x => x.HalqaId, x => x.Count);
@@ -133,7 +135,7 @@ namespace Moeen.Api.Application.Services
                 return GeneralResponse.BadRequest("معرف الطالب مطلوب.");
 
             var student = await _context.Students.AsNoTracking()
-                .FirstOrDefaultAsync(s => s.Id == request.StudentId);
+                .FirstOrDefaultAsync(s => s.Id == request.StudentId && s.status == 0);
 
             if (student == null)
                 return GeneralResponse.NotFound("الطالب غير موجود.");

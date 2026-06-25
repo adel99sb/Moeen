@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Application.Services;
@@ -61,7 +61,7 @@ namespace Moeen.Api.Controllers
 
             var response = new SupervisorDashboardResponse
             {
-                TotalStudents = await _context.Students.AsNoTracking().CountAsync(s => s.MosqueId == mosqueId.Value),
+                TotalStudents = await _context.Students.AsNoTracking().CountAsync(s => s.MosqueId == mosqueId.Value && s.role == 2 && s.status == 0),
                 TotalTeachers = await _context.Teachers.AsNoTracking().CountAsync(t => t.MosqueId == mosqueId.Value),
                 TotalHalqas = await _context.Halqas.AsNoTracking().CountAsync(h => h.Fouj.MosqueId == mosqueId.Value),
                 OpenAlertsAndComplaints = await _context.Complaints.AsNoTracking().CountAsync(c =>
@@ -106,7 +106,7 @@ namespace Moeen.Api.Controllers
 
         private async Task<List<Guid>> GetMosqueUserIdsAsync(Guid mosqueId)
         {
-            var studentIds = _context.Students.AsNoTracking().Where(s => s.MosqueId == mosqueId).Select(s => s.Id);
+            var studentIds = _context.Students.AsNoTracking().Where(s => s.MosqueId == mosqueId && s.role == 2 && s.status == 0).Select(s => s.Id);
             var teacherIds = _context.Teachers.AsNoTracking().Where(t => t.MosqueId == mosqueId).Select(t => t.Id);
             var supervisorIds = _context.Supervisors.AsNoTracking().Where(s => s.MosqueId == mosqueId).Select(s => s.Id);
 
@@ -120,14 +120,15 @@ namespace Moeen.Api.Controllers
             foreach (var halqa in halqas)
             {
                 var tests = await _context.Exams.AsNoTracking()
-                    .CountAsync(e => e.date >= fromDate && e.Student.HalqaId == halqa.Id);
+                    .CountAsync(e => e.date >= fromDate && e.Student.HalqaId == halqa.Id && e.Student.status == 0);
 
                 var recitations = await _context.ProgressEntries.AsNoTracking()
-                    .CountAsync(p => !p.IsDeleted && p.Date >= fromDate && p.HalqaId == halqa.Id);
+                    .CountAsync(p => !p.IsDeleted && p.Date >= fromDate && p.HalqaId == halqa.Id && p.Student.status == 0);
 
                 var attendance = await _context.Attendances.AsNoTracking()
                     .CountAsync(a =>
                         a.HalqeSession.HalqaId == halqa.Id &&
+                        a.Student.status == 0 &&
                         a.HalqeSession.date >= fromDate &&
                         (a.Status == AttendanceStatus.Present || a.Status == AttendanceStatus.Late));
 
@@ -147,13 +148,13 @@ namespace Moeen.Api.Controllers
         {
             var examScores = await _context.Exams
                 .AsNoTracking()
-                .Where(e => e.date >= fromDate && e.Student.MosqueId == mosqueId)
+                .Where(e => e.date >= fromDate && e.Student.MosqueId == mosqueId && e.Student.status == 0)
                 .Select(e => new StudentAssessmentScore(e.StudentId, e.score))
                 .ToListAsync();
 
             var recitationScores = await _context.ProgressEntries
                 .AsNoTracking()
-                .Where(p => !p.IsDeleted && p.Date >= fromDate && p.Student.MosqueId == mosqueId)
+                .Where(p => !p.IsDeleted && p.Date >= fromDate && p.Student.MosqueId == mosqueId && p.Student.status == 0)
                 .Select(p => new StudentAssessmentScore(p.StudentId, p.LevelScore))
                 .ToListAsync();
 
@@ -175,7 +176,7 @@ namespace Moeen.Api.Controllers
 
             var students = await _context.Students
                 .AsNoTracking()
-                .Where(s => s.MosqueId == mosqueId && studentIds.Contains(s.Id))
+                .Where(s => s.MosqueId == mosqueId && s.status == 0 && studentIds.Contains(s.Id))
                 .Select(s => new { s.Id, s.name, s.score })
                 .ToListAsync();
 

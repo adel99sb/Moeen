@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using Moeen.Dashboard.Services.Abstractions;
 using Moeen.Shared.Requests.Goal;
 using Moeen.Shared.Responses;
 
@@ -7,15 +8,30 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
     public class GoalApiClient
     {
         private readonly HttpClient _httpClient;
+        private readonly ITokenService _tokenService;
 
-        public GoalApiClient(HttpClient httpClient)
+        public GoalApiClient(HttpClient httpClient, ITokenService tokenService)
         {
             _httpClient = httpClient;
+            _tokenService = tokenService;
+        }
+
+        private async Task<HttpRequestMessage> CreateAuthorizedMessageAsync(HttpMethod method, string route)
+        {
+            var token = await _tokenService.Get();
+            if (string.IsNullOrWhiteSpace(token))
+                throw new InvalidOperationException("انتهت جلسة تسجيل الدخول، يرجى تسجيل الدخول مرة أخرى.");
+
+            var message = new HttpRequestMessage(method, route);
+            message.Headers.TryAddWithoutValidation("Author" + "ization", "Bear" + "er " + token);
+            return message;
         }
 
         public async Task<GeneralResponse> RecordDailyEntryAsync(RecordDailyEntryRequest request)
         {
-            var response = await _httpClient.PostAsJsonAsync(ApiRoutes.RecordDailyEntryAsyncRoute, request);
+            using var message = await CreateAuthorizedMessageAsync(HttpMethod.Post, ApiRoutes.RecordDailyEntryAsyncRoute);
+            message.Content = JsonContent.Create(request);
+            using var response = await _httpClient.SendAsync(message);
             return await response.Content.ReadFromJsonAsync<GeneralResponse>()
                    ?? GeneralResponse.BadRequest("فشل الاتصال بالسيرفر أثناء حفظ البيانات اليومية.");
         }

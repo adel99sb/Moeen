@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -49,7 +49,7 @@ namespace Moeen.Api.Application.Services
                     TeacherId = h.TeacherId ?? Guid.Empty,
                     TeacherName = h.Teacher != null ? h.Teacher.name : string.Empty,
                     Type = h.Type,
-                    StudentsCount = h.Students.Count(s => s.role == StudentRole)
+                    StudentsCount = h.Students.Count(s => s.role == StudentRole && s.status == 0)
                 })
                 .ToListAsync();
         }
@@ -71,7 +71,7 @@ namespace Moeen.Api.Application.Services
             var query = _context.Students
                 .AsNoTracking()
                 .Include(s => s.Halqa)
-                .Where(s => s.role == StudentRole);
+                .Where(s => s.role == StudentRole && s.status == 0);
 
             if (managedMosqueId.HasValue)
                 query = query.Where(s => s.MosqueId == managedMosqueId.Value);
@@ -113,7 +113,7 @@ namespace Moeen.Api.Application.Services
                 throw new ArgumentException("Circle not found.", nameof(request.HalqaId));
 
             var studentsCount = await _context.Students
-                .Where(s => s.role == StudentRole && s.HalqaId == request.HalqaId)
+                .Where(s => s.role == StudentRole && s.status == 0 && s.HalqaId == request.HalqaId)
                 .CountAsync();
 
             return new HalqaDto
@@ -134,7 +134,7 @@ namespace Moeen.Api.Application.Services
             var filter = request.Filter ?? new StudentFilterDto();
 
             var baseQuery = _context.Students
-                .Where(s => s.role == StudentRole && s.HalqaId == request.HalqaId);
+                .Where(s => s.role == StudentRole && s.status == 0 && s.HalqaId == request.HalqaId);
 
             if (!string.IsNullOrWhiteSpace(filter.Name))
                 baseQuery = baseQuery.Where(s => EF.Functions.Like(s.name, $"%{filter.Name}%"));
@@ -148,7 +148,7 @@ namespace Moeen.Api.Application.Services
             if (filter.AgeTo.HasValue)
                 baseQuery = baseQuery.Where(s => s.age <= filter.AgeTo.Value);
 
-            if (filter.Status.HasValue)
+            if (filter.Status.HasValue && filter.Status.Value == 0)
                 baseQuery = baseQuery.Where(s => s.status == filter.Status.Value);
 
             if (filter.MinScore.HasValue)
@@ -201,7 +201,7 @@ namespace Moeen.Api.Application.Services
         public async Task<HalqaStudentsCountResponse> GetHalqaStudentsCountAsync(GetHalqaStudentsCountRequest request)
         {
             var count = await _context.Students
-                .Where(s => s.role == StudentRole && s.HalqaId == request.HalqaId)
+                .Where(s => s.role == StudentRole && s.status == 0 && s.HalqaId == request.HalqaId)
                 .CountAsync();
 
             return new HalqaStudentsCountResponse { Count = count };
@@ -212,15 +212,15 @@ namespace Moeen.Api.Application.Services
             var circleId = request.HalqaId;
 
             var studentsCountTask = _context.Students
-                .Where(s => s.role == StudentRole && s.HalqaId == circleId)
+                .Where(s => s.role == StudentRole && s.status == 0 && s.HalqaId == circleId)
                 .CountAsync();
 
             var activeCountTask = _context.Students
-                .Where(s => s.role == StudentRole && s.HalqaId == circleId && s.status != 0)
+                .Where(s => s.role == StudentRole && s.status == 0 && s.HalqaId == circleId)
                 .CountAsync();
 
             var avgMemTask = _context.ProgressEntries
-                .Where(pe => pe.HalqaId == circleId)
+                .Where(pe => pe.HalqaId == circleId && pe.Student.status == 0)
                 .Select(pe => (double?)pe.MemorizedUntil)
                 .AverageAsync();
 
@@ -246,7 +246,7 @@ namespace Moeen.Api.Application.Services
             if (sessionIds.Any() && studentsCount > 0)
             {
                 var presentCount = await _context.Attendances
-                    .Where(a => sessionIds.Contains(a.HalqeSessionId))
+                    .Where(a => sessionIds.Contains(a.HalqeSessionId) && a.Student.status == 0)
                     .CountAsync();
 
                 attendanceRate = (presentCount / (double)(studentsCount * sessionIds.Count)) * 100.0;
@@ -281,7 +281,7 @@ namespace Moeen.Api.Application.Services
             if (sessionIds.Any())
             {
                 var groups = await _context.Attendances
-                    .Where(a => sessionIds.Contains(a.HalqeSessionId))
+                    .Where(a => sessionIds.Contains(a.HalqeSessionId) && a.Student.status == 0)
                     .GroupBy(a => a.HalqeSessionId)
                     .Select(g => new { SessionId = g.Key, Count = g.Count() })
                     .ToListAsync();

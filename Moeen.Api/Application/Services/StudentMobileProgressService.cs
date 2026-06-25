@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Data;
@@ -29,7 +29,7 @@ namespace Moeen.Api.Application.Services
 
             var student = await _context.Students
                 .AsNoTracking()
-                .FirstOrDefaultAsync(s => s.Id == studentId);
+                .FirstOrDefaultAsync(s => s.Id == studentId && s.status == 0);
 
             if (student == null)
                 return GeneralResponse.NotFound("الطالب غير موجود.");

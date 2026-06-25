@@ -705,7 +705,7 @@ namespace Moeen.Api.Application.Services
             var children = await _context.Students
                 .Include(s => s.Mosque)
                 .Include(s => s.SaturdayHalqa)
-                .Where(s => s.ParentId == request.ParentId)
+                .Where(s => s.ParentId == request.ParentId && s.status == 0)
                 .OrderBy(s => s.name)
                 .ToListAsync();
 
@@ -756,7 +756,7 @@ namespace Moeen.Api.Application.Services
 
                 if (student.role == ParentRole)
                 {
-                    var child = await _context.Students.FirstOrDefaultAsync(s => s.ParentId == student.Id);
+                    var child = await _context.Students.FirstOrDefaultAsync(s => s.ParentId == student.Id && s.status == 0);
                     dto.ParentDetails = new ParentProfileDetails
                     {
                         StudentId = child?.Id ?? Guid.Empty,
@@ -840,7 +840,7 @@ namespace Moeen.Api.Application.Services
             if (request == null)
                 return GeneralResponse.BadRequest("طلب غير صالح.");
 
-            var studentsQuery = _context.Students.Where(s => s.role == StudentRole).AsQueryable();
+            var studentsQuery = _context.Students.Where(s => s.role == StudentRole && s.status == 0).AsQueryable();
             var parentsQuery = _context.Students.Where(s => s.role == ParentRole).AsQueryable();
             var teachersQuery = _context.Teachers.AsQueryable();
             var supervisorsQuery = _context.Supervisors.AsQueryable();
@@ -853,7 +853,7 @@ namespace Moeen.Api.Application.Services
                 supervisorsQuery = supervisorsQuery.Where(s => s.MosqueId == request.MosqueId.Value);
             }
 
-            if (request.Status.HasValue)
+            if (request.Status.HasValue && request.Status.Value == 0)
                 studentsQuery = studentsQuery.Where(s => s.status == request.Status.Value);
 
             if (request.FromDate.HasValue)

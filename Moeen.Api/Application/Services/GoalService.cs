@@ -14,6 +14,33 @@ using System.Threading.Tasks;
 
 namespace Moeen.Api.Application.Services
 {
+    public static class GoalDailyEntryDuplicatePolicy
+    {
+        public const string MemorizationAlreadyExistsMessage = "يوجد تسميع محفوظ لهذا الطالب في هذا اليوم. افتح السجل السابق لمراجعته أو تعديله.";
+        public const string ReviewAlreadyExistsMessage = "توجد مراجعة محفوظة لهذا الطالب في هذا اليوم. افتح السجل السابق لمراجعتها أو تعديلها.";
+        public const string ExamAlreadyExistsMessage = "يوجد اختبار محفوظ لهذا الطالب في هذا اليوم. افتح السجل السابق لمراجعته أو تعديله.";
+
+        public static string? GetDuplicateMessage(
+            bool memorizationRequested,
+            bool memorizationExists,
+            bool reviewRequested,
+            bool reviewExists,
+            bool examRequested,
+            bool examExists)
+        {
+            if (memorizationRequested && memorizationExists)
+                return MemorizationAlreadyExistsMessage;
+
+            if (reviewRequested && reviewExists)
+                return ReviewAlreadyExistsMessage;
+
+            if (examRequested && examExists)
+                return ExamAlreadyExistsMessage;
+
+            return null;
+        }
+    }
+
     public class GoalService : IGoalService
     {
         private readonly AppDbContext _context;
@@ -38,6 +65,9 @@ namespace Moeen.Api.Application.Services
             if (student == null)
                 return GeneralResponse.NotFound("الطالب غير موجود.");
 
+            if (student.status != 0)
+                return GeneralResponse.BadRequest("الطالب غير نشط ولا يمكن تسجيل بيانات جديدة له.");
+
             var studentHalqaId = student.HalqaId
                 ?? student.SaturdayHalqaId
                 ?? (student.SaturdayHalqeId == Guid.Empty ? (Guid?)null : student.SaturdayHalqeId);
@@ -47,6 +77,25 @@ namespace Moeen.Api.Application.Services
                 return GeneralResponse.NotFound("لا توجد حلقة مرتبطة بهذا الطالب ضمن حلقات المعلم الحالي.");
 
             var date = request.Date.Date;
+
+            var duplicateMessage = GoalDailyEntryDuplicatePolicy.GetDuplicateMessage(
+                request.Memorization != null,
+                request.Memorization != null && await HasDailyProgressEntryAsync(student.Id, date, isReview: false),
+                request.Review != null,
+                request.Review != null && await HasDailyProgressEntryAsync(student.Id, date, isReview: true),
+                request.Exam != null,
+                request.Exam != null && await HasDailyExamAsync(student.Id, date));
+
+            if (!string.IsNullOrWhiteSpace(duplicateMessage))
+                return GeneralResponse.BadRequest(duplicateMessage);
+
+            Guid? teacherExamId = null;
+            if (request.Exam != null)
+            {
+                teacherExamId = await ResolveTeacherExamIdAsync(student.MosqueId, request.Exam.TeacherExamId);
+                if (!teacherExamId.HasValue)
+                    return GeneralResponse.BadRequest("لا يوجد ممتحن مسجل يمكن ربط الاختبار السريع به. أضف ممتحن أو احفظ التسميع بدون الاختبار السريع.");
+            }
 
             var result = new DailyEntryResultDto
             {
@@ -61,7 +110,7 @@ namespace Moeen.Api.Application.Services
                 if (request.AttendanceStatus.HasValue)
                 {
                     var session = await EnsureHalqaSessionAsync(halqaId, date);
-                    var lesson = await EnsureSaturdayLessonAsync(student.SaturdayHalqeId);
+                    var lesson = await EnsureAttendanceLessonAsync(student, teacherId.Value);
 
                     var attendance = await _context.Attendances.FirstOrDefaultAsync(a =>
                         a.StudentId == student.Id && a.HalqeSessionId == session.Id);
@@ -125,7 +174,7 @@ namespace Moeen.Api.Application.Services
                         score = request.Exam.Score,
                         mark = request.Exam.Mark,
                         notes = request.Exam.Notes ?? string.Empty,
-                        TeacherExamId = request.Exam.TeacherExamId ?? Guid.Empty,
+                        TeacherExamId = teacherExamId!.Value,
                         date = date
                     };
 
@@ -278,14 +327,14 @@ namespace Moeen.Api.Application.Services
             var toDate = (request?.ToDate ?? DateTime.UtcNow).Date;
 
             var progressQuery = _context.ProgressEntries.AsNoTracking()
-                .Where(p => p.Date >= fromDate && p.Date <= toDate && p.LevelScore > 0);
+                .Where(p => p.Student.status == 0 && p.Date >= fromDate && p.Date <= toDate && p.LevelScore > 0);
 
             var examQuery = _context.Exams.AsNoTracking()
-                .Where(e => e.date >= fromDate && e.date <= toDate);
+                .Where(e => e.Student.status == 0 && e.date >= fromDate && e.date <= toDate);
 
             var attendanceQuery = _context.Attendances.AsNoTracking()
                 .Include(a => a.HalqeSession)
-                .Where(a => a.HalqeSession.date >= fromDate && a.HalqeSession.date <= toDate);
+                .Where(a => a.Student.status == 0 && a.HalqeSession.date >= fromDate && a.HalqeSession.date <= toDate);
 
             if (request?.HalqaId.HasValue == true && request.HalqaId != Guid.Empty)
             {
@@ -294,7 +343,7 @@ namespace Moeen.Api.Application.Services
                 attendanceQuery = attendanceQuery.Where(a => a.HalqeSession.HalqaId == HalqaId);
 
                 var studentIds = await _context.Students
-                    .Where(s => s.SaturdayHalqeId == HalqaId)
+                    .Where(s => s.status == 0 && s.SaturdayHalqeId == HalqaId)
                     .Select(s => s.Id)
                     .ToListAsync();
 
@@ -322,7 +371,7 @@ namespace Moeen.Api.Application.Services
 
             var studentIdsList = pointsByStudent.Keys.ToList();
             var studentNames = await _context.Students
-                .Where(s => studentIdsList.Contains(s.Id))
+                .Where(s => s.status == 0 && studentIdsList.Contains(s.Id))
                 .Select(s => new { s.Id, s.name })
                 .ToListAsync();
 
@@ -349,6 +398,45 @@ namespace Moeen.Api.Application.Services
             };
 
             return GeneralResponse.Ok("تم جلب لوحة الأداء.", overview);
+        }
+
+        private async Task<bool> HasDailyProgressEntryAsync(Guid studentId, DateTime date, bool isReview)
+        {
+            var nextDate = date.AddDays(1);
+            var query = _context.ProgressEntries
+                .AsNoTracking()
+                .Where(p => p.StudentId == studentId && !p.IsDeleted && p.Date >= date && p.Date < nextDate);
+
+            query = isReview
+                ? query.Where(p => p.NextTarget == 0)
+                : query.Where(p => p.NextTarget > 0);
+
+            return await query.AnyAsync();
+        }
+
+        private async Task<bool> HasDailyExamAsync(Guid studentId, DateTime date)
+        {
+            var nextDate = date.AddDays(1);
+            return await _context.Exams
+                .AsNoTracking()
+                .AnyAsync(e => e.StudentId == studentId && e.date >= date && e.date < nextDate);
+        }
+
+        private async Task<Guid?> ResolveTeacherExamIdAsync(Guid mosqueId, Guid? requestedTeacherExamId)
+        {
+            if (requestedTeacherExamId.HasValue && requestedTeacherExamId.Value != Guid.Empty)
+            {
+                var exists = await _context.TeacherExams.AnyAsync(t => t.Id == requestedTeacherExamId.Value);
+                if (exists)
+                    return requestedTeacherExamId.Value;
+            }
+
+            var fallbackTeacherExamId = await _context.TeacherExams
+                .Where(t => t.MosquId == mosqueId)
+                .Select(t => t.Id)
+                .FirstOrDefaultAsync();
+
+            return fallbackTeacherExamId == Guid.Empty ? null : fallbackTeacherExamId;
         }
 
         private async Task<Guid> ResolveHalqaIdAsync(Guid teacherId, Guid? studentHalqaId)
@@ -401,6 +489,41 @@ namespace Moeen.Api.Application.Services
 
             await _context.HalqaSessions.AddAsync(session);
             return session;
+        }
+
+        private async Task<SaturdayLesson> EnsureAttendanceLessonAsync(Student student, Guid teacherId)
+        {
+            var saturdayHalqaId = student.SaturdayHalqaId.HasValue && student.SaturdayHalqaId.Value != Guid.Empty
+                ? student.SaturdayHalqaId.Value
+                : (student.SaturdayHalqeId == Guid.Empty ? (Guid?)null : student.SaturdayHalqeId);
+
+            if (saturdayHalqaId.HasValue)
+            {
+                var exists = await _context.SaturdayHalqes.AnyAsync(h => h.Id == saturdayHalqaId.Value);
+                if (exists)
+                    return await EnsureSaturdayLessonAsync(saturdayHalqaId.Value);
+            }
+
+            const string fallbackName = "تلقائي - إدخالات الحلقات اليومية";
+            var fallbackHalqa = await _context.SaturdayHalqes
+                .FirstOrDefaultAsync(h => h.TeacherId == teacherId && h.MosqueId == student.MosqueId && h.name == fallbackName);
+
+            if (fallbackHalqa == null)
+            {
+                fallbackHalqa = new SaturdayHalqa
+                {
+                    Id = Guid.NewGuid(),
+                    TeacherId = teacherId,
+                    MosqueId = student.MosqueId,
+                    name = fallbackName,
+                    age_min = 0,
+                    age_max = 120
+                };
+
+                await _context.SaturdayHalqes.AddAsync(fallbackHalqa);
+            }
+
+            return await EnsureSaturdayLessonAsync(fallbackHalqa.Id);
         }
 
         private async Task<SaturdayLesson> EnsureSaturdayLessonAsync(Guid saturdayHalqaId)

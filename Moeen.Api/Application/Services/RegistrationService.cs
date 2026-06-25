@@ -101,12 +101,12 @@ namespace Moeen.Api.Application.Services
             int pageSize = Math.Max(1, request.PageSize);
 
             var query = _context.Students
-                .Where(s => s.HalqaId == request.CircleId);
+                .Where(s => s.HalqaId == request.CircleId && s.status == 0);
 
             if (!string.IsNullOrWhiteSpace(request.StudentName))
                 query = query.Where(s => EF.Functions.Like(s.name, $"%{request.StudentName}%"));
 
-            if (request.Status.HasValue)
+            if (request.Status.HasValue && (int)request.Status.Value == 0)
                 query = query.Where(s => s.status == (int)request.Status.Value);
 
             var totalCount = await query.CountAsync();

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.Core.Entities;
@@ -100,7 +100,7 @@ namespace Moeen.Api.Application.Services
 
             return await _context.Students
                 .AsNoTracking()
-                .FirstOrDefaultAsync(s => s.Id == studentId);
+                .FirstOrDefaultAsync(s => s.Id == studentId && s.status == 0);
         }
 
         private static bool CanStudentSeePost(Student student, Post post)
