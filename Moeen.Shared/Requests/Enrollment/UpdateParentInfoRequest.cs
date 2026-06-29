@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.Enrollment
@@ -11,5 +12,6 @@ namespace Moeen.Shared.Requests.Enrollment
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public string? Relationship { get; set; }
+        public List<Guid> StudentIds { get; set; } = new();
     }
 }

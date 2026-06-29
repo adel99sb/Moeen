@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.Enrollment
@@ -30,9 +31,9 @@ namespace Moeen.Shared.Requests.Enrollment
         [RegularExpression("^(Male|Female)$", ErrorMessage = "Gender must be Male or Female")]
         public string Gender { get; set; } = string.Empty;
 
-        // Parent specific (linking to student)
-        [Required(ErrorMessage = "Student ID is required")]
+        // Parent specific (linking to students)
         public Guid StudentId { get; set; }
+        public List<Guid> StudentIds { get; set; } = new();
 
         // Optional: relationship type (father, mother, guardian)
         [StringLength(50, ErrorMessage = "Relationship cannot exceed 50 characters")]

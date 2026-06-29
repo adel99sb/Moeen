@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Moeen.Shared.Responses.Enrollment
 {
@@ -22,5 +23,8 @@ namespace Moeen.Shared.Responses.Enrollment
 
         // Navigation
         public string StudentName { get; set; } = string.Empty;
+        public List<Guid> StudentIds { get; set; } = new();
+        public string StudentNames { get; set; } = string.Empty;
+        public int StudentsCount { get; set; }
     }
 }

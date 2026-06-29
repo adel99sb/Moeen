@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Moeen.Api.Core.Entities
 {
@@ -24,6 +24,8 @@ namespace Moeen.Api.Core.Entities
 
         public Student Parent { get; set; } = null!;
         public ICollection<Student> Children { get; set; } = new List<Student>();
+        public ICollection<ParentStudentLink> ParentLinks { get; set; } = new List<ParentStudentLink>();
+        public ICollection<ParentStudentLink> ChildLinks { get; set; } = new List<ParentStudentLink>();
         public Guid? SaturdayHalqaId { get; internal set; }
         public Guid? HalqaId { get; set; }
     }

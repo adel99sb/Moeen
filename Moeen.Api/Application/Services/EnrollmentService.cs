@@ -376,9 +376,15 @@ namespace Moeen.Api.Application.Services
             if (await _userManager.FindByEmailAsync(request.Email) != null)
                 return GeneralResponse.BadRequest("البريد الإلكتروني مستخدم بالفعل.");
 
-            var child = await _context.Students.FirstOrDefaultAsync(s => s.Id == request.StudentId);
-            if (child == null)
-                return GeneralResponse.NotFound("الطالب غير موجود.");
+            var selectedStudentIds = NormalizeParentStudentIds(request.StudentIds, request.StudentId);
+            if (selectedStudentIds.Count == 0)
+                return GeneralResponse.BadRequest("يرجى اختيار طالب واحد على الأقل لولي الأمر.");
+
+            var children = await LoadParentChildrenAsync(selectedStudentIds);
+            if (children.Count != selectedStudentIds.Count)
+                return GeneralResponse.BadRequest("يوجد طالب محدد غير موجود.");
+
+            var firstChild = children.OrderBy(c => c.name).First();
 
             var parent = new Student
             {
@@ -398,31 +404,31 @@ namespace Moeen.Api.Application.Services
                 EnrollmentDate = DateTime.UtcNow,
                 status = 0,
                 score = 0,
-                MosqueId = child.MosqueId,
-                SaturdayHalqeId = child.SaturdayHalqeId
+                MosqueId = firstChild.MosqueId,
+                SaturdayHalqeId = firstChild.SaturdayHalqeId
             };
 
-            if (child.SaturdayHalqeId != Guid.Empty)
-                parent.SaturdayHalqaId = child.SaturdayHalqeId;
+            if (firstChild.SaturdayHalqeId != Guid.Empty)
+                parent.SaturdayHalqaId = firstChild.SaturdayHalqeId;
 
             var createResult = await _userManager.CreateAsync(parent, request.Password);
             if (!createResult.Succeeded)
             {
                 var errors = string.Join("; ", createResult.Errors.Select(e => e.Description));
-                return GeneralResponse.BadRequest($"فشل تسجيل ولي الأمر: {errors}");
+                return GeneralResponse.BadRequest($"فشل إنشاء ولي الأمر: {errors}");
             }
 
             var parentRoleError = await EnsureIdentityRoleAsync(parent, Roles.ParentSudent.ToString());
             if (parentRoleError != null)
                 return parentRoleError;
 
-            child.ParentId = parent.Id;
+            await SyncParentStudentLinksAsync(parent.Id, selectedStudentIds);
             await _context.SaveChangesAsync();
 
-            var dto = MapParentDto(parent, child);
+            var dto = MapParentDto(parent, children);
             dto.Relationship = request.Relationship ?? string.Empty;
 
-            return GeneralResponse.Ok("تم تسجيل ولي الأمر بنجاح.", dto);
+            return GeneralResponse.Ok("تم إنشاء ولي الأمر بنجاح.", dto);
         }
 
         public async Task<GeneralResponse> UpdateMemberInfoAsync(UpdateMemberInfoRequest request)
@@ -522,17 +528,32 @@ namespace Moeen.Api.Application.Services
                 }
             }
 
-            if (request.StudentId.HasValue)
+            var selectedParentStudentIds = NormalizeParentStudentIds(request.StudentIds, request.StudentId);
+            if (user.role == ParentRole && selectedParentStudentIds.Count > 0)
             {
-                var child = await _context.Students.FindAsync(request.StudentId.Value);
-                if (child == null)
-                    return GeneralResponse.NotFound("الطالب غير موجود.");
+                var children = await LoadParentChildrenAsync(selectedParentStudentIds);
+                if (children.Count != selectedParentStudentIds.Count)
+                    return GeneralResponse.BadRequest("يوجد طالب محدد غير موجود.");
 
-                child.ParentId = memberId;
+                await SyncParentStudentLinksAsync(memberId, selectedParentStudentIds);
             }
 
             if (!string.IsNullOrWhiteSpace(request.Relationship))
                 user.theme = request.Relationship;
+
+            if (!string.IsNullOrWhiteSpace(request.NewPassword))
+            {
+                if (request.NewPassword.Length < 6)
+                    return GeneralResponse.BadRequest("كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.");
+
+                var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var resetResult = await _userManager.ResetPasswordAsync(user, resetToken, request.NewPassword);
+                if (!resetResult.Succeeded)
+                {
+                    var errors = string.Join("; ", resetResult.Errors.Select(e => e.Description));
+                    return GeneralResponse.BadRequest($"فشل تحديث كلمة المرور: {errors}");
+                }
+            }
 
             await _context.SaveChangesAsync();
             return GeneralResponse.Ok("تم تحديث بيانات العضو بنجاح.");
@@ -631,6 +652,8 @@ namespace Moeen.Api.Application.Services
 
             var query = _context.Students
                 .Include(p => p.Children)
+                .Include(p => p.ChildLinks)
+                    .ThenInclude(link => link.Student)
                 .Include(p => p.Mosque)
                 .Where(p => p.role == ParentRole);
 
@@ -648,11 +671,7 @@ namespace Moeen.Api.Application.Services
                 .Take(pageSize)
                 .ToListAsync();
 
-            var data = parents.Select(p =>
-            {
-                var child = p.Children?.OrderBy(c => c.name).FirstOrDefault();
-                return MapParentDto(p, child);
-            }).ToList();
+            var data = parents.Select(p => MapParentDto(p, ResolveLinkedChildren(p))).ToList();
 
             return GeneralResponse.Ok("تم جلب أولياء الأمور بنجاح.", data, page, pageSize, totalCount);
         }
@@ -702,10 +721,17 @@ namespace Moeen.Api.Application.Services
             if (request == null || request.ParentId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف ولي الأمر غير صالح.");
 
+            var linkedStudentIds = await _context.ParentStudentLinks
+                .Where(link => link.ParentId == request.ParentId)
+                .Select(link => link.StudentId)
+                .ToListAsync();
+
             var children = await _context.Students
                 .Include(s => s.Mosque)
                 .Include(s => s.SaturdayHalqa)
-                .Where(s => s.ParentId == request.ParentId && s.status == 0)
+                .Include(s => s.Halqa)
+                    .ThenInclude(h => h.Fouj)
+                .Where(s => (linkedStudentIds.Contains(s.Id) || s.ParentId == request.ParentId) && s.status == 0)
                 .OrderBy(s => s.name)
                 .ToListAsync();
 
@@ -935,7 +961,10 @@ namespace Moeen.Api.Application.Services
             if (request == null || request.ParentId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف ولي الأمر غير صالح.");
 
-            var parent = await _context.Students.FindAsync(request.ParentId);
+            var parent = await _context.Students
+                .Include(p => p.ChildLinks)
+                .FirstOrDefaultAsync(p => p.Id == request.ParentId && p.role == ParentRole);
+
             if (parent == null)
                 return GeneralResponse.NotFound("ولي الأمر غير موجود.");
 
@@ -945,8 +974,18 @@ namespace Moeen.Api.Application.Services
             if (!string.IsNullOrWhiteSpace(request.Relationship))
                 parent.theme = request.Relationship;
 
+            var selectedStudentIds = NormalizeParentStudentIds(request.StudentIds, null);
+            if (selectedStudentIds.Count > 0)
+            {
+                var children = await LoadParentChildrenAsync(selectedStudentIds);
+                if (children.Count != selectedStudentIds.Count)
+                    return GeneralResponse.BadRequest("يوجد طالب محدد غير موجود.");
+
+                await SyncParentStudentLinksAsync(parent.Id, selectedStudentIds);
+            }
+
             await _context.SaveChangesAsync();
-            return GeneralResponse.Ok("تم تحديث بيانات ولي الأمر بنجاح.");
+            return GeneralResponse.Ok("تم تعديل بيانات ولي الأمر بنجاح.");
         }
 
         public async Task<GeneralResponse> DeleteStudentAsync(DeleteStudentRequest request)
@@ -1058,7 +1097,11 @@ namespace Moeen.Api.Application.Services
             if (request == null || request.ParentId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف ولي الأمر غير صالح.");
 
-            var parent = await _context.Students.Include(p => p.Children).FirstOrDefaultAsync(p => p.Id == request.ParentId);
+            var parent = await _context.Students
+                .Include(p => p.Children)
+                .Include(p => p.ChildLinks)
+                .FirstOrDefaultAsync(p => p.Id == request.ParentId && p.role == ParentRole);
+
             if (parent == null)
                 return GeneralResponse.NotFound("ولي الأمر غير موجود.");
 
@@ -1068,6 +1111,9 @@ namespace Moeen.Api.Application.Services
                     child.ParentId = null;
             }
 
+            if (parent.ChildLinks.Count > 0)
+                _context.ParentStudentLinks.RemoveRange(parent.ChildLinks);
+
             var result = await _userManager.DeleteAsync(parent);
             if (!result.Succeeded)
             {
@@ -1075,7 +1121,6 @@ namespace Moeen.Api.Application.Services
                 return GeneralResponse.BadRequest($"فشل حذف ولي الأمر: {errors}");
             }
 
-            await _context.SaveChangesAsync();
             return GeneralResponse.Ok("تم حذف ولي الأمر بنجاح.");
         }
 
@@ -1448,8 +1493,22 @@ namespace Moeen.Api.Application.Services
             };
         }
 
-        private static ParentDto MapParentDto(Student parent, Student child)
+        private static ParentDto MapParentDto(Student parent, Student? child)
         {
+            return MapParentDto(parent, child == null ? Enumerable.Empty<Student>() : new[] { child });
+        }
+
+        private static ParentDto MapParentDto(Student parent, IEnumerable<Student>? children)
+        {
+            var linkedChildren = (children ?? Enumerable.Empty<Student>())
+                .Where(child => child != null)
+                .GroupBy(child => child.Id)
+                .Select(group => group.First())
+                .OrderBy(child => child.name)
+                .ToList();
+
+            var firstChild = linkedChildren.FirstOrDefault();
+
             return new ParentDto
             {
                 Id = parent.Id,
@@ -1463,10 +1522,95 @@ namespace Moeen.Api.Application.Services
                 ProfileImageUrl = parent.profile_imageUrl,
                 CreatedAt = parent.created_at,
                 JoinedAt = parent.JoinedAt,
-                StudentId = child?.Id ?? Guid.Empty,
+                StudentId = firstChild?.Id ?? Guid.Empty,
                 Relationship = parent.theme ?? string.Empty,
-                StudentName = child?.name ?? string.Empty
+                StudentName = firstChild?.name ?? string.Empty,
+                StudentIds = linkedChildren.Select(child => child.Id).ToList(),
+                StudentNames = string.Join("، ", linkedChildren.Select(child => child.name).Where(name => !string.IsNullOrWhiteSpace(name))),
+                StudentsCount = linkedChildren.Count
             };
+        }
+
+        private static List<Student> ResolveLinkedChildren(Student parent)
+        {
+            var children = new List<Student>();
+
+            if (parent.ChildLinks != null)
+                children.AddRange(parent.ChildLinks.Where(link => link.Student != null).Select(link => link.Student));
+
+            if (parent.Children != null)
+                children.AddRange(parent.Children);
+
+            return children
+                .Where(child => child != null && child.role == StudentRole)
+                .GroupBy(child => child.Id)
+                .Select(group => group.First())
+                .OrderBy(child => child.name)
+                .ToList();
+        }
+
+        private static List<Guid> NormalizeParentStudentIds(IEnumerable<Guid>? studentIds, Guid? legacyStudentId)
+        {
+            var ids = studentIds?
+                .Where(id => id != Guid.Empty)
+                .Distinct()
+                .ToList() ?? new List<Guid>();
+
+            if (legacyStudentId.HasValue && legacyStudentId.Value != Guid.Empty && !ids.Contains(legacyStudentId.Value))
+                ids.Add(legacyStudentId.Value);
+
+            return ids;
+        }
+
+        private async Task<List<Student>> LoadParentChildrenAsync(IReadOnlyCollection<Guid> studentIds)
+        {
+            if (studentIds.Count == 0)
+                return new List<Student>();
+
+            return await _context.Students
+                .Where(student => studentIds.Contains(student.Id) && student.role == StudentRole)
+                .ToListAsync();
+        }
+
+        private async Task SyncParentStudentLinksAsync(Guid parentId, IReadOnlyCollection<Guid> selectedStudentIds)
+        {
+            var selected = selectedStudentIds.Where(id => id != Guid.Empty).Distinct().ToHashSet();
+            var existingLinks = await _context.ParentStudentLinks
+                .Where(link => link.ParentId == parentId)
+                .ToListAsync();
+
+            var linksToRemove = existingLinks.Where(link => !selected.Contains(link.StudentId)).ToList();
+            if (linksToRemove.Count > 0)
+                _context.ParentStudentLinks.RemoveRange(linksToRemove);
+
+            var existingIds = existingLinks.Select(link => link.StudentId).ToHashSet();
+            foreach (var studentId in selected.Where(id => !existingIds.Contains(id)))
+            {
+                _context.ParentStudentLinks.Add(new ParentStudentLink
+                {
+                    ParentId = parentId,
+                    StudentId = studentId,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+            var affectedStudentIds = selected.Concat(linksToRemove.Select(link => link.StudentId)).Distinct().ToList();
+            var affectedStudents = await _context.Students
+                .Where(student => affectedStudentIds.Contains(student.Id))
+                .ToListAsync();
+
+            foreach (var student in affectedStudents)
+            {
+                if (selected.Contains(student.Id))
+                {
+                    if (!student.ParentId.HasValue || student.ParentId == parentId)
+                        student.ParentId = parentId;
+                }
+                else if (student.ParentId == parentId)
+                {
+                    student.ParentId = null;
+                }
+            }
         }
     }
 }

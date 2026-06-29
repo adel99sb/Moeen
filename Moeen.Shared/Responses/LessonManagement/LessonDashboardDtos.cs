@@ -89,6 +89,8 @@ namespace Moeen.Shared.Responses.LessonManagement
         public string HalqaName { get; set; } = string.Empty;
         public string FoujName { get; set; } = string.Empty;
         public int StudentsCount { get; set; }
+        public List<Guid> StudentIds { get; set; } = new();
+        public string StudentNames { get; set; } = string.Empty;
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
     }

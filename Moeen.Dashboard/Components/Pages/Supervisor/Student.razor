@@ -212,6 +212,41 @@
     .status-inactive { background: #fff3f1; color: #b42318; }
     .status-graduated { background: #eef4ff; color: #3538cd; }
 
+    .student-placement-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 18px;
+        padding: 16px;
+        border: 1px solid #eee8e0;
+        border-radius: 18px;
+        background: #fbfaf8;
+    }
+
+    .student-placement-item {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        min-height: 74px;
+        justify-content: center;
+        padding: 12px 14px;
+        border-radius: 15px;
+        background: #fff;
+        border: 1px solid #eee8e0;
+    }
+
+    .student-placement-label {
+        color: #7b7067;
+        font-size: .82rem;
+        font-weight: 800;
+    }
+
+    .student-placement-value {
+        color: #163f35;
+        font-weight: 900;
+        overflow-wrap: anywhere;
+    }
+
     .row-actions {
         display: flex;
         justify-content: center;
@@ -359,6 +394,7 @@
         .students-header { flex-direction: column; }
         .form-grid { grid-template-columns: 1fr; }
         .dialog-backdrop { padding: 12px; }
+        .student-placement-summary { grid-template-columns: 1fr; }
         .student-dialog-header,
         .student-dialog-body,
         .student-dialog-footer { padding-left: 18px; padding-right: 18px; }
@@ -497,6 +533,24 @@
                             <div class="alert alert-danger">@_dialogError</div>
                         }
 
+                        @if (_isViewMode)
+                        {
+                            <div class="student-placement-summary">
+                                <div class="student-placement-item">
+                                    <span class="student-placement-label">المسجد</span>
+                                    <span class="student-placement-value">@Display(GetMosqueName(_form.MosqueId))</span>
+                                </div>
+                                <div class="student-placement-item">
+                                    <span class="student-placement-label">الفوج</span>
+                                    <span class="student-placement-value">@Display(GetFoujName(_form.FoujId))</span>
+                                </div>
+                                <div class="student-placement-item">
+                                    <span class="student-placement-label">الحلقة</span>
+                                    <span class="student-placement-value">@Display(GetHalqaName(_form.HalqaId))</span>
+                                </div>
+                            </div>
+                        }
+
                         <div class="form-grid">
                             <div class="form-field">
                                 <label>الاسم الكامل</label>
@@ -576,11 +630,22 @@
                                     }
                                 </InputSelect>
                             </div>
-                            @if (!_isEditMode && !_isViewMode)
+                            @if (_isViewMode)
                             {
                                 <div class="form-field">
-                                    <label>كلمة المرور</label>
-                                    <InputText type="password" class="form-control moeen-control" @bind-Value="_form.Password" placeholder="كلمة مرور الطالب" />
+                                    <label>الأهل</label>
+                                    <input class="form-control moeen-control" value="@Display(_form.ParentNames)" disabled />
+                                </div>
+                                <div class="form-field">
+                                    <label>عدد الأهل</label>
+                                    <input class="form-control moeen-control" value="@_form.ParentsCount" disabled />
+                                </div>
+                            }
+                            @if (!_isViewMode)
+                            {
+                                <div class="form-field">
+                                    <label>@(_isEditMode ? "كلمة مرور جديدة (اختياري)" : "كلمة المرور")</label>
+                                    <InputText type="password" class="form-control moeen-control" @bind-Value="_form.Password" placeholder="أدخل كلمة المرور الجديدة أو اتركها فارغة في وضع التعديل" />
                                     <ValidationMessage For="@(() => _form.Password)" />
                                 </div>
                             }
@@ -621,6 +686,7 @@
     private List<MosquDto> _mosques = new();
     private List<FoujDto> _foujs = new();
     private List<HalqaDto> _halqas = new();
+    private List<ParentDto> _parents = new();
     private StudentDialogModel _form = new();
 
     private bool _isLoading = true;
@@ -651,6 +717,7 @@
         {
             await LoadMosquesAsync();
             await LoadStructureAsync();
+            await LoadParentsAsync();
             await LoadStudentsAsync();
         }
         catch (Exception ex)
@@ -696,6 +763,31 @@
         }
     }
 
+    private async Task LoadParentsAsync()
+    {
+        try
+        {
+            var response = await EnrollmentService.GetAllParentsAsync(new GetAllParentsRequest
+            {
+                PageNumber = 1,
+                PageSize = 500
+            });
+
+            if (response == null || !response.Success)
+            {
+                _parents = new();
+                return;
+            }
+
+            var json = JsonSerializer.Serialize(response.Data);
+            _parents = JsonSerializer.Deserialize<List<ParentDto>>(json, JsonOptions) ?? new();
+        }
+        catch
+        {
+            _parents = new();
+        }
+    }
+
     private async Task LoadStudentsAsync()
     {
         _errorMessage = null;
@@ -719,8 +811,22 @@
             var json = JsonSerializer.Serialize(response.Data);
             var students = JsonSerializer.Deserialize<List<StudentDto>>(json, JsonOptions) ?? new();
 
+            var rows = students.Select(StudentRow.FromDto).ToList();
+            foreach (var row in rows)
+            {
+                var linkedParents = _parents
+                    .Where(parent => (parent.StudentIds != null && parent.StudentIds.Contains(row.Id)) || parent.StudentId == row.Id)
+                    .GroupBy(parent => parent.Id)
+                    .Select(group => group.First())
+                    .OrderBy(parent => parent.Name)
+                    .ToList();
+
+                row.ParentNames = string.Join("، ", linkedParents.Select(parent => parent.Name).Where(name => !string.IsNullOrWhiteSpace(name)));
+                row.ParentsCount = linkedParents.Count;
+            }
+
             _students.Clear();
-            _students.AddRange(students.Select(StudentRow.FromDto));
+            _students.AddRange(rows);
         }
         catch (Exception ex)
         {
@@ -770,7 +876,9 @@
             Score = student.Score,
             MosqueId = student.MosqueId,
             FoujId = student.FoujId ?? Guid.Empty,
-            HalqaId = student.HalqaId
+            HalqaId = student.HalqaId,
+            ParentNames = student.ParentNames,
+            ParentsCount = student.ParentsCount
         };
         _isDialogOpen = true;
     }
@@ -794,7 +902,9 @@
             Score = student.Score,
             MosqueId = student.MosqueId,
             FoujId = student.FoujId ?? Guid.Empty,
-            HalqaId = student.HalqaId
+            HalqaId = student.HalqaId,
+            ParentNames = student.ParentNames,
+            ParentsCount = student.ParentsCount
         };
         _isDialogOpen = true;
     }
@@ -822,17 +932,24 @@
         {
             if (_isEditMode)
             {
+                if (!string.IsNullOrWhiteSpace(_form.Password) && _form.Password.Trim().Length < 6)
+                {
+                    _dialogError = "كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.";
+                    return;
+                }
+
                 var response = await EnrollmentService.UpdateMemberInfoAsync(new UpdateMemberInfoRequest
                 {
                     MemberId = _form.Id.ToString(),
                     Name = _form.Name,
                     Email = _form.Email,
-                    Phone = _form.Phone?.Trim() ?? string.Empty,
+                    Phone = string.IsNullOrWhiteSpace(_form.Phone) ? null : _form.Phone.Trim(),
                     Gender = _form.Gender,
                     Age = _form.Age,
                     Status = _form.Status,
                     Score = _form.Score,
-                    HalqaId = _form.HalqaId
+                    HalqaId = _form.HalqaId,
+                    NewPassword = string.IsNullOrWhiteSpace(_form.Password) ? null : _form.Password.Trim()
                 });
 
                 if (response == null || !response.Success)
@@ -863,7 +980,7 @@
                     Email = _form.Email,
                     Password = _form.Password,
                     ConfirmPassword = _form.Password,
-                    Phone = _form.Phone?.Trim() ?? string.Empty,
+                    Phone = string.IsNullOrWhiteSpace(_form.Phone) ? null : _form.Phone.Trim(),
                     Gender = _form.Gender,
                     Age = _form.Age,
                     EnrollmentDate = _form.EnrollmentDate,
@@ -926,6 +1043,15 @@
     private static string Display(string? value)
         => string.IsNullOrWhiteSpace(value) ? "—" : value;
 
+    private string GetMosqueName(Guid mosqueId)
+        => _mosques.FirstOrDefault(mosque => mosque.Id == mosqueId)?.name ?? string.Empty;
+
+    private string GetFoujName(Guid foujId)
+        => _foujs.FirstOrDefault(fouj => fouj.Id == foujId)?.Name ?? string.Empty;
+
+    private string GetHalqaName(Guid? halqaId)
+        => halqaId.HasValue ? _halqas.FirstOrDefault(halqa => halqa.Id == halqaId.Value)?.Name ?? string.Empty : string.Empty;
+
     private IEnumerable<FoujDto> DialogFoujs => _form.MosqueId == Guid.Empty
         ? _foujs
         : _foujs.Where(fouj => fouj.MosqueId == _form.MosqueId);
@@ -969,6 +1095,8 @@
         public string FoujName { get; set; } = string.Empty;
         public Guid? HalqaId { get; set; }
         public string HalqaName { get; set; } = string.Empty;
+        public string ParentNames { get; set; } = string.Empty;
+        public int ParentsCount { get; set; }
 
         public static StudentRow FromDto(StudentDto dto)
             => new()
@@ -987,7 +1115,9 @@
                 FoujId = dto.FoujId,
                 FoujName = dto.FoujName ?? string.Empty,
                 HalqaId = dto.HalqaId,
-                HalqaName = dto.HalqaName ?? string.Empty
+                HalqaName = dto.HalqaName ?? string.Empty,
+                ParentNames = dto.ParentNames ?? string.Empty,
+                ParentsCount = dto.ParentsCount
             };
     }
 
@@ -1023,8 +1153,10 @@
         public Guid MosqueId { get; set; }
         public Guid FoujId { get; set; }
         public Guid? HalqaId { get; set; }
+        public string ParentNames { get; set; } = string.Empty;
+        public int ParentsCount { get; set; }
 
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "كلمة المرور يجب أن تكون 6 أحرف على الأقل")]
+        [StringLength(100, ErrorMessage = "كلمة المرور لا يمكن أن تتجاوز 100 حرف")]
         public string? Password { get; set; }
     }
 }

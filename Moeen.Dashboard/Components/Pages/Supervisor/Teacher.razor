@@ -1,4 +1,4 @@
-@page "/supervisor/teacher"
+﻿@page "/supervisor/teacher"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using System.Text.Json
 @using Moeen.Dashboard.Application.Services.Abstractions
@@ -163,7 +163,7 @@
                             DisableMosque="@_isEditMode"
                             ShowFouj="true"
                             ShowHalqa="true"
-                            ShowPassword="@(!_isEditMode)"
+                            ShowPassword="true"
                             ShowJoinedAt="true"
                             ShowStatus="false"
                             ShowScore="false"
@@ -376,6 +376,15 @@
                         Item("تاريخ التعيين", FormatAssignedDateForDisplay(teacher.AssignedAt)),
                         Item("لمحة عن الخبرات", teacher.Bio, wide: true)
                     }
+                },
+                new()
+                {
+                    Title = "الحلقات والأفواج",
+                    Items = new List<MemberDetailsItemModel>
+                    {
+                        Item("الحلقات التي يدرّس فيها", GetTeacherHalqasDisplay(teacher), wide: true),
+                        Item("الأفواج الموجود فيها", GetTeacherFoujsDisplay(teacher), wide: true)
+                    }
                 }
             }
         };
@@ -398,6 +407,12 @@
         {
             if (_isEditMode)
             {
+                if (!string.IsNullOrWhiteSpace(_form.Password) && _form.Password.Trim().Length < 6)
+                {
+                    _dialogError = "كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.";
+                    return;
+                }
+
                 var response = await EnrollmentService.UpdateMemberInfoAsync(new UpdateMemberInfoRequest
                 {
                     MemberId = _form.Id.ToString(),
@@ -407,7 +422,8 @@
                     Gender = _form.Gender,
                     Bio = _form.Bio,
                     AssignedAt = FormatAssignedDateForRequest(_form.AssignedAt),
-                    HalqaId = _form.HalqaId
+                    HalqaId = _form.HalqaId,
+                    NewPassword = string.IsNullOrWhiteSpace(_form.Password) ? null : _form.Password.Trim()
                 });
 
                 if (response == null || !response.Success)
@@ -526,6 +542,40 @@
 
     private static string FormatAssignedDateForDisplay(string? value)
         => DateTime.TryParse(value, out var parsed) ? parsed.ToString("yyyy/MM/dd") : value ?? string.Empty;
+
+    private string GetTeacherHalqasDisplay(TeacherRow teacher)
+    {
+        var halqaNames = _halqas
+            .Where(halqa => halqa.TeacherId == teacher.Id)
+            .OrderBy(halqa => halqa.Name)
+            .Select(halqa => halqa.Name)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (halqaNames.Count == 0 && !string.IsNullOrWhiteSpace(teacher.HalqaName))
+            halqaNames.Add(teacher.HalqaName);
+
+        return halqaNames.Count == 0 ? "—" : string.Join("، ", halqaNames);
+    }
+
+    private string GetTeacherFoujsDisplay(TeacherRow teacher)
+    {
+        var foujNames = _halqas
+            .Where(halqa => halqa.TeacherId == teacher.Id)
+            .OrderBy(halqa => halqa.FoujName)
+            .Select(halqa => !string.IsNullOrWhiteSpace(halqa.FoujName)
+                ? halqa.FoujName
+                : _foujs.FirstOrDefault(fouj => fouj.Id == halqa.FoujId)?.Name)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (foujNames.Count == 0 && !string.IsNullOrWhiteSpace(teacher.FoujName))
+            foujNames.Add(teacher.FoujName);
+
+        return foujNames.Count == 0 ? "—" : string.Join("، ", foujNames);
+    }
 
     private IEnumerable<FoujDto> DialogFoujs => _form.MosqueId == Guid.Empty
         ? _foujs

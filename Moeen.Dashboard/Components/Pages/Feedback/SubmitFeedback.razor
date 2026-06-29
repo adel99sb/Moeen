@@ -1,0 +1,231 @@
+@page "/feedback"
+@page "/Teacher/feedback"
+@page "/examer/feedback"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using Moeen.Dashboard.Services.Abstractions
+@using Moeen.Frontend.Services.Abstractions
+@using Moeen.Shared.Requests.Feedback
+@inject IFeedbackService FeedbackService
+@inject ITokenService TokenService
+@inject NavigationManager Nav
+
+<PageTitle>الشكاوى والاقتراحات</PageTitle>
+
+<style>
+    .feedback-page { direction: rtl; color: #163f35; }
+    .feedback-hero { background: linear-gradient(135deg, #195042, #28715f); color: #fff; border-radius: 24px; padding: 28px; margin-bottom: 22px; box-shadow: 0 18px 45px rgba(25, 80, 66, .16); }
+    .feedback-hero h1 { margin: 0 0 8px; font-size: 1.8rem; font-weight: 900; letter-spacing: -0.04em; }
+    .feedback-hero p { margin: 0; opacity: .92; line-height: 1.8; }
+    .feedback-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .feedback-card { background: #fff; border: 1px solid rgba(25, 80, 66, 0.10); border-radius: 24px; padding: 24px; box-shadow: 0 18px 45px rgba(25, 80, 66, .08); }
+    .feedback-card-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    .feedback-card-title { margin: 0; color: #195042; font-size: 1.2rem; font-weight: 900; display: inline-flex; align-items: center; gap: 10px; }
+    .feedback-icon { width: 44px; height: 44px; border-radius: 15px; background: #e7f0ec; color: #195042; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 44px; }
+    .feedback-text { color: #7b7067; line-height: 1.8; margin: 0 0 16px; }
+    .form-field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .form-field label { color: #195042; font-weight: 900; font-size: .92rem; }
+    .form-control-moeen { width: 100%; min-height: 46px; border: 1px solid #ddd5cc; border-radius: 14px; padding: 0 14px; background: #fbfaf8; color: #163f35; outline: none; font-weight: 700; }
+    textarea.form-control-moeen { min-height: 150px; padding-top: 12px; resize: vertical; line-height: 1.8; }
+    .form-control-moeen:focus { border-color: #195042; background: #fff; box-shadow: 0 0 0 4px rgba(25, 80, 66, 0.10); }
+    .field-hint { color: #8a8178; font-size: .84rem; }
+    .btn-feedback-primary { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 17px; border-radius: 14px; border: 0; font-weight: 900; background: #195042; color: #fff; box-shadow: 0 14px 28px rgba(25, 80, 66, 0.18); }
+    .btn-feedback-primary:hover:not(:disabled) { background: #123d32; transform: translateY(-1px); }
+    .btn-feedback-primary:disabled { opacity: .7; cursor: not-allowed; }
+    .feedback-alert { border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; }
+    @@media (max-width: 900px) { .feedback-grid { grid-template-columns: 1fr; } .feedback-hero { padding: 22px; } }
+</style>
+
+<section class="feedback-page">
+    <div class="feedback-hero">
+        <h1>الشكاوى والاقتراحات</h1>
+        <p>أرسل شكوى أو اقتراح للإدارة ليتم متابعتها والرد عليها من قبل المشرفين.</p>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_successMessage))
+    {
+        <div class="alert alert-success feedback-alert">@_successMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <div class="alert alert-danger feedback-alert">@_errorMessage</div>
+    }
+
+    <div class="feedback-grid">
+        <article class="feedback-card">
+            <div class="feedback-card-header">
+                <h2 class="feedback-card-title"><i class="bi bi-exclamation-circle"></i> إرسال شكوى</h2>
+                <span class="feedback-icon"><i class="bi bi-chat-left-text"></i></span>
+            </div>
+            <p class="feedback-text">اكتب تفاصيل المشكلة بشكل واضح حتى يتمكن المشرف من مراجعتها.</p>
+
+            <div class="form-field">
+                <label for="complaintContent">نص الشكوى</label>
+                <textarea id="complaintContent" class="form-control-moeen" @bind="_complaintContent" @bind:event="oninput" maxlength="1000" placeholder="اكتب الشكوى هنا..."></textarea>
+                <span class="field-hint">يجب أن تكون الشكوى بين 5 و 1000 حرف.</span>
+            </div>
+
+            <button type="button" class="btn-feedback-primary" disabled="@_isSubmittingComplaint" @onclick="SubmitComplaintAsync">
+                @if (_isSubmittingComplaint)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                    <span>جاري الإرسال...</span>
+                }
+                else
+                {
+                    <i class="bi bi-send"></i>
+                    <span>إرسال الشكوى</span>
+                }
+            </button>
+        </article>
+
+        <article class="feedback-card">
+            <div class="feedback-card-header">
+                <h2 class="feedback-card-title"><i class="bi bi-lightbulb"></i> إرسال اقتراح</h2>
+                <span class="feedback-icon"><i class="bi bi-stars"></i></span>
+            </div>
+            <p class="feedback-text">شارك فكرة تساعد في تحسين العمل أو تجربة استخدام المنصة.</p>
+
+            <div class="form-field">
+                <label for="suggestionTitle">عنوان الاقتراح</label>
+                <input id="suggestionTitle" class="form-control-moeen" @bind="_suggestionTitle" @bind:event="oninput" maxlength="200" placeholder="مثال: تحسين صفحة الحلقات" />
+                <span class="field-hint">العنوان بين 2 و 200 حرف.</span>
+            </div>
+
+            <div class="form-field">
+                <label for="suggestionContent">تفاصيل الاقتراح</label>
+                <textarea id="suggestionContent" class="form-control-moeen" @bind="_suggestionContent" @bind:event="oninput" maxlength="1000" placeholder="اكتب تفاصيل الاقتراح هنا..."></textarea>
+                <span class="field-hint">التفاصيل بين 5 و 1000 حرف.</span>
+            </div>
+
+            <button type="button" class="btn-feedback-primary" disabled="@_isSubmittingSuggestion" @onclick="SubmitSuggestionAsync">
+                @if (_isSubmittingSuggestion)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                    <span>جاري الإرسال...</span>
+                }
+                else
+                {
+                    <i class="bi bi-send"></i>
+                    <span>إرسال الاقتراح</span>
+                }
+            </button>
+        </article>
+    </div>
+</section>
+
+@code {
+    private string _complaintContent = string.Empty;
+    private string _suggestionTitle = string.Empty;
+    private string _suggestionContent = string.Empty;
+    private string? _successMessage;
+    private string? _errorMessage;
+    private bool _isSubmittingComplaint;
+    private bool _isSubmittingSuggestion;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        var session = await TokenService.GetSession();
+        if (!session.IsAuthenticated)
+            Nav.NavigateTo("/", replace: true);
+    }
+
+    private async Task SubmitComplaintAsync()
+    {
+        _successMessage = null;
+        _errorMessage = null;
+
+        var content = _complaintContent.Trim();
+        if (content.Length < 5 || content.Length > 1000)
+        {
+            _errorMessage = "نص الشكوى يجب أن يكون بين 5 و 1000 حرف.";
+            return;
+        }
+
+        _isSubmittingComplaint = true;
+        try
+        {
+            var response = await FeedbackService.SubmitComplaintAsync(new SubmitComplaintRequest
+            {
+                ComplaintData = new ComplaintDto
+                {
+                    Content = content,
+                    UserId = Guid.Empty
+                }
+            });
+
+            if (!response.Success)
+            {
+                _errorMessage = response.Message;
+                return;
+            }
+
+            _complaintContent = string.Empty;
+            _successMessage = string.IsNullOrWhiteSpace(response.Message) ? "تم إرسال الشكوى بنجاح." : response.Message;
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isSubmittingComplaint = false;
+        }
+    }
+
+    private async Task SubmitSuggestionAsync()
+    {
+        _successMessage = null;
+        _errorMessage = null;
+
+        var title = _suggestionTitle.Trim();
+        var content = _suggestionContent.Trim();
+
+        if (title.Length < 2 || title.Length > 200)
+        {
+            _errorMessage = "عنوان الاقتراح يجب أن يكون بين 2 و 200 حرف.";
+            return;
+        }
+
+        if (content.Length < 5 || content.Length > 1000)
+        {
+            _errorMessage = "تفاصيل الاقتراح يجب أن تكون بين 5 و 1000 حرف.";
+            return;
+        }
+
+        _isSubmittingSuggestion = true;
+        try
+        {
+            var response = await FeedbackService.SubmitSuggestionAsync(new SubmitSuggestionRequest
+            {
+                SuggestionData = new SuggestionDto
+                {
+                    Title = title,
+                    Content = content,
+                    UserId = Guid.Empty
+                }
+            });
+
+            if (!response.Success)
+            {
+                _errorMessage = response.Message;
+                return;
+            }
+
+            _suggestionTitle = string.Empty;
+            _suggestionContent = string.Empty;
+            _successMessage = string.IsNullOrWhiteSpace(response.Message) ? "تم إرسال الاقتراح بنجاح." : response.Message;
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isSubmittingSuggestion = false;
+        }
+    }
+}

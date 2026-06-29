@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Enities;
@@ -25,7 +25,9 @@ namespace Moeen.Api.infrastructure.Data
         public DbSet<ProgressEntry> ProgressEntries { get; set; }
         public DbSet<SaturdayHalqa> SaturdayHalqes { get; set; }
         public DbSet<ParentSudent> ParentSudents { get; set; }
+        public DbSet<ParentStudentLink> ParentStudentLinks { get; set; }
         public DbSet<WeeklyLesson> WeeklyLessons { get; set; }
+        public DbSet<SaturdayLessonStudent> SaturdayLessonStudents { get; set; }
 
         public DbSet<Student> Students { get; set; }
         public DbSet<Supervisor> Supervisors { get; set; }
@@ -48,6 +50,36 @@ namespace Moeen.Api.infrastructure.Data
             {
                 foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
             }            
+
+            modelBuilder.Entity<ParentStudentLink>()
+                .HasKey(x => new { x.ParentId, x.StudentId });
+
+            modelBuilder.Entity<ParentStudentLink>()
+                .HasOne(x => x.Parent)
+                .WithMany(x => x.ChildLinks)
+                .HasForeignKey(x => x.ParentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ParentStudentLink>()
+                .HasOne(x => x.Student)
+                .WithMany(x => x.ParentLinks)
+                .HasForeignKey(x => x.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SaturdayLessonStudent>()
+                .HasKey(x => new { x.SaturdayLessonId, x.StudentId });
+
+            modelBuilder.Entity<SaturdayLessonStudent>()
+                .HasOne(x => x.SaturdayLesson)
+                .WithMany(x => x.StudentLinks)
+                .HasForeignKey(x => x.SaturdayLessonId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SaturdayLessonStudent>()
+                .HasOne(x => x.Student)
+                .WithMany()
+                .HasForeignKey(x => x.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

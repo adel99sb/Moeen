@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.Enrollment
@@ -15,8 +16,14 @@ namespace Moeen.Shared.Requests.Enrollment
         [EmailAddress(ErrorMessage = "Invalid email address")]
         public string? Email { get; set; }
 
+        private string? _phone;
+
         [Phone(ErrorMessage = "Invalid phone number")]
-        public string? Phone { get; set; }
+        public string? Phone
+        {
+            get => _phone;
+            set => _phone = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        }
 
         [RegularExpression("^(Male|Female)$", ErrorMessage = "Gender must be Male or Female")]
         public string? Gender { get; set; }
@@ -54,6 +61,7 @@ namespace Moeen.Shared.Requests.Enrollment
 
         // Parent specific
         public Guid? StudentId { get; set; }
+        public List<Guid> StudentIds { get; set; } = new();
 
         [StringLength(50, ErrorMessage = "Relationship cannot exceed 50 characters")]
         public string? Relationship { get; set; }

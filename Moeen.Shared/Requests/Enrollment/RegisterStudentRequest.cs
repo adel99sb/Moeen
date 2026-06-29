@@ -23,8 +23,14 @@ namespace Moeen.Shared.Requests.Enrollment
         [DataType(DataType.Password)]
         public string ConfirmPassword { get; set; } = string.Empty;
 
+        private string? _phone;
+
         [Phone(ErrorMessage = "Invalid phone number")]
-        public string Phone { get; set; } = string.Empty;
+        public string? Phone
+        {
+            get => _phone;
+            set => _phone = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        }
 
         [Required(ErrorMessage = "Gender is required")]
         [RegularExpression("^(Male|Female)$", ErrorMessage = "Gender must be Male or Female")]

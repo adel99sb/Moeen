@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Moeen.Shared.Responses.Enrollment
@@ -32,5 +32,8 @@ namespace Moeen.Shared.Responses.Enrollment
         // Navigation properties (simplified)
         public string MosqueName { get; set; } = string.Empty;
         public string SaturdayHalqeName { get; set; } = string.Empty;
+        public List<Guid> ParentIds { get; set; } = new();
+        public string ParentNames { get; set; } = string.Empty;
+        public int ParentsCount { get; set; }
     }
 }

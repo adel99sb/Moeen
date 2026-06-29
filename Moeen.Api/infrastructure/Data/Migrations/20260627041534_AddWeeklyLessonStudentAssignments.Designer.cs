@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Moeen.Api.infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Moeen.Api.infrastructure.Data;
 namespace Moeen.Api.infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260627041534_AddWeeklyLessonStudentAssignments")]
+    partial class AddWeeklyLessonStudentAssignments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -420,24 +423,6 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Mosques");
-                });
-
-            modelBuilder.Entity("Moeen.Api.Core.Entities.ParentStudentLink", b =>
-                {
-                    b.Property<Guid>("ParentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ParentId", "StudentId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("ParentStudentLinks");
                 });
 
             modelBuilder.Entity("Moeen.Api.Core.Entities.PdfFile", b =>
@@ -1117,25 +1102,6 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                     b.Navigation("Halqa");
                 });
 
-            modelBuilder.Entity("Moeen.Api.Core.Entities.ParentStudentLink", b =>
-                {
-                    b.HasOne("Moeen.Api.Core.Entities.Student", "Parent")
-                        .WithMany("ChildLinks")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Moeen.Api.Core.Entities.Student", "Student")
-                        .WithMany("ParentLinks")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Parent");
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("Moeen.Api.Core.Entities.PdfFile", b =>
                 {
                     b.HasOne("Moeen.Api.Core.Entities.Mosque", "Mosque")
@@ -1465,13 +1431,9 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                 {
                     b.Navigation("Attendances");
 
-                    b.Navigation("ChildLinks");
-
                     b.Navigation("Children");
 
                     b.Navigation("Exams");
-
-                    b.Navigation("ParentLinks");
 
                     b.Navigation("progressEntrys");
                 });

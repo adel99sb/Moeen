@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Moeen.Shared.Requests.LessonManagement
@@ -39,7 +40,8 @@ namespace Moeen.Shared.Requests.LessonManagement
     {
         public Guid WeeklyLessonId { get; set; }
         public Guid TeacherId { get; set; }
-        public Guid HalqaId { get; set; }
+        public Guid? HalqaId { get; set; }
+        public List<Guid> StudentIds { get; set; } = new();
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
     }

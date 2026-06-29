@@ -32,7 +32,7 @@ namespace Moeen.Dashboard.Components.Shared
         public Guid FoujId { get; set; }
         public Guid? HalqaId { get; set; }
 
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "كلمة المرور يجب أن تكون 6 أحرف على الأقل")]
+        [StringLength(100, ErrorMessage = "كلمة المرور لا يمكن أن تتجاوز 100 حرف")]
         public string? Password { get; set; }
 
         [StringLength(500, ErrorMessage = "النبذة لا يجب أن تتجاوز 500 حرف")]

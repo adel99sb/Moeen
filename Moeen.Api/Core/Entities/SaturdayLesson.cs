@@ -15,6 +15,7 @@ namespace Moeen.Api.Core.Entities
         public TimeSpan end_time { get; set; }
         public SaturdayHalqa SaturdayHalqe { get; set; } = null!;
         public ICollection<Attendance> attendances { get; set; } = new List<Attendance>();
+        public ICollection<SaturdayLessonStudent> StudentLinks { get; set; } = new List<SaturdayLessonStudent>();
         public ICollection<PdfFile> PdfFiles { get; set; } = new List<PdfFile>();
     }
 
