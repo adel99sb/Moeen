@@ -391,7 +391,7 @@ namespace Moeen.Api.Application.Services
                     CircleId = circle.Id,
                     CircleName = circle.name,
                     AgeRange = $"{circle.age_min}-{circle.age_max}",
-                    TeacherId = circle.TeacherId,
+                    TeacherId = circle.TeacherId ?? Guid.Empty,
                     TeacherName = circle.Teacher?.name ?? "غير محدد",
                     StartTime = lesson?.start_time,
                     EndTime = lesson?.end_time,
@@ -699,6 +699,9 @@ namespace Moeen.Api.Application.Services
             var teacher = await _context.Teachers.AsNoTracking().FirstOrDefaultAsync(t => t.Id == teacherId);
             if (teacher == null)
                 return (GeneralResponse.NotFound("المعلم غير موجود."), null, null, new List<Student>());
+
+            if (teacher.status != 0)
+                return (GeneralResponse.BadRequest("لا يمكن تعيين معلم غير نشط على درس أسبوعي."), null, null, new List<Student>());
 
             var students = await _context.Students
                 .AsNoTracking()

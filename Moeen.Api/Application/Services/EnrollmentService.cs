@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
+using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Data;
 using Moeen.Shared.Requests.Enrollment;
@@ -19,16 +20,19 @@ namespace Moeen.Api.Application.Services
         private const int TeacherRole = 1;
         private const int StudentRole = 2;
         private const int ParentRole = 3;
+        private const int ActiveStatus = 0;
 
         private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+        private readonly ICurrentUserService? _currentUserService;
 
-        public EnrollmentService(AppDbContext context, UserManager<User> userManager, RoleManager<IdentityRole<Guid>> roleManager)
+        public EnrollmentService(AppDbContext context, UserManager<User> userManager, RoleManager<IdentityRole<Guid>> roleManager, ICurrentUserService? currentUserService = null)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _currentUserService = currentUserService;
         }
 
         private async Task<GeneralResponse?> EnsureIdentityRoleAsync(User user, string roleName)
@@ -62,6 +66,21 @@ namespace Moeen.Api.Application.Services
             return null;
         }
 
+        private async Task<Guid?> ResolveManagedMosqueIdAsync()
+        {
+            var currentUserId = _currentUserService?.CurrentUserId;
+            if (!currentUserId.HasValue)
+                return null;
+
+            return await _context.Supervisors
+                .AsNoTracking()
+                .Where(s => s.Id == currentUserId.Value)
+                .Select(s => (Guid?)s.MosqueId)
+                .FirstOrDefaultAsync();
+        }
+
+        private static Guid? ResolveEffectiveMosqueId(Guid? managedMosqueId, Guid? requestedMosqueId)
+            => managedMosqueId ?? requestedMosqueId;
         public async Task<GeneralResponse> RegisterStudentAsync(RegisterStudentRequest request)
         {
             if (request == null)
@@ -187,6 +206,7 @@ namespace Moeen.Api.Application.Services
                 created_at = DateTime.UtcNow,
                 JoinedAt = DateTime.UtcNow,
                 MosqueId = request.MosqueId,
+                status = request.Status,
                 Bio = request.Bio ?? string.Empty,
                 assigned_at = request.AssignedAt ?? string.Empty
             };
@@ -202,7 +222,7 @@ namespace Moeen.Api.Application.Services
             if (teacherRoleError != null)
                 return teacherRoleError;
 
-            if (assignedHalqa != null)
+            if (assignedHalqa != null && teacher.status == ActiveStatus)
             {
                 assignedHalqa.TeacherId = teacher.Id;
                 await _context.SaveChangesAsync();
@@ -526,6 +546,9 @@ namespace Moeen.Api.Application.Services
 
                     selectedHalqa.TeacherId = teacher.Id;
                 }
+
+                if (request.Status.HasValue)
+                    await UpdateTeacherStatusAsync(teacher, request.Status.Value);
             }
 
             var selectedParentStudentIds = NormalizeParentStudentIds(request.StudentIds, request.StudentId);
@@ -565,10 +588,18 @@ namespace Moeen.Api.Application.Services
                 return GeneralResponse.BadRequest("معرّف العضو غير صالح.");
 
             var student = await _context.Students.FindAsync(memberId);
-            if (student == null)
-                return GeneralResponse.NotFound("الطالب غير موجود.");
+            if (student != null)
+            {
+                student.status = request.Status;
+                await _context.SaveChangesAsync();
+                return GeneralResponse.Ok("تم تحديث حالة العضو بنجاح.");
+            }
 
-            student.status = request.Status;
+            var teacher = await _context.Teachers.FindAsync(memberId);
+            if (teacher == null)
+                return GeneralResponse.NotFound("العضو غير موجود.");
+
+            await UpdateTeacherStatusAsync(teacher, request.Status);
             await _context.SaveChangesAsync();
 
             return GeneralResponse.Ok("تم تحديث حالة العضو بنجاح.");
@@ -592,8 +623,9 @@ namespace Moeen.Api.Application.Services
             if (!string.IsNullOrWhiteSpace(request.Name))
                 query = query.Where(s => EF.Functions.Like(s.name, $"%{request.Name}%"));
 
-            if (request.MosqueId.HasValue)
-                query = query.Where(s => s.MosqueId == request.MosqueId.Value);
+            var effectiveMosqueId = ResolveEffectiveMosqueId(await ResolveManagedMosqueIdAsync(), request.MosqueId);
+            if (effectiveMosqueId.HasValue)
+                query = query.Where(s => s.MosqueId == effectiveMosqueId.Value);
 
             if (request.Status.HasValue)
                 query = query.Where(s => s.status == request.Status.Value);
@@ -627,8 +659,12 @@ namespace Moeen.Api.Application.Services
             if (!string.IsNullOrWhiteSpace(request.Name))
                 query = query.Where(t => EF.Functions.Like(t.name, $"%{request.Name}%"));
 
-            if (request.MosqueId.HasValue)
-                query = query.Where(t => t.MosqueId == request.MosqueId.Value);
+            var effectiveMosqueId = ResolveEffectiveMosqueId(await ResolveManagedMosqueIdAsync(), request.MosqueId);
+            if (effectiveMosqueId.HasValue)
+                query = query.Where(t => t.MosqueId == effectiveMosqueId.Value);
+
+            if (request.Status.HasValue)
+                query = query.Where(t => t.status == request.Status.Value);
 
             var totalCount = await query.CountAsync();
 
@@ -663,6 +699,10 @@ namespace Moeen.Api.Application.Services
             if (!string.IsNullOrWhiteSpace(request.Phone))
                 query = query.Where(p => EF.Functions.Like(p.PhoneNumber, $"%{request.Phone}%"));
 
+            var effectiveMosqueId = ResolveEffectiveMosqueId(await ResolveManagedMosqueIdAsync(), null);
+            if (effectiveMosqueId.HasValue)
+                query = query.Where(p => p.MosqueId == effectiveMosqueId.Value);
+
             var totalCount = await query.CountAsync();
 
             var parents = await query
@@ -685,6 +725,10 @@ namespace Moeen.Api.Application.Services
             int pageSize = Math.Max(1, request.PageSize);
 
             var query = _context.Supervisors.Include(s => s.Mosque).AsQueryable();
+
+            var effectiveMosqueId = ResolveEffectiveMosqueId(await ResolveManagedMosqueIdAsync(), null);
+            if (effectiveMosqueId.HasValue)
+                query = query.Where(s => s.MosqueId == effectiveMosqueId.Value);
 
             if (!string.IsNullOrWhiteSpace(request.Name))
                 query = query.Where(s => EF.Functions.Like(s.name, $"%{request.Name}%"));
@@ -810,7 +854,7 @@ namespace Moeen.Api.Application.Services
                     Role = teacher.role,
                     ProfileImageUrl = teacher.profile_imageUrl,
                     JoinedAt = teacher.JoinedAt,
-                    Status = 0,
+                    Status = teacher.status,
                     MosqueId = teacher.MosqueId,
                     MosqueName = teacher.Mosque?.name ?? string.Empty,
                     TeacherDetails = new TeacherProfileDetails
@@ -868,7 +912,7 @@ namespace Moeen.Api.Application.Services
 
             var studentsQuery = _context.Students.Where(s => s.role == StudentRole && s.status == 0).AsQueryable();
             var parentsQuery = _context.Students.Where(s => s.role == ParentRole).AsQueryable();
-            var teachersQuery = _context.Teachers.AsQueryable();
+            var teachersQuery = _context.Teachers.Where(t => t.status == ActiveStatus).AsQueryable();
             var supervisorsQuery = _context.Supervisors.AsQueryable();
 
             if (request.MosqueId.HasValue)
@@ -1223,6 +1267,7 @@ namespace Moeen.Api.Application.Services
             var page = Math.Max(1, request.PageNumber);
             var pageSize = Math.Max(1, request.PageSize);
             var totalCount = 0;
+            var scopedMosqueId = ResolveEffectiveMosqueId(await ResolveManagedMosqueIdAsync(), request.MosqueId);
 
             if (string.IsNullOrWhiteSpace(type) || type.Equals("Student", StringComparison.OrdinalIgnoreCase))
             {
@@ -1234,8 +1279,8 @@ namespace Moeen.Api.Application.Services
                     query = query.Where(s => EF.Functions.Like(s.Email, $"%{request.Email}%"));
                 if (!string.IsNullOrWhiteSpace(request.Phone))
                     query = query.Where(s => EF.Functions.Like(s.PhoneNumber, $"%{request.Phone}%"));
-                if (request.MosqueId.HasValue)
-                    query = query.Where(s => s.MosqueId == request.MosqueId.Value);
+                if (scopedMosqueId.HasValue)
+                    query = query.Where(s => s.MosqueId == scopedMosqueId.Value);
                 if (request.Status.HasValue)
                     query = query.Where(s => s.status == request.Status.Value);
                 if (request.Role.HasValue)
@@ -1289,8 +1334,10 @@ namespace Moeen.Api.Application.Services
                     query = query.Where(t => EF.Functions.Like(t.Email, $"%{request.Email}%"));
                 if (!string.IsNullOrWhiteSpace(request.Phone))
                     query = query.Where(t => EF.Functions.Like(t.PhoneNumber, $"%{request.Phone}%"));
-                if (request.MosqueId.HasValue)
-                    query = query.Where(t => t.MosqueId == request.MosqueId.Value);
+                if (scopedMosqueId.HasValue)
+                    query = query.Where(t => t.MosqueId == scopedMosqueId.Value);
+                if (request.Status.HasValue)
+                    query = query.Where(t => t.status == request.Status.Value);
                 if (request.JoinedFrom.HasValue)
                     query = query.Where(t => t.JoinedAt >= request.JoinedFrom.Value);
                 if (request.JoinedTo.HasValue)
@@ -1321,7 +1368,7 @@ namespace Moeen.Api.Application.Services
                     Role = t.role,
                     ProfileImageUrl = t.profile_imageUrl,
                     JoinedAt = t.JoinedAt,
-                    Status = 0,
+                    Status = t.status,
                     MosqueId = t.MosqueId,
                     MosqueName = t.Mosque?.name ?? string.Empty
                 }));
@@ -1340,8 +1387,8 @@ namespace Moeen.Api.Application.Services
                     query = query.Where(p => EF.Functions.Like(p.Email, $"%{request.Email}%"));
                 if (!string.IsNullOrWhiteSpace(request.Phone))
                     query = query.Where(p => EF.Functions.Like(p.PhoneNumber, $"%{request.Phone}%"));
-                if (request.MosqueId.HasValue)
-                    query = query.Where(p => p.MosqueId == request.MosqueId.Value);
+                if (scopedMosqueId.HasValue)
+                    query = query.Where(p => p.MosqueId == scopedMosqueId.Value);
                 if (request.JoinedFrom.HasValue)
                     query = query.Where(p => p.JoinedAt >= request.JoinedFrom.Value);
                 if (request.JoinedTo.HasValue)
@@ -1391,8 +1438,8 @@ namespace Moeen.Api.Application.Services
                     query = query.Where(s => EF.Functions.Like(s.Email, $"%{request.Email}%"));
                 if (!string.IsNullOrWhiteSpace(request.Phone))
                     query = query.Where(s => EF.Functions.Like(s.PhoneNumber, $"%{request.Phone}%"));
-                if (request.MosqueId.HasValue)
-                    query = query.Where(s => s.MosqueId == request.MosqueId.Value);
+                if (scopedMosqueId.HasValue)
+                    query = query.Where(s => s.MosqueId == scopedMosqueId.Value);
                 if (request.JoinedFrom.HasValue)
                     query = query.Where(s => s.JoinedAt >= request.JoinedFrom.Value);
                 if (request.JoinedTo.HasValue)
@@ -1478,6 +1525,7 @@ namespace Moeen.Api.Application.Services
                 Gender = teacher.gender,
                 FontSize = teacher.font_size,
                 Role = teacher.role,
+                Status = teacher.status,
                 Theme = teacher.theme,
                 ProfileImageUrl = teacher.profile_imageUrl,
                 CreatedAt = teacher.created_at,
@@ -1560,6 +1608,38 @@ namespace Moeen.Api.Application.Services
                 ids.Add(legacyStudentId.Value);
 
             return ids;
+        }
+
+        private async Task UpdateTeacherStatusAsync(Teacher teacher, int status)
+        {
+            teacher.status = status;
+
+            if (status != ActiveStatus)
+                await DetachTeacherAssignmentsAsync(teacher.Id);
+        }
+
+        private async Task DetachTeacherAssignmentsAsync(Guid teacherId)
+        {
+            var halqas = await _context.Halqas
+                .Where(h => h.TeacherId == teacherId)
+                .ToListAsync();
+
+            foreach (var halqa in halqas)
+                halqa.TeacherId = null;
+
+            var saturdayHalqas = await _context.SaturdayHalqes
+                .Where(h => h.TeacherId == teacherId)
+                .ToListAsync();
+
+            foreach (var saturdayHalqa in saturdayHalqas)
+                saturdayHalqa.TeacherId = null;
+
+            var weeklyLessonRows = await _context.Set<SaturdayLesson>()
+                .Where(l => l.TeacherId == teacherId)
+                .ToListAsync();
+
+            foreach (var row in weeklyLessonRows)
+                row.TeacherId = null;
         }
 
         private async Task<List<Student>> LoadParentChildrenAsync(IReadOnlyCollection<Guid> studentIds)

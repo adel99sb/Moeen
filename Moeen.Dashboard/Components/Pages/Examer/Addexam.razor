@@ -371,7 +371,7 @@
 
     private async Task LoadTeachersAsync()
     {
-        var response = await EnrollmentService.GetAllTeachersAsync(new GetAllTeachersRequest { PageNumber = 1, PageSize = 500 });
+        var response = await EnrollmentService.GetAllTeachersAsync(new GetAllTeachersRequest { PageNumber = 1, PageSize = 500, Status = 0 });
         if (response == null || !response.Success)
             throw new InvalidOperationException(response?.Message ?? "تعذر تحميل المعلمين.");
 

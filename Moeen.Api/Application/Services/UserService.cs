@@ -187,6 +187,10 @@ namespace Moeen.Api.Application.Services
             if (studentAccount != null && studentAccount.role == 2 && studentAccount.status != 0)
                 return GeneralResponse.Unauthorized("Inactive account.");
 
+            var teacherAccount = user as Teacher ?? await _unitOfWork.Repository<Teacher>().GetByIdAsync(user.Id);
+            if (teacherAccount != null && teacherAccount.status != 0)
+                return GeneralResponse.Unauthorized("Inactive account.");
+
             var result = await _userManager.CheckPasswordAsync(user, loginRequest.Password);
             if (!result)
                 return GeneralResponse.BadRequest("Invalid password.");

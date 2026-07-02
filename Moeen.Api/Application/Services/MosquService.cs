@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
+using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Data;
 using Moeen.Shared.Requests.Mosuq;
@@ -17,10 +18,25 @@ namespace Moeen.Api.Application.Services
     public class MosquService : IMosquService
     {
         private readonly AppDbContext _context;
+        private readonly ICurrentUserService? _currentUserService;
 
-        public MosquService(AppDbContext context)
+        public MosquService(AppDbContext context, ICurrentUserService? currentUserService = null)
         {
             _context = context;
+            _currentUserService = currentUserService;
+        }
+
+        private async Task<Guid?> ResolveManagedMosqueIdAsync()
+        {
+            var currentUserId = _currentUserService?.CurrentUserId;
+            if (!currentUserId.HasValue)
+                return null;
+
+            return await _context.Supervisors
+                .AsNoTracking()
+                .Where(s => s.Id == currentUserId.Value)
+                .Select(s => (Guid?)s.MosqueId)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<GeneralResponse> AddMosqu(AddMosquReq req)
@@ -54,6 +70,10 @@ namespace Moeen.Api.Application.Services
             var pageSize = Math.Max(1, request.PageSize);
 
             var query = _context.Mosques.AsQueryable();
+            var managedMosqueId = await ResolveManagedMosqueIdAsync();
+            if (managedMosqueId.HasValue)
+                query = query.Where(m => m.Id == managedMosqueId.Value);
+
             var totalCount = await query.CountAsync();
 
             var mosqus = await query
@@ -124,7 +144,7 @@ namespace Moeen.Api.Application.Services
                 Name = h.Name,
                 FoujId = h.FoujId,
                 FoujName = h.Fouj?.name ?? string.Empty,
-                TeacherId = (Guid)h.TeacherId,
+                TeacherId = h.TeacherId ?? Guid.Empty,
                 TeacherName = h.Teacher?.name ?? string.Empty,
                 Type = h.Type,
                 StudentsCount = countMap.TryGetValue(h.Id, out var c) ? c : 0
@@ -143,7 +163,7 @@ namespace Moeen.Api.Application.Services
 
             var baseQuery = _context.Teachers
                 .Include(t => t.Mosque)
-                .Where(t => t.MosqueId == request.MosqueId);
+                .Where(t => t.MosqueId == request.MosqueId && t.status == 0);
 
             var totalCount = await baseQuery.CountAsync();
 
@@ -162,6 +182,7 @@ namespace Moeen.Api.Application.Services
                 Gender = t.gender,
                 FontSize = t.font_size,
                 Role = t.role,
+                Status = t.status,
                 Theme = t.theme,
                 ProfileImageUrl = t.profile_imageUrl,
                 CreatedAt = t.created_at,
@@ -191,7 +212,7 @@ namespace Moeen.Api.Application.Services
 
             var circlesCount = await _context.Halqas.CountAsync(h => foujIds.Contains(h.FoujId));
             var studentsCount = await _context.Students.CountAsync(s => s.MosqueId == request.MosqueId);
-            var teachersCount = await _context.Teachers.CountAsync(t => t.MosqueId == request.MosqueId);
+            var teachersCount = await _context.Teachers.CountAsync(t => t.MosqueId == request.MosqueId && t.status == 0);
 
             var dto = new MosqueStatisticsDto
             {

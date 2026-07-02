@@ -433,7 +433,8 @@
             var response = await EnrollmentService.GetAllTeachersAsync(new GetAllTeachersRequest
             {
                 PageNumber = 1,
-                PageSize = 300
+                PageSize = 300,
+                Status = 0
             });
 
             if (response == null || !response.Success)

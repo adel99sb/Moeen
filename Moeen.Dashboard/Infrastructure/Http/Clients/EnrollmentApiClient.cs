@@ -117,6 +117,7 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             {
                 { "Name", request.Name },
                 { "MosqueId", request.MosqueId?.ToString() },
+                { "Status", request.Status?.ToString() },
                 { "PageNumber", request.PageNumber.ToString() },
                 { "PageSize", request.PageSize.ToString() }
             };

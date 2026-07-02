@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Application.Services;
@@ -62,7 +62,7 @@ namespace Moeen.Api.Controllers
             var response = new SupervisorDashboardResponse
             {
                 TotalStudents = await _context.Students.AsNoTracking().CountAsync(s => s.MosqueId == mosqueId.Value && s.role == 2 && s.status == 0),
-                TotalTeachers = await _context.Teachers.AsNoTracking().CountAsync(t => t.MosqueId == mosqueId.Value),
+                TotalTeachers = await _context.Teachers.AsNoTracking().CountAsync(t => t.MosqueId == mosqueId.Value && t.status == 0),
                 TotalHalqas = await _context.Halqas.AsNoTracking().CountAsync(h => h.Fouj.MosqueId == mosqueId.Value),
                 OpenAlertsAndComplaints = await _context.Complaints.AsNoTracking().CountAsync(c =>
                     mosqueUserIds.Contains(c.UserId) &&
@@ -97,17 +97,13 @@ namespace Moeen.Api.Controllers
             if (supervisorMosqueId.HasValue)
                 return supervisorMosqueId;
 
-            return await _context.Mosques
-                .AsNoTracking()
-                .OrderBy(m => m.name)
-                .Select(m => (Guid?)m.Id)
-                .FirstOrDefaultAsync();
+            return null;
         }
 
         private async Task<List<Guid>> GetMosqueUserIdsAsync(Guid mosqueId)
         {
             var studentIds = _context.Students.AsNoTracking().Where(s => s.MosqueId == mosqueId && s.role == 2 && s.status == 0).Select(s => s.Id);
-            var teacherIds = _context.Teachers.AsNoTracking().Where(t => t.MosqueId == mosqueId).Select(t => t.Id);
+            var teacherIds = _context.Teachers.AsNoTracking().Where(t => t.MosqueId == mosqueId && t.status == 0).Select(t => t.Id);
             var supervisorIds = _context.Supervisors.AsNoTracking().Where(s => s.MosqueId == mosqueId).Select(s => s.Id);
 
             return await studentIds.Concat(teacherIds).Concat(supervisorIds).Distinct().ToListAsync();

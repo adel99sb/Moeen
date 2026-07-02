@@ -110,6 +110,9 @@ namespace Moeen.Api.Application.Services
                 if (teacher == null)
                     return GeneralResponse.BadRequest("المعلم المحدد غير موجود.");
 
+                if (teacher.status != 0)
+                    return GeneralResponse.BadRequest("لا يمكن تسجيل اختبار على معلم غير نشط.");
+
                 // 4. إنشاء كيان الامتحان وحفظه
                 var exam = new Exam
                 {
@@ -286,6 +289,9 @@ namespace Moeen.Api.Application.Services
 
                 var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(request.TeacherId);
                 if (teacher == null) return GeneralResponse.NotFound("المعلم غير موجود.");
+
+                if (teacher.status != 0)
+                    return GeneralResponse.BadRequest("لا يمكن تسجيل اختبار على معلم غير نشط.");
 
                 // دمج الملاحظات مع التقييم واسم الفوج لعدم وجود حقول مستقلة لها في الكيان حالياً
                 var enrichedNotes = $"[التقييم: {request.Rating}] [الفوج: {request.FoujName}] {request.Notes}";

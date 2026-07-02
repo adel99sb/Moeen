@@ -42,6 +42,9 @@ namespace Moeen.Api.Application.Services
             if (teacher == null)
                 return GeneralResponse.BadRequest("المعلم غير موجود.");
 
+            if (teacher.status != 0)
+                return GeneralResponse.BadRequest("لا يمكن تعيين معلم غير نشط على حلقة.");
+
             var managedMosqueId = await ResolveManagedMosqueIdAsync();
             if (managedMosqueId.HasValue)
             {
@@ -125,6 +128,9 @@ namespace Moeen.Api.Application.Services
                 resultTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == request.TeacherId.Value);
                 if (resultTeacher == null)
                     return GeneralResponse.BadRequest("المعلم غير موجود.");
+
+                if (resultTeacher.status != 0)
+                    return GeneralResponse.BadRequest("لا يمكن تعيين معلم غير نشط على حلقة.");
 
                 if (managedMosqueId.HasValue && resultTeacher.MosqueId != managedMosqueId.Value)
                     return GeneralResponse.BadRequest("لا يمكنك تعيين معلم خارج نطاق المسجد الذي تديره.");
@@ -237,6 +243,9 @@ namespace Moeen.Api.Application.Services
             var newTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == request.NewTeacherId);
             if (newTeacher == null)
                 return GeneralResponse.BadRequest("المعلم الجديد غير موجود.");
+
+            if (newTeacher.status != 0)
+                return GeneralResponse.BadRequest("لا يمكن تعيين معلم غير نشط على حلقة.");
 
             var managedMosqueId = await ResolveManagedMosqueIdAsync();
             if (managedMosqueId.HasValue)

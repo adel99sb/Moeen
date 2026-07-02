@@ -476,7 +476,9 @@ namespace Moeen.Api.Application.Services
             var students = (await _unitOfWork.Repository<Student>().GetAllAsync(studentSpec))
                 .ToDictionary(s => s.Id, s => s);
 
-            var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync((Guid)Halqa.TeacherId);
+            var teacher = Halqa.TeacherId.HasValue
+                ? await _unitOfWork.Repository<Teacher>().GetByIdAsync(Halqa.TeacherId.Value)
+                : null;
 
             var avgAttendanceRate = (studentIds.Count == 0 || sessionIds.Count == 0)
                 ? 0.0
@@ -539,7 +541,7 @@ namespace Moeen.Api.Application.Services
                 HalqaId = Halqa.Id,
                 HalqaName = Halqa.Name ?? string.Empty,
                 HalqaType = Halqa.Type,
-                TeacherId = (Guid)Halqa.TeacherId,
+                TeacherId = Halqa.TeacherId ?? Guid.Empty,
                 TeacherName = teacher?.name ?? string.Empty,
                 StudentsCount = studentIds.Count,
                 ActiveStudentsCount = activeStudentsCount,

@@ -601,7 +601,7 @@
                             </div>
                             <div class="form-field">
                                 <label>المسجد</label>
-                                <InputSelect class="form-control moeen-control" @bind-Value="_form.MosqueId" disabled="@_isViewMode">
+                                <InputSelect class="form-control moeen-control" Value="_form.MosqueId" ValueChanged="@((Guid value) => OnMosqueChanged(value))" ValueExpression="@(() => _form.MosqueId)" disabled="@_isViewMode">
                                     <option value="@Guid.Empty">اختر المسجد</option>
                                     @foreach (var mosque in _mosques)
                                     {
@@ -612,7 +612,7 @@
                             </div>
                             <div class="form-field">
                                 <label>الفوج</label>
-                                <InputSelect class="form-control moeen-control" @bind-Value="_form.FoujId" disabled="@_isViewMode">
+                                <InputSelect class="form-control moeen-control" Value="_form.FoujId" ValueChanged="@((Guid value) => OnFoujChanged(value))" ValueExpression="@(() => _form.FoujId)" disabled="@_isViewMode">
                                     <option value="@Guid.Empty">اختر الفوج</option>
                                     @foreach (var fouj in DialogFoujs)
                                     {
@@ -622,7 +622,7 @@
                             </div>
                             <div class="form-field">
                                 <label>الحلقة</label>
-                                <InputSelect class="form-control moeen-control" @bind-Value="_form.HalqaId" disabled="@_isViewMode">
+                                <InputSelect class="form-control moeen-control" Value="_form.HalqaId" ValueChanged="@((Guid? value) => OnHalqaChanged(value))" ValueExpression="@(() => _form.HalqaId)" disabled="@_isViewMode">
                                     <option value="">اختر الحلقة</option>
                                     @foreach (var halqa in DialogHalqas)
                                     {
@@ -849,11 +849,9 @@
         _isViewMode = false;
         _form = new StudentDialogModel
         {
-            EnrollmentDate = DateTime.Today,
-            MosqueId = _mosques.FirstOrDefault()?.Id ?? Guid.Empty,
-            FoujId = _foujs.FirstOrDefault()?.Id ?? Guid.Empty,
-            HalqaId = _halqas.FirstOrDefault()?.Id
+            EnrollmentDate = DateTime.Today
         };
+        SetDefaultPlacement();
         _isDialogOpen = true;
     }
 
@@ -919,6 +917,105 @@
         _dialogError = null;
     }
 
+    private void SetDefaultPlacement()
+    {
+        var mosque = _mosques.FirstOrDefault();
+        _form.MosqueId = mosque?.Id ?? Guid.Empty;
+
+        var fouj = _form.MosqueId == Guid.Empty
+            ? _foujs.FirstOrDefault()
+            : _foujs.FirstOrDefault(f => f.MosqueId == _form.MosqueId);
+
+        _form.FoujId = fouj?.Id ?? Guid.Empty;
+        _form.HalqaId = _form.FoujId == Guid.Empty
+            ? null
+            : _halqas.FirstOrDefault(h => h.FoujId == _form.FoujId)?.Id;
+    }
+
+    private void OnMosqueChanged(Guid mosqueId)
+    {
+        _form.MosqueId = mosqueId;
+
+        var currentFoujIsValid = _form.FoujId != Guid.Empty &&
+            _foujs.Any(fouj => fouj.Id == _form.FoujId && (mosqueId == Guid.Empty || fouj.MosqueId == mosqueId));
+
+        if (!currentFoujIsValid)
+        {
+            _form.FoujId = _foujs.FirstOrDefault(fouj => mosqueId == Guid.Empty || fouj.MosqueId == mosqueId)?.Id ?? Guid.Empty;
+        }
+
+        EnsureHalqaMatchesCurrentFouj();
+    }
+
+    private void OnFoujChanged(Guid foujId)
+    {
+        _form.FoujId = foujId;
+
+        var fouj = _foujs.FirstOrDefault(f => f.Id == foujId);
+        if (fouj != null)
+        {
+            _form.MosqueId = fouj.MosqueId;
+        }
+
+        EnsureHalqaMatchesCurrentFouj();
+    }
+
+    private void OnHalqaChanged(Guid? halqaId)
+    {
+        _form.HalqaId = halqaId == Guid.Empty ? null : halqaId;
+
+        if (!_form.HalqaId.HasValue)
+            return;
+
+        var halqa = _halqas.FirstOrDefault(h => h.Id == _form.HalqaId.Value);
+        if (halqa == null)
+            return;
+
+        _form.FoujId = halqa.FoujId;
+        var fouj = _foujs.FirstOrDefault(f => f.Id == halqa.FoujId);
+        if (fouj != null)
+        {
+            _form.MosqueId = fouj.MosqueId;
+        }
+    }
+
+    private void EnsureHalqaMatchesCurrentFouj()
+    {
+        var currentHalqaIsValid = _form.HalqaId.HasValue &&
+            _halqas.Any(halqa => halqa.Id == _form.HalqaId.Value && (_form.FoujId == Guid.Empty || halqa.FoujId == _form.FoujId));
+
+        if (!currentHalqaIsValid)
+        {
+            _form.HalqaId = _form.FoujId == Guid.Empty
+                ? null
+                : _halqas.FirstOrDefault(halqa => halqa.FoujId == _form.FoujId)?.Id;
+        }
+    }
+
+    private bool TryNormalizePlacementBeforeSave()
+    {
+        if (!_form.HalqaId.HasValue || _form.HalqaId.Value == Guid.Empty)
+            return true;
+
+        var halqa = _halqas.FirstOrDefault(h => h.Id == _form.HalqaId.Value);
+        if (halqa == null)
+        {
+            _dialogError = "الحلقة المختارة غير موجودة ضمن البيانات الحالية، يرجى إعادة اختيار الحلقة.";
+            return false;
+        }
+
+        var fouj = _foujs.FirstOrDefault(f => f.Id == halqa.FoujId);
+        if (fouj == null)
+        {
+            _dialogError = "الفوج المرتبط بالحَلقة غير موجود ضمن البيانات الحالية، يرجى إعادة اختيار الفوج والحلقة.";
+            return false;
+        }
+
+        _form.FoujId = fouj.Id;
+        _form.MosqueId = fouj.MosqueId;
+        return true;
+    }
+
     private async Task ApplyDialogAsync()
     {
         if (_isViewMode)
@@ -937,6 +1034,9 @@
                     _dialogError = "كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.";
                     return;
                 }
+
+                if (!TryNormalizePlacementBeforeSave())
+                    return;
 
                 var response = await EnrollmentService.UpdateMemberInfoAsync(new UpdateMemberInfoRequest
                 {
@@ -973,6 +1073,9 @@
                     _dialogError = "كلمة المرور مطلوبة عند إضافة طالب جديد.";
                     return;
                 }
+
+                if (!TryNormalizePlacementBeforeSave())
+                    return;
 
                 var response = await EnrollmentService.RegisterStudentAsync(new RegisterStudentRequest
                 {

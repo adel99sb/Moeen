@@ -174,7 +174,7 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("TeacherId")
+                    b.Property<Guid?>("TeacherId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -243,7 +243,7 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                     b.Property<Guid>("TeacherExamId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("TeacherId")
+                    b.Property<Guid?>("TeacherId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("date")
@@ -608,7 +608,7 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                     b.Property<Guid>("MosqueId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("TeacherId")
+                    b.Property<Guid?>("TeacherId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("age_max")
@@ -902,6 +902,9 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("status")
+                        .HasColumnType("int");
+
                     b.HasIndex("MosqueId");
 
                     b.ToTable("Teachers", (string)null);
@@ -1042,8 +1045,7 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                     b.HasOne("Moeen.Api.Core.Entities.Teacher", "Teacher")
                         .WithMany()
                         .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Student");
 
@@ -1224,8 +1226,7 @@ namespace Moeen.Api.infrastructure.Data.Migrations
                     b.HasOne("Moeen.Api.Core.Entities.Teacher", "Teacher")
                         .WithMany()
                         .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Teacher");
                 });

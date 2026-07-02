@@ -114,6 +114,7 @@ namespace Moeen.Api.Infrastructure.Data
                     gender = "Male",
                     font_size = 16,
                     role = (int)Roles.Teacher,
+                    status = 0,
                     theme = "light",
                     profile_imageUrl = null,
                     created_at = DateTime.UtcNow,
@@ -149,6 +150,7 @@ namespace Moeen.Api.Infrastructure.Data
 
                 if (teacher != null)
                 {
+                    teacher.status = 0;
                     teacher.MosqueId = DevelopmentMosqueId;
                     teacher.Bio = string.IsNullOrWhiteSpace(teacher.Bio) ? "معلم seed محلي لاختبار لوحة المعلم والترقية." : teacher.Bio;
                     teacher.assigned_at = string.IsNullOrWhiteSpace(teacher.assigned_at) ? DateTime.UtcNow.ToString("yyyy-MM-dd") : teacher.assigned_at;

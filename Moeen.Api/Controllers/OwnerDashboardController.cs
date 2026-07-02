@@ -30,7 +30,7 @@ namespace Moeen.Api.Controllers
             {
                 TotalMosques = await _context.Mosques.AsNoTracking().CountAsync(),
                 TotalSupervisors = await _context.Supervisors.AsNoTracking().CountAsync(),
-                TotalTeachers = await _context.Teachers.AsNoTracking().CountAsync(),
+                TotalTeachers = await _context.Teachers.AsNoTracking().CountAsync(t => t.status == 0),
                 TotalStudents = await _context.Students.AsNoTracking().CountAsync(s => s.role == 2 && s.status == 0),
                 TotalHalqas = await _context.Halqas.AsNoTracking().CountAsync(),
                 TotalOpenComplaints = await _context.Complaints.AsNoTracking().CountAsync(c => c.Status != ComplaintStatus.Resolved),
@@ -58,7 +58,7 @@ namespace Moeen.Api.Controllers
             foreach (var mosque in mosques)
             {
                 var userIds = await _context.Students.AsNoTracking().Where(s => s.MosqueId == mosque.Id && s.role == 2 && s.status == 0).Select(s => s.Id)
-                    .Concat(_context.Teachers.AsNoTracking().Where(t => t.MosqueId == mosque.Id).Select(t => t.Id))
+                    .Concat(_context.Teachers.AsNoTracking().Where(t => t.MosqueId == mosque.Id && t.status == 0).Select(t => t.Id))
                     .Concat(_context.Supervisors.AsNoTracking().Where(s => s.MosqueId == mosque.Id).Select(s => s.Id))
                     .Distinct()
                     .ToListAsync();
@@ -69,7 +69,7 @@ namespace Moeen.Api.Controllers
                     MosqueName = mosque.name,
                     Address = mosque.address,
                     Supervisors = await _context.Supervisors.AsNoTracking().CountAsync(s => s.MosqueId == mosque.Id),
-                    Teachers = await _context.Teachers.AsNoTracking().CountAsync(t => t.MosqueId == mosque.Id),
+                    Teachers = await _context.Teachers.AsNoTracking().CountAsync(t => t.MosqueId == mosque.Id && t.status == 0),
                     Students = await _context.Students.AsNoTracking().CountAsync(s => s.MosqueId == mosque.Id && s.role == 2 && s.status == 0),
                     Halqas = await _context.Halqas.AsNoTracking().CountAsync(h => h.Fouj.MosqueId == mosque.Id),
                     OpenComplaints = userIds.Count == 0

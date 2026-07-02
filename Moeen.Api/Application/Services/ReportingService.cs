@@ -25,7 +25,7 @@ namespace Moeen.Api.Application.Services
         public async Task<GeneralResponse> GetGeneralPerformanceIndicatorsAsync(GetGeneralPerformanceIndicatorsRequest request)
         {
             var totalStudents = await _context.Students.AsNoTracking().CountAsync(s => s.role == 2 && s.status == 0);
-            var totalTeachers = await _context.Teachers.AsNoTracking().CountAsync();
+            var totalTeachers = await _context.Teachers.AsNoTracking().CountAsync(t => t.status == 0);
             var totalCircles = await _context.Halqas.AsNoTracking().CountAsync();
             var totalComplaints = await _context.Complaints.AsNoTracking().CountAsync();
 

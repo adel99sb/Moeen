@@ -33,6 +33,9 @@ namespace Moeen.Shared.Requests.Enrollment
         public string Gender { get; set; } = string.Empty;
 
         public DateTime? DateOfBirth { get; set; }
+        
+        [Range(0, 2, ErrorMessage = "Status must be between 0 and 2")]
+        public int Status { get; set; }
 
         // Teacher specific
         [Required(ErrorMessage = "Mosque ID is required")]

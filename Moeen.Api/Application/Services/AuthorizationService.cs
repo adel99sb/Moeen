@@ -628,7 +628,7 @@ namespace Moeen.Api.Application.Services
                     .ToDictionary(m => m.Id, m => m.name);
 
                 var halqas = (await _unitOfWork.Repository<Halqa>().GetAllAsync())
-                    .Where(h => userIds.Contains((Guid)h.TeacherId))
+                    .Where(h => h.TeacherId.HasValue && userIds.Contains(h.TeacherId.Value))
                     .ToList();
 
                 var foujIds = halqas.Select(h => h.FoujId).Distinct().ToList();
@@ -637,7 +637,7 @@ namespace Moeen.Api.Application.Services
                     .ToDictionary(f => f.Id, f => f.name);
 
                 var foujByTeacher = halqas
-                    .GroupBy(h => h.TeacherId)
+                    .GroupBy(h => h.TeacherId!.Value)
                     .ToDictionary(g => g.Key, g => foujs.TryGetValue(g.First().FoujId, out var f) ? f : null);
 
                 return users.Select(u =>

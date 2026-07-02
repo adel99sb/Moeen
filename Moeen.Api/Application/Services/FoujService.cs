@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Moeen.Api.Core.Contracts.Application;
+using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Data;
 using Moeen.Shared.Requests.Fouj;
@@ -15,20 +16,38 @@ namespace Moeen.Api.Application.Services
     public class FoujService : IFoujService
     {
         private readonly AppDbContext _context;
+        private readonly ICurrentUserService? _currentUserService;
 
-        public FoujService(AppDbContext context)
+        public FoujService(AppDbContext context, ICurrentUserService? currentUserService = null)
         {
             _context = context;
+            _currentUserService = currentUserService;
         }
+
+        private async Task<Guid?> ResolveManagedMosqueIdAsync()
+        {
+            var currentUserId = _currentUserService?.CurrentUserId;
+            if (!currentUserId.HasValue)
+                return null;
+
+            return await _context.Supervisors
+                .AsNoTracking()
+                .Where(s => s.Id == currentUserId.Value)
+                .Select(s => (Guid?)s.MosqueId)
+                .FirstOrDefaultAsync();
+        }
+
+        private static Guid? ResolveEffectiveMosqueId(Guid? managedMosqueId, Guid? requestedMosqueId)
+            => managedMosqueId ?? requestedMosqueId;
 
         public async Task<GeneralResponse> CreateFoujAsync(CreateFoujRequest request)
         {
             if (request == null)
-                return GeneralResponse.BadRequest("ÈíÇäÇÊ ÇáİæÌ ãØáæÈÉ.");
+                return GeneralResponse.BadRequest("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.");
 
             var mosqueExists = await _context.Mosques.AnyAsync(m => m.Id == request.MosqueId);
             if (!mosqueExists)
-                return GeneralResponse.NotFound("ÇáãÓÌÏ ÛíÑ ãæÌæÏ.");
+                return GeneralResponse.NotFound("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.");
 
             var fouj = new Fouj
             {
@@ -42,20 +61,20 @@ namespace Moeen.Api.Application.Services
             await _context.Foujs.AddAsync(fouj);
             await _context.SaveChangesAsync();
 
-            return GeneralResponse.Ok("Êã ÅäÔÇÁ ÇáİæÌ ÈäÌÇÍ.", MapFouj(fouj, 0));
+            return GeneralResponse.Ok("ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.", MapFouj(fouj, 0));
         }
 
         public async Task<GeneralResponse> UpdateFoujAsync(UpdateFoujRequest request)
         {
             if (request == null || request.FoujId == Guid.Empty)
-                return GeneralResponse.BadRequest("ãÚÑİ ÇáİæÌ ãØáæÈ.");
+                return GeneralResponse.BadRequest("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.");
 
             var fouj = await _context.Foujs
                 .Include(f => f.Halqas)
                 .FirstOrDefaultAsync(f => f.Id == request.FoujId);
 
             if (fouj == null)
-                return GeneralResponse.NotFound("ÇáİæÌ ÛíÑ ãæÌæÏ.");
+                return GeneralResponse.NotFound("ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.");
 
             if (!string.IsNullOrWhiteSpace(request.Name))
                 fouj.name = request.Name;
@@ -70,35 +89,35 @@ namespace Moeen.Api.Application.Services
             {
                 var mosqueExists = await _context.Mosques.AnyAsync(m => m.Id == request.MosqueId.Value);
                 if (!mosqueExists)
-                    return GeneralResponse.NotFound("ÇáãÓÌÏ ÛíÑ ãæÌæÏ.");
+                    return GeneralResponse.NotFound("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.");
 
                 fouj.MosqueId = request.MosqueId.Value;
             }
 
             await _context.SaveChangesAsync();
 
-            return GeneralResponse.Ok("Êã ÊÍÏíË ÇáİæÌ ÈäÌÇÍ.", MapFouj(fouj, fouj.Halqas?.Count ?? 0));
+            return GeneralResponse.Ok("ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.", MapFouj(fouj, fouj.Halqas?.Count ?? 0));
         }
 
         public async Task<GeneralResponse> DeleteFoujAsync(DeleteFoujRequest request)
         {
             if (request == null || request.FoujId == Guid.Empty)
-                return GeneralResponse.BadRequest("ãÚÑİ ÇáİæÌ ãØáæÈ.");
+                return GeneralResponse.BadRequest("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.");
 
             var fouj = await _context.Foujs
                 .Include(f => f.Halqas)
                 .FirstOrDefaultAsync(f => f.Id == request.FoujId);
 
             if (fouj == null)
-                return GeneralResponse.NotFound("ÇáİæÌ ÛíÑ ãæÌæÏ.");
+                return GeneralResponse.NotFound("ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.");
 
             if (fouj.Halqas?.Any() == true)
-                return GeneralResponse.BadRequest("áÇ íãßä ÍĞİ ÇáİæÌ áæÌæÏ ÍáŞÇÊ ãÑÊÈØÉ.");
+                return GeneralResponse.BadRequest("ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.");
 
             _context.Foujs.Remove(fouj);
             await _context.SaveChangesAsync();
 
-            return GeneralResponse.Ok("Êã ÍĞİ ÇáİæÌ ÈäÌÇÍ.");
+            return GeneralResponse.Ok("ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.");
         }
 
         public async Task<GeneralResponse> GetAllFoujsAsync(GetAllFoujsRequest request)
@@ -110,8 +129,9 @@ namespace Moeen.Api.Application.Services
                 .Include(f => f.Halqas)
                 .AsQueryable();
 
-            if (request.MosqueId.HasValue)
-                query = query.Where(f => f.MosqueId == request.MosqueId.Value);
+            var effectiveMosqueId = ResolveEffectiveMosqueId(await ResolveManagedMosqueIdAsync(), request.MosqueId);
+            if (effectiveMosqueId.HasValue)
+                query = query.Where(f => f.MosqueId == effectiveMosqueId.Value);
 
             var foujs = await query
                 .OrderBy(f => f.name)
@@ -126,29 +146,29 @@ namespace Moeen.Api.Application.Services
                 })
                 .ToListAsync();
 
-            return GeneralResponse.Ok("Êã ÌáÈ ŞÇÆãÉ ÇáÃİæÇÌ.", foujs);
+            return GeneralResponse.Ok("ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.", foujs);
         }
 
         public async Task<GeneralResponse> AddHalqaToFoujAsync(AddHalqaToFoujRequest request)
         {
             if (request == null || request.FoujId == Guid.Empty || request.HalqaId == Guid.Empty)
-                return GeneralResponse.BadRequest("ãÚÑİ ÇáİæÌ æÇáÍáŞÉ ãØáæÈÇä.");
+                return GeneralResponse.BadRequest("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.");
 
             var fouj = await _context.Foujs.FindAsync(request.FoujId);
             if (fouj == null)
-                return GeneralResponse.NotFound("ÇáİæÌ ÛíÑ ãæÌæÏ.");
+                return GeneralResponse.NotFound("ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.");
 
             var halqa = await _context.Halqas
                 .Include(h => h.Teacher)
                 .FirstOrDefaultAsync(h => h.Id == request.HalqaId);
 
             if (halqa == null)
-                return GeneralResponse.NotFound("ÇáÍáŞÉ ÛíÑ ãæÌæÏÉ.");
+                return GeneralResponse.NotFound("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.");
 
             halqa.FoujId = request.FoujId;
             await _context.SaveChangesAsync();
 
-            return GeneralResponse.Ok("ÊãÊ ÅÖÇİÉ ÇáÍáŞÉ Åáì ÇáİæÌ.", new HalqaDto
+            return GeneralResponse.Ok("ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.", new HalqaDto
             {
                 Id = halqa.Id,
                 Name = halqa.Name,
@@ -164,18 +184,18 @@ namespace Moeen.Api.Application.Services
         public async Task<GeneralResponse> RemoveHalqaFromFoujAsync(RemoveHalqaFromFoujRequest request)
         {
             if (request == null || request.FoujId == Guid.Empty || request.HalqaId == Guid.Empty)
-                return GeneralResponse.BadRequest("ãÚÑİ ÇáİæÌ æÇáÍáŞÉ ãØáæÈÇä.");
+                return GeneralResponse.BadRequest("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.");
 
             var halqa = await _context.Halqas
                 .FirstOrDefaultAsync(h => h.Id == request.HalqaId && h.FoujId == request.FoujId);
 
             if (halqa == null)
-                return GeneralResponse.NotFound("ÇáÍáŞÉ ÛíÑ ãæÌæÏÉ ÏÇÎá ÇáİæÌ.");
+                return GeneralResponse.NotFound("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.");
 
             _context.Halqas.Remove(halqa);
             await _context.SaveChangesAsync();
 
-            return GeneralResponse.Ok("ÊãÊ ÅÒÇáÉ ÇáÍáŞÉ ãä ÇáİæÌ.");
+            return GeneralResponse.Ok("ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.");
         }
 
         private static FoujDto MapFouj(Fouj fouj, int halqasCount)

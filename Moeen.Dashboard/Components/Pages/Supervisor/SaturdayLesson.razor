@@ -354,7 +354,7 @@
     {
         try
         {
-            var response = await EnrollmentService.GetAllTeachersAsync(new GetAllTeachersRequest { PageNumber = 1, PageSize = 500 });
+            var response = await EnrollmentService.GetAllTeachersAsync(new GetAllTeachersRequest { PageNumber = 1, PageSize = 500, Status = 0 });
             var json = JsonSerializer.Serialize(response.Data);
             _teachers = response.Success ? JsonSerializer.Deserialize<List<TeacherDto>>(json, JsonOptions) ?? new() : new();
         }

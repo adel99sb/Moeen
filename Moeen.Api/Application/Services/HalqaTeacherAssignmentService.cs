@@ -33,6 +33,9 @@ namespace Moeen.Api.Application.Services
                 if (teacher == null)
                     return GeneralResponse.NotFound("المعلم غير موجود.");
 
+                if (teacher.status != 0)
+                    return GeneralResponse.BadRequest("لا يمكن تعيين معلم غير نشط على حلقة.");
+
                 var halqa = await _unitOfWork.Repository<Halqa>().GetByIdAsync(request.HalqaId);
                 if (halqa == null)
                     return GeneralResponse.NotFound("الحلقة غير موجودة.");
@@ -89,7 +92,7 @@ namespace Moeen.Api.Application.Services
                 {
                     HalqaId = h.Id,
                     HalqaName = h.Name,
-                    TeacherId = (Guid)h.TeacherId,
+                    TeacherId = h.TeacherId ?? Guid.Empty,
                     TeacherName = h.Teacher?.name
                 }).ToList();
 
@@ -112,8 +115,8 @@ namespace Moeen.Api.Application.Services
                 if (halqa == null)
                     return GeneralResponse.NotFound("الحلقة غير موجودة.");
                 // ✅ الطريقة الصحيحة:
-                var teacher = halqa.TeacherId != Guid.Empty
-                    ? await _unitOfWork.Repository<Teacher>().GetByIdAsync((Guid)halqa.TeacherId)
+                var teacher = halqa.TeacherId.HasValue && halqa.TeacherId.Value != Guid.Empty
+                    ? await _unitOfWork.Repository<Teacher>().GetByIdAsync(halqa.TeacherId.Value)
                     : null;
                 var dtos = new List<TeacherAssignmentDto>();
                 if (teacher != null)
@@ -152,6 +155,9 @@ namespace Moeen.Api.Application.Services
                 var newTeacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(request.NewTeacherId);
                 if (newTeacher == null)
                     return GeneralResponse.NotFound("المعلم الجديد غير موجود.");
+
+                if (newTeacher.status != 0)
+                    return GeneralResponse.BadRequest("لا يمكن تعيين معلم غير نشط على حلقة.");
 
                 halqa.TeacherId = request.NewTeacherId;
                 await _unitOfWork.Repository<Halqa>().UpdateAsync(halqa);

@@ -6,6 +6,7 @@ namespace Moeen.Api.Core.Entities
     {
         public Guid MosqueId { get; set; }
         public Mosque Mosque { get; set; } = null!;
+        public int status { get; set; }
 
         [Column("boi")]
         public string Bio { get; set; } = string.Empty;

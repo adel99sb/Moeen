@@ -102,6 +102,7 @@
                             <th>البريد الإلكتروني</th>
                             <th>رقم الهاتف</th>
                             <th>المسجد</th>
+                            <th>الحالة</th>
                             <th>الخبرة</th>
                             <th>إجراءات</th>
                         </tr>
@@ -110,7 +111,7 @@
                         @if (_teachers.Count == 0)
                         {
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">لا يوجد معلمين حالياً.</td>
+                                <td colspan="7" class="text-center text-muted py-4">لا يوجد معلمين حالياً.</td>
                             </tr>
                         }
                         else
@@ -127,6 +128,7 @@
                                     <td>@teacher.Email</td>
                                     <td>@(string.IsNullOrWhiteSpace(teacher.Phone) ? "—" : teacher.Phone)</td>
                                     <td>@(string.IsNullOrWhiteSpace(teacher.MosqueName) ? "—" : teacher.MosqueName)</td>
+                                    <td>@GetStatusLabel(teacher.Status)</td>
                                     <td><div class="teacher-bio" title="@teacher.Bio">@(string.IsNullOrWhiteSpace(teacher.Bio) ? "—" : teacher.Bio)</div></td>
                                     <td>
                                         <div class="row-actions">
@@ -165,7 +167,7 @@
                             ShowHalqa="true"
                             ShowPassword="true"
                             ShowJoinedAt="true"
-                            ShowStatus="false"
+                            ShowStatus="true"
                             ShowScore="false"
                             ShowBio="true"
                             ShowAssignedAt="true"
@@ -311,6 +313,7 @@
             MosqueId = _mosques.FirstOrDefault()?.Id ?? Guid.Empty,
             FoujId = _foujs.FirstOrDefault()?.Id ?? Guid.Empty,
             HalqaId = _halqas.FirstOrDefault()?.Id,
+            Status = 0,
             AssignedAt = DateTime.Today
         };
         _isDialogOpen = true;
@@ -332,6 +335,7 @@
             MosqueId = teacher.MosqueId,
             FoujId = teacher.FoujId ?? Guid.Empty,
             HalqaId = teacher.HalqaId,
+            Status = teacher.Status,
             Bio = teacher.Bio,
             AssignedAt = ParseAssignedDate(teacher.AssignedAt)
         };
@@ -365,6 +369,7 @@
                         Item("رقم الهاتف", teacher.Phone),
                         Item("الجنس", GetGenderLabel(teacher.Gender)),
                         Item("تاريخ الانضمام", FormatDate(teacher.JoinedAt)),
+                        Item("حالة الحساب", GetStatusLabel(teacher.Status)),
                         Item("المسجد", teacher.MosqueName)
                     }
                 },
@@ -421,6 +426,7 @@
                     Phone = _form.Phone?.Trim() ?? string.Empty,
                     Gender = _form.Gender,
                     Bio = _form.Bio,
+                    Status = _form.Status,
                     AssignedAt = FormatAssignedDateForRequest(_form.AssignedAt),
                     HalqaId = _form.HalqaId,
                     NewPassword = string.IsNullOrWhiteSpace(_form.Password) ? null : _form.Password.Trim()
@@ -457,6 +463,7 @@
                     Phone = _form.Phone?.Trim() ?? string.Empty,
                     PhoneNumber = _form.Phone?.Trim() ?? string.Empty,
                     Gender = _form.Gender,
+                    Status = _form.Status,
                     MosqueId = _form.MosqueId,
                     FoujId = _form.FoujId == Guid.Empty ? null : _form.FoujId,
                     HalqaId = _form.HalqaId,
@@ -525,6 +532,15 @@
 
     private static string GetGenderLabel(string? gender)
         => string.Equals(gender, "Female", StringComparison.OrdinalIgnoreCase) ? "أنثى" : "ذكر";
+
+    private static string GetStatusLabel(int status)
+        => status switch
+        {
+            0 => "نشط",
+            1 => "متوقف",
+            2 => "متخرج",
+            _ => "غير محدد"
+        };
 
     private static string FormatDate(DateTime date)
         => date == default ? "—" : date.ToString("yyyy/MM/dd");
@@ -599,6 +615,7 @@
         public string FoujName { get; set; } = string.Empty;
         public Guid? HalqaId { get; set; }
         public string HalqaName { get; set; } = string.Empty;
+        public int Status { get; set; }
         public string? Bio { get; set; }
         public string? AssignedAt { get; set; }
 
@@ -617,6 +634,7 @@
                 FoujName = dto.FoujName ?? string.Empty,
                 HalqaId = dto.HalqaId,
                 HalqaName = dto.HalqaName ?? string.Empty,
+                Status = dto.Status,
                 Bio = dto.Bio,
                 AssignedAt = dto.AssignedAt
             };

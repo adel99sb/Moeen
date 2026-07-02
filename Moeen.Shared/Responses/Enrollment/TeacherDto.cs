@@ -12,6 +12,7 @@ namespace Moeen.Shared.Responses.Enrollment
         public string Gender { get; set; } = string.Empty;
         public int FontSize { get; set; }
         public int Role { get; set; } // Should be 1 for Teacher
+        public int Status { get; set; }
         public string Theme { get; set; } = string.Empty;
         public string ProfileImageUrl { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
