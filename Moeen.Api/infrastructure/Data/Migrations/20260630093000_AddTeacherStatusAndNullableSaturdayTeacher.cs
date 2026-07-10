@@ -1,11 +1,15 @@
 using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Moeen.Api.infrastructure.Data;
 
 #nullable disable
 
 namespace Moeen.Api.infrastructure.Data.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20260630093000_AddTeacherStatusAndNullableSaturdayTeacher")]
     public partial class AddTeacherStatusAndNullableSaturdayTeacher : Migration
     {
         /// <inheritdoc />
