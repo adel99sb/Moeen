@@ -39,6 +39,14 @@ namespace Moeen.Api.Application.Services
                 .FirstOrDefaultAsync();
         }
 
+        private async Task<GeneralResponse?> EnsureMosqueAccessAsync(Guid mosqueId)
+        {
+            var managedMosqueId = await ResolveManagedMosqueIdAsync();
+            return managedMosqueId.HasValue && managedMosqueId.Value != mosqueId
+                ? GeneralResponse.Unauthorized("لا يمكنك الوصول إلى بيانات مسجد آخر.")
+                : null;
+        }
+
         public async Task<GeneralResponse> AddMosqu(AddMosquReq req)
         {
             if (req == null)
@@ -100,6 +108,10 @@ namespace Moeen.Api.Application.Services
             if (request == null || request.MosqueId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف المسجد غير صالح.");
 
+            var accessError = await EnsureMosqueAccessAsync(request.MosqueId);
+            if (accessError != null)
+                return accessError;
+
             var mosque = await _context.Mosques.FindAsync(request.MosqueId);
             if (mosque == null)
                 return GeneralResponse.NotFound("المسجد غير موجود.");
@@ -111,6 +123,10 @@ namespace Moeen.Api.Application.Services
         {
             if (request == null || request.MosqueId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف المسجد غير صالح.");
+
+            var accessError = await EnsureMosqueAccessAsync(request.MosqueId);
+            if (accessError != null)
+                return accessError;
 
             var page = Math.Max(1, request.Page);
             var pageSize = Math.Max(1, request.PageSize);
@@ -201,6 +217,10 @@ namespace Moeen.Api.Application.Services
             if (request == null || request.MosqueId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف المسجد غير صالح.");
 
+            var accessError = await EnsureMosqueAccessAsync(request.MosqueId);
+            if (accessError != null)
+                return accessError;
+
             var mosque = await _context.Mosques.FindAsync(request.MosqueId);
             if (mosque == null)
                 return GeneralResponse.NotFound("المسجد غير موجود.");
@@ -268,6 +288,10 @@ namespace Moeen.Api.Application.Services
             if (request == null || request.MosqueId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف المسجد غير صالح.");
 
+            var accessError = await EnsureMosqueAccessAsync(request.MosqueId);
+            if (accessError != null)
+                return accessError;
+
             var mosque = await _context.Mosques.FindAsync(request.MosqueId);
             if (mosque == null)
                 return GeneralResponse.NotFound("المسجد غير موجود.");
@@ -295,6 +319,10 @@ namespace Moeen.Api.Application.Services
             if (request == null || request.MosqueId == Guid.Empty || request.AdminUserId == Guid.Empty)
                 return GeneralResponse.BadRequest("بيانات غير صالحة.");
 
+            var accessError = await EnsureMosqueAccessAsync(request.MosqueId);
+            if (accessError != null)
+                return accessError;
+
             var mosque = await _context.Mosques.FindAsync(request.MosqueId);
             if (mosque == null)
                 return GeneralResponse.NotFound("المسجد غير موجود.");
@@ -316,6 +344,10 @@ namespace Moeen.Api.Application.Services
         {
             if (request == null || request.MosqueId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف المسجد غير صالح.");
+
+            var accessError = await EnsureMosqueAccessAsync(request.MosqueId);
+            if (accessError != null)
+                return accessError;
 
             var mosque = await _context.Mosques.FindAsync(request.MosqueId);
             if (mosque == null)
@@ -346,6 +378,10 @@ namespace Moeen.Api.Application.Services
         {
             if (request == null || request.MosqueId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف المسجد غير صالح.");
+
+            var accessError = await EnsureMosqueAccessAsync(request.MosqueId);
+            if (accessError != null)
+                return accessError;
 
             var supervisors = await _context.Supervisors
                 .Where(s => s.MosqueId == request.MosqueId)

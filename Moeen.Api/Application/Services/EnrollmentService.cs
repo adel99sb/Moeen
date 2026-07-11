@@ -81,6 +81,38 @@ namespace Moeen.Api.Application.Services
 
         private static Guid? ResolveEffectiveMosqueId(Guid? managedMosqueId, Guid? requestedMosqueId)
             => managedMosqueId ?? requestedMosqueId;
+
+        private async Task<GeneralResponse?> EnsureMosqueAccessAsync(Guid mosqueId)
+        {
+            var managedMosqueId = await ResolveManagedMosqueIdAsync();
+            return managedMosqueId.HasValue && managedMosqueId.Value != mosqueId
+                ? GeneralResponse.Unauthorized("لا يمكنك الوصول إلى بيانات مسجد آخر.")
+                : null;
+        }
+
+        private async Task<GeneralResponse?> EnsureMemberAccessAsync(Guid memberId)
+        {
+            var managedMosqueId = await ResolveManagedMosqueIdAsync();
+            if (!managedMosqueId.HasValue)
+                return null;
+
+            var memberMosqueId = await _context.Students.AsNoTracking()
+                .Where(s => s.Id == memberId)
+                .Select(s => (Guid?)s.MosqueId)
+                .FirstOrDefaultAsync()
+                ?? await _context.Teachers.AsNoTracking()
+                    .Where(t => t.Id == memberId)
+                    .Select(t => (Guid?)t.MosqueId)
+                    .FirstOrDefaultAsync()
+                ?? await _context.Supervisors.AsNoTracking()
+                    .Where(s => s.Id == memberId)
+                    .Select(s => (Guid?)s.MosqueId)
+                    .FirstOrDefaultAsync();
+
+            return memberMosqueId.HasValue && memberMosqueId.Value != managedMosqueId.Value
+                ? GeneralResponse.Unauthorized("لا يمكنك الوصول إلى عضو من مسجد آخر.")
+                : null;
+        }
         public async Task<GeneralResponse> RegisterStudentAsync(RegisterStudentRequest request)
         {
             if (request == null)
@@ -95,6 +127,10 @@ namespace Moeen.Api.Application.Services
             var mosque = await _context.Mosques.FindAsync(request.MosqueId);
             if (mosque == null)
                 return GeneralResponse.NotFound("المسجد غير موجود.");
+
+            var mosqueAccessError = await EnsureMosqueAccessAsync(request.MosqueId);
+            if (mosqueAccessError != null)
+                return mosqueAccessError;
 
             SaturdayHalqa halqa = null;
             if (request.SaturdayHalqeId.HasValue)
@@ -177,6 +213,10 @@ namespace Moeen.Api.Application.Services
             if (mosque == null)
                 return GeneralResponse.NotFound("المسجد غير موجود.");
 
+            var mosqueAccessError = await EnsureMosqueAccessAsync(request.MosqueId);
+            if (mosqueAccessError != null)
+                return mosqueAccessError;
+
             Halqa? assignedHalqa = null;
             if (request.HalqaId.HasValue && request.HalqaId.Value != Guid.Empty)
             {
@@ -247,6 +287,10 @@ namespace Moeen.Api.Application.Services
             var mosque = await _context.Mosques.FindAsync(request.MosqueId);
             if (mosque == null)
                 return GeneralResponse.NotFound("المسجد غير موجود.");
+
+            var mosqueAccessError = await EnsureMosqueAccessAsync(request.MosqueId);
+            if (mosqueAccessError != null)
+                return mosqueAccessError;
 
             var supervisor = new Supervisor
             {
@@ -348,6 +392,10 @@ namespace Moeen.Api.Application.Services
             if (teacher == null)
                 return GeneralResponse.NotFound("المعلم غير موجود.");
 
+            var mosqueAccessError = await EnsureMosqueAccessAsync(teacher.MosqueId);
+            if (mosqueAccessError != null)
+                return mosqueAccessError;
+
             var alreadySupervisor = await _context.Supervisors.AnyAsync(s => s.Id == teacher.Id);
             if (!alreadySupervisor)
             {
@@ -404,6 +452,10 @@ namespace Moeen.Api.Application.Services
             if (children.Count != selectedStudentIds.Count)
                 return GeneralResponse.BadRequest("يوجد طالب محدد غير موجود.");
 
+            var managedMosqueId = await ResolveManagedMosqueIdAsync();
+            if (managedMosqueId.HasValue && children.Any(child => child.MosqueId != managedMosqueId.Value))
+                return GeneralResponse.Unauthorized("لا يمكنك ربط ولي الأمر بطلاب من مسجد آخر.");
+
             var firstChild = children.OrderBy(c => c.name).First();
 
             var parent = new Student
@@ -455,6 +507,10 @@ namespace Moeen.Api.Application.Services
         {
             if (request == null || !Guid.TryParse(request.MemberId, out var memberId))
                 return GeneralResponse.BadRequest("معرّف العضو غير صالح.");
+
+            var accessError = await EnsureMemberAccessAsync(memberId);
+            if (accessError != null)
+                return accessError;
 
             var user = await _context.Users.FindAsync(memberId);
             if (user == null)
@@ -765,6 +821,10 @@ namespace Moeen.Api.Application.Services
             if (request == null || request.ParentId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف ولي الأمر غير صالح.");
 
+            var accessError = await EnsureMemberAccessAsync(request.ParentId);
+            if (accessError != null)
+                return accessError;
+
             var linkedStudentIds = await _context.ParentStudentLinks
                 .Where(link => link.ParentId == request.ParentId)
                 .Select(link => link.StudentId)
@@ -787,6 +847,10 @@ namespace Moeen.Api.Application.Services
         {
             if (request == null || !Guid.TryParse(request.MemberId, out var memberId))
                 return GeneralResponse.BadRequest("معرّف العضو غير صالح.");
+
+            var accessError = await EnsureMemberAccessAsync(memberId);
+            if (accessError != null)
+                return accessError;
 
             var student = await _context.Students
                 .Include(s => s.Mosque)
@@ -915,12 +979,13 @@ namespace Moeen.Api.Application.Services
             var teachersQuery = _context.Teachers.Where(t => t.status == ActiveStatus).AsQueryable();
             var supervisorsQuery = _context.Supervisors.AsQueryable();
 
-            if (request.MosqueId.HasValue)
+            var effectiveMosqueId = ResolveEffectiveMosqueId(await ResolveManagedMosqueIdAsync(), request.MosqueId);
+            if (effectiveMosqueId.HasValue)
             {
-                studentsQuery = studentsQuery.Where(s => s.MosqueId == request.MosqueId.Value);
-                parentsQuery = parentsQuery.Where(s => s.MosqueId == request.MosqueId.Value);
-                teachersQuery = teachersQuery.Where(t => t.MosqueId == request.MosqueId.Value);
-                supervisorsQuery = supervisorsQuery.Where(s => s.MosqueId == request.MosqueId.Value);
+                studentsQuery = studentsQuery.Where(s => s.MosqueId == effectiveMosqueId.Value);
+                parentsQuery = parentsQuery.Where(s => s.MosqueId == effectiveMosqueId.Value);
+                teachersQuery = teachersQuery.Where(t => t.MosqueId == effectiveMosqueId.Value);
+                supervisorsQuery = supervisorsQuery.Where(s => s.MosqueId == effectiveMosqueId.Value);
             }
 
             if (request.Status.HasValue && request.Status.Value == 0)
@@ -970,6 +1035,10 @@ namespace Moeen.Api.Application.Services
             if (request == null || request.StudentId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف الطالب غير صالح.");
 
+            var accessError = await EnsureMemberAccessAsync(request.StudentId);
+            if (accessError != null)
+                return accessError;
+
             var student = await _context.Students.FindAsync(request.StudentId);
             if (student == null)
                 return GeneralResponse.NotFound("الطالب غير موجود.");
@@ -989,6 +1058,10 @@ namespace Moeen.Api.Application.Services
             if (request == null || request.TeacherId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف المعلم غير صالح.");
 
+            var accessError = await EnsureMemberAccessAsync(request.TeacherId);
+            if (accessError != null)
+                return accessError;
+
             var teacher = await _context.Teachers.FindAsync(request.TeacherId);
             if (teacher == null)
                 return GeneralResponse.NotFound("المعلم غير موجود.");
@@ -1004,6 +1077,10 @@ namespace Moeen.Api.Application.Services
         {
             if (request == null || request.ParentId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف ولي الأمر غير صالح.");
+
+            var accessError = await EnsureMemberAccessAsync(request.ParentId);
+            if (accessError != null)
+                return accessError;
 
             var parent = await _context.Students
                 .Include(p => p.ChildLinks)
@@ -1086,6 +1163,10 @@ namespace Moeen.Api.Application.Services
         {
             if (request == null || request.TeacherId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف المعلم غير صالح.");
+
+            var accessError = await EnsureMemberAccessAsync(request.TeacherId);
+            if (accessError != null)
+                return accessError;
 
             var teacher = await _context.Teachers.FindAsync(request.TeacherId);
             if (teacher == null)
@@ -1173,6 +1254,10 @@ namespace Moeen.Api.Application.Services
             if (request == null || request.SupervisorId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف المشرف غير صالح.");
 
+            var accessError = await EnsureMemberAccessAsync(request.SupervisorId);
+            if (accessError != null)
+                return accessError;
+
             var supervisor = await _context.Supervisors.FindAsync(request.SupervisorId);
             if (supervisor == null)
                 return GeneralResponse.NotFound("المشرف غير موجود.");
@@ -1191,6 +1276,10 @@ namespace Moeen.Api.Application.Services
         {
             if (request == null || !Guid.TryParse(request.MemberId, out var memberId))
                 return GeneralResponse.BadRequest("معرّف العضو غير صالح.");
+
+            var accessError = await EnsureMemberAccessAsync(memberId);
+            if (accessError != null)
+                return accessError;
 
             var student = await _context.Students.FindAsync(memberId);
             if (student == null)

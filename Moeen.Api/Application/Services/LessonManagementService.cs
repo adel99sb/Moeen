@@ -855,11 +855,8 @@ namespace Moeen.Api.Application.Services
 
         private async Task<Guid?> ResolveManagedMosqueIdAsync()
         {
-            if (_currentUserService.IsAdmin == true)
-                return null;
-
             var currentUserId = _currentUserService.CurrentUserId;
-            if (!currentUserId.HasValue || !_currentUserService.IsInRole("Supervisor"))
+            if (!currentUserId.HasValue)
                 return null;
 
             return await _context.Supervisors
