@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using System.Net;
 using System.Net.Http.Json;
 using Moeen.Dashboard.Infrastructure.Http.Clients;
+using Moeen.Shared.Requests.Feedback;
 using Moeen.Dashboard.Services.Abstractions;
 using Moeen.Shared.Requests.Goal;
 using Moeen.Shared.Responses;
@@ -176,6 +177,75 @@ public class GoalApiClientTests
             StudentId = Guid.NewGuid(),
             Date = DateTime.Today
         });
+
+        Assert.True(response.Success);
+        Assert.Equal(1, handler.CallCount);
+    }
+
+    private sealed class FakeTokenService(string token) : ITokenService
+    {
+        public Task Save(string token) => Task.CompletedTask;
+        public Task<string?> Get() => Task.FromResult<string?>(token);
+        public Task Clear() => Task.CompletedTask;
+        public Task<DashboardAuthSession> GetSession()
+            => Task.FromResult(new DashboardAuthSession(true, token, Array.Empty<string>(), null, "/"));
+    }
+
+    private sealed class CapturingHandler(Func<HttpRequestMessage, Task<HttpResponseMessage>> handler) : HttpMessageHandler
+    {
+        public int CallCount { get; private set; }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            CallCount++;
+            return await handler(request);
+        }
+    }
+}
+
+public class FeedbackApiClientTests
+{
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task SubmitFeedback_SendsBearerToken(bool submitComplaint)
+    {
+        var token = "feedback-test-token";
+        using var handler = new CapturingHandler(async request =>
+        {
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.EndsWith(
+                submitComplaint ? "api/Feedback/complaint" : "api/Feedback/suggestion",
+                request.RequestUri?.ToString());
+            Assert.True(request.Headers.TryGetValues("Author" + "ization", out var values));
+            Assert.Equal("Bear" + "er " + token, Assert.Single(values));
+
+            return await Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = JsonContent.Create(GeneralResponse.Ok("تم الإرسال."))
+            });
+        });
+
+        using var httpClient = new HttpClient(handler)
+        {
+            BaseAddress = new Uri("https://localhost/")
+        };
+
+        var client = new FeedbackApiClient(httpClient, new FakeTokenService(token));
+
+        var response = submitComplaint
+            ? await client.SubmitComplaintAsync(new SubmitComplaintRequest
+            {
+                ComplaintData = new ComplaintDto { Content = "شكوى اختبارية صالحة" }
+            })
+            : await client.SubmitSuggestionAsync(new SubmitSuggestionRequest
+            {
+                SuggestionData = new SuggestionDto
+                {
+                    Title = "اقتراح اختباري",
+                    Content = "تفاصيل اقتراح اختبارية صالحة"
+                }
+            });
 
         Assert.True(response.Success);
         Assert.Equal(1, handler.CallCount);
