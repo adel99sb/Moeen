@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.WebUtilities;
+using Moeen.Dashboard.Services.Abstractions;
+using System.Net.Http.Headers;
 using Moeen.Shared.Requests.Halqa;
 using Moeen.Shared.Responses;
 using System.Net.Http.Json;
@@ -9,11 +11,13 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
     public class HalqaApiClient
     {
         private readonly HttpClient _http;
+        private readonly ITokenService _tokenService;
         private readonly ILogger<HalqaApiClient> _logger;
 
-        public HalqaApiClient(HttpClient http, ILogger<HalqaApiClient> logger)
+        public HalqaApiClient(HttpClient http, ITokenService tokenService, ILogger<HalqaApiClient> logger)
         {
             _http = http;
+            _tokenService = tokenService;
             _logger = logger;
         }
 
@@ -25,7 +29,7 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             };
 
             var url = QueryHelpers.AddQueryString(ApiRoutes.GetAllHalqasAsyncRoute, query);
-            var response = await _http.GetAsync(url);
+            using var response = await SendAuthorizedAsync(HttpMethod.Get, url);
             return await ReadGeneralResponseAsync(response, "GetAllHalqas");
         }
 
@@ -37,31 +41,40 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             };
 
             var url = QueryHelpers.AddQueryString(ApiRoutes.GetHalqaAssignmentStudentsAsyncRoute, query);
-            var response = await _http.GetAsync(url);
+            using var response = await SendAuthorizedAsync(HttpMethod.Get, url);
             return await ReadGeneralResponseAsync(response, "GetHalqaAssignmentStudents");
         }
 
         public async Task<GeneralResponse> CreateAsync(CreateHalqaRequest request)
         {
-            var response = await _http.PostAsJsonAsync(ApiRoutes.CreateHalqaAsyncRoute, request);
+            using var response = await SendAuthorizedAsync(HttpMethod.Post, ApiRoutes.CreateHalqaAsyncRoute, JsonContent.Create(request));
             return await ReadGeneralResponseAsync(response, "CreateHalqa");
         }
 
         public async Task<GeneralResponse> UpdateAsync(UpdateHalqaRequest request)
         {
-            var response = await _http.PutAsJsonAsync(ApiRoutes.UpdateHalqaAsyncRoute, request);
+            using var response = await SendAuthorizedAsync(HttpMethod.Put, ApiRoutes.UpdateHalqaAsyncRoute, JsonContent.Create(request));
             return await ReadGeneralResponseAsync(response, "UpdateHalqa");
         }
 
         public async Task<GeneralResponse> DeleteAsync(DeleteHalqaRequest request)
         {
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Delete, ApiRoutes.DeleteHalqaAsyncRoute)
-            {
-                Content = JsonContent.Create(request)
-            };
-
-            var response = await _http.SendAsync(httpRequest);
+            using var response = await SendAuthorizedAsync(HttpMethod.Delete, ApiRoutes.DeleteHalqaAsyncRoute, JsonContent.Create(request));
             return await ReadGeneralResponseAsync(response, "DeleteHalqa");
+        }
+
+        private async Task<HttpResponseMessage> SendAuthorizedAsync(HttpMethod method, string route, HttpContent? content = null)
+        {
+            var token = await _tokenService.Get();
+            if (string.IsNullOrWhiteSpace(token))
+                throw new InvalidOperationException("انتهت جلسة تسجيل الدخول، يرجى تسجيل الدخول مرة أخرى.");
+
+            using var request = new HttpRequestMessage(method, route)
+            {
+                Content = content
+            };
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            return await _http.SendAsync(request);
         }
 
         private async Task<GeneralResponse> ReadGeneralResponseAsync(HttpResponseMessage response, string operation)

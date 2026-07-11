@@ -34,8 +34,10 @@ namespace Moeen.Api.Application.Services
                 .Include(h => h.Teacher)
                 .AsQueryable();
 
-            if (mosqueId.HasValue)
-                query = query.Where(h => h.Fouj.MosqueId == mosqueId.Value);
+            var managedMosqueId = await ResolveManagedMosqueIdAsync();
+            var effectiveMosqueId = managedMosqueId ?? mosqueId;
+            if (effectiveMosqueId.HasValue)
+                query = query.Where(h => h.Fouj.MosqueId == effectiveMosqueId.Value);
 
             return await query
                 .OrderBy(h => h.Fouj.name)

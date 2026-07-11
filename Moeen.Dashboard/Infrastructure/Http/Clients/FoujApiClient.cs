@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.WebUtilities;
+using Moeen.Dashboard.Services.Abstractions;
+using System.Net.Http.Headers;
 using Moeen.Shared.Requests.Fouj;
 using Moeen.Shared.Responses;
 using System.Net.Http.Json;
@@ -9,11 +11,13 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
     public class FoujApiClient
     {
         private readonly HttpClient _http;
+        private readonly ITokenService _tokenService;
         private readonly ILogger<FoujApiClient> _logger;
 
-        public FoujApiClient(HttpClient http, ILogger<FoujApiClient> logger)
+        public FoujApiClient(HttpClient http, ITokenService tokenService, ILogger<FoujApiClient> logger)
         {
             _http = http;
+            _tokenService = tokenService;
             _logger = logger;
         }
 
@@ -25,26 +29,40 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
             };
 
             var url = QueryHelpers.AddQueryString(ApiRoutes.FoujRoute, query);
-            var response = await _http.GetAsync(url);
+            using var response = await SendAuthorizedAsync(HttpMethod.Get, url);
             return await ReadGeneralResponseAsync(response, "GetAllFoujs");
         }
 
         public async Task<GeneralResponse> CreateAsync(CreateFoujRequest request)
         {
-            var response = await _http.PostAsJsonAsync(ApiRoutes.FoujRoute, request);
+            using var response = await SendAuthorizedAsync(HttpMethod.Post, ApiRoutes.FoujRoute, JsonContent.Create(request));
             return await ReadGeneralResponseAsync(response, "CreateFouj");
         }
 
         public async Task<GeneralResponse> UpdateAsync(UpdateFoujRequest request)
         {
-            var response = await _http.PutAsJsonAsync(ApiRoutes.FoujByIdRoute(request.FoujId), request);
+            using var response = await SendAuthorizedAsync(HttpMethod.Put, ApiRoutes.FoujByIdRoute(request.FoujId), JsonContent.Create(request));
             return await ReadGeneralResponseAsync(response, "UpdateFouj");
         }
 
         public async Task<GeneralResponse> DeleteAsync(Guid foujId)
         {
-            var response = await _http.DeleteAsync(ApiRoutes.FoujByIdRoute(foujId));
+            using var response = await SendAuthorizedAsync(HttpMethod.Delete, ApiRoutes.FoujByIdRoute(foujId));
             return await ReadGeneralResponseAsync(response, "DeleteFouj");
+        }
+
+        private async Task<HttpResponseMessage> SendAuthorizedAsync(HttpMethod method, string route, HttpContent? content = null)
+        {
+            var token = await _tokenService.Get();
+            if (string.IsNullOrWhiteSpace(token))
+                throw new InvalidOperationException("انتهت جلسة تسجيل الدخول، يرجى تسجيل الدخول مرة أخرى.");
+
+            using var request = new HttpRequestMessage(method, route)
+            {
+                Content = content
+            };
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            return await _http.SendAsync(request);
         }
 
         private async Task<GeneralResponse> ReadGeneralResponseAsync(HttpResponseMessage response, string operation)
