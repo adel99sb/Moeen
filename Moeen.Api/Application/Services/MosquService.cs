@@ -353,20 +353,60 @@ namespace Moeen.Api.Application.Services
             if (mosque == null)
                 return GeneralResponse.NotFound("المسجد غير موجود.");
 
+            var blockers = new List<string>();
+
             var foujIds = await _context.Foujs
                 .Where(f => f.MosqueId == request.MosqueId)
                 .Select(f => f.Id)
                 .ToListAsync();
+            if (foujIds.Count > 0)
+                blockers.Add($"{foujIds.Count} فوج");
 
-            var hasRelations =
-                foujIds.Any() ||
-                await _context.Halqas.AnyAsync(h => foujIds.Contains(h.FoujId)) ||
-                await _context.Teachers.AnyAsync(t => t.MosqueId == request.MosqueId) ||
-                await _context.Students.AnyAsync(s => s.MosqueId == request.MosqueId) ||
-                await _context.Supervisors.AnyAsync(s => s.MosqueId == request.MosqueId);
+            var halqasCount = await _context.Halqas.CountAsync(h => foujIds.Contains(h.FoujId));
+            if (halqasCount > 0)
+                blockers.Add($"{halqasCount} حلقة");
 
-            if (hasRelations)
-                return GeneralResponse.BadRequest("لا يمكن حذف المسجد لوجود بيانات مرتبطة به.");
+            var teachersCount = await _context.Teachers.CountAsync(t => t.MosqueId == request.MosqueId);
+            if (teachersCount > 0)
+                blockers.Add($"{teachersCount} معلم");
+
+            var studentsCount = await _context.Students.CountAsync(s => s.MosqueId == request.MosqueId);
+            if (studentsCount > 0)
+                blockers.Add($"{studentsCount} طالب أو ولي أمر");
+
+            var supervisorsCount = await _context.Supervisors.CountAsync(s => s.MosqueId == request.MosqueId);
+            if (supervisorsCount > 0)
+                blockers.Add($"{supervisorsCount} مشرف");
+
+            var postsCount = await _context.Posts.CountAsync(p => p.MosqueId == request.MosqueId);
+            if (postsCount > 0)
+                blockers.Add($"{postsCount} منشور");
+
+            var pdfFilesCount = await _context.PdfFiles.CountAsync(p => p.MosqueId == request.MosqueId);
+            if (pdfFilesCount > 0)
+                blockers.Add($"{pdfFilesCount} ملف مكتبة");
+
+            var teacherExamsCount = await _context.TeacherExams.CountAsync(e => e.MosquId == request.MosqueId);
+            if (teacherExamsCount > 0)
+                blockers.Add($"{teacherExamsCount} معلم اختبار");
+
+            var saturdayHalqaIds = await _context.SaturdayHalqes
+                .Where(h => h.MosqueId == request.MosqueId)
+                .Select(h => h.Id)
+                .ToListAsync();
+            if (saturdayHalqaIds.Count > 0)
+                blockers.Add($"{saturdayHalqaIds.Count} حلقة أسبوعية");
+
+            var saturdayLessonsCount = await _context.Set<SaturdayLesson>()
+                .CountAsync(l => saturdayHalqaIds.Contains(l.SaturdayHalqeId));
+            if (saturdayLessonsCount > 0)
+                blockers.Add($"{saturdayLessonsCount} موعد درس أسبوعي");
+
+            if (blockers.Count > 0)
+            {
+                var blockerText = string.Join("، ", blockers);
+                return GeneralResponse.BadRequest($"لا يمكن حذف المسجد لأنه مرتبط ببيانات أخرى: {blockerText}. يرجى حذف أو نقل البيانات المرتبطة أولاً ثم إعادة المحاولة.");
+            }
 
             _context.Mosques.Remove(mosque);
             await _context.SaveChangesAsync();

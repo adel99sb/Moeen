@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Shared.Requests.Enrollment;
 using Moeen.Shared.Responses;
@@ -9,6 +10,7 @@ namespace Moeen.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class EnrollmentController : ControllerBase
     {
         private readonly IEnrollmentService _enrollmentService;
@@ -116,10 +118,12 @@ namespace Moeen.Api.Controllers
         public async Task<ActionResult<GeneralResponse>> GetMemberStatistics([FromQuery] GetMemberStatisticsRequest request)
             => Ok(await _enrollmentService.GetMemberStatisticsAsync(request));
 
+        [Authorize(Roles = "Admin,Owner")]
         [HttpDelete("students/{studentId:guid}")]
         public async Task<ActionResult<GeneralResponse>> DeleteStudent([FromRoute] Guid studentId)
             => Ok(await _enrollmentService.DeleteStudentAsync(new DeleteStudentRequest { StudentId = studentId }));
 
+        [Authorize(Roles = "Admin,Owner")]
         [HttpDelete("teachers/{teacherId:guid}")]
         public async Task<ActionResult<GeneralResponse>> DeleteTeacher([FromRoute] Guid teacherId)
             => Ok(await _enrollmentService.DeleteTeacherAsync(new DeleteTeacherRequest { TeacherId = teacherId }));
@@ -128,6 +132,7 @@ namespace Moeen.Api.Controllers
         public async Task<ActionResult<GeneralResponse>> DeleteParent([FromRoute] Guid parentId)
             => Ok(await _enrollmentService.DeleteParentAsync(new DeleteParentRequest { ParentId = parentId }));
 
+        [Authorize(Roles = "Admin,Owner")]
         [HttpDelete("supervisors/{supervisorId:guid}")]
         public async Task<ActionResult<GeneralResponse>> DeleteSupervisor([FromRoute] Guid supervisorId)
             => Ok(await _enrollmentService.DeleteSupervisorAsync(new DeleteSupervisorRequest { SupervisorId = supervisorId }));
