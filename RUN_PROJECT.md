@@ -167,7 +167,7 @@ ipconfig
 
 السكريبت يقوم تلقائياً بـ:
 
-- فحص dotnet، وإذا كان ناقصاً يحاول تثبيت .NET SDK 9 عبر winget.
+- فحص dotnet، وإذا كان ناقصاً يحاول تثبيت .NET SDK 10 عبر winget.
 - فحص winget، وإذا كان ناقصاً يحاول تثبيت Microsoft App Installer من الرابط الرسمي `https://aka.ms/getwinget`.
 - فحص Java، وإذا كانت ناقصة يحاول تثبيت Microsoft OpenJDK 17 عبر winget.
 - فحص MAUI/Android workload، وإذا ناقصة يحاول تثبيتها عبر dotnet workload.
@@ -176,7 +176,7 @@ ipconfig
 - إذا Android SDK موجود لكن ناقصه command-line tools أو packages، يثبت الناقص فقط.
 - إذا لا يوجد Android SDK أبداً، ينشئ واحداً محلياً خارج Visual Studio تحت `%LOCALAPPDATA%\Android\Sdk`.
 - تنزيل Android command-line tools مباشرة من Google عند الحاجة.
-- تثبيت Android SDK packages الناقصة: `platform-tools`, `platforms;android-35`, `build-tools;35.0.0`.
+- تثبيت Android SDK packages الناقصة: `platform-tools`, `platforms;android-36`, `build-tools;35.0.0`.
 - قبول Android SDK licenses.
 - ضبط `ANDROID_HOME` و `ANDROID_SDK_ROOT` للمستخدم الحالي.
 - فحص وجود جهاز Android متصل.

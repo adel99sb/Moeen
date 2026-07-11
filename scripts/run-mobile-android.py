@@ -31,7 +31,7 @@ from typing import Iterable
 
 
 DEFAULT_PROJECT = "Moeen.App/Moeen.App.csproj"
-DEFAULT_FRAMEWORK = "net9.0-android"
+DEFAULT_FRAMEWORK = "net10.0-android36.0"
 DEFAULT_API_PORT = 5055
 
 
@@ -220,14 +220,14 @@ def setup_adb_reverse(adb: str, serial: str, repo_root: Path, port: int) -> None
 
 
 def check_dotnet_environment(repo_root: Path) -> None:
-    require_tool("dotnet", "dotnet was not found. Install .NET SDK 9 and make sure dotnet is in PATH.")
+    require_tool("dotnet", "dotnet was not found. Install .NET SDK 10 and make sure dotnet is in PATH.")
 
     info = run(["dotnet", "--list-sdks"], cwd=repo_root, capture=True)
     sdks = info.stdout or ""
-    if not any(line.startswith("9.") for line in sdks.splitlines()):
+    if not any(line.startswith("10.") for line in sdks.splitlines()):
         raise RunnerError(
-            "No .NET 9 SDK found. The app targets net9.0-android.\n"
-            "Install .NET SDK 9.x, then rerun this script."
+            "No .NET 10 SDK found. The app targets net10.0-android36.0.\n"
+            "Install .NET SDK 10.x, then rerun this script."
         )
 
     workloads = run(["dotnet", "workload", "list"], cwd=repo_root, capture=True)

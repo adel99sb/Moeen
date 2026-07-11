@@ -21,8 +21,9 @@ $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
 $appProject = Join-Path $root 'Moeen.App\Moeen.App.csproj'
+$mobileFramework = 'net10.0-android36.0'
 $packageName = 'com.companyname.moeen.app'
-$apkPath = Join-Path $root 'Moeen.App\bin\Debug\net9.0-android\com.companyname.moeen.app-Signed.apk'
+$apkPath = Join-Path $root "Moeen.App\bin\Debug\$mobileFramework\com.companyname.moeen.app-Signed.apk"
 $defaultAndroidSdkRoot = Join-Path $env:LOCALAPPDATA 'Android\Sdk'
 
 function Write-Step([string]$Message) {
@@ -203,17 +204,17 @@ function Install-WithWinget([string]$PackageId, [string]$FriendlyName) {
 function Ensure-DotNetSdk {
     $dotnet = Get-Command dotnet -ErrorAction SilentlyContinue
     if (-not $dotnet) {
-        Install-WithWinget 'Microsoft.DotNet.SDK.9' '.NET SDK 9'
+        Install-WithWinget 'Microsoft.DotNet.SDK.10' '.NET SDK 10'
         $dotnet = Get-Command dotnet -ErrorAction SilentlyContinue
     }
 
     if (-not $dotnet) {
-        Fail ".NET SDK is still missing after install attempt. Install .NET SDK 9 manually and reopen PowerShell."
+        Fail ".NET SDK is still missing after install attempt. Install .NET SDK 10 manually and reopen PowerShell."
     }
 
     $version = dotnet --version
-    if (-not ($version -like '9.*')) {
-        Write-Warning "Detected dotnet version '$version'. The mobile project targets net9.0-android, so .NET SDK 9 is recommended."
+    if (-not ($version -like '10.*')) {
+        Write-Warning "Detected dotnet version '$version'. The mobile project targets $mobileFramework, so .NET SDK 10 is recommended."
     }
 
     Write-Ok "dotnet found: $version"
@@ -423,7 +424,7 @@ function Ensure-AndroidSdk([string]$RequestedRoot) {
 
     $script:AndroidPackagesToInstall = @()
     Ensure-AndroidPackage $sdkRoot 'platform-tools' 'platform-tools\adb.exe'
-    Ensure-AndroidPackage $sdkRoot 'platforms;android-35' 'platforms\android-35\android.jar'
+    Ensure-AndroidPackage $sdkRoot 'platforms;android-36' 'platforms\android-36\android.jar'
     Ensure-AndroidPackage $sdkRoot 'build-tools;35.0.0' 'build-tools\35.0.0\aapt.exe'
 
     if ($script:AndroidPackagesToInstall.Count -gt 0) {
@@ -537,10 +538,10 @@ if (-not (Test-Path $appProject)) {
     Fail "Mobile project was not found: $appProject"
 }
 
-dotnet build $appProject -f net9.0-android `
+dotnet build $appProject -f $mobileFramework `
     -p:AndroidPackageFormat=apk `
+    "-p:AndroidSdkDirectory=$($androidSdk.SdkRoot)" `
     -p:EmbedAssembliesIntoApk=true `
-    -p:AndroidFastDeploymentType=None `
     -p:AndroidUseSharedRuntime=false `
     -p:UseSharedCompilation=false `
     -p:BuildInParallel=false `
