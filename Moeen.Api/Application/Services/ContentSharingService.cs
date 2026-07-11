@@ -44,6 +44,7 @@ namespace Moeen.Api.Application.Services
                 Body = post.body,
                 ImageUrl = string.IsNullOrWhiteSpace(post.imageUrl) ? null : await _file_service_GetUrlSafe(post.imageUrl),
                 MosqueId = post.MosqueId == Guid.Empty ? null : post.MosqueId,
+                MosqueName = post.Mosque?.name,
                 HalqaId = post.HalqaId,
                 HalqaName = await GetHalqaNameAsync(post.HalqaId),
                 IsAnnouncement = !post.HalqaId.HasValue,
@@ -486,7 +487,14 @@ namespace Moeen.Api.Application.Services
         {
             try
             {
-                var posts = await _unitOfWork.Repository<Post>().GetAllAsync();
+                // Posts are intentionally global for supervisors: do not filter by the current supervisor's mosque.
+                var globalPostsSpec = Spec.ForChain<Post>(
+                    p => true,
+                    q => q.Include(p => p.Mosque).Include(p => p.PosInteractions));
+
+                var posts = (await _unitOfWork.Repository<Post>().GetAllAsync(globalPostsSpec))
+                    .OrderByDescending(p => p.created_at)
+                    .ToList();
                 var dtos = new List<PostDto>();
 
                 foreach (var post in posts)

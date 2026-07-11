@@ -4,8 +4,11 @@ using Moeen.Api.Application.Services;
 using Moeen.Api.Core.Contracts.infrastructure.Providers;
 using Moeen.Api.Core.Entities;
 using Moeen.Api.infrastructure.Data;
+using Moeen.Api.infrastructure.Repositories;
+using Moeen.Shared.Constants;
 using Moeen.Shared.Requests.Enrollment;
 using Moeen.Shared.Requests.Mosuq;
+using Moeen.Shared.Responses.ContentSharing;
 using Moeen.Shared.Responses.Enrollment;
 using Moeen.Shared.Responses.Mosuq;
 
@@ -66,6 +69,49 @@ public class SupervisorMosqueIsolationTests
         })).Data);
         Assert.Single(mosques);
         Assert.Equal(mosqueA.Id, mosques[0].Id);
+    }
+
+    [Fact]
+    public async Task Supervisors_FromDifferentMosques_SeeTheSameGlobalPostList()
+    {
+        await using var db = CreateContext();
+        var mosqueA = new Mosque { Id = Guid.NewGuid(), name = "Mosque A", address = "A" };
+        var mosqueB = new Mosque { Id = Guid.NewGuid(), name = "Mosque B", address = "B" };
+        var supervisorA = Supervisor(Guid.NewGuid(), "Supervisor A", mosqueA);
+        var supervisorB = Supervisor(Guid.NewGuid(), "Supervisor B", mosqueB);
+        var postA = new Post
+        {
+            Id = Guid.NewGuid(),
+            MosqueId = mosqueA.Id,
+            Mosque = mosqueA,
+            title = "Post A",
+            body = "From Mosque A",
+            created_at = DateTime.UtcNow.AddMinutes(-1)
+        };
+        var postB = new Post
+        {
+            Id = Guid.NewGuid(),
+            MosqueId = mosqueB.Id,
+            Mosque = mosqueB,
+            title = "Post B",
+            body = "From Mosque B",
+            created_at = DateTime.UtcNow
+        };
+
+        db.AddRange(mosqueA, mosqueB, supervisorA, supervisorB, postA, postB);
+        await db.SaveChangesAsync();
+
+        var serviceA = new ContentSharingService(new UnitOfWork(db), new FakeCurrentUserService(supervisorA.Id), new FakeFileService());
+        var serviceB = new ContentSharingService(new UnitOfWork(db), new FakeCurrentUserService(supervisorB.Id), new FakeFileService());
+
+        var postsForA = Assert.IsType<List<PostDto>>((await serviceA.GetAllPostsAsync()).Data);
+        var postsForB = Assert.IsType<List<PostDto>>((await serviceB.GetAllPostsAsync()).Data);
+
+        Assert.Equal(2, postsForA.Count);
+        Assert.Equal(2, postsForB.Count);
+        Assert.Equal(postsForA.Select(p => p.Id), postsForB.Select(p => p.Id));
+        Assert.Contains(postsForA, p => p.MosqueId == mosqueA.Id && p.MosqueName == mosqueA.name);
+        Assert.Contains(postsForA, p => p.MosqueId == mosqueB.Id && p.MosqueName == mosqueB.name);
     }
 
     [Fact]
@@ -149,6 +195,18 @@ public class SupervisorMosqueIsolationTests
         created_at = DateTime.UtcNow,
         JoinedAt = DateTime.UtcNow
     };
+
+    private sealed class FakeFileService : IFileService
+    {
+        public Task<string> UploadFileAsync(FilePathType fileType, Guid ownerId, string fileName, byte[] fileData)
+            => Task.FromResult(fileName);
+
+        public Task<bool> DeleteFileAsync(string filePath)
+            => Task.FromResult(true);
+
+        public Task<string> GetFileUrlAsync(string filePath)
+            => Task.FromResult(filePath);
+    }
 
     private sealed class FakeCurrentUserService(Guid userId) : ICurrentUserService
     {
