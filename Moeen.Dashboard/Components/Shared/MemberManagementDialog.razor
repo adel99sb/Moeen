@@ -206,6 +206,14 @@
         color: #163f35;
     }
 
+    .moeen-management-dialog > form {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
     .moeen-dialog-header {
         display: flex;
         align-items: center;
@@ -214,6 +222,10 @@
         padding: 24px 28px;
         border-bottom: 1px solid #eee8e0;
         background: linear-gradient(135deg, #f7f3ed 0%, #fff 100%);
+    }
+
+    .moeen-dialog-header {
+        flex-shrink: 0;
     }
 
     .moeen-dialog-title {
@@ -240,7 +252,10 @@
     }
 
     .moeen-dialog-body {
+        flex: 1;
+        min-height: 0;
         overflow-y: auto;
+        overscroll-behavior: contain;
         padding: 26px 28px;
     }
 
@@ -295,6 +310,10 @@
         padding: 20px 28px 24px;
         border-top: 1px solid #eee8e0;
         background: #fff;
+    }
+
+    .moeen-dialog-footer {
+        flex-shrink: 0;
     }
 
     .moeen-btn-primary,

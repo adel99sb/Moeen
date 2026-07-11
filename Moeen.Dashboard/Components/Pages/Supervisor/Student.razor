@@ -298,6 +298,14 @@
         box-shadow: 0 30px 90px rgba(0, 0, 0, 0.24);
     }
 
+    .student-dialog > form {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
     .student-dialog-header {
         display: flex;
         align-items: center;
@@ -306,6 +314,10 @@
         padding: 24px 28px;
         border-bottom: 1px solid #eee8e0;
         background: linear-gradient(135deg, #f7f3ed 0%, #fff 100%);
+    }
+
+    .student-dialog-header {
+        flex-shrink: 0;
     }
 
     .student-dialog-title {
@@ -332,7 +344,10 @@
     }
 
     .student-dialog-body {
+        flex: 1;
+        min-height: 0;
         overflow-y: auto;
+        overscroll-behavior: contain;
         padding: 26px 28px;
     }
 
@@ -379,6 +394,10 @@
         padding: 20px 28px 24px;
         border-top: 1px solid #eee8e0;
         background: #fff;
+    }
+
+    .student-dialog-footer {
+        flex-shrink: 0;
     }
 
     .state-card {
