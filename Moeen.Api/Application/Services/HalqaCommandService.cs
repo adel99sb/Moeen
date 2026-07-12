@@ -178,9 +178,37 @@ namespace Moeen.Api.Application.Services
             if (managedMosqueId.HasValue && halqa.Fouj.MosqueId != managedMosqueId.Value)
                 return GeneralResponse.BadRequest("لا يمكنك حذف هذه الحلقة.");
 
-            var hasStudents = await _context.Students.AnyAsync(s => s.role == StudentRole && s.HalqaId == halqa.Id);
-            if (hasStudents)
-                return GeneralResponse.BadRequest("لا يمكن حذف الحلقة لوجود طلاب مرتبطين بها.");
+            var blockers = new List<string>();
+
+            var studentsCount = await _context.Students.CountAsync(s => s.role == StudentRole && s.HalqaId == halqa.Id);
+            if (studentsCount > 0)
+                blockers.Add($"{studentsCount} طالب");
+
+            var progressEntriesCount = await _context.ProgressEntries.CountAsync(p => p.HalqaId == halqa.Id);
+            if (progressEntriesCount > 0)
+                blockers.Add($"{progressEntriesCount} سجل تقدم");
+
+            var sessionsCount = await _context.HalqaSessions.CountAsync(s => s.HalqaId == halqa.Id);
+            if (sessionsCount > 0)
+                blockers.Add($"{sessionsCount} جلسة حلقة");
+
+            var examAssignmentsCount = await _context.ExamTeacherHalqa.CountAsync(x => x.HalqaId == halqa.Id);
+            if (examAssignmentsCount > 0)
+                blockers.Add($"{examAssignmentsCount} تكليف اختبار");
+
+            var postsCount = await _context.Posts.CountAsync(p => p.HalqaId == halqa.Id);
+            if (postsCount > 0)
+                blockers.Add($"{postsCount} منشور");
+
+            var weeklyLessonsCount = await _context.Set<SaturdayLesson>().CountAsync(l => l.HalqaId == halqa.Id);
+            if (weeklyLessonsCount > 0)
+                blockers.Add($"{weeklyLessonsCount} موعد درس أسبوعي");
+
+            if (blockers.Count > 0)
+            {
+                var blockerText = string.Join("، ", blockers);
+                return GeneralResponse.BadRequest($"لا يمكن حذف الحلقة لأنها مرتبطة ببيانات أخرى: {blockerText}. يرجى حذف أو نقل البيانات المرتبطة أولاً.");
+            }
 
             await _unitOfWork.Repository<Halqa>().DeleteAsync(halqa);
             await _unitOfWork.CompleteAsync();

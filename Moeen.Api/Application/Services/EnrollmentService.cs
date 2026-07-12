@@ -82,6 +82,11 @@ namespace Moeen.Api.Application.Services
         private static Guid? ResolveEffectiveMosqueId(Guid? managedMosqueId, Guid? requestedMosqueId)
             => managedMosqueId ?? requestedMosqueId;
 
+        private GeneralResponse? EnsureAuthenticatedUser()
+            => _currentUserService?.CurrentUserId.HasValue == true
+                ? null
+                : GeneralResponse.Unauthorized("يجب تسجيل الدخول للوصول إلى بيانات الأعضاء.");
+
         private async Task<GeneralResponse?> EnsureMosqueAccessAsync(Guid mosqueId)
         {
             var managedMosqueId = await ResolveManagedMosqueIdAsync();
@@ -666,6 +671,10 @@ namespace Moeen.Api.Application.Services
             if (request == null)
                 return GeneralResponse.BadRequest("طلب غير صالح.");
 
+            var authenticationError = EnsureAuthenticatedUser();
+            if (authenticationError != null)
+                return authenticationError;
+
             int page = Math.Max(1, request.PageNumber);
             int pageSize = Math.Max(1, request.PageSize);
 
@@ -703,6 +712,10 @@ namespace Moeen.Api.Application.Services
             if (request == null)
                 return GeneralResponse.BadRequest("طلب غير صالح.");
 
+            var authenticationError = EnsureAuthenticatedUser();
+            if (authenticationError != null)
+                return authenticationError;
+
             int page = Math.Max(1, request.PageNumber);
             int pageSize = Math.Max(1, request.PageSize);
 
@@ -738,6 +751,10 @@ namespace Moeen.Api.Application.Services
         {
             if (request == null)
                 return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            var authenticationError = EnsureAuthenticatedUser();
+            if (authenticationError != null)
+                return authenticationError;
 
             int page = Math.Max(1, request.PageNumber);
             int pageSize = Math.Max(1, request.PageSize);
@@ -776,6 +793,10 @@ namespace Moeen.Api.Application.Services
         {
             if (request == null)
                 return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            var authenticationError = EnsureAuthenticatedUser();
+            if (authenticationError != null)
+                return authenticationError;
 
             int page = Math.Max(1, request.PageNumber);
             int pageSize = Math.Max(1, request.PageSize);
@@ -962,6 +983,10 @@ namespace Moeen.Api.Application.Services
             if (request == null)
                 return GeneralResponse.BadRequest("طلب غير صالح.");
 
+            var authenticationError = EnsureAuthenticatedUser();
+            if (authenticationError != null)
+                return authenticationError;
+
             var (members, totalCount) = await SearchMembersInternalAsync(request, applyPaging: true);
             var page = Math.Max(1, request.PageNumber);
             var pageSize = Math.Max(1, request.PageSize);
@@ -973,6 +998,10 @@ namespace Moeen.Api.Application.Services
         {
             if (request == null)
                 return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            var authenticationError = EnsureAuthenticatedUser();
+            if (authenticationError != null)
+                return authenticationError;
 
             var studentsQuery = _context.Students.Where(s => s.role == StudentRole && s.status == 0).AsQueryable();
             var parentsQuery = _context.Students.Where(s => s.role == ParentRole).AsQueryable();
@@ -1262,6 +1291,33 @@ namespace Moeen.Api.Application.Services
             if (supervisor == null)
                 return GeneralResponse.NotFound("المشرف غير موجود.");
 
+            var blockers = new List<string>();
+
+            var complaintsCount = await _context.Complaints.CountAsync(c => c.UserId == supervisor.Id);
+            if (complaintsCount > 0)
+                blockers.Add($"لديه {complaintsCount} شكوى أو اقتراح");
+
+            var interactionsCount = await _context.PosInteractions.CountAsync(i => i.UserId == supervisor.Id);
+            if (interactionsCount > 0)
+                blockers.Add($"لديه {interactionsCount} تفاعل على المنشورات");
+
+            if (blockers.Count > 0)
+            {
+                var blockerText = string.Join("، ", blockers);
+                return GeneralResponse.BadRequest($"لا يمكن حذف المشرف لأنه مرتبط ببيانات أخرى: {blockerText}. يرجى معالجة البيانات المرتبطة أولاً ثم إعادة المحاولة.");
+            }
+
+            var roles = await _userManager.GetRolesAsync(supervisor);
+            if (roles.Count > 0)
+            {
+                var removeRolesResult = await _userManager.RemoveFromRolesAsync(supervisor, roles);
+                if (!removeRolesResult.Succeeded)
+                {
+                    var errors = string.Join("; ", removeRolesResult.Errors.Select(e => e.Description));
+                    return GeneralResponse.BadRequest($"فشل إزالة صلاحيات المشرف قبل الحذف: {errors}");
+                }
+            }
+
             var result = await _userManager.DeleteAsync(supervisor);
             if (!result.Succeeded)
             {
@@ -1295,6 +1351,10 @@ namespace Moeen.Api.Application.Services
         {
             if (request == null)
                 return GeneralResponse.BadRequest("طلب غير صالح.");
+
+            var authenticationError = EnsureAuthenticatedUser();
+            if (authenticationError != null)
+                return authenticationError;
 
             var searchRequest = new SearchMembersRequest
             {

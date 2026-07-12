@@ -74,13 +74,30 @@ namespace Moeen.Api.Application.Services
             if (request == null || request.Id == Guid.Empty)
                 return GeneralResponse.BadRequest("معرف الدرس مطلوب.");
 
-            var hasAttendance = await _context.Attendances.AnyAsync(a => a.SaturdayLessonId == request.Id);
-            if (hasAttendance)
-                return GeneralResponse.BadRequest("لا يمكن حذف الدرس لوجود سجل حضور.");
-
-            var lesson = await _context.Set<SaturdayLesson>().FindAsync(request.Id);
+            var lesson = await _context.Set<SaturdayLesson>()
+                .Include(l => l.StudentLinks)
+                .Include(l => l.PdfFiles)
+                .FirstOrDefaultAsync(l => l.Id == request.Id);
             if (lesson == null)
                 return GeneralResponse.NotFound("الدرس غير موجود.");
+
+            var blockers = new List<string>();
+
+            var attendanceCount = await _context.Attendances.CountAsync(a => a.SaturdayLessonId == request.Id);
+            if (attendanceCount > 0)
+                blockers.Add($"{attendanceCount} سجل حضور");
+
+            if (lesson.StudentLinks.Count > 0)
+                blockers.Add($"{lesson.StudentLinks.Count} طالب مرتبط");
+
+            if (lesson.PdfFiles.Count > 0)
+                blockers.Add($"{lesson.PdfFiles.Count} ملف مرتبط");
+
+            if (blockers.Count > 0)
+            {
+                var blockerText = string.Join("، ", blockers);
+                return GeneralResponse.BadRequest($"لا يمكن حذف الدرس لأنه مرتبط ببيانات أخرى: {blockerText}. يرجى إزالة البيانات المرتبطة أولاً.");
+            }
 
             _context.Set<SaturdayLesson>().Remove(lesson);
             await _context.SaveChangesAsync();
@@ -375,11 +392,14 @@ namespace Moeen.Api.Application.Services
             if (!CanManageWeeklyLessons())
                 return GeneralResponse.Unauthorized("غير مصرح.");
 
+            var managedMosqueId = await ResolveManagedMosqueIdAsync();
+            var effectiveMosqueId = managedMosqueId ?? request.MosqueId;
+
             var circles = await _context.Set<SaturdayHalqa>()
                 .Include(c => c.Teacher)
                 .Include(c => c.Students)
                 .Include(c => c.SaturdayLessons)
-                .Where(c => !request.MosqueId.HasValue || c.MosqueId == request.MosqueId.Value)
+                .Where(c => !effectiveMosqueId.HasValue || c.MosqueId == effectiveMosqueId.Value)
                 .ToListAsync();
 
             var result = circles.Select(circle =>
@@ -407,7 +427,8 @@ namespace Moeen.Api.Application.Services
             if (!CanManageWeeklyLessons())
                 return GeneralResponse.Unauthorized("غير مصرح.");
 
-            var lessons = await _context.WeeklyLessons
+            var managedMosqueId = await ResolveManagedMosqueIdAsync();
+            var query = _context.WeeklyLessons
                 .AsNoTracking()
                 .Include(l => l.Schedules)
                     .ThenInclude(s => s.Teacher)
@@ -417,6 +438,17 @@ namespace Moeen.Api.Application.Services
                 .Include(l => l.Schedules)
                     .ThenInclude(s => s.Halqa)
                         .ThenInclude(h => h.Students)
+                .AsQueryable();
+
+            if (managedMosqueId.HasValue)
+            {
+                query = query.Where(l => l.Schedules.Any(s =>
+                    (s.TeacherId.HasValue && s.Teacher.MosqueId == managedMosqueId.Value) ||
+                    (s.HalqaId.HasValue && s.Halqa.Fouj.MosqueId == managedMosqueId.Value) ||
+                    s.SaturdayHalqe.MosqueId == managedMosqueId.Value));
+            }
+
+            var lessons = await query
                 .OrderBy(l => l.Title)
                 .ToListAsync();
 
@@ -491,7 +523,7 @@ namespace Moeen.Api.Application.Services
                 return GeneralResponse.NotFound("الدرس الأسبوعي غير موجود.");
 
             if (lesson.Schedules.Count > 0)
-                _context.Set<SaturdayLesson>().RemoveRange(lesson.Schedules);
+                return GeneralResponse.BadRequest($"لا يمكن حذف الدرس الأسبوعي لأنه مرتبط بـ {lesson.Schedules.Count} موعد. يرجى حذف المواعيد المرتبطة أولاً.");
 
             _context.WeeklyLessons.Remove(lesson);
             await _context.SaveChangesAsync();
@@ -611,19 +643,31 @@ namespace Moeen.Api.Application.Services
             if (assignmentId == Guid.Empty)
                 return GeneralResponse.BadRequest("معرّف الموعد غير صالح.");
 
-            var hasAttendance = await _context.Attendances.AnyAsync(a => a.SaturdayLessonId == assignmentId);
-            if (hasAttendance)
-                return GeneralResponse.BadRequest("لا يمكن حذف الموعد لأنه يحتوي على حضور مسجل.");
-
             var assignment = await _context.Set<SaturdayLesson>()
                 .Include(l => l.StudentLinks)
+                .Include(l => l.PdfFiles)
                 .FirstOrDefaultAsync(l => l.Id == assignmentId && l.WeeklyLessonId != null);
 
             if (assignment == null)
                 return GeneralResponse.NotFound("موعد الدرس الأسبوعي غير موجود.");
 
+            var blockers = new List<string>();
+
+            var attendanceCount = await _context.Attendances.CountAsync(a => a.SaturdayLessonId == assignmentId);
+            if (attendanceCount > 0)
+                blockers.Add($"{attendanceCount} سجل حضور");
+
             if (assignment.StudentLinks.Count > 0)
-                _context.Set<SaturdayLessonStudent>().RemoveRange(assignment.StudentLinks);
+                blockers.Add($"{assignment.StudentLinks.Count} طالب مرتبط");
+
+            if (assignment.PdfFiles.Count > 0)
+                blockers.Add($"{assignment.PdfFiles.Count} ملف مرتبط");
+
+            if (blockers.Count > 0)
+            {
+                var blockerText = string.Join("، ", blockers);
+                return GeneralResponse.BadRequest($"لا يمكن حذف موعد الدرس الأسبوعي لأنه مرتبط ببيانات أخرى: {blockerText}. يرجى إزالة البيانات المرتبطة أولاً.");
+            }
 
             _context.Set<SaturdayLesson>().Remove(assignment);
             await _context.SaveChangesAsync();

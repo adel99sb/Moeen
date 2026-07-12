@@ -380,6 +380,30 @@
         background-color: #fff;
     }
 
+    .password-input-wrap {
+        position: relative;
+    }
+
+    .password-input-wrap .moeen-control {
+        padding-left: 48px;
+    }
+
+    .password-toggle-btn {
+        position: absolute;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 36px;
+        height: 36px;
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: #195042;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
     .validation-message {
         display: block;
         margin-top: 7px;
@@ -511,9 +535,6 @@
                                             </button>
                                             <button class="icon-btn" type="button" title="تعديل" @onclick="() => OpenEditDialog(student)">
                                                 <i class="bi bi-pencil-square"></i>
-                                            </button>
-                                            <button class="icon-btn danger" type="button" title="حذف" @onclick="() => DeleteStudentAsync(student)">
-                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -664,7 +685,12 @@
                             {
                                 <div class="form-field">
                                     <label>@(_isEditMode ? "كلمة مرور جديدة (اختياري)" : "كلمة المرور")</label>
-                                    <InputText type="password" class="form-control moeen-control" @bind-Value="_form.Password" placeholder="أدخل كلمة المرور الجديدة أو اتركها فارغة في وضع التعديل" />
+                                    <div class="password-input-wrap">
+                                        <InputText type="@(_showPassword ? "text" : "password")" class="form-control moeen-control" @bind-Value="_form.Password" placeholder="أدخل كلمة المرور الجديدة أو اتركها فارغة في وضع التعديل" />
+                                        <button type="button" class="password-toggle-btn" @onclick="TogglePasswordVisibility" aria-label="@(_showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور")">
+                                            <i class="@(_showPassword ? "bi bi-eye-slash" : "bi bi-eye")"></i>
+                                        </button>
+                                    </div>
                                     <ValidationMessage For="@(() => _form.Password)" />
                                 </div>
                             }
@@ -713,6 +739,7 @@
     private bool _isDialogOpen;
     private bool _isEditMode;
     private bool _isViewMode;
+    private bool _showPassword;
     private string _searchText = string.Empty;
     private string? _errorMessage;
     private string? _successMessage;
@@ -866,6 +893,7 @@
         _dialogError = null;
         _isEditMode = false;
         _isViewMode = false;
+        _showPassword = false;
         _form = new StudentDialogModel
         {
             EnrollmentDate = DateTime.Today
@@ -880,6 +908,7 @@
         _dialogError = null;
         _isEditMode = true;
         _isViewMode = false;
+        _showPassword = false;
         _form = new StudentDialogModel
         {
             Id = student.Id,
@@ -933,8 +962,12 @@
 
         _isDialogOpen = false;
         _isViewMode = false;
+        _showPassword = false;
         _dialogError = null;
     }
+
+    private void TogglePasswordVisibility()
+        => _showPassword = !_showPassword;
 
     private void SetDefaultPlacement()
     {

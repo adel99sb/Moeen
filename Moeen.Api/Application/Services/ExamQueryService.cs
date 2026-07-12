@@ -367,7 +367,7 @@ namespace Moeen.Api.Application.Services
             return GeneralResponse.Ok("تم جلب نتائج البحث.", results, request.PageNumber, request.PageSize, total);
         }
 
-        private string CalculateGrade(int score)
+        private static string CalculateGrade(int score)
         {
             if (score >= 90) return "ممتاز";
             if (score >= 80) return "جيد جداً";

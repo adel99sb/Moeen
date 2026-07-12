@@ -93,6 +93,9 @@ namespace Moeen.Api.Application.Services
             if (book == null)
                 return GeneralResponse.NotFound("الكتاب غير موجود.");
 
+            if (!await CanAccessBookAsync(book))
+                return GeneralResponse.Unauthorized("لا يمكنك الوصول إلى كتاب تابع لمسجد آخر.");
+
             if (!string.IsNullOrWhiteSpace(request.BookData.Title))
                 book.title = request.BookData.Title.Trim();
 
@@ -113,7 +116,7 @@ namespace Moeen.Api.Application.Services
             if (request == null || string.IsNullOrWhiteSpace(request.Query))
                 return GeneralResponse.BadRequest("نص البحث مطلوب.");
 
-            var books = (await _unitOfWork.Repository<PdfFile>().GetAllAsync()).ToList();
+            var books = await GetScopedBooksAsync();
             var results = (await MapBooksAsync(books))
                 .Where(b => Matches(b.Title, request.Query)
                          || Matches(b.Description, request.Query)
@@ -130,7 +133,7 @@ namespace Moeen.Api.Application.Services
             var pageNumber = request?.PageNumber > 0 ? request.PageNumber : 1;
             var pageSize = request?.PageSize > 0 ? request.PageSize : 20;
 
-            var books = (await _unitOfWork.Repository<PdfFile>().GetAllAsync()).ToList();
+            var books = await GetScopedBooksAsync();
 
             if (!string.IsNullOrWhiteSpace(request?.Category))
                 books = books.Where(b => Matches(b.title, request.Category) || Matches(b.description, request.Category)).ToList();
@@ -160,6 +163,9 @@ namespace Moeen.Api.Application.Services
             if (book == null)
                 return GeneralResponse.NotFound("الكتاب غير موجود.");
 
+            if (!await CanAccessBookAsync(book))
+                return GeneralResponse.Unauthorized("لا يمكنك الوصول إلى كتاب تابع لمسجد آخر.");
+
             return GeneralResponse.Ok("تم جلب بيانات الكتاب بنجاح.", await MapBookAsync(book));
         }
 
@@ -168,7 +174,7 @@ namespace Moeen.Api.Application.Services
             if (request == null || string.IsNullOrWhiteSpace(request.Category))
                 return GeneralResponse.BadRequest("التصنيف مطلوب.");
 
-            var books = (await _unitOfWork.Repository<PdfFile>().GetAllAsync()).ToList();
+            var books = await GetScopedBooksAsync();
             var results = (await MapBooksAsync(books))
                 .Where(b => Matches(b.Title, request.Category) || Matches(b.Description, request.Category))
                 .OrderByDescending(b => b.CreatedAt)
@@ -194,10 +200,34 @@ namespace Moeen.Api.Application.Services
             if (book == null)
                 return GeneralResponse.NotFound("الكتاب غير موجود.");
 
+            if (!await CanAccessBookAsync(book))
+                return GeneralResponse.Unauthorized("لا يمكنك الوصول إلى كتاب تابع لمسجد آخر.");
+
             await _unitOfWork.Repository<PdfFile>().DeleteAsync(book);
             await _unitOfWork.CompleteAsync();
 
             return GeneralResponse.Ok("تم حذف الكتاب بنجاح.", new { BookId = request.BookId });
+        }
+
+        private async Task<List<PdfFile>> GetScopedBooksAsync()
+        {
+            var books = (await _unitOfWork.Repository<PdfFile>().GetAllAsync()).ToList();
+            if (_currentUserService.IsAdmin == true)
+                return books;
+
+            var mosqueId = await ResolveMosqueIdAsync();
+            return mosqueId == Guid.Empty
+                ? new List<PdfFile>()
+                : books.Where(b => b.MosqueId == mosqueId).ToList();
+        }
+
+        private async Task<bool> CanAccessBookAsync(PdfFile book)
+        {
+            if (_currentUserService.IsAdmin == true)
+                return true;
+
+            var mosqueId = await ResolveMosqueIdAsync();
+            return mosqueId != Guid.Empty && book.MosqueId == mosqueId;
         }
 
         private async Task<bool> CanManageLibraryAsync()
@@ -223,8 +253,7 @@ namespace Moeen.Api.Application.Services
             var saturdayLessons = (await _unitOfWork.Repository<SaturdayLesson>().GetAllAsync()).ToList();
 
             var lesson = saturdayLessons.FirstOrDefault(l =>
-                saturdayHalqas.Any(h => h.Id == l.SaturdayHalqeId && h.MosqueId == mosqueId))
-                ?? saturdayLessons.FirstOrDefault();
+                saturdayHalqas.Any(h => h.Id == l.SaturdayHalqeId && h.MosqueId == mosqueId));
 
             if (lesson == null)
                 return null;
@@ -241,6 +270,9 @@ namespace Moeen.Api.Application.Services
                 if (supervisor != null)
                     return supervisor.MosqueId;
             }
+
+            if (_currentUserService.IsAdmin != true)
+                return Guid.Empty;
 
             var mosque = (await _unitOfWork.Repository<Mosque>().GetAllAsync()).FirstOrDefault();
             return mosque?.Id ?? Guid.Empty;

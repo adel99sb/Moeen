@@ -1,5 +1,11 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Moeen.Api.Core.Entities;
+using Moeen.Api.infrastructure.Data;
+using Moeen.Shared.Requests.ExamQuery;
+using Moeen.Shared.Responses.ExamQuery;
+using System.Text.Json;
 using System.Net;
 using System.Net.Http.Json;
 using Moeen.Dashboard.Infrastructure.Http.Clients;
@@ -269,6 +275,70 @@ public class FeedbackApiClientTests
             CallCount++;
             return await handler(request);
         }
+    }
+}
+
+public class ExamQueryServiceTests
+{
+    [Fact]
+    public async Task GetStudentExamsAsync_ReturnsExamWithCalculatedGrade()
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+
+        await using var context = new AppDbContext(options);
+        var studentId = Guid.NewGuid();
+        var teacherId = Guid.NewGuid();
+
+        context.Students.Add(new Moeen.Api.Core.Entities.Student
+        {
+            Id = studentId,
+            UserName = "student-test",
+            name = "طالب اختبار",
+            MosqueId = Guid.NewGuid(),
+            SaturdayHalqeId = Guid.NewGuid(),
+            EnrollmentDate = DateTime.UtcNow
+        });
+        context.Teachers.Add(new Moeen.Api.Core.Entities.Teacher
+        {
+            Id = teacherId,
+            UserName = "teacher-test",
+            name = "فاحص اختبار",
+            MosqueId = Guid.NewGuid()
+        });
+        context.Exams.Add(new Exam
+        {
+            Id = Guid.NewGuid(),
+            StudentId = studentId,
+            TeacherId = teacherId,
+            TeacherExamId = Guid.NewGuid(),
+            juz_form = 1,
+            juz_to = 2,
+            score = 95,
+            mark = 95,
+            date = DateTime.UtcNow,
+            notes = "اختبار"
+        });
+        await context.SaveChangesAsync();
+
+        var service = new ExamQueryService(context);
+        var response = await service.GetStudentExamsAsync(new GetStudentExamsRequest
+        {
+            StudentId = studentId
+        });
+
+        Assert.True(response.Success);
+
+        var json = JsonSerializer.Serialize(response.Data);
+        var result = JsonSerializer.Deserialize<GetStudentExamsResponse>(json, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        var exam = Assert.Single(Assert.IsType<GetStudentExamsResponse>(result).Exams);
+        Assert.Equal("ممتاز", exam.Grade);
+        Assert.Equal(studentId, exam.StudentId);
     }
 }
 

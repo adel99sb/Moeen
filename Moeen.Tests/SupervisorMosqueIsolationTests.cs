@@ -7,9 +7,11 @@ using Moeen.Api.infrastructure.Data;
 using Moeen.Api.infrastructure.Repositories;
 using Moeen.Shared.Constants;
 using Moeen.Shared.Requests.Enrollment;
+using Moeen.Shared.Requests.Fouj;
 using Moeen.Shared.Requests.Mosuq;
 using Moeen.Shared.Responses.ContentSharing;
 using Moeen.Shared.Responses.Enrollment;
+using Moeen.Shared.Responses.Fouj;
 using Moeen.Shared.Responses.Mosuq;
 
 namespace Moeen.Tests;
@@ -69,6 +71,44 @@ public class SupervisorMosqueIsolationTests
         })).Data);
         Assert.Single(mosques);
         Assert.Equal(mosqueA.Id, mosques[0].Id);
+    }
+
+    [Fact]
+    public async Task SupervisorFoujList_UsesAssignedMosqueEvenWhenAdminClaimIsAlsoPresent()
+    {
+        await using var db = CreateContext();
+        var mosqueA = new Mosque { Id = Guid.NewGuid(), name = "Mosque A", address = "A" };
+        var mosqueB = new Mosque { Id = Guid.NewGuid(), name = "Mosque B", address = "B" };
+        var supervisorA = Supervisor(Guid.NewGuid(), "Supervisor A", mosqueA);
+        var foujA = new Fouj
+        {
+            Id = Guid.NewGuid(),
+            name = "Fouj A",
+            MosqueId = mosqueA.Id,
+            Mosque = mosqueA,
+            start_time = DateTime.Today.AddHours(8),
+            End_time = TimeSpan.FromHours(10)
+        };
+        var foujB = new Fouj
+        {
+            Id = Guid.NewGuid(),
+            name = "Fouj B",
+            MosqueId = mosqueB.Id,
+            Mosque = mosqueB,
+            start_time = DateTime.Today.AddHours(9),
+            End_time = TimeSpan.FromHours(11)
+        };
+
+        db.AddRange(mosqueA, mosqueB, supervisorA, foujA, foujB);
+        await db.SaveChangesAsync();
+
+        var service = new FoujService(db, new FakeCurrentUserService(supervisorA.Id));
+        var response = await service.GetAllFoujsAsync(new GetAllFoujsRequest { MosqueId = mosqueB.Id });
+        var foujs = Assert.IsType<List<FoujDto>>(response.Data);
+
+        Assert.Single(foujs);
+        Assert.Equal(foujA.Id, foujs[0].Id);
+        Assert.Equal(mosqueA.Id, foujs[0].MosqueId);
     }
 
     [Fact]
@@ -143,6 +183,32 @@ public class SupervisorMosqueIsolationTests
         Assert.Equal(0, (await db.Students.FindAsync(studentB.Id))!.score);
     }
 
+    [Fact]
+    public async Task AnonymousMemberLists_FailClosedInsteadOfReturningAllMosques()
+    {
+        await using var db = CreateContext();
+        var mosqueA = new Mosque { Id = Guid.NewGuid(), name = "Mosque A", address = "A" };
+        var mosqueB = new Mosque { Id = Guid.NewGuid(), name = "Mosque B", address = "B" };
+        db.AddRange(
+            mosqueA,
+            mosqueB,
+            Student(Guid.NewGuid(), "Student A", mosqueA),
+            Student(Guid.NewGuid(), "Student B", mosqueB),
+            Teacher(Guid.NewGuid(), "Teacher A", mosqueA),
+            Teacher(Guid.NewGuid(), "Teacher B", mosqueB));
+        await db.SaveChangesAsync();
+
+        var service = new EnrollmentService(db, null!, null!, new FakeCurrentUserService(null));
+
+        var students = await service.GetAllStudentsAsync(new GetAllStudentsRequest { PageNumber = 1, PageSize = 20 });
+        var teachers = await service.GetAllTeachersAsync(new GetAllTeachersRequest { PageNumber = 1, PageSize = 20 });
+
+        Assert.False(students.Success);
+        Assert.Equal(401, students.StatusCode);
+        Assert.False(teachers.Success);
+        Assert.Equal(401, teachers.StatusCode);
+    }
+
     private static AppDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -208,7 +274,7 @@ public class SupervisorMosqueIsolationTests
             => Task.FromResult(filePath);
     }
 
-    private sealed class FakeCurrentUserService(Guid userId) : ICurrentUserService
+    private sealed class FakeCurrentUserService(Guid? userId) : ICurrentUserService
     {
         public Guid? CurrentUserId => userId;
         public string CurrentUserName => "supervisor";

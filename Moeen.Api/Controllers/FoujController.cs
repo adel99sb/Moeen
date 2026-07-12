@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Shared.Requests.Fouj;
 using Moeen.Shared.Responses;
@@ -8,6 +9,7 @@ namespace Moeen.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin,Owner,Supervisor")]
     public class FoujController : ControllerBase
     {
         private readonly IFoujService _foujService;
