@@ -221,31 +221,40 @@ function Ensure-DotNetSdk {
 }
 
 function Ensure-Java {
-    $java = Get-Command java -ErrorAction SilentlyContinue
-    if (-not $java) {
+    $javaHomes = @(
+        'C:\Program Files\Microsoft\jdk-21*',
+        'C:\Program Files\Eclipse Adoptium\jdk-21*',
+        'C:\Program Files\Java\jdk-21*',
+        'C:\Program Files\Microsoft\jdk-17*',
+        'C:\Program Files\Eclipse Adoptium\jdk-17*',
+        'C:\Program Files\Java\jdk-17*'
+    ) | ForEach-Object { Get-ChildItem -Path $_ -Directory -ErrorAction SilentlyContinue } | Sort-Object FullName -Descending
+
+    $javaHome = $javaHomes | Select-Object -First 1
+    if (-not $javaHome) {
         Install-WithWinget 'Microsoft.OpenJDK.17' 'Microsoft OpenJDK 17'
-        $java = Get-Command java -ErrorAction SilentlyContinue
+        $javaHome = @(
+            'C:\Program Files\Microsoft\jdk-17*',
+            'C:\Program Files\Eclipse Adoptium\jdk-17*',
+            'C:\Program Files\Java\jdk-17*'
+        ) | ForEach-Object { Get-ChildItem -Path $_ -Directory -ErrorAction SilentlyContinue } | Sort-Object FullName -Descending | Select-Object -First 1
     }
 
+    if ($javaHome) {
+        $javaBin = Join-Path $javaHome.FullName 'bin'
+        $env:JAVA_HOME = $javaHome.FullName
+        if ($env:PATH -notlike "*$javaBin*") {
+            $env:PATH = "$javaBin;$env:PATH"
+        }
+        [Environment]::SetEnvironmentVariable('JAVA_HOME', $javaHome.FullName, 'User')
+        Write-Ok "JAVA_HOME set to: $($javaHome.FullName)"
+    }
+
+    $java = Get-Command java -ErrorAction SilentlyContinue
     if ($java) {
         Write-Ok "java found: $($java.Source)"
     } else {
         Write-Warning "java is still not visible in PATH. .NET Android build may still work if it finds a bundled JDK, otherwise install OpenJDK 17 manually."
-    }
-
-    if (-not $env:JAVA_HOME) {
-        $javaHomes = @(
-            'C:\Program Files\Microsoft\jdk-17*',
-            'C:\Program Files\Eclipse Adoptium\jdk-17*',
-            'C:\Program Files\Java\jdk-17*'
-        ) | ForEach-Object { Get-ChildItem -Path $_ -Directory -ErrorAction SilentlyContinue } | Sort-Object FullName -Descending
-
-        $javaHome = $javaHomes | Select-Object -First 1
-        if ($javaHome) {
-            $env:JAVA_HOME = $javaHome.FullName
-            [Environment]::SetEnvironmentVariable('JAVA_HOME', $javaHome.FullName, 'User')
-            Write-Ok "JAVA_HOME set to: $($javaHome.FullName)"
-        }
     }
 }
 
@@ -425,7 +434,7 @@ function Ensure-AndroidSdk([string]$RequestedRoot) {
     $script:AndroidPackagesToInstall = @()
     Ensure-AndroidPackage $sdkRoot 'platform-tools' 'platform-tools\adb.exe'
     Ensure-AndroidPackage $sdkRoot 'platforms;android-36' 'platforms\android-36\android.jar'
-    Ensure-AndroidPackage $sdkRoot 'build-tools;35.0.0' 'build-tools\35.0.0\aapt.exe'
+    Ensure-AndroidPackage $sdkRoot 'build-tools;36.0.0' 'build-tools\36.0.0\aapt.exe'
 
     if ($script:AndroidPackagesToInstall.Count -gt 0) {
         if ($SkipAndroidSdkInstall) {

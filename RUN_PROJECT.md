@@ -176,7 +176,7 @@ ipconfig
 - إذا Android SDK موجود لكن ناقصه command-line tools أو packages، يثبت الناقص فقط.
 - إذا لا يوجد Android SDK أبداً، ينشئ واحداً محلياً خارج Visual Studio تحت `%LOCALAPPDATA%\Android\Sdk`.
 - تنزيل Android command-line tools مباشرة من Google عند الحاجة.
-- تثبيت Android SDK packages الناقصة: `platform-tools`, `platforms;android-36`, `build-tools;35.0.0`.
+- تثبيت Android SDK packages الناقصة: `platform-tools`, `platforms;android-36`, `build-tools;36.0.0`.
 - قبول Android SDK licenses.
 - ضبط `ANDROID_HOME` و `ANDROID_SDK_ROOT` للمستخدم الحالي.
 - فحص وجود جهاز Android متصل.
