@@ -38,12 +38,12 @@ try {
     $health = Invoke-RestMethod -Uri 'http://localhost:5055/health' -TimeoutSec 5
     $health | ConvertTo-Json -Depth 5
 } catch {
-    Write-Warning "API health check failed on http://localhost:5055/health. Start API first using scripts/run-api.ps1. Error: $($_.Exception.Message)"
+    Write-Warning "API health check failed on http://localhost:5055/health. Start API first using scripts/run-api.cmd. Error: $($_.Exception.Message)"
 }
 Write-Host ""
 
 Write-Host "[5] Useful commands" -ForegroundColor Yellow
-Write-Host "Run API:       .\scripts\run-api.ps1"
-Write-Host "Run Dashboard: .\scripts\run-dashboard.ps1"
+Write-Host "Run API:       .\scripts\run-api.cmd"
+Write-Host "Run Dashboard: .\scripts\run-dashboard.cmd"
 Write-Host "Swagger:       https://localhost:7023/swagger"
 Write-Host "Dashboard:     https://localhost:7220"

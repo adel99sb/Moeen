@@ -16,7 +16,7 @@
 افتح PowerShell من مجلد المشروع الأساسي، ثم شغّل الـ API أولاً:
 
 ```powershell
-.\scripts\run-api.ps1
+.\scripts\run-api.cmd
 ```
 
 اترك نافذة الـ API مفتوحة. أول تشغيل ممكن يطول قليلاً لأن المشروع سيعمل تلقائياً في Development على:
@@ -28,7 +28,7 @@
 بعد نجاح الـ API شغّل Dashboard بنافذة PowerShell ثانية:
 
 ```powershell
-.\scripts\run-dashboard.ps1
+.\scripts\run-dashboard.cmd
 ```
 
 الروابط الافتراضية:
@@ -61,7 +61,7 @@ parent@moeen.local
 شغّل:
 
 ```powershell
-.\scripts\check-dev.ps1
+.\scripts\check-dev.cmd
 ```
 
 هذا يفحص:
@@ -113,7 +113,7 @@ Startup.Database
 لمعرفة من يستخدم port:
 
 ```powershell
-.\scripts\check-dev.ps1
+.\scripts\check-dev.cmd
 ```
 
 أو أغلق المشروع القديم إذا كان لا يزال يعمل.
@@ -130,7 +130,7 @@ https://localhost:7023/
 
 ```powershell
 $env:MOEEN_API_BASE_URL="http://localhost:5055/"
-.\scripts\run-dashboard.ps1
+.\scripts\run-dashboard.cmd
 ```
 
 ### 4. الموبايل لا يتصل بالـ API
@@ -156,14 +156,16 @@ ipconfig
 قبل تشغيل الموبايل، شغّل الـ API أولاً واترك نافذته مفتوحة:
 
 ```powershell
-.\scripts\run-api.ps1
+.\scripts\run-api.cmd
 ```
 
 بعدها وصل الموبايل USB وفعل Developer Options + USB debugging، ثم شغّل:
 
 ```powershell
-.\scripts\run-mobile.ps1
+.\scripts\run-mobile.cmd
 ```
+
+إذا كان جهازك يسمح بتشغيل PowerShell scripts، يمكنك استخدام ملفات `.ps1` مباشرة. ملفات `.cmd` موجودة حتى تعمل على أجهزة تمنع تشغيل سكربتات PowerShell غير الموقعة.
 
 السكريبت يقوم تلقائياً بـ:
 
@@ -190,7 +192,7 @@ ipconfig
 
 ```powershell
 adb devices
-.\scripts\run-mobile.ps1 -DeviceId DEVICE_ID
+.\scripts\run-mobile.cmd -DeviceId DEVICE_ID
 ```
 
 ملاحظة: الموبايل حالياً مضبوط في `Moeen.App/Infrastructure/Http/ApiRouts.cs` لاستخدام `http://127.0.0.1:5055/` على Android، وهذا يعتمد على `adb reverse`. لذلك لا تحتاج لتغيير IP عند استخدام USB.

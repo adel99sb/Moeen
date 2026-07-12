@@ -494,7 +494,7 @@ function Get-ConnectedDevice([string]$RequestedDeviceId) {
     if ($deviceLines.Count -gt 1) {
         Write-Host "Connected devices:" -ForegroundColor Yellow
         $deviceLines | ForEach-Object { Write-Host " - $_" }
-        Fail "More than one Android device is connected. Re-run with: .\scripts\run-mobile.ps1 -DeviceId <device-id>"
+        Fail "More than one Android device is connected. Re-run with: .\scripts\run-mobile.cmd -DeviceId <device-id>"
     }
 
     return $deviceLines[0]
@@ -533,7 +533,7 @@ if (-not $SkipApiCheck) {
         $health = Invoke-RestMethod -Uri $ApiUrl -TimeoutSec 5
         Write-Ok "API health check passed: $ApiUrl"
     } catch {
-        Fail "API health check failed at '$ApiUrl'. Start the API first using .\scripts\run-api.ps1. Details: $($_.Exception.Message)"
+        Fail "API health check failed at '$ApiUrl'. Start the API first using .\scripts\run-api.cmd. Details: $($_.Exception.Message)"
     }
 } else {
     Write-Info "Skipping API health check because -SkipApiCheck was provided."
@@ -574,4 +574,4 @@ if (-not $NoLaunch) {
 
 Write-Step "Done"
 Write-Host "Mobile app is installed. Keep the API running while testing." -ForegroundColor Green
-Write-Host "If API calls fail inside the app, run again while API is open, or check: .\scripts\check-dev.ps1" -ForegroundColor Yellow
+Write-Host "If API calls fail inside the app, run again while API is open, or check: .\scripts\check-dev.cmd" -ForegroundColor Yellow
