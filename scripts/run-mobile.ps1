@@ -478,7 +478,7 @@ function Ensure-MauiAndroidWorkload {
 }
 
 function Get-ConnectedDevice([string]$RequestedDeviceId) {
-    $deviceLines = adb devices | Select-String "\tdevice$" | ForEach-Object { $_.ToString().Split("`t")[0] }
+    $deviceLines = @(adb devices | Select-String "\tdevice$" | ForEach-Object { $_.ToString().Split("`t")[0] })
 
     if ($RequestedDeviceId) {
         if ($deviceLines -notcontains $RequestedDeviceId) {
@@ -505,6 +505,10 @@ function Invoke-Adb([string]$SelectedDevice, [string[]]$AdbArgs) {
         & adb -s $SelectedDevice @AdbArgs
     } else {
         & adb @AdbArgs
+    }
+
+    if ($LASTEXITCODE -ne 0) {
+        Fail "adb command failed with exit code $LASTEXITCODE`: adb $($AdbArgs -join ' ')"
     }
 }
 
