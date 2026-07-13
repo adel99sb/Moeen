@@ -42,7 +42,7 @@ namespace Moeen.Api.Infrastructure.Data
                     JoinedAt = DateTime.UtcNow,
                     age = 12,
                     EnrollmentDate = DateTime.UtcNow,
-                    status = 1,
+                    status = 0,
                     score = 0,
                     MosqueId = DevelopmentMosqueId,
                     SaturdayHalqeId = Guid.Empty,
@@ -75,7 +75,7 @@ namespace Moeen.Api.Infrastructure.Data
                 student.theme = string.IsNullOrWhiteSpace(student.theme) ? "light" : student.theme;
                 student.MosqueId = DevelopmentMosqueId;
                 student.age = student.age == 0 ? 12 : student.age;
-                student.status = student.status == 0 ? 1 : student.status;
+                student.status = 0;
                 student.EnrollmentDate = student.EnrollmentDate == default ? DateTime.UtcNow : student.EnrollmentDate;
                 student.JoinedAt = student.JoinedAt == default ? DateTime.UtcNow : student.JoinedAt;
                 student.created_at = student.created_at == default ? DateTime.UtcNow : student.created_at;
@@ -156,7 +156,7 @@ namespace Moeen.Api.Infrastructure.Data
             student.HalqaId = DevelopmentMobileHalqaId;
             student.MosqueId = DevelopmentMosqueId;
             student.score = 92;
-            student.status = 1;
+            student.status = 0;
             student.EnrollmentDate = student.EnrollmentDate == default ? DateTime.UtcNow.AddMonths(-4) : student.EnrollmentDate;
 
             var today = DateTime.UtcNow.Date;

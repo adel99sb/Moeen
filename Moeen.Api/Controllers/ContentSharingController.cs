@@ -122,6 +122,7 @@ namespace Moeen.Api.Controllers
         }
 
         [HttpGet("all")]
+        [AllowAnonymous]
         public async Task<ActionResult<GeneralResponse>> GetAllPosts()
         {
             var result = await _contentService.GetAllPostsAsync();
