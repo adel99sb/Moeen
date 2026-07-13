@@ -269,13 +269,33 @@ namespace Moeen.Api.Application.Services
                 var supervisor = await _unitOfWork.Repository<Supervisor>().GetByIdAsync(currentUserId.Value);
                 if (supervisor != null)
                     return supervisor.MosqueId;
+
+                var teacher = await _unitOfWork.Repository<Teacher>().GetByIdAsync(currentUserId.Value);
+                if (teacher != null)
+                    return teacher.MosqueId;
+
+                var examiner = await _unitOfWork.Repository<TeacherExam>().GetByIdAsync(currentUserId.Value);
+                if (examiner != null)
+                    return examiner.MosquId;
             }
 
-            if (_currentUserService.IsAdmin != true)
+            if (_currentUserService.IsAdmin == true)
+            {
+                var mosque = (await _unitOfWork.Repository<Mosque>().GetAllAsync()).FirstOrDefault();
+                return mosque?.Id ?? Guid.Empty;
+            }
+
+            if (!_currentUserService.IsInRole(Roles.Examer.ToString()))
                 return Guid.Empty;
 
-            var mosque = (await _unitOfWork.Repository<Mosque>().GetAllAsync()).FirstOrDefault();
-            return mosque?.Id ?? Guid.Empty;
+            var bookMosqueIds = (await _unitOfWork.Repository<PdfFile>().GetAllAsync())
+                .Select(book => book.MosqueId)
+                .Where(id => id != Guid.Empty)
+                .Distinct()
+                .Take(2)
+                .ToList();
+
+            return bookMosqueIds.Count == 1 ? bookMosqueIds[0] : Guid.Empty;
         }
 
         private static bool Matches(string? source, string? query)

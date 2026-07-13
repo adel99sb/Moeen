@@ -16,6 +16,7 @@ namespace Moeen.Frontend.Services.Abstractions
         Task<List<ComplaintDto>> GetComplaintsAsync(PaginationRequest request);
         Task<GeneralResponse> GetComplaintsResponseAsync(PaginationRequest request);
         Task<GeneralResponse> GetSuggestionsAsync(PaginationRequest request);
+        Task<GeneralResponse> TransferToOwnerAsync(Guid feedbackId);
         Task<GeneralResponse> DeleteFeedbackAsync(Guid complaintId);
     }
 }

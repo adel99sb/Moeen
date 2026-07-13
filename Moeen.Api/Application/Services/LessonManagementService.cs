@@ -442,10 +442,12 @@ namespace Moeen.Api.Application.Services
 
             if (managedMosqueId.HasValue)
             {
-                query = query.Where(l => l.Schedules.Any(s =>
+                query = query.Where(l =>
+                    !l.Schedules.Any() ||
+                    l.Schedules.Any(s =>
                     (s.TeacherId.HasValue && s.Teacher.MosqueId == managedMosqueId.Value) ||
                     (s.HalqaId.HasValue && s.Halqa.Fouj.MosqueId == managedMosqueId.Value) ||
-                    s.SaturdayHalqe.MosqueId == managedMosqueId.Value));
+                        s.SaturdayHalqe.MosqueId == managedMosqueId.Value));
             }
 
             var lessons = await query

@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
+using Moeen.Shared.Requests;
 using Moeen.Shared.Requests.Feedback;
 using Moeen.Shared.Responses;
-using Moeen.Shared.Requests;
 
 namespace Moeen.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class FeedbackController : ControllerBase
     {
         private readonly IFeedbackService _feedbackService;
@@ -17,58 +19,45 @@ namespace Moeen.Api.Controllers
             _feedbackService = feedbackService;
         }
 
-        /// <summary>
-        /// أمر: تقديم شكوى.
-        /// </summary>
         [HttpPost("complaint")]
         public async Task<ActionResult<GeneralResponse>> SubmitComplaint([FromBody] SubmitComplaintRequest request)
             => Ok(await _feedbackService.SubmitComplaintAsync(request));
 
-        /// <summary>
-        /// أمر: تقديم اقتراح.
-        /// </summary>
         [HttpPost("suggestion")]
         public async Task<ActionResult<GeneralResponse>> SubmitSuggestion([FromBody] SubmitSuggestionRequest request)
             => Ok(await _feedbackService.SubmitSuggestionAsync(request));
 
-        /// <summary>
-        /// أمر: إدارة الشكاوى والاقتراحات.
-        /// </summary>
+        [Authorize(Roles = "Admin,Supervisor")]
         [HttpPut("manage")]
         public async Task<ActionResult<GeneralResponse>> ManageFeedback([FromBody] ManageFeedbackRequest request)
             => Ok(await _feedbackService.ManageFeedbacksAsync(request));
 
-        /// <summary>
-        /// PUT: تحديث حالة الشكوى.
-        /// </summary>
+        [Authorize(Roles = "Admin,Supervisor")]
         [HttpPut("complaint/status")]
         public async Task<ActionResult<GeneralResponse>> UpdateComplaintStatus([FromBody] UpdateComplaintStatusRequest request)
             => Ok(await _feedbackService.UpdateComplaintStatusAsync(request));
 
-        /// <summary>
-        /// GET: استرجاع قائمة الشكاوى مع ترقيم.
-        /// </summary>
+        [Authorize(Roles = "Admin,Owner,Supervisor")]
         [HttpGet("complaints")]
         public async Task<ActionResult<GeneralResponse>> GetComplaints([FromQuery] PaginationRequest request)
             => Ok(await _feedbackService.GetComplaintsAsync(request ?? new PaginationRequest()));
 
-        /// <summary>
-        /// GET: استرجاع قائمة الاقتراحات مع ترقيم.
-        /// </summary>
+        [Authorize(Roles = "Admin,Owner,Supervisor")]
         [HttpGet("suggestions")]
         public async Task<ActionResult<GeneralResponse>> GetSuggestions([FromQuery] PaginationRequest request)
             => Ok(await _feedbackService.GetSuggestionsAsync(request ?? new PaginationRequest()));
 
-        /// <summary>
-        /// PUT: تحديث حالة الاقتراح.
-        /// </summary>
+        [Authorize(Roles = "Admin,Supervisor")]
         [HttpPut("suggestion/status")]
         public async Task<ActionResult<GeneralResponse>> UpdateSuggestionStatus([FromBody] UpdateSuggestionStatusRequest request)
             => Ok(await _feedbackService.UpdateSuggestionStatusAsync(request));
 
-        /// <summary>
-        /// DELETE: حذف شكوى أو اقتراح بشكل دائم.
-        /// </summary>
+        [Authorize(Roles = "Admin,Supervisor")]
+        [HttpPut("{feedbackId:guid}/transfer-to-owner")]
+        public async Task<ActionResult<GeneralResponse>> TransferToOwner([FromRoute] Guid feedbackId)
+            => Ok(await _feedbackService.TransferToOwnerAsync(feedbackId));
+
+        [Authorize(Roles = "Admin,Owner")]
         [HttpDelete("{complaintId:guid}")]
         public async Task<ActionResult<GeneralResponse>> DeleteComplaint([FromRoute] Guid complaintId)
             => Ok(await _feedbackService.DeleteComplaintAsync(complaintId));

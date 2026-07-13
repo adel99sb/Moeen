@@ -113,6 +113,9 @@ namespace Moeen.Api.Application.Services
                 if (teacher.status != 0)
                     return GeneralResponse.BadRequest("لا يمكن تسجيل اختبار على معلم غير نشط.");
 
+                if (student.status != 0)
+                    return GeneralResponse.BadRequest("لا يمكن تسجيل اختبار لطالب غير نشط.");
+
                 // 4. إنشاء كيان الامتحان وحفظه
                 var exam = new Exam
                 {
@@ -125,7 +128,7 @@ namespace Moeen.Api.Application.Services
                     notes = request.Notes ?? string.Empty,
                     mark = request.Mark,
                     date = DateTime.UtcNow,
-                    TeacherExamId = Guid.NewGuid()    // يُنشأ تلقائياً إذا كان الجدول يتطلبه
+                    TeacherExamId = null
                 };
 
                 await _unitOfWork.Repository<Exam>().AddAsync(exam);

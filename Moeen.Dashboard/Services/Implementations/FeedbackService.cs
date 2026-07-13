@@ -71,6 +71,11 @@ namespace Moeen.Dashboard.Services.Implementations
             return await _apiClient.GetComplaintsAsync(request);
         }
 
+        public async Task<GeneralResponse> TransferToOwnerAsync(Guid feedbackId)
+        {
+            return await _apiClient.TransferToOwnerAsync(feedbackId);
+        }
+
         public async Task<GeneralResponse> DeleteFeedbackAsync(Guid complaintId)
         {
             return await _apiClient.DeleteFeedbackAsync(complaintId);

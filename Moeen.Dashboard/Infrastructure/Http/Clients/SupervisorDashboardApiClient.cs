@@ -17,8 +17,14 @@ namespace Moeen.Dashboard.Infrastructure.Http.Clients
 
         public async Task<SupervisorDashboardResponse?> GetOverviewAsync(string token)
         {
-            using var request = new HttpRequestMessage(HttpMethod.Get, ApiRoutes.SupervisorDashboardOverviewRoute);
+            var route = $"{ApiRoutes.SupervisorDashboardOverviewRoute}?_={DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
+            using var request = new HttpRequestMessage(HttpMethod.Get, route);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.CacheControl = new CacheControlHeaderValue
+            {
+                NoCache = true,
+                NoStore = true
+            };
 
             _logger.LogInformation(
                 "Supervisor dashboard overview request prepared with explicit bearer token. HasToken={HasToken}, TokenLength={TokenLength}",

@@ -1,6 +1,7 @@
 @page "/examer/bookexamer"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using System.Text.Json
+@using Moeen.Dashboard.Infrastructure.Http
 @using Moeen.Dashboard.Services.Abstractions
 @using Moeen.Shared.Requests.Library
 @using Moeen.Shared.Responses.Library
@@ -260,9 +261,13 @@
             || Display(book.Description).Contains(_search.Trim(), StringComparison.OrdinalIgnoreCase)
             || Display(book.Author).Contains(_search.Trim(), StringComparison.OrdinalIgnoreCase));
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!firstRender)
+            return;
+
         await LoadBooksAsync();
+        StateHasChanged();
     }
 
     private async Task LoadBooksAsync()
@@ -309,6 +314,8 @@
         if (Uri.TryCreate(url, UriKind.Absolute, out _))
             return url;
 
-        return url.StartsWith('/') ? url : $"/{url}";
+        var baseUrl = ApiRoutes.BaseUrl.TrimEnd('/');
+        var relative = url.TrimStart('/');
+        return $"{baseUrl}/{relative}";
     }
 }

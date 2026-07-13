@@ -979,9 +979,7 @@
             : _foujs.FirstOrDefault(f => f.MosqueId == _form.MosqueId);
 
         _form.FoujId = fouj?.Id ?? Guid.Empty;
-        _form.HalqaId = _form.FoujId == Guid.Empty
-            ? null
-            : _halqas.FirstOrDefault(h => h.FoujId == _form.FoujId)?.Id;
+        _form.HalqaId = null;
     }
 
     private void OnMosqueChanged(Guid mosqueId)
@@ -1038,9 +1036,7 @@
 
         if (!currentHalqaIsValid)
         {
-            _form.HalqaId = _form.FoujId == Guid.Empty
-                ? null
-                : _halqas.FirstOrDefault(halqa => halqa.FoujId == _form.FoujId)?.Id;
+            _form.HalqaId = null;
         }
     }
 

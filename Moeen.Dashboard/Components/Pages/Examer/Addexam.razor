@@ -257,9 +257,9 @@
                 <h2 class="card-title"><i class="bi bi-pencil-square"></i> بيانات الاختبار</h2>
                 <div class="form-grid">
                     <div class="form-field">
-                        <label>المختبر</label>
+                        <label>المعلم المسؤول</label>
                         <select class="form-select-clean" @bind="_form.TeacherId">
-                            <option value="@Guid.Empty">اختر المختبر</option>
+                            <option value="@Guid.Empty">اختر المعلم</option>
                             @foreach (var teacher in _teachers)
                             {
                                 <option value="@teacher.Id">@Display(teacher.Name) - @Display(teacher.MosqueName)</option>
@@ -429,7 +429,7 @@
     private string? ValidateForm()
     {
         if (_form.TeacherId == Guid.Empty)
-            return "اختر المختبر المسؤول عن الاختبار.";
+            return "اختر المعلم المسؤول عن الاختبار.";
 
         if (_form.JuzFrom < 1 || _form.JuzFrom > 30)
             return "جزء البداية يجب أن يكون بين 1 و 30.";

@@ -48,6 +48,9 @@
     .icon-btn.info { color: #039855; }
     .icon-btn.edit { color: #2563eb; }
     .icon-btn.danger { color: #b42318; }
+    .transfer-btn { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 0 12px; border: 1px solid #cfe0da; border-radius: 12px; background: #eef7f3; color: #195042; font-weight: 900; white-space: nowrap; }
+    .transfer-btn:hover:not(:disabled) { background: #dfeee8; transform: translateY(-1px); }
+    .transfer-btn:disabled { opacity: .65; cursor: not-allowed; }
     .state-card { padding: 22px; border: 1px solid #eee8e0; border-radius: 18px; background: #fff; color: #195042; }
     .dialog-backdrop { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 28px; background: rgba(9, 30, 24, 0.42); backdrop-filter: blur(7px); direction: rtl; }
     .dialog-panel { width: min(100%, 820px); max-height: calc(100vh - 56px); overflow: hidden; display: flex; flex-direction: column; border-radius: 26px; background: #fff; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.24); }
@@ -81,12 +84,6 @@
             <div class="search-wrapper">
                 <i class="bi bi-search"></i>
                 <input class="search-input" value="@_searchText" placeholder="ابحث بالمحتوى أو المستخدم أو الرد..." @oninput="HandleSearch" />
-            </div>
-            <div class="toolbar-actions">
-                <button class="btn-moeen-light" type="button" @onclick="() => LoadFeedbackAsync()" disabled="@_isLoading">
-                    <i class="bi bi-arrow-clockwise"></i>
-                    <span>تحديث</span>
-                </button>
             </div>
         </div>
 
@@ -156,7 +153,17 @@
                                         <div class="row-actions">
                                             <button class="icon-btn info" type="button" title="عرض" @onclick="() => OpenDetailsDialog(item)"><i class="bi bi-info-circle"></i></button>
                                             <button class="icon-btn edit" type="button" title="إدارة" @onclick="() => OpenManageDialog(item)"><i class="bi bi-pencil-square"></i></button>
-                                            <button class="icon-btn danger" type="button" title="حذف" @onclick="() => DeleteFeedbackAsync(item)"><i class="bi bi-trash"></i></button>
+                                            <button class="transfer-btn" type="button" title="تحويل للمالك" disabled="@(_transferringId == item.Id)" @onclick="() => TransferToOwnerAsync(item)">
+                                                @if (_transferringId == item.Id)
+                                                {
+                                                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-send"></i>
+                                                }
+                                                <span>تحويل للمالك</span>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -215,7 +222,17 @@
                                         <div class="row-actions">
                                             <button class="icon-btn info" type="button" title="عرض" @onclick="() => OpenDetailsDialog(item)"><i class="bi bi-info-circle"></i></button>
                                             <button class="icon-btn edit" type="button" title="إدارة" @onclick="() => OpenManageDialog(item)"><i class="bi bi-pencil-square"></i></button>
-                                            <button class="icon-btn danger" type="button" title="حذف" @onclick="() => DeleteFeedbackAsync(item)"><i class="bi bi-trash"></i></button>
+                                            <button class="transfer-btn" type="button" title="تحويل للمالك" disabled="@(_transferringId == item.Id)" @onclick="() => TransferToOwnerAsync(item)">
+                                                @if (_transferringId == item.Id)
+                                                {
+                                                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-send"></i>
+                                                }
+                                                <span>تحويل للمالك</span>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -305,6 +322,7 @@
     private bool _isSaving;
     private bool _isDetailsOpen;
     private bool _isManageDialogOpen;
+    private Guid? _transferringId;
     private string _searchText = string.Empty;
     private string? _errorMessage;
     private string? _successMessage;
@@ -499,31 +517,36 @@
         }
     }
 
-    private async Task DeleteFeedbackAsync(FeedbackItemModel item)
+    private async Task TransferToOwnerAsync(FeedbackItemModel item)
     {
         _successMessage = null;
         _errorMessage = null;
 
         var label = item.Type == FeedbackType.Complaint ? "الشكوى" : "الاقتراح";
-        var confirmed = await JS.InvokeAsync<bool>("confirm", $"هل تريد حذف {label} بشكل نهائي؟");
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"هل تريد تحويل {label} إلى المالك؟ بعد التحويل لن تظهر ضمن قائمة المشرف.");
         if (!confirmed)
             return;
 
+        _transferringId = item.Id;
         try
         {
-            var response = await FeedbackService.DeleteFeedbackAsync(item.Id);
+            var response = await FeedbackService.TransferToOwnerAsync(item.Id);
             if (response == null || !response.Success)
             {
-                _errorMessage = response?.Message ?? "فشل حذف السجل.";
+                _errorMessage = response?.Message ?? "فشل تحويل السجل إلى المالك.";
                 return;
             }
 
-            _successMessage = "تم الحذف بنجاح.";
+            _successMessage = $"تم تحويل {label} إلى المالك بنجاح.";
             await LoadFeedbackAsync(showLoading: false);
         }
         catch (Exception ex)
         {
-            _errorMessage = $"تعذر حذف السجل: {ex.Message}";
+            _errorMessage = $"تعذر تحويل السجل إلى المالك: {ex.Message}";
+        }
+        finally
+        {
+            _transferringId = null;
         }
     }
 

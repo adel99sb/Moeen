@@ -104,6 +104,7 @@
         public static string UpdateSuggestionStatusAsyncRoute { get; } = "api/Feedback/suggestion/status";
         public static string GetComplaintsAsyncRoute { get; } = "api/Feedback/complaints";
         public static string GetSuggestionsAsyncRoute { get; } = "api/Feedback/suggestions";
+        public static string TransferFeedbackToOwnerAsyncRoute(Guid feedbackId) => $"api/Feedback/{feedbackId}/transfer-to-owner";
         public static string DeleteFeedbackAsyncRoute(Guid complaintId) => $"api/Feedback/{complaintId}";
         //goal
 

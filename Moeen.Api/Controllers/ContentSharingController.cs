@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Moeen.Api.Core.Contracts.Application;
 using Moeen.Shared.Requests.ContentSharing;
 using Moeen.Shared.Responses;
@@ -7,6 +8,7 @@ namespace Moeen.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ContentSharingController : ControllerBase
     {
         private readonly IContentSharingService _contentService;
@@ -17,6 +19,7 @@ namespace Moeen.Api.Controllers
         }
 
         [HttpPost("publish")]
+        [Authorize(Roles = "Admin,Owner,Supervisor")]
         public async Task<ActionResult<GeneralResponse>> PublishPost([FromBody] PublishPostRequest request)
         {
             var result = await _contentService.PublishPostAsync(request);
@@ -97,6 +100,7 @@ namespace Moeen.Api.Controllers
         }
 
         [HttpPut("posts/{postId:guid}")]
+        [Authorize(Roles = "Admin,Owner,Supervisor")]
         public async Task<ActionResult<GeneralResponse>> UpdatePost(
             [FromRoute] Guid postId,
             [FromBody] UpdatePostRequest request)
@@ -110,6 +114,7 @@ namespace Moeen.Api.Controllers
         }
 
         [HttpDelete("posts/{postId:guid}")]
+        [Authorize(Roles = "Admin,Owner,Supervisor")]
         public async Task<ActionResult<GeneralResponse>> DeletePost([FromRoute] Guid postId)
         {
             var result = await _contentService.DeletePostAsync(new DeletePostRequest { PostId = postId });

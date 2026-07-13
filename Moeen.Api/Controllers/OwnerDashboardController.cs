@@ -33,7 +33,9 @@ namespace Moeen.Api.Controllers
                 TotalTeachers = await _context.Teachers.AsNoTracking().CountAsync(t => t.status == 0),
                 TotalStudents = await _context.Students.AsNoTracking().CountAsync(s => s.role == 2 && s.status == 0),
                 TotalHalqas = await _context.Halqas.AsNoTracking().CountAsync(),
-                TotalOpenComplaints = await _context.Complaints.AsNoTracking().CountAsync(c => c.Status != ComplaintStatus.Resolved),
+                TotalOpenComplaints = await _context.Complaints.AsNoTracking().CountAsync(c =>
+                    (c.Type == FeedbackType.Complaint && c.Status == ComplaintStatus.TransferredToOwner) ||
+                    (c.Type == FeedbackType.Suggestion && c.SuggestionStatus == SuggestionStatus.TransferredToOwner)),
                 TotalPosts = await _context.Posts.AsNoTracking().CountAsync(),
                 TotalBooks = await _context.PdfFiles.AsNoTracking().CountAsync()
             };
@@ -74,7 +76,10 @@ namespace Moeen.Api.Controllers
                     Halqas = await _context.Halqas.AsNoTracking().CountAsync(h => h.Fouj.MosqueId == mosque.Id),
                     OpenComplaints = userIds.Count == 0
                         ? 0
-                        : await _context.Complaints.AsNoTracking().CountAsync(c => userIds.Contains(c.UserId) && c.Status != ComplaintStatus.Resolved)
+                        : await _context.Complaints.AsNoTracking().CountAsync(c =>
+                            userIds.Contains(c.UserId) &&
+                            ((c.Type == FeedbackType.Complaint && c.Status == ComplaintStatus.TransferredToOwner) ||
+                             (c.Type == FeedbackType.Suggestion && c.SuggestionStatus == SuggestionStatus.TransferredToOwner)))
                 });
             }
 
@@ -96,20 +101,23 @@ namespace Moeen.Api.Controllers
                 })
                 .ToListAsync();
 
-            var complaints = await _context.Complaints
+            var forwardedFeedback = await _context.Complaints
                 .AsNoTracking()
-                .OrderByDescending(c => c.created_at)
+                .Where(c =>
+                    (c.Type == FeedbackType.Complaint && c.Status == ComplaintStatus.TransferredToOwner) ||
+                    (c.Type == FeedbackType.Suggestion && c.SuggestionStatus == SuggestionStatus.TransferredToOwner))
+                .OrderByDescending(c => c.UpdatedAt ?? c.created_at)
                 .Take(3)
                 .Select(c => new OwnerActivityItemDto
                 {
-                    Title = "بلاغ جديد",
+                    Title = c.Type == FeedbackType.Complaint ? "شكوى محولة" : "اقتراح محول",
                     Description = c.content,
                     Icon = "bi bi-chat-dots-fill",
-                    CreatedAt = c.created_at
+                    CreatedAt = c.UpdatedAt ?? c.created_at
                 })
                 .ToListAsync();
 
-            return posts.Concat(complaints)
+            return posts.Concat(forwardedFeedback)
                 .OrderByDescending(item => item.CreatedAt)
                 .Take(6)
                 .ToList();
@@ -133,8 +141,8 @@ namespace Moeen.Api.Controllers
             {
                 alerts.Add(new OwnerAlertDto
                 {
-                    Title = "شكاوى تحتاج متابعة",
-                    Details = $"يوجد {response.TotalOpenComplaints} شكوى أو تنبيه مفتوح.",
+                    Title = "شكاوى واقتراحات محولة تحتاج متابعة",
+                    Details = $"يوجد {response.TotalOpenComplaints} شكوى أو اقتراح محول للمالك.",
                     Severity = "danger"
                 });
             }

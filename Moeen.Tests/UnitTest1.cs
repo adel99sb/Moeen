@@ -10,8 +10,10 @@ using System.Net;
 using System.Net.Http.Json;
 using Moeen.Dashboard.Infrastructure.Http.Clients;
 using Moeen.Shared.Requests.Feedback;
+using Moeen.Shared.Requests;
 using Moeen.Dashboard.Services.Abstractions;
 using Moeen.Shared.Requests.Goal;
+using Moeen.Shared.Requests.ContentSharing;
 using Moeen.Shared.Responses;
 using Moeen.Api.Application.Services;
 using Moeen.Api.infrastructure.Providers;
@@ -188,6 +190,70 @@ public class GoalApiClientTests
         Assert.Equal(1, handler.CallCount);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task GetFeedbackLists_SendsBearerToken(bool loadComplaints)
+    {
+        var token = "supervisor-feedback-token";
+        using var handler = new CapturingHandler(async request =>
+        {
+            Assert.Equal(HttpMethod.Get, request.Method);
+            Assert.EndsWith(
+                loadComplaints
+                    ? "api/Feedback/complaints?page=1&pageSize=25"
+                    : "api/Feedback/suggestions?page=1&pageSize=25",
+                request.RequestUri?.ToString());
+            Assert.Equal("Bearer", request.Headers.Authorization?.Scheme);
+            Assert.Equal(token, request.Headers.Authorization?.Parameter);
+
+            return await Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = JsonContent.Create(GeneralResponse.Ok("تم التحميل.", Array.Empty<object>()))
+            });
+        });
+
+        using var httpClient = new HttpClient(handler)
+        {
+            BaseAddress = new Uri("https://localhost/")
+        };
+
+        var client = new FeedbackApiClient(httpClient, new FakeTokenService(token));
+        var pagination = new PaginationRequest { Page = 1, PageSize = 25 };
+
+        var response = loadComplaints
+            ? await client.GetComplaintsAsync(pagination)
+            : await client.GetSuggestionsAsync(pagination);
+
+        Assert.True(response.Success);
+        Assert.Equal(1, handler.CallCount);
+    }
+
+    [Fact]
+    public async Task GetFeedbackLists_WhenApiReturnsUnauthorized_ReturnsFriendlySessionMessage()
+    {
+        using var handler = new CapturingHandler(request =>
+        {
+            Assert.Equal(HttpMethod.Get, request.Method);
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.Unauthorized)
+            {
+                Content = new StringContent(string.Empty)
+            });
+        });
+
+        using var httpClient = new HttpClient(handler)
+        {
+            BaseAddress = new Uri("https://localhost/")
+        };
+
+        var client = new FeedbackApiClient(httpClient, new FakeTokenService("expired-feedback-token"));
+        var response = await client.GetComplaintsAsync(new PaginationRequest { Page = 1, PageSize = 25 });
+
+        Assert.False(response.Success);
+        Assert.Equal(401, response.StatusCode);
+        Assert.Contains("انتهت جلسة تسجيل الدخول", response.Message);
+    }
+
     private sealed class FakeTokenService(string token) : ITokenService
     {
         public Task Save(string token) => Task.CompletedTask;
@@ -278,6 +344,84 @@ public class FeedbackApiClientTests
     }
 }
 
+public class PostApiClientTests
+{
+    public static IEnumerable<object[]> MutationCases()
+    {
+        yield return new object[] { "publish", HttpMethod.Post };
+        yield return new object[] { "update", HttpMethod.Put };
+        yield return new object[] { "delete", HttpMethod.Delete };
+    }
+
+    [Theory]
+    [MemberData(nameof(MutationCases))]
+    public async Task SupervisorPostMutations_SendStoredBearerToken(string operation, HttpMethod expectedMethod)
+    {
+        var token = "supervisor-post-token";
+        var postId = Guid.NewGuid();
+
+        using var handler = new CapturingHandler(async request =>
+        {
+            Assert.Equal(expectedMethod, request.Method);
+            Assert.True(request.Headers.TryGetValues("Author" + "ization", out var values));
+            Assert.Equal("Bear" + "er " + token, Assert.Single(values));
+
+            return await Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = JsonContent.Create(GeneralResponse.Ok("تمت العملية بنجاح."))
+            });
+        });
+
+        using var httpClient = new HttpClient(handler)
+        {
+            BaseAddress = new Uri("https://localhost/")
+        };
+
+        var client = new PostApiClient(httpClient, new FakeTokenService(token));
+
+        GeneralResponse? response = operation switch
+        {
+            "publish" => await client.PublishPost(new PublishPostRequest
+            {
+                IsPublic = true,
+                PostData = new RequstePostDto { Title = "اختبار", Body = "محتوى اختبار" }
+            }),
+            "update" => await client.UpdatePost(new UpdatePostRequest
+            {
+                PostId = postId,
+                Title = "عنوان معدل",
+                Body = "محتوى معدل"
+            }),
+            "delete" => await client.DeletePost(new DeletePostRequest { PostId = postId }),
+            _ => throw new InvalidOperationException("Unknown operation")
+        };
+
+        Assert.NotNull(response);
+        Assert.True(response!.Success);
+        Assert.Equal(1, handler.CallCount);
+    }
+
+    private sealed class FakeTokenService(string token) : ITokenService
+    {
+        public Task Save(string token) => Task.CompletedTask;
+        public Task<string?> Get() => Task.FromResult<string?>(token);
+        public Task Clear() => Task.CompletedTask;
+        public Task<DashboardAuthSession> GetSession()
+            => Task.FromResult(new DashboardAuthSession(true, token, new[] { "Supervisor" }, null, "/supervisor/posts"));
+    }
+
+    private sealed class CapturingHandler(Func<HttpRequestMessage, Task<HttpResponseMessage>> handler) : HttpMessageHandler
+    {
+        public int CallCount { get; private set; }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            CallCount++;
+            return await handler(request);
+        }
+    }
+}
+
 public class ExamQueryServiceTests
 {
     [Fact]
@@ -339,6 +483,47 @@ public class ExamQueryServiceTests
         var exam = Assert.Single(Assert.IsType<GetStudentExamsResponse>(result).Exams);
         Assert.Equal("ممتاز", exam.Grade);
         Assert.Equal(studentId, exam.StudentId);
+    }
+}
+
+public class StudentPlacementSourceGuardTests
+{
+    [Fact]
+    public void SupervisorStudentForm_DoesNotAutoSelectFirstHalqa()
+    {
+        var root = FindRepositoryRoot();
+        var source = File.ReadAllText(Path.Combine(root, "Moeen.Dashboard/Components/Pages/Supervisor/Student.razor"));
+
+        Assert.DoesNotContain("_halqas.FirstOrDefault(h => h.FoujId == _form.FoujId)?.Id", source);
+        Assert.DoesNotContain("_halqas.FirstOrDefault(halqa => halqa.FoujId == _form.FoujId)?.Id", source);
+        Assert.Contains("_form.HalqaId = null;", source);
+    }
+
+    [Fact]
+    public void SupervisorDashboard_CountsActiveStudentRowsAndDisablesCaching()
+    {
+        var root = FindRepositoryRoot();
+        var controller = File.ReadAllText(Path.Combine(root, "Moeen.Api/Controllers/SupervisorDashboardController.cs"));
+        var client = File.ReadAllText(Path.Combine(root, "Moeen.Dashboard/Infrastructure/Http/Clients/SupervisorDashboardApiClient.cs"));
+
+        Assert.Contains("CountAsync(s => s.MosqueId == mosqueId.Value && s.role == 2 && s.status == 0)", controller);
+        Assert.Contains("ResponseCache(NoStore = true", controller);
+        Assert.Contains("NoCache = true", client);
+        Assert.Contains("NoStore = true", client);
+    }
+
+    private static string FindRepositoryRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory != null)
+        {
+            if (File.Exists(Path.Combine(directory.FullName, "Moeen.sln")))
+                return directory.FullName;
+
+            directory = directory.Parent;
+        }
+
+        throw new DirectoryNotFoundException("Moeen repository root was not found.");
     }
 }
 

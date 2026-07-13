@@ -24,6 +24,7 @@ namespace Moeen.Api.Controllers
         }
 
         [HttpGet("overview")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
         public async Task<ActionResult<SupervisorDashboardResponse>> GetOverview()
         {
             _logger.LogInformation(
@@ -66,8 +67,10 @@ namespace Moeen.Api.Controllers
                 TotalHalqas = await _context.Halqas.AsNoTracking().CountAsync(h => h.Fouj.MosqueId == mosqueId.Value),
                 OpenAlertsAndComplaints = await _context.Complaints.AsNoTracking().CountAsync(c =>
                     mosqueUserIds.Contains(c.UserId) &&
+                    c.Type == FeedbackType.Complaint &&
                     c.Status != ComplaintStatus.Resolved &&
-                    c.Status != ComplaintStatus.Delete),
+                    c.Status != ComplaintStatus.Delete &&
+                    c.Status != ComplaintStatus.TransferredToOwner),
                 HalqaPerformance = await BuildHalqaPerformanceAsync(halqas, fromDate),
                 ExcellentStudents = SupervisorDashboardStudentClassifier.BuildExcellentStudents(studentPerformances),
                 StrugglingStudents = SupervisorDashboardStudentClassifier.BuildStrugglingStudents(studentPerformances)

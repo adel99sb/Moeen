@@ -14,8 +14,8 @@ namespace Moeen.Api.Core.Entities
         public int mark { get; set; }
         public Student Student { get; set; } = null!;
         public Teacher Teacher { get; set; } = null!;
-        public Guid TeacherExamId { get; set; }
-        public TeacherExam TeacherExams { get; set; } = null!;
+        public Guid? TeacherExamId { get; set; }
+        public TeacherExam? TeacherExams { get; set; }
 
     }
 }
