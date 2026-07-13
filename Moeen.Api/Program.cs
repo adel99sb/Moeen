@@ -228,15 +228,13 @@ var app = builder.Build();
 
 await InitializeDatabaseAsync(app);
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-else
+if (AppSettings.Instance.UseHttpsRedirection)
 {
     app.UseHttpsRedirection();
 }
+
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseAuthentication();
 app.UseMiddleware<ApiRequestLoggingMiddleware>();
 app.UseAuthorization();
@@ -276,15 +274,18 @@ static async Task InitializeDatabaseAsync(WebApplication app)
             context.Database.ProviderName,
             MaskConnectionString(context.Database.GetDbConnection().ConnectionString));
 
-        if (app.Environment.IsDevelopment())
+        var shouldApplyMigrations =
+            app.Environment.IsDevelopment() || AppSettings.Instance.ApplyMigrationsOnStartup;
+
+        if (shouldApplyMigrations)
         {
-            logger.LogInformation("Applying EF Core migrations for local development startup...");
+            logger.LogInformation("Applying EF Core migrations on startup...");
             await context.Database.MigrateAsync();
             logger.LogInformation("EF Core migrations are up to date.");
         }
         else
         {
-            logger.LogInformation("Skipping automatic migrations because the environment is not Development.");
+            logger.LogInformation("Skipping automatic migrations because hosted startup migrations are disabled.");
         }
 
         logger.LogInformation("Ensuring application roles exist...");
