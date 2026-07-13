@@ -4,7 +4,7 @@
     {
         public static string BaseUrl { get; } = NormalizeBaseUrl(
             Environment.GetEnvironmentVariable("MOEEN_API_BASE_URL")
-            ?? "https://localhost:7023/");
+            ?? "http://moeen.somee.com/");
 
         // Auth
         public static string LoginRoute { get; } = "api/User/login";

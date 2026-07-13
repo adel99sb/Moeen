@@ -2,12 +2,8 @@
 {
     public static class ApiRoutes
     {
-#if ANDROID
-        // Physical Android devices can reach the local API over USB via `adb reverse tcp:5055 tcp:5055`.
-        public static string BaseUrl { get; } = "http://127.0.0.1:5055/";
-#else
-        public static string BaseUrl { get; } = "https://localhost:7023/";
-#endif
+
+        public static string BaseUrl { get; } = "https://moeen.somee.com/";
 
         // Auth
         public static string LoginRoute { get; } = "api/User/login";
