@@ -1,11 +1,13 @@
+param(
+    [string]$ApiBaseUrl = 'http://moeen.somee.com/'
+)
+
 $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
-if ([string]::IsNullOrWhiteSpace($env:MOEEN_API_BASE_URL)) {
-    $env:MOEEN_API_BASE_URL = 'http://moeen.somee.com/'
-}
+$env:MOEEN_API_BASE_URL = $ApiBaseUrl
 
 Write-Host "=== Moeen Dashboard ===" -ForegroundColor Cyan
 Write-Host "Working directory: $root"
