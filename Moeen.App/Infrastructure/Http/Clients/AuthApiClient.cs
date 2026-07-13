@@ -1,6 +1,5 @@
 using Moeen.Shared.Requests.Identity;
 using Moeen.Shared.Responses;
-using System.Net;
 using System.Net.Http.Json;
 
 namespace Moeen.App.Infrastructure.Http.Clients
@@ -19,12 +18,9 @@ namespace Moeen.App.Infrastructure.Http.Clients
             try
             {
                 var response = await _httpClient.PostAsJsonAsync(ApiRoutes.LoginRoute, request);
-                var result = await response.Content.ReadFromJsonAsync<GeneralResponse>();
-
-                if (result != null)
-                    return result;
-
-                return BuildFailureResponse(response.StatusCode, "رجع السيرفر رداً فارغاً أثناء تسجيل الدخول.");
+                return await ApiResponseReader.ReadGeneralResponseAsync(
+                    response,
+                    "تعذر قراءة استجابة تسجيل الدخول.");
             }
             catch (HttpRequestException)
             {
@@ -34,18 +30,6 @@ namespace Moeen.App.Infrastructure.Http.Clients
             {
                 return GeneralResponse.InternalError("انتهت مهلة الاتصال أثناء تسجيل الدخول. حاول مرة ثانية.");
             }
-        }
-
-        private static GeneralResponse BuildFailureResponse(HttpStatusCode statusCode, string message)
-        {
-            return statusCode switch
-            {
-                HttpStatusCode.BadRequest => GeneralResponse.BadRequest(message),
-                HttpStatusCode.Unauthorized => GeneralResponse.Unauthorized(message),
-                HttpStatusCode.NotFound => GeneralResponse.NotFound(message),
-                >= HttpStatusCode.InternalServerError => GeneralResponse.InternalError(message),
-                _ => new GeneralResponse(message, false, (int)statusCode)
-            };
         }
     }
 }

@@ -1,5 +1,4 @@
 using Moeen.Shared.Responses;
-using System.Net.Http.Json;
 
 namespace Moeen.App.Infrastructure.Http.Clients
 {
@@ -18,8 +17,9 @@ namespace Moeen.App.Infrastructure.Http.Clients
             {
                 var route = $"{ApiRoutes.LibraryBooksRoute}?pageNumber={pageNumber}&pageSize={pageSize}";
                 var response = await _httpClient.GetAsync(route);
-                return await response.Content.ReadFromJsonAsync<GeneralResponse>()
-                       ?? GeneralResponse.BadRequest("تعذر قراءة استجابة السيرفر.");
+                return await ApiResponseReader.ReadGeneralResponseAsync(
+                    response,
+                    "تعذر قراءة استجابة المكتبة.");
             }
             catch (HttpRequestException)
             {

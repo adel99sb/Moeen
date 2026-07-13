@@ -2,7 +2,6 @@ using Moeen.Shared.Constants;
 using Moeen.Shared.Responses;
 using System.Globalization;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 
 namespace Moeen.App.Infrastructure.Http.Clients
 {
@@ -31,8 +30,9 @@ namespace Moeen.App.Infrastructure.Http.Clients
             try
             {
                 var response = await _httpClient.SendAsync(request);
-                return await response.Content.ReadFromJsonAsync<GeneralResponse>()
-                       ?? GeneralResponse.BadRequest("تعذر قراءة استجابة تقدم الطالب.");
+                return await ApiResponseReader.ReadGeneralResponseAsync(
+                    response,
+                    "تعذر قراءة استجابة تقدم الطالب.");
             }
             catch (HttpRequestException)
             {

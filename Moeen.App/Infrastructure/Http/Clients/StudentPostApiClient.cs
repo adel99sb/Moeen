@@ -1,6 +1,5 @@
 using Moeen.Shared.Responses;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 
 namespace Moeen.App.Infrastructure.Http.Clients
 {
@@ -38,8 +37,7 @@ namespace Moeen.App.Infrastructure.Http.Clients
             try
             {
                 var response = await _httpClient.SendAsync(request);
-                return await response.Content.ReadFromJsonAsync<GeneralResponse>()
-                       ?? GeneralResponse.BadRequest(fallbackMessage);
+                return await ApiResponseReader.ReadGeneralResponseAsync(response, fallbackMessage);
             }
             catch (HttpRequestException)
             {

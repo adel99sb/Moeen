@@ -1,6 +1,5 @@
 using Moeen.Shared.Responses;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 
 namespace Moeen.App.Infrastructure.Http.Clients
 {
@@ -24,14 +23,9 @@ namespace Moeen.App.Infrastructure.Http.Clients
             try
             {
                 var response = await _httpClient.SendAsync(request);
-                var result = await response.Content.ReadFromJsonAsync<GeneralResponse>();
-
-                if (result != null)
-                    return result;
-
-                return response.IsSuccessStatusCode
-                    ? GeneralResponse.Ok("تم جلب بيانات الصفحة الرئيسية.")
-                    : GeneralResponse.BadRequest("تعذر قراءة استجابة السيرفر.");
+                return await ApiResponseReader.ReadGeneralResponseAsync(
+                    response,
+                    "تعذر قراءة استجابة الصفحة الرئيسية.");
             }
             catch (HttpRequestException)
             {

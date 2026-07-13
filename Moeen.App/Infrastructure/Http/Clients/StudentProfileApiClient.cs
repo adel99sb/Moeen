@@ -25,8 +25,9 @@ namespace Moeen.App.Infrastructure.Http.Clients
             try
             {
                 var response = await _httpClient.SendAsync(request);
-                return await response.Content.ReadFromJsonAsync<GeneralResponse>()
-                       ?? GeneralResponse.BadRequest("تعذر قراءة استجابة السيرفر.");
+                return await ApiResponseReader.ReadGeneralResponseAsync(
+                    response,
+                    "تعذر قراءة استجابة الملف الشخصي.");
             }
             catch (HttpRequestException)
             {
@@ -50,8 +51,9 @@ namespace Moeen.App.Infrastructure.Http.Clients
             try
             {
                 var response = await _httpClient.SendAsync(request);
-                return await response.Content.ReadFromJsonAsync<GeneralResponse>()
-                       ?? GeneralResponse.BadRequest("تعذر قراءة استجابة السيرفر.");
+                return await ApiResponseReader.ReadGeneralResponseAsync(
+                    response,
+                    "تعذر قراءة استجابة إرسال الملاحظة.");
             }
             catch (HttpRequestException)
             {
