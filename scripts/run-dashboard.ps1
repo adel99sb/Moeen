@@ -4,7 +4,7 @@ $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
 if ([string]::IsNullOrWhiteSpace($env:MOEEN_API_BASE_URL)) {
-    $env:MOEEN_API_BASE_URL = 'https://localhost:7023/'
+    $env:MOEEN_API_BASE_URL = 'http://moeen.somee.com/'
 }
 
 Write-Host "=== Moeen Dashboard ===" -ForegroundColor Cyan
