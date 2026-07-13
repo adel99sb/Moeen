@@ -1,18 +1,12 @@
-param(
-    [string]$ApiBaseUrl = 'http://moeen.somee.com/'
-)
-
 $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
-$env:MOEEN_API_BASE_URL = $ApiBaseUrl
-
 Write-Host "=== Moeen Dashboard ===" -ForegroundColor Cyan
 Write-Host "Working directory: $root"
 Write-Host "Dashboard ports: https://localhost:7220 and http://localhost:5077"
-Write-Host "API base URL: $env:MOEEN_API_BASE_URL"
+Write-Host "API base URL: http://moeen.somee.com/"
 Write-Host ""
 
 foreach ($port in 5077, 7220) {

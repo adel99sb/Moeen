@@ -2,9 +2,7 @@
 {
     public static class ApiRoutes
     {
-        public static string BaseUrl { get; } = NormalizeBaseUrl(
-            Environment.GetEnvironmentVariable("MOEEN_API_BASE_URL")
-            ?? "http://moeen.somee.com/");
+        public static string BaseUrl { get; } = "http://moeen.somee.com/";
 
         // Auth
         public static string LoginRoute { get; } = "api/User/login";
@@ -153,13 +151,5 @@
         public static string LibraryBookByIdRoute(Guid bookId) => $"api/library-management/books/{bookId}";
         public static string MosquAssignAdmin { get; } = "api/Mosqu/assign-admin";
 
-        private static string NormalizeBaseUrl(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                return "https://localhost:7023/";
-
-            var trimmed = value.Trim();
-            return trimmed.EndsWith('/') ? trimmed : trimmed + "/";
-        }
     }
 }
